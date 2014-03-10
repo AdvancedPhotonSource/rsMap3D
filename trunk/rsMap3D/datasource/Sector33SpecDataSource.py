@@ -4,9 +4,11 @@
 '''
 import os
 from pyspec import spec
-from rsMap3D.datasource.AbstractXrayUtilitiesDataSource import AbstractXrayutilitiesDataSource
+from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
+    import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
-import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader as DetectorReader
+import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
+    as DetectorReader
 import numpy as np
 import xrayutilities as xu
 
@@ -26,10 +28,13 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
         self.detectorCircleDirections = instConfig.getDetectorCircleDirections()
         self.primaryBeamDirection = instConfig.getPrimaryBeamDirection()
-        self.sampleInplaneReferenceDirection = instConfig.getInplaneReferenceDirection()
-        self.sampleSurfaceNormalDirection = instConfig.getSampleSurfaceNormalDirection()
+        self.sampleInplaneReferenceDirection = \
+            instConfig.getInplaneReferenceDirection()
+        self.sampleSurfaceNormalDirection = \
+            instConfig.getSampleSurfaceNormalDirection()
 
-        detConfig = DetectorReader.DetectorGeometryForXrayutilitiesReader(detConfigFile)
+        detConfig = \
+            DetectorReader.DetectorGeometryForXrayutilitiesReader(detConfigFile)
         detector = detConfig.getDetectorById("Pilatus")
         self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
         self.detectorDimensions = detConfig.getNpixels(detector)
@@ -48,7 +53,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.specFile = os.path.join(self.projectDir, self.projectName + ".spc")
         imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
         self.imageFileTmp = os.path.join(imageDir, \
-                                "S%%03d/%s_S%%03d_%%05d.tif" % (self.projectName))
+                                "S%%03d/%s_S%%03d_%%05d.tif" % 
+                                (self.projectName))
 
         try:
             self.sd = spec.SpecDataFile(self.specFile)
@@ -100,8 +106,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        qx, qy, qz = hxrd.Ang2Q.area(angles[:,1], angles[:,3], angles[:,2], angles[:,0], \
-                     roi=roi, Nav=nav)
+        qx, qy, qz = hxrd.Ang2Q.area(angles[:,1], \
+                                     angles[:,3], \
+                                     angles[:,2], \
+                                     angles[:,0], \
+                                     roi=roi, \
+                                     Nav=nav)
         idx = range(len(qx))
         xmin = [np.min(qx[i]) for i in idx] 
         xmax = [np.max(qx[i]) for i in idx] 
@@ -154,20 +164,30 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             inUse = []
             for i in xrange(len(self.imageBounds[scan][0])):
                 bounds = self.imageBounds[scan]
-                if self.inBounds(bounds[0][i], bounds[1][i], bounds[2][i], bounds[3][i], \
-                    bounds[4][i], bounds[5][i]):
+                if self.inBounds(bounds[0][i], \
+                                 bounds[1][i], \
+                                 bounds[2][i], \
+                                 bounds[3][i], \
+                                 bounds[4][i], \
+                                 bounds[5][i]):
                     inUse.append(True)
                 else:
                     inUse.append(False)
             self.imageToBeUsed[scan] = inUse
  
     def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        return ((xmin >= self.rangeBounds[0] and xmin <= self.rangeBounds[1]) or \
-                (xmax >= self.rangeBounds[0] and xmax <= self.rangeBounds[1])) and \
-                ((ymin >= self.rangeBounds[2] and ymin <= self.rangeBounds[3]) or \
-                (ymax >= self.rangeBounds[2] and ymax <= self.rangeBounds[3])) and \
-                ((zmin >= self.rangeBounds[4] and zmin <= self.rangeBounds[5]) or \
-                (zmax >= self.rangeBounds[4] and zmax <= self.rangeBounds[5]))
+        return ((xmin >= self.rangeBounds[0] and \
+                 xmin <= self.rangeBounds[1]) or \
+                (xmax >= self.rangeBounds[0] and \
+                 xmax <= self.rangeBounds[1])) and \
+                ((ymin >= self.rangeBounds[2] and \
+                  ymin <= self.rangeBounds[3]) or \
+                (ymax >= self.rangeBounds[2] and \
+                 ymax <= self.rangeBounds[3])) and \
+                ((zmin >= self.rangeBounds[4] and \
+                  zmin <= self.rangeBounds[5]) or \
+                (zmax >= self.rangeBounds[4] and \
+                 zmax <= self.rangeBounds[5]))
                
     def getAvailableScans(self):
         return self.availableScans
