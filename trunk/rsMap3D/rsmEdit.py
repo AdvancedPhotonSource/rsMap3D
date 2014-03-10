@@ -16,7 +16,11 @@ import xrayutilities as xu
 import xrayutilities_33bmc_functions as bm
 
 class MainDialog(QWidget):
+    '''
+    '''
     def __init__(self,parent=None):
+        '''
+        '''
         super(MainDialog, self).__init__(parent)
         layout = QGridLayout()
         self.tabs = QTabWidget()
@@ -46,6 +50,8 @@ class MainDialog(QWidget):
                       self.scanForm.doPoleMap)
         
     def loadScanFile(self):
+        '''
+        '''
         self.tabs.setTabEnabled(self.dataTabIndex, False)
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
@@ -58,6 +64,8 @@ class MainDialog(QWidget):
         self.scanForm.loadScanFile(self.dataSource)        
 
     def setupRanges(self):
+        '''
+        '''
         overallXmin, overallXmax, overallYmin, overallYmax, \
                overallZmin, overallZmax = self.dataSource.getOverallRanges()
         self.dataRange.setRanges(overallXmin, \
@@ -72,16 +80,22 @@ class MainDialog(QWidget):
         self.tabs.setTabEnabled(self.processTabIndex, True)
     
     def setScanRanges(self):
+        '''
+        '''
         ranges = self.dataRange.getRanges()
         self.dataSource.setRangeBounds(ranges)
         self.scanForm.renderOverallQs()
         
     def tabChanged(self, index):
+        '''
+        '''
         if str(self.tabs.tabText(index)) == "Data Range":
             self.scanForm.renderOverallQs()
                                         
 class FileForm(QDialog):
     def __init__(self,parent=None):
+        '''
+        '''
         super(FileForm, self).__init__(parent)
         layout = QGridLayout()
 
@@ -122,28 +136,46 @@ class FileForm(QDialog):
         self.setLayout(layout);
         
     def loadFile(self):
+        '''
+        '''
         self.emit(SIGNAL("loadFile"))
         
     def browseForInstFile(self):
+        '''
+        '''
         print "Browsing for inst file"
 
     def browseForDetFile(self):
+        '''
+        '''
         print "Browsing for Det file"
 
+    def getDetConfigName(self):
+        '''
+        '''
+        return self.detConfigTxt.text()
+
+    def getInstConfigName(self):
+        '''
+        '''
+        return self.instConfigTxt.text()
+
     def getProjectDir(self):
+        '''
+        '''
         return self.projDirTxt.text()
         
     def getProjectName(self):
+        '''
+        '''
         return self.projNameTxt.text()
     
-    def getInstConfigName(self):
-        return self.instConfigTxt.text()
-
-    def getDetConfigName(self):
-        return self.detConfigTxt.text()
-
 class DataRange(QDialog):
+    '''
+    '''
     def __init__(self, parent=None):                
+        '''
+        '''
         super(DataRange, self).__init__(parent)
         self._initializeRanges()
         
@@ -203,39 +235,16 @@ class DataRange(QDialog):
             self.zmaxChanged)
         self.setLayout(layout)
         
-    def xminChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-    
-    def xmaxChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-    
-    def yminChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-    
-    def ymaxChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-    
-    def zminChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-    
-    def zmaxChanged(self):
-        #make sure this can be a float also make sure min < max
-        print 'change)'
-        
-    def resetRange(self):
-        self.xminText.setText(str(self.ranges[0]))
-        self.xmaxText.setText(str(self.ranges[1]))
-        self.yminText.setText(str(self.ranges[2]))
-        self.ymaxText.setText(str(self.ranges[3]))
-        self.zminText.setText(str(self.ranges[4]))
-        self.zmaxText.setText(str(self.ranges[5]))
+    def _initializeRanges(self):
+        '''
+        '''
+        self.ranges = (float("Infinity"), float("-Infinity"), \
+                        float("Infinity"), float("-Infinity"), \
+                        float("Infinity"), float("-Infinity"))
         
     def applyRange(self):
+        '''
+        '''
         self.ranges = (float(self.xminText.text()),
                        float(self.xmaxText.text()),
                        float(self.yminText.text()),
@@ -244,7 +253,19 @@ class DataRange(QDialog):
                        float(self.zmaxText.text()))
         self.emit(SIGNAL("rangeChanged"))
         
+    def resetRange(self):
+        '''
+        '''
+        self.xminText.setText(str(self.ranges[0]))
+        self.xmaxText.setText(str(self.ranges[1]))
+        self.yminText.setText(str(self.ranges[2]))
+        self.ymaxText.setText(str(self.ranges[3]))
+        self.zminText.setText(str(self.ranges[4]))
+        self.zmaxText.setText(str(self.ranges[5]))
+        
     def setRanges(self, xmin, xmax, ymin, ymax, zmin, zmax):
+        '''
+        '''
         self.ranges = (xmin, xmax, ymin, ymax, zmin, zmax)
         self.xminText.setText(str(xmin))
         self.xmaxText.setText(str(xmax))
@@ -254,16 +275,53 @@ class DataRange(QDialog):
         self.zmaxText.setText(str(zmax))
         
     def getRanges(self):
+        '''
+        '''
         return self.ranges
         
-    def _initializeRanges(self):
-        self.ranges = (float("Infinity"), float("-Infinity"), \
-                        float("Infinity"), float("-Infinity"), \
-                        float("Infinity"), float("-Infinity"))
+    def xminChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
+    
+    def xmaxChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
+    
+    def yminChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
+    
+    def ymaxChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
+    
+    def zminChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
+    
+    def zmaxChanged(self):
+        '''
+        '''
+        #make sure this can be a float also make sure min < max
+        print 'change)'
         
         
 class ScanForm(QDialog):
+    '''
+    '''
     def __init__(self, parent=None):
+        '''
+        '''
         super(ScanForm, self).__init__(parent)
         self.rangeBounds = (float("Infinity"), float("-Infinity"), \
                         float("Infinity"), float("-Infinity"), \
@@ -350,46 +408,16 @@ class ScanForm(QDialog):
          
         self.setLayout(layout);
         
-    def loadScanFile(self, dataSource):
-        self.dataSource = dataSource
-        for curScan in self.dataSource.getAvailableScans():
-            item = QListWidgetItem()
-            item.setText(str(curScan))
-            self.scanList.addItem(item)
-        self.emit(SIGNAL("doneLoading"))
+    def addValueToTable(self, value, row, column, coloredBrush):
+        '''
+        '''
+        item = QTableWidgetItem(str(value))
+        item.setForeground(coloredBrush)
+        self.detail.setItem(row, column, item)
         
-    def scanSelected(self, item):
-        scanNo = int(item.text().split(' ')[0])
-#        scan = self.sd[scanNo]
-#        angles = scan.get_geo_angles()
-        angles = self.dataSource.getAngles(scanNo)
-        self.showAngles(angles)
-        self.showQs(scanNo)
-        self.selectAll.setEnabled(True)
-        self.deselectAll.setEnabled(True)
-                
-    def showAngles(self, angles):
-        self.detail.setRowCount(angles.size)
-        blackBrush = QBrush()
-        blackBrush.setColor(QColor('black'))
-        row = 0
-        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
-                        self.checkItemChanged)
-
-        for angle in angles:
-            checkItem = QTableWidgetItem(1)
-            checkItem.data(Qt.CheckStateRole)
-            checkItem.setCheckState(Qt.Checked)
-            self.detail.setItem(row, 0, checkItem)
-            self.addValueToTable(angle[0], row, 1, blackBrush)
-            self.addValueToTable(angle[1], row, 2, blackBrush)
-            self.addValueToTable(angle[2], row, 3, blackBrush)
-            self.addValueToTable(angle[3], row, 4, blackBrush)
-            row +=1
-        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
-                    self.checkItemChanged)
-
     def checkItemChanged(self,item):
+        '''
+        '''
         scanNo = self.getSelectedScan()
         row = item.row()
         if item.checkState() == Qt.Checked:
@@ -398,129 +426,17 @@ class ScanForm(QDialog):
             self.imageToBeUsed[scanNo][row] = False
         self.showQs(scanNo)
 
-    def showQs(self, scan ):
-        self.ren.RemoveAllViewProps()
-        redBrush = QBrush()
-        redBrush.setColor(QColor('red'))
-        blackBrush = QBrush()
-        blackBrush.setColor(QColor('black'))
-        xmin, xmax, ymin, ymax, zmin, zmax = \
-            self.dataSource.getImageBounds(scan)
-        row = 0
-        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
-                        self.checkItemChanged)
-        imageToBeUsed = self.dataSource.getImageToBeUsed()
-        for value in xmin:
-            if imageToBeUsed[scan][row]:
-                self.addValueToTable(xmin[row], row, 5, blackBrush)
-                self.addValueToTable(xmax[row], row, 6, blackBrush)
-                self.addValueToTable(ymin[row], row, 7, blackBrush)
-                self.addValueToTable(ymax[row], row, 8, blackBrush)
-                self.addValueToTable(zmin[row], row, 9, blackBrush)
-                self.addValueToTable(zmax[row], row, 10, blackBrush)
-                self.renderBounds((xmin[row], xmax[row], ymin[row], ymax[row], \
-                    zmin[row], zmax[row]))
-                checkItem = self.detail.item(row,0)
-                checkItem.setCheckState(Qt.Checked)
-            else:
-                self.addValueToTable(xmin[row], row, 5, redBrush)
-                self.addValueToTable(xmax[row], row, 6, redBrush)
-                self.addValueToTable(ymin[row], row, 7, redBrush)
-                self.addValueToTable(ymax[row], row, 8, redBrush)
-                self.addValueToTable(zmin[row], row, 9, redBrush)
-                self.addValueToTable(zmax[row], row, 10, redBrush)
-                checkItem = self.detail.item(row,0)
-                checkItem.setCheckState(Qt.Unchecked)
-            row +=1
-        
-                         
-        scanXmin, scanXmax, scanYmin, scanYmax, scanZmin, scanZmax = \
-           self.dataSource.findScanQs(xmin, xmax, ymin, ymax, zmin, zmax)
-        self.xminText.setText(str(scanXmin))
-        self.xmaxText.setText(str(scanXmax))
-        self.yminText.setText(str(scanYmin))
-        self.ymaxText.setText(str(scanYmax))
-        self.zminText.setText(str(scanZmin))
-        self.zmaxText.setText(str(scanZmax))
-        self.renderBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
-            scanZmin, scanZmax))
-        axes = vtk.vtkCubeAxesActor()
-        axes.SetBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
-            scanZmin, scanZmax))
-        axes.SetCamera(self.ren.GetActiveCamera())
-
-        self.ren.AddActor(axes)
-        self.ren.ResetCamera()
-        self.renWin.Render()
-        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
-                    self.checkItemChanged)
-
-    def renderOverallQs(self):
-        self.ren.RemoveAllViewProps()
-        imageToBeUsed = self.dataSource.getImageToBeUsed()
-        for scan in self.dataSource.getAvailableScans():
-            minx, maxx, miny, maxy, minz, maxz = \
-                self.dataSource.getImageBounds(scan)                
-            #set up to skip some images.
-            if len(minx) >200:
-                step = len(minx)/200 + 1
-            else:
-                step = 1
-            #display scan 
-            for i in xrange(0, len(minx)-1,step ):
-                if imageToBeUsed[scan][i]:
-                    self.renderBounds((minx[i], maxx[i], miny[i], \
-                                      maxy[i], minz[i], maxz[i]))
-        axes = vtk.vtkCubeAxesActor()
-        rangeBounds = self.dataSource.getRangeBounds()
-        
-        axes.SetBounds((rangeBounds[0], rangeBounds[1], \
-                        rangeBounds[2], rangeBounds[3], \
-                        rangeBounds[4], rangeBounds[5]))
-        axes.SetCamera(self.ren.GetActiveCamera())
-        self.ren.AddActor(axes)
-        self.ren.ResetCamera()
-        self.renWin.Render()
-                                
-   
-    def addValueToTable(self, value, row, column, coloredBrush):
-        item = QTableWidgetItem(str(value))
-        item.setForeground(coloredBrush)
-        self.detail.setItem(row, column, item)
-        
-    def renderBounds(self, bounds):
-        cube = vtk.vtkOutlineSource()
-        cube.SetBounds(bounds)
-        cube.Update()
-        cubeMapper = vtk.vtkPolyDataMapper()
-        cubeMapper.SetInputConnection(cube.GetOutputPort())
-        cubeActor = vtk.vtkActor()
-        cubeActor.SetMapper(cubeMapper)
-        cubeActor.GetProperty().SetColor(0.6,0,0)
-        self.ren.AddActor(cubeActor)
-        return cube
-        
-    def getSelectedScan(self):
-        scansSel = self.scanList.selectedItems()
-        if len(scansSel) > 1:
-            print "Should not be able to select more than one scan."
-        scan = scansSel[0]
-        scanNo = int(scan.text().split(' ')[0])
-        return scanNo
-        
-    def selectAllAction(self):
-        scanNo = self.getSelectedScan()
-        for i in xrange(len(self.imageToBeUsed[scanNo])):
-            self.imageToBeUsed[scanNo][i] = True
-        self.showQs(scanNo)
-                        
     def deselectAllAction(self):
+        '''
+        '''
         scanNo = self.getSelectedScan()
         for i in xrange(len(self.imageToBeUsed[scanNo])):
             self.imageToBeUsed[scanNo][i] = False
         self.showQs(scanNo)
 
     def doGridMap(self):
+        '''
+        '''
         print "Doing Grid Map"
         # number of points to be used during the gridding
         nx, ny, nz = 200, 201, 202
@@ -578,6 +494,8 @@ class ScanForm(QDialog):
         
         
     def doPoleMap(self):
+        '''
+        '''
         print "Doing Pole Map"
         # number of points to be used during the gridding
         nx, ny, nz = 200, 201, 202
@@ -633,11 +551,179 @@ class ScanForm(QDialog):
         writer.SetInput(image_data)
         writer.Write()
         
+    def loadScanFile(self, dataSource):
+        '''
+        '''
+        self.dataSource = dataSource
+        for curScan in self.dataSource.getAvailableScans():
+            item = QListWidgetItem()
+            item.setText(str(curScan))
+            self.scanList.addItem(item)
+        self.emit(SIGNAL("doneLoading"))
+        
+   
+    def getSelectedScan(self):
+        '''
+        '''
+        scansSel = self.scanList.selectedItems()
+        if len(scansSel) > 1:
+            print "Should not be able to select more than one scan."
+        scan = scansSel[0]
+        scanNo = int(scan.text().split(' ')[0])
+        return scanNo
+        
+    def renderBounds(self, bounds):
+        '''
+        '''
+        cube = vtk.vtkOutlineSource()
+        cube.SetBounds(bounds)
+        cube.Update()
+        cubeMapper = vtk.vtkPolyDataMapper()
+        cubeMapper.SetInputConnection(cube.GetOutputPort())
+        cubeActor = vtk.vtkActor()
+        cubeActor.SetMapper(cubeMapper)
+        cubeActor.GetProperty().SetColor(0.6,0,0)
+        self.ren.AddActor(cubeActor)
+        return cube
+        
+    def renderOverallQs(self):
+        '''
+        '''
+        self.ren.RemoveAllViewProps()
+        imageToBeUsed = self.dataSource.getImageToBeUsed()
+        for scan in self.dataSource.getAvailableScans():
+            minx, maxx, miny, maxy, minz, maxz = \
+                self.dataSource.getImageBounds(scan)                
+            #set up to skip some images.
+            if len(minx) >200:
+                step = len(minx)/200 + 1
+            else:
+                step = 1
+            #display scan 
+            for i in xrange(0, len(minx)-1,step ):
+                if imageToBeUsed[scan][i]:
+                    self.renderBounds((minx[i], maxx[i], miny[i], \
+                                      maxy[i], minz[i], maxz[i]))
+        axes = vtk.vtkCubeAxesActor()
+        rangeBounds = self.dataSource.getRangeBounds()
+        
+        axes.SetBounds((rangeBounds[0], rangeBounds[1], \
+                        rangeBounds[2], rangeBounds[3], \
+                        rangeBounds[4], rangeBounds[5]))
+        axes.SetCamera(self.ren.GetActiveCamera())
+        self.ren.AddActor(axes)
+        self.ren.ResetCamera()
+        self.renWin.Render()
+                                
+    def scanSelected(self, item):
+        '''
+        '''
+        scanNo = int(item.text().split(' ')[0])
+        angles = self.dataSource.getAngles(scanNo)
+        self.showAngles(angles)
+        self.showQs(scanNo)
+        self.selectAll.setEnabled(True)
+        self.deselectAll.setEnabled(True)
+                
+    def selectAllAction(self):
+        '''
+        '''
+        scanNo = self.getSelectedScan()
+        for i in xrange(len(self.imageToBeUsed[scanNo])):
+            self.imageToBeUsed[scanNo][i] = True
+        self.showQs(scanNo)
+                        
+    def showAngles(self, angles):
+        '''
+        '''
+        self.detail.setRowCount(angles.size)
+        blackBrush = QBrush()
+        blackBrush.setColor(QColor('black'))
+        row = 0
+        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+                        self.checkItemChanged)
+
+        for angle in angles:
+            checkItem = QTableWidgetItem(1)
+            checkItem.data(Qt.CheckStateRole)
+            checkItem.setCheckState(Qt.Checked)
+            self.detail.setItem(row, 0, checkItem)
+            self.addValueToTable(angle[0], row, 1, blackBrush)
+            self.addValueToTable(angle[1], row, 2, blackBrush)
+            self.addValueToTable(angle[2], row, 3, blackBrush)
+            self.addValueToTable(angle[3], row, 4, blackBrush)
+            row +=1
+        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+                    self.checkItemChanged)
+
+    def showQs(self, scan ):
+        '''
+        '''
+        self.ren.RemoveAllViewProps()
+        redBrush = QBrush()
+        redBrush.setColor(QColor('red'))
+        blackBrush = QBrush()
+        blackBrush.setColor(QColor('black'))
+        xmin, xmax, ymin, ymax, zmin, zmax = \
+            self.dataSource.getImageBounds(scan)
+        row = 0
+        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+                        self.checkItemChanged)
+        imageToBeUsed = self.dataSource.getImageToBeUsed()
+        for value in xmin:
+            if imageToBeUsed[scan][row]:
+                self.addValueToTable(xmin[row], row, 5, blackBrush)
+                self.addValueToTable(xmax[row], row, 6, blackBrush)
+                self.addValueToTable(ymin[row], row, 7, blackBrush)
+                self.addValueToTable(ymax[row], row, 8, blackBrush)
+                self.addValueToTable(zmin[row], row, 9, blackBrush)
+                self.addValueToTable(zmax[row], row, 10, blackBrush)
+                self.renderBounds((xmin[row], xmax[row], ymin[row], ymax[row], \
+                    zmin[row], zmax[row]))
+                checkItem = self.detail.item(row,0)
+                checkItem.setCheckState(Qt.Checked)
+            else:
+                self.addValueToTable(xmin[row], row, 5, redBrush)
+                self.addValueToTable(xmax[row], row, 6, redBrush)
+                self.addValueToTable(ymin[row], row, 7, redBrush)
+                self.addValueToTable(ymax[row], row, 8, redBrush)
+                self.addValueToTable(zmin[row], row, 9, redBrush)
+                self.addValueToTable(zmax[row], row, 10, redBrush)
+                checkItem = self.detail.item(row,0)
+                checkItem.setCheckState(Qt.Unchecked)
+            row +=1
+        
+                         
+        scanXmin, scanXmax, scanYmin, scanYmax, scanZmin, scanZmax = \
+           self.dataSource.findScanQs(xmin, xmax, ymin, ymax, zmin, zmax)
+        self.xminText.setText(str(scanXmin))
+        self.xmaxText.setText(str(scanXmax))
+        self.yminText.setText(str(scanYmin))
+        self.ymaxText.setText(str(scanYmax))
+        self.zminText.setText(str(scanZmin))
+        self.zmaxText.setText(str(scanZmax))
+        self.renderBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
+            scanZmin, scanZmax))
+        axes = vtk.vtkCubeAxesActor()
+        axes.SetBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
+            scanZmin, scanZmax))
+        axes.SetCamera(self.ren.GetActiveCamera())
+
+        self.ren.AddActor(axes)
+        self.ren.ResetCamera()
+        self.renWin.Render()
+        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+                    self.checkItemChanged)
+
 class ProcessScans(QDialog):
+    '''
+    '''
     POLE_MAP_STR = "Pole Map"
     GRID_MAP_STR = "Grid Map"
     
     def __init__(self, parent=None):
+        '''
+        '''
         super(ProcessScans, self).__init__(parent)
         layout = QGridLayout()
         label = QLabel("Output Type")        
@@ -652,6 +738,8 @@ class ProcessScans(QDialog):
         self.connect(runButton, SIGNAL("clicked()"), self.runMapper)
         
     def runMapper(self):
+        '''
+        '''
         print "Selected " + str(self.outTypeChooser.currentText())
         if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
             self.emit(SIGNAL("doGridMap"))
