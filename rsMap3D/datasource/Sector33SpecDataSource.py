@@ -81,6 +81,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             print "Cannot open file " + str(self.specFile)
         
     def findImageQs(self, angles, ub, en=13000.0):
+        '''
+        '''
         qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
                                           self.getDetectorCircleDirections(), 
                                           self.getPrimaryBeamDirection())
@@ -123,6 +125,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
+        '''
+        '''
         scanXmin = np.min( xmin)
         scanXmax = np.max( xmax)
         scanYmin = np.min( ymin)
@@ -131,7 +135,40 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         scanZmax = np.max(  zmax)
         return scanXmin, scanXmax, scanYmin, scanYmax, scanZmin, scanZmax
 
+    def getAngles(self, scanNo):
+        '''
+        '''
+        scan = self.sd[scanNo]
+        return scan.get_geo_angles()
+    
+    def getAvailableScans(self):
+        '''
+        '''
+        return self.availableScans
+    
+    def getDetectorAngles(self):
+        '''
+        '''
+        return
+    
+    def getImageBounds(self, scan):
+        '''
+        '''
+        return self.imageBounds[scan]    
+
+    def getImage(self):
+        '''
+        '''
+        return
+    
+    def getImageToBeUsed(self):
+        '''
+        '''
+        return self.imageToBeUsed
+     
     def getOverallRanges(self):
+        '''
+        '''
         overallXmin = float("Infinity")
         overallXmax = float("-Infinity")
         overallYmin = float("Infinity")
@@ -150,15 +187,35 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         return overallXmin, overallXmax, overallYmin, overallYmax, \
                overallZmin, overallZmax
 
-    def setRangeBounds(self, rangeBounds):
-        self.rangeBounds = rangeBounds;
-        self.processImageToBeUsed()
-        #=======================================================================
-        # if len(self.scanList.selectedItems()) > 0:
-        #    print "do something"
-        #=======================================================================
+    def getRangeBounds(self):
+        '''
+        '''
+        return self.rangeBounds
+    
+    def getSampleAngles(self):
+        '''
+        '''
+        return
             
+    def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
+        '''
+        '''
+        return ((xmin >= self.rangeBounds[0] and \
+                 xmin <= self.rangeBounds[1]) or \
+                (xmax >= self.rangeBounds[0] and \
+                 xmax <= self.rangeBounds[1])) and \
+                ((ymin >= self.rangeBounds[2] and \
+                  ymin <= self.rangeBounds[3]) or \
+                (ymax >= self.rangeBounds[2] and \
+                 ymax <= self.rangeBounds[3])) and \
+                ((zmin >= self.rangeBounds[4] and \
+                  zmin <= self.rangeBounds[5]) or \
+                (zmax >= self.rangeBounds[4] and \
+                 zmax <= self.rangeBounds[5]))
+               
     def processImageToBeUsed(self):
+        '''
+        '''
         self.imageToBeUsed = {}
         for scan in self.availableScans:
             inUse = []
@@ -175,44 +232,15 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                     inUse.append(False)
             self.imageToBeUsed[scan] = inUse
  
-    def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        return ((xmin >= self.rangeBounds[0] and \
-                 xmin <= self.rangeBounds[1]) or \
-                (xmax >= self.rangeBounds[0] and \
-                 xmax <= self.rangeBounds[1])) and \
-                ((ymin >= self.rangeBounds[2] and \
-                  ymin <= self.rangeBounds[3]) or \
-                (ymax >= self.rangeBounds[2] and \
-                 ymax <= self.rangeBounds[3])) and \
-                ((zmin >= self.rangeBounds[4] and \
-                  zmin <= self.rangeBounds[5]) or \
-                (zmax >= self.rangeBounds[4] and \
-                 zmax <= self.rangeBounds[5]))
-               
-    def getAvailableScans(self):
-        return self.availableScans
-    
-    def getImageBounds(self, scan):
-        return self.imageBounds[scan]    
-
-    def getRangeBounds(self):
-        return self.rangeBounds
-    
-    def getImageToBeUsed(self):
-        return self.imageToBeUsed
-     
-    def getAngles(self, scanNo):
-        scan = self.sd[scanNo]
-        return scan.get_geo_angles()
-    
-    def getDetectorAngles(self):
-        return
-    
-    def getImage(self):
-        return
-    
-    def getSampleAngles(self):
-        return
+    def setRangeBounds(self, rangeBounds):
+        '''
+        '''
+        self.rangeBounds = rangeBounds;
+        self.processImageToBeUsed()
+        #=======================================================================
+        # if len(self.scanList.selectedItems()) > 0:
+        #    print "do something"
+        #=======================================================================
             
 if __name__ == '__main__':
     source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', \
