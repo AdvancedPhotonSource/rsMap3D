@@ -1,16 +1,19 @@
-import sys
-import os
+'''
+ Copyright (c) 2012, UChicago Argonne, LLC
+ See LICENSE file.
+'''
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from pyspec import spec
-import xrayutilities as xu
-import numpy as np
-import vtk
-from vtk.qt4.QVTKRenderWindowInteractor import  QVTKRenderWindowInteractor
-import xrayutilities_33bmc_functions as bm
-import time
-from vtk.util import numpy_support
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtk.util import numpy_support
+import numpy as np
+import sys
+import time
+import vtk
+import xrayutilities as xu
+import xrayutilities_33bmc_functions as bm
 
 class MainDialog(QWidget):
     def __init__(self,parent=None):
@@ -24,7 +27,8 @@ class MainDialog(QWidget):
         self.fileTabIndex = self.tabs.addTab(self.fileForm, "File")
         self.dataTabIndex = self.tabs.addTab(self.dataRange, "Data Range")
         self.scanTabIndex = self.tabs.addTab(self.scanForm, "Scans")
-        self.processTabIndex = self.tabs.addTab(self.processScans, "Process Data")
+        self.processTabIndex = self.tabs.addTab(self.processScans, 
+                                                "Process Data")
         self.tabs.setTabEnabled(self.dataTabIndex, False)
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
@@ -36,25 +40,32 @@ class MainDialog(QWidget):
         self.connect(self.scanForm, SIGNAL("doneLoading"), self.setupRanges)
         self.connect(self.dataRange, SIGNAL("rangeChanged"), self.setScanRanges)
         self.connect(self.tabs, SIGNAL("currentChanged(int)"), self.tabChanged)
-        self.connect(self.processScans, SIGNAL("doGridMap"), self.scanForm.doGridMap)      
-        self.connect(self.processScans, SIGNAL("doPoleMap"), self.scanForm.doPoleMap)
+        self.connect(self.processScans, SIGNAL("doGridMap"), 
+                     self.scanForm.doGridMap)      
+        self.connect(self.processScans, SIGNAL("doPoleMap"),
+                      self.scanForm.doPoleMap)
         
     def loadScanFile(self):
         self.tabs.setTabEnabled(self.dataTabIndex, False)
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
-        self.dataSource = Sector33SpecDataSource(self.fileForm.getProjectDir(), \
-                            self.fileForm.getProjectName(), \
-                            self.fileForm.getInstConfigName(), \
-                            self.fileForm.getDetConfigName())
+        self.dataSource = \
+            Sector33SpecDataSource(self.fileForm.getProjectDir(), \
+                                   self.fileForm.getProjectName(), \
+                                   self.fileForm.getInstConfigName(), \
+                                   self.fileForm.getDetConfigName())
         
         self.scanForm.loadScanFile(self.dataSource)        
 
     def setupRanges(self):
         overallXmin, overallXmax, overallYmin, overallYmax, \
                overallZmin, overallZmax = self.dataSource.getOverallRanges()
-        self.dataRange.setRanges(overallXmin, overallXmax, overallYmin, overallYmax, \
-               overallZmin, overallZmax)
+        self.dataRange.setRanges(overallXmin, \
+                                 overallXmax, \
+                                 overallYmin, \
+                                 overallYmax, \
+                                 overallZmin, \
+                                 overallZmax)
         self.setScanRanges()
         self.tabs.setTabEnabled(self.dataTabIndex, True)
         self.tabs.setTabEnabled(self.scanTabIndex, True)
@@ -293,7 +304,8 @@ class ScanForm(QDialog):
         self.deselectAll.setText("Deselect All")
         self.deselectAll.setDisabled(True)
         self.connect(self.selectAll, SIGNAL("clicked()"), self.selectAllAction)
-        self.connect(self.deselectAll, SIGNAL("clicked()"), self.deselectAllAction)
+        self.connect(self.deselectAll, SIGNAL("clicked()"), 
+                     self.deselectAllAction)
         
         qrange.addWidget(xLabel, 0,0)
         qrange.addWidget(xminLabel, 0,1)
@@ -339,42 +351,6 @@ class ScanForm(QDialog):
         self.setLayout(layout);
         
     def loadScanFile(self, dataSource):
-        #------------------------------------- self.projectDir = str(projectDir)
-        #----------------------------------- self.projectName = str(projectName)
-        # self.specFile = os.path.join(self.projectDir, self.projectName + ".spc")
-        # imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
-        #-------------------------- self.imageFileTmp = os.path.join(imageDir, \
-                                # "S%%03d/%s_S%%03d_%%05d.tif" % (self.projectName))
-        #------------------------------------------------------------------ try:
-            #------------------------ self.sd = spec.SpecDataFile(self.specFile)
-            #--------------------------------------------- self.scanList.clear()
-            #------------------------------ maxScan = max(self.sd.findex.keys())
-#------------------------------------------------------------------------------ 
-            #--------------------------------------- scans = range(1, maxScan+1)
-            #------------------------------------------------------- print scans
-            #------------------------- imagePath = os.path.join(str(projectDir),
-                            #------------------- "images/%s" % str(projectName))
-#------------------------------------------------------------------------------ 
-            #--------------------------------------------- self.imageBounds = {}
-            #------------------------------------------- self.imageToBeUsed = {}
-            #------------------------------------------ self.availableScans = []
-            #------------------------------------------------ for scan in scans:
-                #- if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
-                    #----------------------------------- curScan = self.sd[scan]
-                    #---------------------------------- item = QListWidgetItem()
-                    #-------------------- item.setText(str(curScan.scan) + " " +
-                                #---------------------------- curScan.scan_type)
-                    #------------------------------- self.scanList.addItem(item)
-                    # curScan.geo_angle_names=['X2mtheta', 'theta', 'phi', 'chi']
-                    #-------------------------- self.availableScans.append(scan)
-                    #---------------------------------- #curScan = self.sd[scan]
-                    #------------------------- angles = curScan.get_geo_angles()
-                    #------------------------------------------- ub = curScan.UB
-                    #---------------------------------------------- en = 15200.0
-                    #- self.imageBounds[scan] = self.findImageQs(angles, ub, en)
-            #---------------------------------- self.emit(SIGNAL("doneLoading"))
-        #------------------------------------------------------- except IOError:
-            #-------------------- print "Cannot open file " + str(self.specFile)
         self.dataSource = dataSource
         for curScan in self.dataSource.getAvailableScans():
             item = QListWidgetItem()
@@ -428,7 +404,8 @@ class ScanForm(QDialog):
         redBrush.setColor(QColor('red'))
         blackBrush = QBrush()
         blackBrush.setColor(QColor('black'))
-        xmin, xmax, ymin, ymax, zmin, zmax = self.dataSource.getImageBounds(scan)
+        xmin, xmax, ymin, ymax, zmin, zmax = \
+            self.dataSource.getImageBounds(scan)
         row = 0
         self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
                         self.checkItemChanged)
@@ -482,7 +459,8 @@ class ScanForm(QDialog):
         self.ren.RemoveAllViewProps()
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         for scan in self.dataSource.getAvailableScans():
-            minx, maxx, miny, maxy, minz, maxz = self.dataSource.getImageBounds(scan)                
+            minx, maxx, miny, maxy, minz, maxz = \
+                self.dataSource.getImageBounds(scan)                
             #set up to skip some images.
             if len(minx) >200:
                 step = len(minx)/200 + 1
@@ -504,84 +482,6 @@ class ScanForm(QDialog):
         self.ren.ResetCamera()
         self.renWin.Render()
                                 
-    #---------------------------- def findImageQs(self, angles, ub, en=13000.0):
-        # qconv = xu.experiment.QConversion(['z-', 'y+', 'z-'], ['z-'], [0,1,0])
-        #-------------- hxrd = xu.HXRD([0, 1, 0], [1, 0, 0], en=en, qconv=qconv)
-        #------------------------------------------------------- cch = [206, 85]
-        #---------------------------------------------------- chpdeg = [106,106]
-        #----------------------------------------------------------- nav = [1,1]
-        #------------------------------------------------- roi = [0,487, 0, 195]
-        #-- hxrd.Ang2Q.init_area('x-', 'z+', cch1=cch[0], cch2=cch[1], Nch1=487,
-           #-- Nch2=195, chpdeg1=chpdeg[0], chpdeg2=chpdeg[1], Nav=nav, roi=roi)
-#------------------------------------------------------------------------------ 
-        # qx, qy, qz = hxrd.Ang2Q.area(angles[:,1], angles[:,3], angles[:,2], angles[:,0], \
-                     #---------------------------------------- roi=roi, Nav=nav)
-        #-------------------------------------------------- idx = range(len(qx))
-        #----------------------------------- xmin = [np.min(qx[i]) for i in idx]
-        #----------------------------------- xmax = [np.max(qx[i]) for i in idx]
-        #----------------------------------- ymin = [np.min(qy[i]) for i in idx]
-        #----------------------------------- ymax = [np.max(qy[i]) for i in idx]
-        #----------------------------------- zmin = [np.min(qz[i]) for i in idx]
-        #----------------------------------- zmax = [np.max(qz[i]) for i in idx]
-#------------------------------------------------------------------------------ 
-        #--------------------------- return (xmin, xmax, ymin, ymax, zmin, zmax)
-           
-    #----------------- def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        #---------------------------------------------- scanXmin = np.min( xmin)
-        #---------------------------------------------- scanXmax = np.max( xmax)
-        #---------------------------------------------- scanYmin = np.min( ymin)
-        #--------------------------------------------- scanYmax = np.max(  ymax)
-        #--------------------------------------------- scanZmin = np.min(  zmin)
-        #--------------------------------------------- scanZmax = np.max(  zmax)
-        #----- return scanXmin, scanXmax, scanYmin, scanYmax, scanZmin, scanZmax
-
-    #----------------------------------------------- def getOverallRanges(self):
-        #--------------------------------------- overallXmin = float("Infinity")
-        #-------------------------------------- overallXmax = float("-Infinity")
-        #--------------------------------------- overallYmin = float("Infinity")
-        #-------------------------------------- overallYmax = float("-Infinity")
-        #--------------------------------------- overallZmin = float("Infinity")
-        #-------------------------------------- overallZmax = float("-Infinity")
-        #------------------------ imageBounds = self.dataSource.getImageBounds()
-        #-------------------------------------- for scan in self.availableScans:
-            #----- overallXmin = min( overallXmin, np.min(imageBounds[scan][0]))
-            #----- overallXmax = max( overallXmax, np.max(imageBounds[scan][1]))
-            #----- overallYmin = min( overallYmin, np.min(imageBounds[scan][2]))
-            #----- overallYmax = max( overallYmax, np.max(imageBounds[scan][3]))
-            #----- overallZmin = min( overallZmin, np.min(imageBounds[scan][4]))
-            #----- overallZmax = max( overallZmax, np.max(imageBounds[scan][5]))
-#------------------------------------------------------------------------------ 
-        #---------- return overallXmin, overallXmax, overallYmin, overallYmax, \
-               #--------------------------------------- overallZmin, overallZmax
-       
-    #------------------------------------ def setRangeBounds(self, rangeBounds):
-        #--------------------------------------- self.rangeBounds = rangeBounds;
-        #------------------------------------------- self.processImageToBeUsed()
-        #---------------------------- if len(self.scanList.selectedItems()) > 0:
-            #---------------------------------------------- print "do something"
-#------------------------------------------------------------------------------ 
-    #------------------------------------------- def processImageToBeUsed(self):
-        #----------------------------------------------- self.imageToBeUsed = {}
-        #-------------------------------------- for scan in self.availableScans:
-            #-------------------------------------------------------- inUse = []
-            #------------------ for i in xrange(len(self.imageBounds[scan][0])):
-                #------------------------------- bounds = self.imageBounds[scan]
-                 # if self.inBounds(bounds[0][i], bounds[1][i], bounds[2][i], bounds[3][i], \
-                    #------------------------------ bounds[4][i], bounds[5][i]):
-                    #---------------------------------------- inUse.append(True)
-                #--------------------------------------------------------- else:
-                    #--------------------------------------- inUse.append(False)
-            #---------------------------------- self.imageToBeUsed[scan] = inUse
-#------------------------------------------------------------------------------ 
-        
-                                            
-    #------------------- def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        # return ((xmin >= self.rangeBounds[0] and xmin <= self.rangeBounds[1]) or \
-           # (xmax >= self.rangeBounds[0] and xmax <= self.rangeBounds[1])) and \
-           # ((ymin >= self.rangeBounds[2] and ymin <= self.rangeBounds[3]) or \
-           # (ymax >= self.rangeBounds[2] and ymax <= self.rangeBounds[3])) and \
-           # ((zmin >= self.rangeBounds[4] and zmin <= self.rangeBounds[5]) or \
-           #----- (zmax >= self.rangeBounds[4] and zmax <= self.rangeBounds[5]))
    
     def addValueToTable(self, value, row, column, coloredBrush):
         item = QTableWidgetItem(str(value))
@@ -632,9 +532,10 @@ class ScanForm(QDialog):
                        self.imageToBeUsed, self.imageFileTmp, nx, ny, nz, \
                        xmin=self.rangeBounds[0], xmax=self.rangeBounds[1], \
                        ymin=self.rangeBounds[2], ymax=self.rangeBounds[3], \
-                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], en=15200.0)
-        #qx, qy, qz, gint, gridder = bm.polemap(specfile, scanno, imagefiletmp, nx, ny, nz)
-        print 'Elapsed time for gridding: %.3f seconds' % (time.time() - _start_time)
+                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], \
+                       en=15200.0)
+        print 'Elapsed time for gridding: %.3f seconds' % \
+               (time.time() - _start_time)
         
         # print some information
         print 'qx: ', qx.min(), ' .... ', qx.max()
@@ -670,7 +571,8 @@ class ScanForm(QDialog):
         
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.projectName, self.availableScans[0]))
+        writer.SetFileName("%s_S%d.vti" % (self.projectName, \
+                                           self.availableScans[0]))
         writer.SetInput(image_data)
         writer.Write()
         
@@ -687,9 +589,10 @@ class ScanForm(QDialog):
                        self.imageToBeUsed, self.imageFileTmp, nx, ny, nz, \
                        xmin=self.rangeBounds[0], xmax=self.rangeBounds[1], \
                        ymin=self.rangeBounds[2], ymax=self.rangeBounds[3], \
-                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], en=15200.0)
-        #qx, qy, qz, gint, gridder = bm.polemap(specfile, scanno, imagefiletmp, nx, ny, nz)
-        print 'Elapsed time for gridding: %.3f seconds' % (time.time() - _start_time)
+                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], \
+                       en=15200.0)
+        print 'Elapsed time for gridding: %.3f seconds' % \
+               (time.time() - _start_time)
         
         # print some information
         print 'qx: ', qx.min(), ' .... ', qx.max()
@@ -725,7 +628,8 @@ class ScanForm(QDialog):
         
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.projectName, self.availableScans[0]))
+        writer.SetFileName("%s_S%d.vti" % (self.projectName, 
+                                           self.availableScans[0]))
         writer.SetInput(image_data)
         writer.Write()
         
