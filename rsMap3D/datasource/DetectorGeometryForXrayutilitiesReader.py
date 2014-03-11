@@ -1,7 +1,6 @@
 '''
-Created on Mar 6, 2014
-
-@author: hammonds
+ Copyright (c) 2012, UChicago Argonne, LLC
+ See LICENSE file.
 '''
 NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils}'
 DETECTORS = NAMESPACE + "Detectors"

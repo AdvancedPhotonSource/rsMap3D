@@ -2,9 +2,6 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import numpy as np
-import time
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
@@ -22,8 +19,6 @@ from PyQt4.QtGui import QColor
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk.util import numpy_support
 
-import xrayutilities as xu
-import rsMap3D.xrayutilities_33bmc_functions as bm
 import vtk
 
 
@@ -145,123 +140,6 @@ class ScanForm(QDialog):
             self.imageToBeUsed[scanNo][i] = False
         self.showQs(scanNo)
 
-    def doGridMap(self):
-        '''
-        '''
-        print "Doing Grid Map"
-        # number of points to be used during the gridding
-        nx, ny, nz = 200, 201, 202
-        
-        # read and grid data with helper function
-        _start_time = time.time()
-        qx, qy, qz, gint, gridder = \
-            bm.gridmap(self.specFile, self.availableScans, \
-                       self.imageToBeUsed, self.imageFileTmp, nx, ny, nz, \
-                       xmin=self.rangeBounds[0], xmax=self.rangeBounds[1], \
-                       ymin=self.rangeBounds[2], ymax=self.rangeBounds[3], \
-                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], \
-                       en=15200.0)
-        print 'Elapsed time for gridding: %.3f seconds' % \
-               (time.time() - _start_time)
-        
-        # print some information
-        print 'qx: ', qx.min(), ' .... ', qx.max()
-        print 'qy: ', qy.min(), ' .... ', qy.max()
-        print 'qz: ', qz.min(), ' .... ', qz.max()
-        
-        # prepare data for export to VTK image file
-        INT = xu.maplog(gint, 5.0, 0)
-        
-        qx0 = qx.min()
-        dqx  = (qx.max()-qx.min())/nx
-        
-        qy0 = qy.min()
-        dqy  = (qy.max()-qy.min())/ny
-        
-        qz0 = qz.min()
-        dqz = (qz.max()-qz.min())/nz
-        
-        INT = np.transpose(INT).reshape((INT.size))
-        data_array = numpy_support.numpy_to_vtk(INT)
-        
-        image_data = vtk.vtkImageData()
-        image_data.SetNumberOfScalarComponents(1)
-        image_data.SetOrigin(qx0,qy0,qz0)
-        image_data.SetSpacing(dqx,dqy,dqz)
-        image_data.SetExtent(0,nx-1,0,ny-1,0,nz-1)
-        image_data.SetScalarTypeToDouble()
-        
-        pd = image_data.GetPointData()
-        
-        pd.SetScalars(data_array)
-        #pd.GetScalars().SetName("scattering data")
-        
-        # export data to file
-        writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.projectName, \
-                                           self.availableScans[0]))
-        writer.SetInput(image_data)
-        writer.Write()
-        
-        
-    def doPoleMap(self):
-        '''
-        '''
-        print "Doing Pole Map"
-        # number of points to be used during the gridding
-        nx, ny, nz = 200, 201, 202
-        
-        # read and grid data with helper function
-        _start_time = time.time()
-        qx, qy, qz, gint, gridder = \
-            bm.polemap(self.specFile, self.availableScans, \
-                       self.imageToBeUsed, self.imageFileTmp, nx, ny, nz, \
-                       xmin=self.rangeBounds[0], xmax=self.rangeBounds[1], \
-                       ymin=self.rangeBounds[2], ymax=self.rangeBounds[3], \
-                       zmin=self.rangeBounds[4], zmax=self.rangeBounds[5], \
-                       en=15200.0)
-        print 'Elapsed time for gridding: %.3f seconds' % \
-               (time.time() - _start_time)
-        
-        # print some information
-        print 'qx: ', qx.min(), ' .... ', qx.max()
-        print 'qy: ', qy.min(), ' .... ', qy.max()
-        print 'qz: ', qz.min(), ' .... ', qz.max()
-        
-        # prepare data for export to VTK image file
-        INT = xu.maplog(gint, 5.0, 0)
-        
-        qx0 = qx.min()
-        dqx  = (qx.max()-qx.min())/nx
-        
-        qy0 = qy.min()
-        dqy  = (qy.max()-qy.min())/ny
-        
-        qz0 = qz.min()
-        dqz = (qz.max()-qz.min())/nz
-        
-        INT = np.transpose(INT).reshape((INT.size))
-        data_array = numpy_support.numpy_to_vtk(INT)
-        
-        image_data = vtk.vtkImageData()
-        image_data.SetNumberOfScalarComponents(1)
-        image_data.SetOrigin(qx0,qy0,qz0)
-        image_data.SetSpacing(dqx,dqy,dqz)
-        image_data.SetExtent(0,nx-1,0,ny-1,0,nz-1)
-        image_data.SetScalarTypeToDouble()
-        
-        pd = image_data.GetPointData()
-        
-        pd.SetScalars(data_array)
-        #pd.GetScalars().SetName("scattering data")
-        
-        # export data to file
-        writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.projectName, 
-                                           self.availableScans[0]))
-        writer.SetInput(image_data)
-        writer.Write()
-        
     def loadScanFile(self, dataSource):
         '''
         '''

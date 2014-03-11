@@ -18,7 +18,7 @@ class AbstractXrayutilitiesDataSource:
         self.detectorCircleDirections = None
         self.primaryBeamDirection = None
         self.incidentWavelength = float('nan')
-        self.incidentEnergy = float('nan')
+        self.incidentEnergy = None
         self.sampleInplaneReferenceDirection = None
         self.sampleSurfaceNormalDirection = None
         self.detectorCenterChannel = None
@@ -49,11 +49,11 @@ class AbstractXrayutilitiesDataSource:
         """ """
         return self.incidentWavelength
     
-    def getIncidentEnergy(self):
+    def getIncidentEnergy(self, index1=0, index2=0):
         """ """
         return self.incidentEnergy
     
-    def getSampleInplaneReferenceDirection(self):
+    def getInplaneReferenceDirection(self):
         """ """
         return self.sampleInplaneReferenceDirection
     

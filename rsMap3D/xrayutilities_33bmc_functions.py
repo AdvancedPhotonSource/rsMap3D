@@ -24,8 +24,6 @@ import os
 import sys
 import Image
 
-#if not '/Users/cschlep/software/python/pyspec' in sys.path:
-#    sys.path.insert(0,'/Users/cschlep/software/python/pyspec')
 from pyspec import spec
 
 # x-ray energy in eV
@@ -60,8 +58,7 @@ def hotpixelkill(ad_data):
     
     return ad_data
 
-def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0,0,0,0],
-        en=default_en,cch=default_cch,chpdeg=default_chpdeg,nav=default_nav,
+def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
         adframes=None):
     """
     read ad frames and and convert them in reciprocal space
@@ -69,34 +66,10 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
     or read from the edf file header when no scan number is given (scannr=None)
     """
     
-    sd = spec.SpecDataFile(specfile)
+    sd = spec.SpecDataFile(dataSource.specFile)
     intensity = numpy.array([])
     tth = th = phi = chi = numpy.array([])
 
-    # fourc goniometer
-    # convention for coordinate system:
-    # x: downstream;
-    # z: upwards;
-    # y: "outboard" (makes coordinate system right-handed).
-    # QConversion will set up the goniometer geometry.
-    # So the first argument describes the sample rotations, the second the
-    # detector rotations and the third the primary beam direction.
-    #qconv = xu.experiment.QConversion(['y-','x+','y-'], ['y-'], [1,0,0])
-
-    # define experimental class for angle conversion
-    #
-    # ipdir: inplane reference direction (ipdir points into the primary beam
-    #        direction at zero angles)
-    # ndir:  surface normal of your sample (ndir points in a direction
-    #        perpendicular to the primary beam and the innermost detector
-    #        rotation axis)
-    #hxrd = xu.HXRD([0,1,0], [0,0,1], en=en, qconv=qconv)
-    
-    # initialize area detector properties
-    #hxrd.Ang2Q.init_area('z-', 'y+', cch1=cch[0], cch2=cch[1],
-    #    Nch1=487, Nch2=195, chpdeg1=chpdeg[0], chpdeg2=chpdeg[1],
-    #    Nav=nav, roi=roi) 
-        
     
     # fourc goniometer in fourc coordinates
     # convention for coordinate system:
@@ -106,7 +79,9 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
     # QConversion will set up the goniometer geometry.
     # So the first argument describes the sample rotations, the second the
     # detector rotations and the third the primary beam direction.
-    qconv = xu.experiment.QConversion(['z-','y+','z-'], ['z-'], [0,1,0])
+    qconv = xu.experiment.QConversion(dataSource.getSampleCircleDirections(), \
+                                      dataSource.getDetectorCircleDirections(), \
+                                      dataSource.getPrimaryBeamDirection())
 
     # define experimental class for angle conversion
     #
@@ -115,19 +90,42 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
     # ndir:  surface normal of your sample (ndir points in a direction
     #        perpendicular to the primary beam and the innermost detector
     #        rotation axis)
-    hxrd = xu.HXRD([0,1,0], [1,0,0], en=en, qconv=qconv)
+    en = dataSource.getIncidentEnergy()
+    hxrd = xu.HXRD(dataSource.getInplaneReferenceDirection(), \
+                   dataSource.getSampleSurfaceNormalDirection(), \
+                   en=en[dataSource.getAvailableScans()[0]], \
+                   qconv=qconv)
     
     
     # initialize area detector properties
-    hxrd.Ang2Q.init_area('x-', 'z+', cch1=cch[0], cch2=cch[1],
-        Nch1=487, Nch2=195, chpdeg1=chpdeg[0], chpdeg2=chpdeg[1],
-        Nav=nav, roi=roi) 
+    if (dataSource.getDetectorPixelWidth() != None ) and \
+        (dataSource.getDistanceToDetector() != None):
+        hxrd.Ang2Q.init_area(dataSource.getDetectorPixelDirection1(), \
+            dataSource.getDetectorPixelDirection2(), \
+            cch1=dataSource.getDetectorCenterChannel()[0], \
+            cch2=dataSource.getDetectorCenterChannel()[1], \
+            Nch1=dataSource.getDetectorDimensions()[0], \
+            Nch2=dataSource.getDetectorDimensions()[0], \
+            pwidth1=dataSource.getDetectorPixelWidth()[0], \
+            pwidth2=dataSource.getDetectorPixelWidth()[1], \
+            distance=dataSource.getDistanceToDetector(), \
+            Nav=dataSource.getNumPixelsToAverage(), roi=roi) 
+    else:
+        hxrd.Ang2Q.init_area(dataSource.getDetectorPixelDirection1(), \
+            dataSource.getDetectorPixelDirection2(), \
+            cch1=dataSource.getDetectorCenterChannel()[0], \
+            cch2=dataSource.getDetectorCenterChannel()[1], \
+            Nch1=dataSource.getDetectorDimensions()[0], \
+            Nch2=dataSource.getDetectorDimensions()[0], \
+            chpdeg1=dataSource.getDetectorChannelsPerDegree()[0], \
+            chpdeg2=dataSource.getDetectorChannelsPerDegree()[1], \
+            Nav=dataSource.getNumPixelsToAverage(), roi=roi) 
         
     print hxrd
 
     offset = 0
-    
-    for scannr in scans:
+    imageToBeUsed = dataSource.getImageToBeUsed()
+    for scannr in dataSource.getAvailableScans():
         scan = sd[scannr]
         scan.geo_angle_names = ['X2mtheta', 'theta', 'phi', 'chi']
         angles = scan.get_geo_angles()
@@ -142,10 +140,11 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
         # read in the image data
         arrayInitializedForScan = False
         foundIndex = 0
+        
         for ind in xrange(scan.data.shape[0]):
             if imageToBeUsed[scannr][ind]:    
                 # read tif image
-                img = numpy.array(Image.open(adfiletmp % (scannr, scannr, ind))).T
+                img = numpy.array(Image.open(dataSource.imageFileTmp % (scannr, scannr, ind))).T
                 img = hotpixelkill(img)
     
                 # reduce data size
@@ -153,7 +152,10 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
                 #print nav[0]
                 #print nav[1]
                 #print roi
-                img2 = xu.blockAverage2D(img, nav[0],nav[1], roi=roi)
+                img2 = xu.blockAverage2D(img, 
+                                         dataSource.getNumPixelsToAverage()[0], \
+                                         dataSource.getNumPixelsToAverage()[1], \
+                                         roi=roi)
                 #print "img2.shape: " +str(img2.shape)
                 # initialize data array
                 if not arrayInitializedForScan:
@@ -182,11 +184,12 @@ def rawmap(specfile,scans,imageToBeUsed, adfiletmp,roi=default_roi,angdelta=[0,0
             chi = numpy.concatenate((chi, numpy.array(chi2)), axis = 0)
     # transform scan angles to reciprocal space coordinates for all detector pixels
     
-    qx, qy, qz = hxrd.Ang2Q.area(th, chi, phi, tth,  roi=roi, Nav=nav)
+    qx, qy, qz = hxrd.Ang2Q.area(th, chi, phi, tth,  roi=roi, 
+                                 Nav=dataSource.getNumPixelsToAverage())
 
     return qx, qy, qz, intensity
 
-def gridmap(specfile,scannr, imageToBeUsed,adfiletmp,nx,ny,nz,**kwargs):
+def gridmap(dataSource,nx,ny,nz,**kwargs):
     """
     read ad frames and grid them in reciprocal space
     angular coordinates are taken from the spec file
@@ -207,11 +210,10 @@ def gridmap(specfile,scannr, imageToBeUsed,adfiletmp,nx,ny,nz,**kwargs):
     del kwargs1['ymax']
     del kwargs1['zmin']
     del kwargs1['zmax']
-    
-    for scan in scannr:
+    imageToBeUsed = dataSource.getImageToBeUsed()
+    for scan in dataSource.getAvailableScans():
         if True in imageToBeUsed[scan]:
-            qx, qy, qz, intensity = rawmap(specfile,(scan,), imageToBeUsed, \
-                                           adfiletmp,**kwargs1)
+            qx, qy, qz, intensity = rawmap(dataSource,**kwargs1)
     
             # convert data to rectangular grid in reciprocal space
             gridder(qx,qy,qz,intensity)
@@ -219,7 +221,7 @@ def gridmap(specfile,scannr, imageToBeUsed,adfiletmp,nx,ny,nz,**kwargs):
     return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.gdata,gridder
 
 
-def polemap(specfile,scannr, imageToBeUsed, adfiletmp,nspx,nspy,nspq,**kwargs):
+def polemap(dataSource,nspx,nspy,nspq,**kwargs):
     """
     read ad frames and grid them in reciprocal space
     angular coordinates are taken from the spec file
@@ -265,11 +267,11 @@ def polemap(specfile,scannr, imageToBeUsed, adfiletmp,nspx,nspy,nspq,**kwargs):
     del kwargs1['zmin']
     del kwargs1['zmax']
     
-    for scan in scannr:
+    imageToBeUsed = dataSource.getImageToBeUsed()
+    for scan in dataSource.getAvailableScans():
         #print '---' + str(scan) + str(imageToBeUsed[scan])
         if True in imageToBeUsed[scan]:
-            qx, qy, qz, intensity = rawmap(specfile, (scan,), imageToBeUsed, \
-                                            adfiletmp, **kwargs1)
+            qx, qy, qz, intensity = rawmap(dataSource, **kwargs1)
             
             # convert qx,qy,qz to stereographic projection
             spq = numpy.sqrt(qx**2 + qy**2 + qz**2)

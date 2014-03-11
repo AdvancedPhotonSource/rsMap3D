@@ -66,15 +66,11 @@ class ProcessScans(QDialog):
         _start_time = time.time()
         rangeBounds = self.dataSource.getRangeBounds()
         qx, qy, qz, gint, gridder = \
-            bm.gridmap(self.dataSource.specFile, \
-                       self.dataSource.getAvailableScans(), \
-                       self.dataSource.getImageToBeUsed(), \
-                       self.dataSource.imageFileTmp, \
+            bm.gridmap(self.dataSource, \
                        nx, ny, nz, \
                        xmin=rangeBounds[0], xmax=rangeBounds[1], \
                        ymin=rangeBounds[2], ymax=rangeBounds[3], \
-                       zmin=rangeBounds[4], zmax=rangeBounds[5], \
-                       en=15200.0)
+                       zmin=rangeBounds[4], zmax=rangeBounds[5])
         print 'Elapsed time for gridding: %.3f seconds' % \
                (time.time() - _start_time)
         
@@ -129,15 +125,11 @@ class ProcessScans(QDialog):
         _start_time = time.time()
         rangeBounds = self.dataSource.getRangeBounds()
         qx, qy, qz, gint, gridder = \
-            bm.polemap(self.dataSource.specFile, \
-                       self.dataSource.getAvailableScans(), \
-                       self.dataSource.getImageToBeUsed(), \
-                       self.dataSource.getImageFileTmp, \
+            bm.polemap(self.dataSource, \
                        nx, ny, nz, \
                        xmin=rangeBounds[0], xmax=rangeBounds[1], \
                        ymin=rangeBounds[2], ymax=rangeBounds[3], \
-                       zmin=rangeBounds[4], zmax=rangeBounds[5], \
-                       en=15200.0)
+                       zmin=rangeBounds[4], zmax=rangeBounds[5])
         print 'Elapsed time for gridding: %.3f seconds' % \
                (time.time() - _start_time)
         
