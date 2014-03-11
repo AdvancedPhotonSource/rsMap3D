@@ -41,10 +41,12 @@ class MainDialog(QWidget):
         self.connect(self.scanForm, SIGNAL("doneLoading"), self.setupRanges)
         self.connect(self.dataRange, SIGNAL("rangeChanged"), self.setScanRanges)
         self.connect(self.tabs, SIGNAL("currentChanged(int)"), self.tabChanged)
-        self.connect(self.processScans, SIGNAL("doGridMap"), 
-                     self.scanForm.doGridMap)      
-        self.connect(self.processScans, SIGNAL("doPoleMap"),
-                      self.scanForm.doPoleMap)
+        #=======================================================================
+        # self.connect(self.processScans, SIGNAL("doGridMap"), 
+        #             self.scanForm.doGridMap)      
+        # self.connect(self.processScans, SIGNAL("doPoleMap"),
+        #              self.scanForm.doPoleMap)
+        #=======================================================================
         self.connect(self.processScans, SIGNAL("process"), self.runMapper)
         
     def loadScanFile(self):

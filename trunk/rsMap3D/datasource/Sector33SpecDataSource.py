@@ -68,6 +68,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.imageBounds = {}
             self.imageToBeUsed = {}
             self.availableScans = []
+            self.incidentEnergy = {}
             for scan in scans:
                 if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
                     curScan = self.sd[scan]
@@ -75,18 +76,21 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                     self.availableScans.append(scan)
                     angles = curScan.get_geo_angles()
                     ub = curScan.UB
-                    en = 15200.0
-                    self.imageBounds[scan] = self.findImageQs(angles, ub, en)
+                    print float(curScan.energy)
+                    self.incidentEnergy[scan] = \
+                        curScan.energy
+                    self.imageBounds[scan] = \
+                        self.findImageQs(angles, ub, self.incidentEnergy[scan])
         except IOError:
             print "Cannot open file " + str(self.specFile)
         
-    def findImageQs(self, angles, ub, en=13000.0):
+    def findImageQs(self, angles, ub, en):
         '''
         '''
         qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
                                           self.getDetectorCircleDirections(), 
                                           self.getPrimaryBeamDirection())
-        hxrd = xu.HXRD(self.getSampleInplaneReferenceDirection(), 
+        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), 
                        self.getSampleSurfaceNormalDirection(), 
                        en=en, 
                        qconv=qconv)
