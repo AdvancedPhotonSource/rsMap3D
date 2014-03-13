@@ -24,9 +24,16 @@ import vtk
 
 class ScanForm(QDialog):
     '''
+    This class presents a form to display available scans, lists the angles 
+    and q values for a selected scan and allows selecting of individual images 
+    for exclusion/inclusion in the processing phase.  A window is also provided
+    to visualize the q space covered by the included images in the selected
+    scan.
     '''
     def __init__(self, parent=None):
         '''
+        Constructor - Layout widgets on the form and set up a VTK window for 
+        displaying the covered q space 
         '''
         super(ScanForm, self).__init__(parent)
         self.rangeBounds = (float("Infinity"), float("-Infinity"), \
@@ -112,6 +119,8 @@ class ScanForm(QDialog):
         
     def addValueToTable(self, value, row, column, coloredBrush):
         '''
+        Add a value to a cell in the table setting the value to display and 
+        the foreground color
         '''
         item = QTableWidgetItem(str(value))
         item.setForeground(coloredBrush)
@@ -119,6 +128,8 @@ class ScanForm(QDialog):
         
     def checkItemChanged(self,item):
         '''
+        Change whether a row is selected or not and register if the associated
+        image will be used in analysis
         '''
         scanNo = self.getSelectedScan()
         row = item.row()
@@ -130,6 +141,8 @@ class ScanForm(QDialog):
 
     def deselectAllAction(self):
         '''
+        Change setting for all images in the selected scan so that none of the
+        images are used in analysis
         '''
         scanNo = self.getSelectedScan()
         for i in xrange(len(self.imageToBeUsed[scanNo])):
@@ -138,6 +151,7 @@ class ScanForm(QDialog):
 
     def loadScanFile(self, dataSource):
         '''
+        Load information from the selected dataSource into this form.
         '''
         self.dataSource = dataSource
         for curScan in self.dataSource.getAvailableScans():
@@ -157,6 +171,7 @@ class ScanForm(QDialog):
    
     def getSelectedScan(self):
         '''
+        Return the scan number of the selected scan
         '''
         scansSel = self.scanList.selectedItems()
         if len(scansSel) > 1:
@@ -167,6 +182,7 @@ class ScanForm(QDialog):
         
     def renderBounds(self, bounds):
         '''
+        Render a box with boundaries from the given input
         '''
         cube = vtk.vtkOutlineSource()
         cube.SetBounds(bounds)
@@ -181,6 +197,7 @@ class ScanForm(QDialog):
         
     def renderOverallQs(self):
         '''
+        Render bounds for all selected images from all available scans 
         '''
         self.ren.RemoveAllViewProps()
         imageToBeUsed = self.dataSource.getImageToBeUsed()
@@ -210,6 +227,9 @@ class ScanForm(QDialog):
                                 
     def scanSelected(self, item):
         '''
+        When a scan is selected from the list, change the table to display 
+        information about the images in that scan and call to to show the 
+        bounds of the selected images in that scan.
         '''
         scanNo = int(item.text().split(' ')[0])
         angles = self.dataSource.getAngles(scanNo)
@@ -220,6 +240,7 @@ class ScanForm(QDialog):
                 
     def selectAllAction(self):
         '''
+        Mark all images in the currently selected scan for use in analysis
         '''
         scanNo = self.getSelectedScan()
         for i in xrange(len(self.imageToBeUsed[scanNo])):
@@ -228,6 +249,7 @@ class ScanForm(QDialog):
                         
     def showAngles(self, angles):
         '''
+        Display the angles associated with images in the scan in the table.
         '''
         numAngles = len(self.dataSource.getSampleAngleNames() + \
                         self.dataSource.getDetectorAngleNames())
@@ -251,6 +273,8 @@ class ScanForm(QDialog):
 
     def showQs(self, scan ):
         '''
+        Display q max/min value for the image in the selected scan in the table
+        and render the boundaries for those Q values.
         '''
         self.ren.RemoveAllViewProps()
         redBrush = QBrush()

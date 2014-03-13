@@ -21,12 +21,15 @@ import xrayutilities as xu
 
 class ProcessScans(QDialog):
     '''
+    This class presents a form to select to start analysis.  This display
+    allows switching between Grid map and pole figure.
     '''
     POLE_MAP_STR = "Pole Map"
     GRID_MAP_STR = "Grid Map"
     
     def __init__(self, parent=None):
         '''
+        Constructor - Layout widgets on the page & link up actions.
         '''
         super(ProcessScans, self).__init__(parent)
         layout = QGridLayout()
@@ -43,10 +46,14 @@ class ProcessScans(QDialog):
         
         
     def process(self):
+        '''
+        Emit a signal to trigger the start of procesing.
+        '''
         self.emit(SIGNAL("process"))
         
     def runMapper(self, dataSource):
         '''
+        Run the selected mapper
         '''
         self.dataSource = dataSource
         print "Selected " + str(self.outTypeChooser.currentText())
@@ -57,6 +64,7 @@ class ProcessScans(QDialog):
             
     def doGridMap(self):
         '''
+        Produce a q map of the data.
         '''
         print "Doing Grid Map"
         # number of points to be used during the gridding
@@ -116,6 +124,7 @@ class ProcessScans(QDialog):
         
     def doPoleMap(self):
         '''
+        Produce a pole map of the data.
         '''
         print "Doing Pole Map"
         # number of points to be used during the gridding

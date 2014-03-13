@@ -118,17 +118,6 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
         for i in xrange(len(scan.geo_angle_names)):
             scanAngle1[i] = angles[:,i]
             scanAngle2[i] = []
-        #print scanAngle
-        #print scanAngle1
-        #print scanAngle2   
-#        tth1 = angles[:,0]
-#        th1 = angles[:,1]
-#        chi1 = angles[:,3]
-#        phi1 = angles[:,2]
-#        th2 = []
-#        chi2 = []
-#        phi2 = []
-#        tth2 = []
         # read in the image data
         arrayInitializedForScan = False
         foundIndex = 0
@@ -162,20 +151,12 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
                 #print sys.getsizeof(intensity)
                 for i in xrange(len(scan.geo_angle_names)):
                     scanAngle2[i].append(scanAngle1[i][ind])
-#                tth2.append(tth1[ind])
-#                th2.append(th1[ind])
-#                phi2.append(phi1[ind])
-#                chi2.append(chi1[ind])
                 foundIndex += 1
         if len(scanAngle2[0]) > 0:
             for i in xrange(len(scan.geo_angle_names)):
                 scanAngle[i] = \
                     np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
                                       axis=0)
-#            tth = numpy.concatenate((tth, numpy.array(tth2)), axis = 0)
-#            th  = numpy.concatenate((th, numpy.array(th2)), axis = 0)
-#            phi = numpy.concatenate((phi, numpy.array(phi2)), axis = 0)
-#            chi = numpy.concatenate((chi, numpy.array(chi2)), axis = 0)
     # transform scan angles to reciprocal space coordinates for all detector pixels
     angleList = []
     for i in xrange(len(scan.geo_angle_names)):
