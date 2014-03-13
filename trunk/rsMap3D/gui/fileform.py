@@ -11,8 +11,12 @@ from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QPushButton
 
 class FileForm(QDialog):
+    '''
+    This class presents information for selecting input files
+    '''
     def __init__(self,parent=None):
         '''
+        Constructor - Layout Widgets on the page and link actions
         '''
         super(FileForm, self).__init__(parent)
         layout = QGridLayout()
@@ -55,36 +59,43 @@ class FileForm(QDialog):
         
     def loadFile(self):
         '''
+        Emit a signal to start loading data
         '''
         self.emit(SIGNAL("loadFile"))
         
     def browseForInstFile(self):
         '''
+        Launch file selection dialog for instrument file.
         '''
         print "Browsing for inst file"
 
     def browseForDetFile(self):
         '''
+        Launch file selection dialog for Detector file.
         '''
         print "Browsing for Det file"
 
     def getDetConfigName(self):
         '''
+        Return the selected Detector Configuration file
         '''
         return self.detConfigTxt.text()
 
     def getInstConfigName(self):
         '''
+        Return the Instrument config file name
         '''
         return self.instConfigTxt.text()
 
     def getProjectDir(self):
         '''
+        Return the project directory
         '''
         return self.projDirTxt.text()
         
     def getProjectName(self):
         '''
+        Return the project name
         '''
         return self.projNameTxt.text()
     

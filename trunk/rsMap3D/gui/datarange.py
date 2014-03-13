@@ -13,6 +13,8 @@ from PyQt4.QtGui import QPushButton
 
 class DataRange(QDialog):
     '''
+    This class displays the overall data range for all selected images in
+    the available scans.
     '''
     def __init__(self, parent=None):                
         '''
@@ -78,6 +80,8 @@ class DataRange(QDialog):
         
     def _initializeRanges(self):
         '''
+        Private class to initialize ranges at +- infinity.  This sets values 
+        but puts them to bad values on purpose.
         '''
         self.ranges = (float("Infinity"), float("-Infinity"), \
                         float("Infinity"), float("-Infinity"), \
@@ -85,6 +89,8 @@ class DataRange(QDialog):
         
     def applyRange(self):
         '''
+        Apply changes by recording them as current values and signaling that 
+        the ranges have changed.
         '''
         self.ranges = (float(self.xminText.text()),
                        float(self.xmaxText.text()),
@@ -96,6 +102,7 @@ class DataRange(QDialog):
         
     def resetRange(self):
         '''
+        Reset the ranges to the last set of applied values.
         '''
         self.xminText.setText(str(self.ranges[0]))
         self.xmaxText.setText(str(self.ranges[1]))
@@ -106,6 +113,7 @@ class DataRange(QDialog):
         
     def setRanges(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
+        Allow ranges to be set externally
         '''
         self.ranges = (xmin, xmax, ymin, ymax, zmin, zmax)
         self.xminText.setText(str(xmin))
@@ -117,41 +125,48 @@ class DataRange(QDialog):
         
     def getRanges(self):
         '''
+        Return the range values
         '''
         return self.ranges
         
     def xminChanged(self):
         '''
+        Trigger that the xmin value has changed
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
     
     def xmaxChanged(self):
         '''
+        Trigger that the xmax value has changed
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
     
     def yminChanged(self):
         '''
+        Trigger that the ymin value has changed
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
     
     def ymaxChanged(self):
         '''
+        trigger that the ymax value has changed
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
     
     def zminChanged(self):
         '''
+        Trigger that the zmin value has changed
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
     
     def zmaxChanged(self):
         '''
+        Trigger that the zmax value has changed.
         '''
         #make sure this can be a float also make sure min < max
         print 'change)'
