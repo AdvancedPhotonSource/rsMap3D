@@ -32,7 +32,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             instConfig.getInplaneReferenceDirection()
         self.sampleSurfaceNormalDirection = \
             instConfig.getSampleSurfaceNormalDirection()
-
+        self.sampleAngleNames = instConfig.getSampleCircleNames()
+        self.detectorAngleNames = instConfig.getDetectorCircleNames()
+        
+        
         detConfig = \
             DetectorReader.DetectorGeometryForXrayutilitiesReader(detConfigFile)
         detector = detConfig.getDetectorById("Pilatus")
@@ -47,7 +50,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
         self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
         
-        self.angleNames = ['X2mtheta', 'theta', 'phi', 'chi']
+        self.angleNames = instConfig.getSampleCircleNames() + \
+            instConfig.getDetectorCircleNames()
+        print self.angleNames
         self.projectDir = str(projectDir)
         self.projectName = str(projectName)
         self.specFile = os.path.join(self.projectDir, self.projectName + ".spc")
@@ -112,10 +117,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        qx, qy, qz = hxrd.Ang2Q.area(angles[:,1], \
-                                     angles[:,3], \
+        qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
+                                     angles[:,1], \
                                      angles[:,2], \
-                                     angles[:,0], \
+                                     angles[:,3], \
                                      roi=roi, \
                                      Nav=nav)
         idx = range(len(qx))
@@ -154,6 +159,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         '''
         return
+    
+    def getDetectorAngleNames(self):
+        return self.detectorAngleNames
     
     def getImageBounds(self, scan):
         '''
@@ -200,6 +208,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         '''
         return
+    
+    def getSampleAngleNames(self):
+        '''
+        '''
+        return self.sampleAngleNames
+    
             
     def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
@@ -248,5 +262,5 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             
 if __name__ == '__main__':
     source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', \
-                                    '/local/RSM/33BM-instForXrayutilities.xml', \
-                                    '/local/RSM/33bmDetectorGeometry.xml')
+                                '/local/RSM/33BM-instForXrayutilities.xml', \
+                                '/local/RSM/33bmDetectorGeometry.xml')

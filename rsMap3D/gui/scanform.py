@@ -91,10 +91,6 @@ class ScanForm(QDialog):
         
         rightBox.addLayout(qrange)
         self.detail = QTableWidget()
-        self.detail.setColumnCount(11)
-        self.detail.setHorizontalHeaderLabels(['Use Image', 'X2mtheta', 'theta', 'phi', 
-                                            'chi', 'Min qx', 'Max qx', 'Min qy',
-                                            'Max qy', 'Min qz', 'Max qz'])
         rightBox.addWidget(self.detail)
         layout.addLayout(rightBox, 0,1)
         layout.setColumnStretch(1, 45)
@@ -148,6 +144,14 @@ class ScanForm(QDialog):
             item = QListWidgetItem()
             item.setText(str(curScan))
             self.scanList.addItem(item)
+        self.detail.setColumnCount(7 + \
+                                   len(dataSource.getDetectorAngleNames()) + \
+                                   len(dataSource.getSampleAngleNames()))
+        self.detail.setHorizontalHeaderLabels(['Use Image'] + \
+                                            dataSource.getSampleAngleNames() + \
+                                            dataSource.getDetectorAngleNames() + \
+                                            ['Min qx', 'Max qx', 'Min qy', \
+                                            'Max qy', 'Min qz', 'Max qz'])
         self.emit(SIGNAL("doneLoading"))
         
    
@@ -225,6 +229,8 @@ class ScanForm(QDialog):
     def showAngles(self, angles):
         '''
         '''
+        numAngles = len(self.dataSource.getSampleAngleNames() + \
+                        self.dataSource.getDetectorAngleNames())
         self.detail.setRowCount(angles.size)
         blackBrush = QBrush()
         blackBrush.setColor(QColor('black'))
@@ -237,10 +243,8 @@ class ScanForm(QDialog):
             checkItem.data(Qt.CheckStateRole)
             checkItem.setCheckState(Qt.Checked)
             self.detail.setItem(row, 0, checkItem)
-            self.addValueToTable(angle[0], row, 1, blackBrush)
-            self.addValueToTable(angle[1], row, 2, blackBrush)
-            self.addValueToTable(angle[2], row, 3, blackBrush)
-            self.addValueToTable(angle[3], row, 4, blackBrush)
+            for i in xrange(len(angle)):
+                self.addValueToTable(angle[i], row, i+1, blackBrush)
             row +=1
         self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
                     self.checkItemChanged)
@@ -259,25 +263,27 @@ class ScanForm(QDialog):
         self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
                         self.checkItemChanged)
         imageToBeUsed = self.dataSource.getImageToBeUsed()
+        numAngles = len(self.dataSource.getSampleAngleNames() + \
+                        self.dataSource.getDetectorAngleNames())
         for value in xmin:
             if imageToBeUsed[scan][row]:
-                self.addValueToTable(xmin[row], row, 5, blackBrush)
-                self.addValueToTable(xmax[row], row, 6, blackBrush)
-                self.addValueToTable(ymin[row], row, 7, blackBrush)
-                self.addValueToTable(ymax[row], row, 8, blackBrush)
-                self.addValueToTable(zmin[row], row, 9, blackBrush)
-                self.addValueToTable(zmax[row], row, 10, blackBrush)
+                self.addValueToTable(xmin[row], row, numAngles + 1, blackBrush)
+                self.addValueToTable(xmax[row], row, numAngles + 2, blackBrush)
+                self.addValueToTable(ymin[row], row, numAngles + 3, blackBrush)
+                self.addValueToTable(ymax[row], row, numAngles + 4, blackBrush)
+                self.addValueToTable(zmin[row], row, numAngles + 5, blackBrush)
+                self.addValueToTable(zmax[row], row, numAngles + 6, blackBrush)
                 self.renderBounds((xmin[row], xmax[row], ymin[row], ymax[row], \
                     zmin[row], zmax[row]))
                 checkItem = self.detail.item(row,0)
                 checkItem.setCheckState(Qt.Checked)
             else:
-                self.addValueToTable(xmin[row], row, 5, redBrush)
-                self.addValueToTable(xmax[row], row, 6, redBrush)
-                self.addValueToTable(ymin[row], row, 7, redBrush)
-                self.addValueToTable(ymax[row], row, 8, redBrush)
-                self.addValueToTable(zmin[row], row, 9, redBrush)
-                self.addValueToTable(zmax[row], row, 10, redBrush)
+                self.addValueToTable(xmin[row], row, numAngles + 1, redBrush)
+                self.addValueToTable(xmax[row], row, numAngles + 2, redBrush)
+                self.addValueToTable(ymin[row], row, numAngles + 3, redBrush)
+                self.addValueToTable(ymax[row], row, numAngles + 4, redBrush)
+                self.addValueToTable(zmin[row], row, numAngles + 5, redBrush)
+                self.addValueToTable(zmax[row], row, numAngles + 6, redBrush)
                 checkItem = self.detail.item(row,0)
                 checkItem.setCheckState(Qt.Unchecked)
             row +=1

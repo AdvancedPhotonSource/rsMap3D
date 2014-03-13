@@ -17,32 +17,11 @@
 
 # ALSO LOOK AT THE FILE xrayutilities_example_plot_3D_ESRF_ID01.py
 
-import numpy
-import math
+import numpy as np
 import xrayutilities as xu
-import os
-import sys
 import Image
 
 from pyspec import spec
-
-# x-ray energy in eV
-default_en=15200.0 
-
-# cch describes the "zero" position of the detector. this means at
-# "detector arm angles"=0 the primary beam is hitting the detector at some
-# particular position. these two values specify this pixel position
-default_cch = [206,85]
-
-# channel per degree for the detector
-# chpdeg specify how many pixels the beam position on the detector changes
-# for 1 degree movement. basically this determines the detector distance
-# and needs to be determined every time the distance is changed
-#default_chpdeg = [106,106] 
-default_chpdeg = [77,77] 
-
-# reduce data: number of pixels to average in each detector direction
-default_nav = [1,1] 
 
 # region of interest on the detector
 default_roi = [0,487,0,195] 
@@ -67,8 +46,8 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
     """
     
     sd = spec.SpecDataFile(dataSource.specFile)
-    intensity = numpy.array([])
-    tth = th = phi = chi = numpy.array([])
+    intensity = np.array([])
+    tth = th = phi = chi = np.array([])
 
     
     # fourc goniometer in fourc coordinates
@@ -80,8 +59,8 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
     # So the first argument describes the sample rotations, the second the
     # detector rotations and the third the primary beam direction.
     qconv = xu.experiment.QConversion(dataSource.getSampleCircleDirections(), \
-                                      dataSource.getDetectorCircleDirections(), \
-                                      dataSource.getPrimaryBeamDirection())
+                                dataSource.getDetectorCircleDirections(), \
+                                dataSource.getPrimaryBeamDirection())
 
     # define experimental class for angle conversion
     #
@@ -122,21 +101,34 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
             Nav=dataSource.getNumPixelsToAverage(), roi=roi) 
         
     print hxrd
+    scanAngle = {}
+    for i in xrange(len(sd[dataSource.getAvailableScans()[0]].geo_angle_names)):
+        scanAngle[i] = np.array([])
 
     offset = 0
     imageToBeUsed = dataSource.getImageToBeUsed()
     for scannr in dataSource.getAvailableScans():
         scan = sd[scannr]
-        scan.geo_angle_names = ['X2mtheta', 'theta', 'phi', 'chi']
+        scan.geo_angle_names = dataSource.getSampleAngleNames() + \
+                               dataSource.getDetectorAngleNames()
         angles = scan.get_geo_angles()
-        tth1 = angles[:,0]
-        th1 = angles[:,1]
-        chi1 = angles[:,3]
-        phi1 = angles[:,2]
-        th2 = []
-        chi2 = []
-        phi2 = []
-        tth2 = []
+        scanAngle1 = {}
+        scanAngle2 = {}
+        print angles
+        for i in xrange(len(scan.geo_angle_names)):
+            scanAngle1[i] = angles[:,i]
+            scanAngle2[i] = []
+        #print scanAngle
+        #print scanAngle1
+        #print scanAngle2   
+#        tth1 = angles[:,0]
+#        th1 = angles[:,1]
+#        chi1 = angles[:,3]
+#        phi1 = angles[:,2]
+#        th2 = []
+#        chi2 = []
+#        phi2 = []
+#        tth2 = []
         # read in the image data
         arrayInitializedForScan = False
         foundIndex = 0
@@ -144,47 +136,53 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
         for ind in xrange(scan.data.shape[0]):
             if imageToBeUsed[scannr][ind]:    
                 # read tif image
-                img = numpy.array(Image.open(dataSource.imageFileTmp % (scannr, scannr, ind))).T
+                img = np.array(Image.open(dataSource.imageFileTmp % 
+                                             (scannr, scannr, ind))).T
                 img = hotpixelkill(img)
     
                 # reduce data size
-                #print img
-                #print nav[0]
-                #print nav[1]
-                #print roi
                 img2 = xu.blockAverage2D(img, 
-                                         dataSource.getNumPixelsToAverage()[0], \
-                                         dataSource.getNumPixelsToAverage()[1], \
-                                         roi=roi)
-                #print "img2.shape: " +str(img2.shape)
+                                        dataSource.getNumPixelsToAverage()[0], \
+                                        dataSource.getNumPixelsToAverage()[1], \
+                                        roi=roi)
                 # initialize data array
                 if not arrayInitializedForScan:
                     if not intensity.shape[0]:
-                        intensity = numpy.zeros((numpy.count_nonzero(imageToBeUsed[scannr]),) + img2.shape)
+                        intensity = np.zeros((np.count_nonzero(imageToBeUsed[scannr]),) + img2.shape)
                         arrayInitializedForScan = True
                     else: 
                         offset = intensity.shape[0]
-                        intensity = numpy.concatenate(
+                        intensity = np.concatenate(
                             (intensity,
-                            (numpy.zeros((numpy.count_nonzero(imageToBeUsed[scannr]),) + img2.shape))),
+                            (np.zeros((np.count_nonzero(imageToBeUsed[scannr]),) + img2.shape))),
                             axis=0)
                         arrayInitializedForScan = True
                 # add data to intensity array
                 intensity[foundIndex+offset,:,:] = img2
                 #print sys.getsizeof(intensity)
-                tth2.append(tth1[ind])
-                th2.append(th1[ind])
-                phi2.append(phi1[ind])
-                chi2.append(chi1[ind])
+                for i in xrange(len(scan.geo_angle_names)):
+                    scanAngle2[i].append(scanAngle1[i][ind])
+#                tth2.append(tth1[ind])
+#                th2.append(th1[ind])
+#                phi2.append(phi1[ind])
+#                chi2.append(chi1[ind])
                 foundIndex += 1
-        if len(tth2) > 0:
-            tth = numpy.concatenate((tth, numpy.array(tth2)), axis = 0)
-            th  = numpy.concatenate((th, numpy.array(th2)), axis = 0)
-            phi = numpy.concatenate((phi, numpy.array(phi2)), axis = 0)
-            chi = numpy.concatenate((chi, numpy.array(chi2)), axis = 0)
+        if len(scanAngle2[0]) > 0:
+            for i in xrange(len(scan.geo_angle_names)):
+                scanAngle[i] = \
+                    np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
+                                      axis=0)
+#            tth = numpy.concatenate((tth, numpy.array(tth2)), axis = 0)
+#            th  = numpy.concatenate((th, numpy.array(th2)), axis = 0)
+#            phi = numpy.concatenate((phi, numpy.array(phi2)), axis = 0)
+#            chi = numpy.concatenate((chi, numpy.array(chi2)), axis = 0)
     # transform scan angles to reciprocal space coordinates for all detector pixels
-    
-    qx, qy, qz = hxrd.Ang2Q.area(th, chi, phi, tth,  roi=roi, 
+    angleList = []
+    for i in xrange(len(scan.geo_angle_names)):
+        angleList.append(scanAngle[i])
+    angleTuple = tuple(angleList)
+    print angleTuple
+    qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], angleTuple[1], angleTuple[2], angleTuple[3],  roi=roi, 
                                  Nav=dataSource.getNumPixelsToAverage())
 
     return qx, qy, qz, intensity
@@ -214,7 +212,10 @@ def gridmap(dataSource,nx,ny,nz,**kwargs):
     for scan in dataSource.getAvailableScans():
         if True in imageToBeUsed[scan]:
             qx, qy, qz, intensity = rawmap(dataSource,**kwargs1)
-    
+            print qx.shape
+            print qy.shape
+            print qz.shape
+            print intensity.shape
             # convert data to rectangular grid in reciprocal space
             gridder(qx,qy,qz,intensity)
 
@@ -274,7 +275,7 @@ def polemap(dataSource,nspx,nspy,nspq,**kwargs):
             qx, qy, qz, intensity = rawmap(dataSource, **kwargs1)
             
             # convert qx,qy,qz to stereographic projection
-            spq = numpy.sqrt(qx**2 + qy**2 + qz**2)
+            spq = np.sqrt(qx**2 + qy**2 + qz**2)
             spx = qx / (spq + qz)
             spy = qy / (spq + qz)
             

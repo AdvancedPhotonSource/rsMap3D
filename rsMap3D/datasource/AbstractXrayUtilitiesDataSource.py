@@ -30,6 +30,8 @@ class AbstractXrayutilitiesDataSource:
         self.detectorROI = None
         self.detectorAngles = None
         self.sampleAngles = None
+        self.detectorAngleNames = None
+        self.sampleAngleNames = None
         self.detectorPixelDirection1 = None
         self.detectorPixelDirection2 = None
         
@@ -101,12 +103,17 @@ class AbstractXrayutilitiesDataSource:
     def getDetectorAngles(self, index1=0, index2=0):
         """ """
         return None
-    
+
+    def getDetectorAngleNames(self):
+        return self.detectorAngleNames
     
     @abc.abstractmethod
     def getSampleAngles(self, index1=0, index2=0):
         """ """
         return None
+    
+    def getSampleAngleNames(self):
+        return self.detectorAngleNames
     
     @abc.abstractmethod
     def getImage(self, index1=0, index2=0):

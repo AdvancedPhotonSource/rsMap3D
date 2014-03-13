@@ -2,7 +2,8 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
-NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils}'
+NAMESPACE = \
+    '{https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils}'
 DETECTORS = NAMESPACE + "Detectors"
 DETECTOR = NAMESPACE + "Detector"
 DETECTOR_ID = NAMESPACE + "ID"
