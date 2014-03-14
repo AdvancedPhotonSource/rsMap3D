@@ -47,8 +47,6 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
     
     sd = spec.SpecDataFile(dataSource.specFile)
     intensity = np.array([])
-    tth = th = phi = chi = np.array([])
-
     
     # fourc goniometer in fourc coordinates
     # convention for coordinate system:
@@ -100,7 +98,6 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
             chpdeg2=dataSource.getDetectorChannelsPerDegree()[1], \
             Nav=dataSource.getNumPixelsToAverage(), roi=roi) 
         
-    print hxrd
     scanAngle = {}
     for i in xrange(len(sd[dataSource.getAvailableScans()[0]].geo_angle_names)):
         scanAngle[i] = np.array([])
@@ -114,7 +111,6 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
         angles = scan.get_geo_angles()
         scanAngle1 = {}
         scanAngle2 = {}
-        print angles
         for i in xrange(len(scan.geo_angle_names)):
             scanAngle1[i] = angles[:,i]
             scanAngle2[i] = []
@@ -162,7 +158,6 @@ def rawmap(dataSource,roi=default_roi,angdelta=[0,0,0,0,0],
     for i in xrange(len(scan.geo_angle_names)):
         angleList.append(scanAngle[i])
     angleTuple = tuple(angleList)
-    print angleTuple
     qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], angleTuple[1], angleTuple[2], angleTuple[3],  roi=roi, 
                                  Nav=dataSource.getNumPixelsToAverage())
 
@@ -193,10 +188,6 @@ def gridmap(dataSource,nx,ny,nz,**kwargs):
     for scan in dataSource.getAvailableScans():
         if True in imageToBeUsed[scan]:
             qx, qy, qz, intensity = rawmap(dataSource,**kwargs1)
-            print qx.shape
-            print qy.shape
-            print qz.shape
-            print intensity.shape
             # convert data to rectangular grid in reciprocal space
             gridder(qx,qy,qz,intensity)
 
