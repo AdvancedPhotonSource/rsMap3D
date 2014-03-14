@@ -145,7 +145,6 @@ class FileForm(QDialog):
                              "The project directory entered is invalid")
         
     def projectNameChanged(self):
-        print "2"
         self.checkOkToLoad()
         
     def instConfigChanged(self):
