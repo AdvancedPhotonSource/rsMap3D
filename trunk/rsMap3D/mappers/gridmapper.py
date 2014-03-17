@@ -1,7 +1,6 @@
 '''
-Created on Mar 14, 2014
-
-@author: hammonds
+ Copyright (c) 2012, UChicago Argonne, LLC
+ See LICENSE file.
 '''
 import numpy as np
 import time
@@ -17,21 +16,11 @@ class QGridMapper(AbstractGridMapper):
     '''
     '''
     
-#    def __init__(self, dataSource, nx=200, ny=201, nz=202):
-#        '''
-#        '''
-#        super(QGridMapper, self).__init__(self, \
-#                                          dataSource, \
-#                                          nx=nx, \
-#                                          ny=ny, \
-#                                          nz=nz)
 
     def doMap(self):
         '''
         Produce a q map of the data.
         '''
-        print "Doing Grid Map"
-        # number of points to be used during the gridding
         
         # read and grid data with helper function
         _start_time = time.time()
@@ -83,4 +72,3 @@ class QGridMapper(AbstractGridMapper):
                                            self.dataSource.availableScans[0]))
         writer.SetInput(image_data)
         writer.Write()
-        

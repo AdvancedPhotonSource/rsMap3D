@@ -12,18 +12,11 @@ import rsMap3D.xrayutilities_33bmc_functions as bm
 import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 
-
 class PoleFigureMapper(AbstractGridMapper):
     '''
     '''
     
-    def __init__(self, dataSource, nx=200, ny=201, nz=202):
-        super(PoleFigureMapper, self).__init__(self, 
-                                          dataSource, 
-                                          nx, 
-                                          ny, 
-                                          nz)
-        
+
     def doMap(self):
         '''
         Produce a pole map of the data.
@@ -75,7 +68,7 @@ class PoleFigureMapper(AbstractGridMapper):
         
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, 
+        writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
                                            self.dataSource.availableScans[0]))
         writer.SetInput(image_data)
         writer.Write()
