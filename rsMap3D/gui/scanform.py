@@ -145,8 +145,8 @@ class ScanForm(QDialog):
         images are used in analysis
         '''
         scanNo = self.getSelectedScan()
-        for i in xrange(len(self.imageToBeUsed[scanNo])):
-            self.imageToBeUsed[scanNo][i] = False
+        for i in xrange(len(self.dataSource.imageToBeUsed[scanNo])):
+            self.dataSource.imageToBeUsed[scanNo][i] = False
         self.showQs(scanNo)
 
     def loadScanFile(self, dataSource):
@@ -154,6 +154,7 @@ class ScanForm(QDialog):
         Load information from the selected dataSource into this form.
         '''
         self.dataSource = dataSource
+        self.scanList.clear()
         for curScan in self.dataSource.getAvailableScans():
             item = QListWidgetItem()
             item.setText(str(curScan))
@@ -243,8 +244,8 @@ class ScanForm(QDialog):
         Mark all images in the currently selected scan for use in analysis
         '''
         scanNo = self.getSelectedScan()
-        for i in xrange(len(self.imageToBeUsed[scanNo])):
-            self.imageToBeUsed[scanNo][i] = True
+        for i in xrange(len(self.dataSource.imageToBeUsed[scanNo])):
+            self.dataSource.imageToBeUsed[scanNo][i] = True
         self.showQs(scanNo)
                         
     def showAngles(self, angles):
