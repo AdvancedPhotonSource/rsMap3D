@@ -3,12 +3,7 @@
  See LICENSE file.
 '''
 import numpy as np
-import time
 
-from vtk.util import numpy_support
-import vtk
-
-import rsMap3D.xrayutilities_33bmc_functions as bm
 import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 
@@ -16,59 +11,59 @@ class PoleFigureMapper(AbstractGridMapper):
     '''
     '''
     
-
-    def doMap(self):
-        '''
-        Produce a pole map of the data.
-        '''
-        
-        # read and grid data with helper function
-        _start_time = time.time()
+    def processMap(self, **kwargs):
+        """
+        read ad frames and grid them in reciprocal space
+        angular coordinates are taken from the spec file
+    
+        **kwargs are passed to the rawmap function
+        """
+    
+        gridder = xu.Gridder3D(self.nx, self.ny ,self.nz)
+        gridder.KeepData(True)
         rangeBounds = self.dataSource.getRangeBounds()
-        qx, qy, qz, gint, gridder = \
-            bm.polemap(self.dataSource, \
-                       self.nx, self.ny, self.nz, \
-                       xmin=rangeBounds[0], xmax=rangeBounds[1], \
-                       ymin=rangeBounds[2], ymax=rangeBounds[3], \
-                       zmin=rangeBounds[4], zmax=rangeBounds[5])
-        print 'Elapsed time for gridding: %.3f seconds' % \
-               (time.time() - _start_time)
+        qxmin = rangeBounds[0]
+        qxmax = rangeBounds[1]
+        qymin = rangeBounds[2]
+        qymax = rangeBounds[3]
+        qzmin = rangeBounds[4]
+        qzmax = rangeBounds[5]
         
-        # print some information
-        print 'qx: ', qx.min(), ' .... ', qx.max()
-        print 'qy: ', qy.min(), ' .... ', qy.max()
-        print 'qz: ', qz.min(), ' .... ', qz.max()
+        maxqxsq = max(qxmin**2, qxmax**2)
+        minqxsq = min(qxmin**2, qxmax**2)
+        maxqysq = max(qymin**2, qymax**2)
+        minqysq = min(qymin**2, qymax**2)
+        maxqzsq = max(qzmin**2, qzmax**2)
+        minqzsq = min(qzmin**2, qzmax**2)
         
-        # prepare data for export to VTK image file
-        INT = xu.maplog(gint, 5.0, 0)
+        minspq = 4
+        maxspq = 6
+        minspx = -1.0
+        maxspx = 1.0
+        minspy = -1.0
+        maxspy = 1.0
+    
+        print "qx range: " + str(qxmin) + ", " + str(qxmax)
+        print "qy range: " + str(qymin) + ", " + str(qymax)
+        print "qz range: " + str(qzmin) + ", " + str(qzmax)
+        print "spx range: " + str(minspx) + ", " + str(maxspx)
+        print "spy range: " + str(minspy) + ", " + str(maxspy)
+        print "spq range: " + str(minspq) + ", " + str(maxspq)
+        gridder.dataRange((minspx, maxspx), (minspy, maxspy), (minspq, maxspq), True)
         
-        qx0 = qx.min()
-        dqx  = (qx.max()-qx.min())/self.nx
-        
-        qy0 = qy.min()
-        dqy  = (qy.max()-qy.min())/self.ny
-        
-        qz0 = qz.min()
-        dqz = (qz.max()-qz.min())/self.nz
-        
-        INT = np.transpose(INT).reshape((INT.size))
-        data_array = numpy_support.numpy_to_vtk(INT)
-        
-        image_data = vtk.vtkImageData()
-        image_data.SetNumberOfScalarComponents(1)
-        image_data.SetOrigin(qx0,qy0,qz0)
-        image_data.SetSpacing(dqx,dqy,dqz)
-        image_data.SetExtent(0, self.nx-1,0, self.ny-1,0, self.nz-1)
-        image_data.SetScalarTypeToDouble()
-        
-        pd = image_data.GetPointData()
-        
-        pd.SetScalars(data_array)
-        #pd.GetScalars().SetName("scattering data")
-        
-        # export data to file
-        writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
-                                           self.dataSource.availableScans[0]))
-        writer.SetInput(image_data)
-        writer.Write()
+        imageToBeUsed = self.dataSource.getImageToBeUsed()
+        for scan in self.dataSource.getAvailableScans():
+            #print '---' + str(scan) + str(imageToBeUsed[scan])
+            if True in imageToBeUsed[scan]:
+                qx, qy, qz, intensity = self.rawmap((scan, ), **kwargs)
+                
+                # convert qx,qy,qz to stereographic projection
+                spq = np.sqrt(qx**2 + qy**2 + qz**2)
+                spx = qx / (spq + qz)
+                spy = qy / (spq + qz)
+                
+            
+                # convert data to rectangular grid in reciprocal space
+                gridder(spx,spy,spq,intensity)
+    
+        return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.gdata,gridder
