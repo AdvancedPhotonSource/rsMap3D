@@ -155,7 +155,8 @@ class FileForm(QDialog):
         return self.projNameTxt.text()
     
     def projectDirChanged(self):
-        if os.path.isdir(self.projDirTxt.text()):
+        if os.path.isdir(self.projDirTxt.text()) or \
+            self.projDirTxt.text() == "":
             self.checkOkToLoad()
         else:
             message = QMessageBox()
@@ -167,7 +168,8 @@ class FileForm(QDialog):
         self.checkOkToLoad()
         
     def instConfigChanged(self):
-        if os.path.isfile(self.instConfigTxt.text()):
+        if os.path.isfile(self.instConfigTxt.text()) or \
+           self.instConfigTxt.text() == "":
             self.checkOkToLoad()
         else:
             message = QMessageBox()
@@ -177,7 +179,8 @@ class FileForm(QDialog):
                              "configuration is invalid")
         
     def detConfigChanged(self):
-        if os.path.isfile(self.detConfigTxt.text()):
+        if os.path.isfile(self.detConfigTxt.text()) or \
+           self.detConfigTxt.text() == "":
             self.checkOkToLoad()
         else:
             message = QMessageBox()
