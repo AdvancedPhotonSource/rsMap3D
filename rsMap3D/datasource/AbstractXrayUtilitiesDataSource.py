@@ -11,7 +11,7 @@ class AbstractXrayutilitiesDataSource:
     classdocs
     '''
 
-    def __init__(self, transform=None):
+    def __init__(self, transform=None, scanList=None):
         '''
         Constructor
         '''

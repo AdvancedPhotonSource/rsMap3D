@@ -26,17 +26,18 @@ class DetectorGeometryForXrayutilitiesReader(object):
         '''
         Constructor
         '''
-        tree = ET.parse(filename)
+        try:
+            tree = ET.parse(filename)
+        except IOError as ex:
+            raise (IOError("Bad Detector Configuration File") + str(ex))
         self.root = tree.getroot()
         
         
     def getDetectors(self):
-        print self.root
         return self.root.find(DETECTORS)
     
     def getDetectorById(self, id):
         dets = self.getDetectors().findall(DETECTOR)
-        print 'dets' +str(dets)
         for detector in dets:
             detId = detector.find(DETECTOR_ID)
             print detId.text

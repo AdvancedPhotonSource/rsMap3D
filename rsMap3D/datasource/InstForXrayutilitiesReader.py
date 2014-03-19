@@ -25,17 +25,26 @@ class InstForXrayutilitiesReader():
         '''
         '''
         self.root = None
-        tree = ET.parse(filename)
+        try:
+            tree = ET.parse(filename)
+        except IOError as ex:
+            raise (IOError("Bad Instrument Configuration File") + str(ex))
         self.root = tree.getroot()
         
     def getSampleCircles(self):
         '''
         '''
-        return self.root.find(SAMPLE_CIRCLES).getchildren()
+        circles = self.root.find(SAMPLE_CIRCLES)
+        if circles == None:
+            raise IOError("Instrument configuration has no Sample Circles")
+        return circles.getchildren()
 
     def getDetectorCircles(self):
         '''
         '''
+        circles = self.root.find(DETECTOR_CIRCLES)
+        if circles == None:
+            raise IOError("Instrument configuration has no Detector Circles")
         return self.root.find(DETECTOR_CIRCLES).getchildren()
         
     def getSampleCircleDirections(self):
