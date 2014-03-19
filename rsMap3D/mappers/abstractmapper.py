@@ -11,6 +11,7 @@ import Image
 from pyspec import spec
 import vtk
 from vtk.util import numpy_support
+from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 
 # region of interest on the detector
 default_roi = [0,487,0,195] 
@@ -22,7 +23,7 @@ class AbstractGridMapper(object):
     '''
 
 
-    def __init__(self, dataSource, nx=200, ny=201, nz=202):
+    def __init__(self, dataSource, nx=200, ny=201, nz=202, transform = None):
         '''
         Constructor
         '''
@@ -30,7 +31,10 @@ class AbstractGridMapper(object):
         self.nx = nx
         self.ny = ny
         self.nz = nz
-
+        if transform == None:
+            self.transform = UnityTransform3D()
+        else:
+            self.transform = transform
 
     def doMap(self):
         '''
@@ -224,10 +228,20 @@ class AbstractGridMapper(object):
         for i in xrange(len(scan.geo_angle_names)):
             angleList.append(scanAngle[i])
         angleTuple = tuple(angleList)
-        qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], angleTuple[1], angleTuple[2], angleTuple[3],  roi=roi, 
+        qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], \
+                                     angleTuple[1], \
+                                     angleTuple[2], \
+                                     angleTuple[3],  \
+                                     roi=roi, 
                                      Nav=self.dataSource.getNumPixelsToAverage())
+
+        # apply selected transform
+        qxTrans, qyTrans, qzTrans = \
+            self.transform.do3DTransform(qx, qy, qz)
+
     
-        return qx, qy, qz, intensity
+        return qxTrans, qyTrans, qzTrans, intensity
 
-
+    def setTransform(self, transform):
+        self.transform = transform
         

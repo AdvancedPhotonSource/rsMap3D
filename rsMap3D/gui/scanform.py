@@ -134,9 +134,9 @@ class ScanForm(QDialog):
         scanNo = self.getSelectedScan()
         row = item.row()
         if item.checkState() == Qt.Checked:
-            self.imageToBeUsed[scanNo][row] = True
+            self.dataSource.imageToBeUsed[scanNo][row] = True
         else:
-            self.imageToBeUsed[scanNo][row] = False
+            self.dataSource.imageToBeUsed[scanNo][row] = False
         self.showQs(scanNo)
 
     def deselectAllAction(self):

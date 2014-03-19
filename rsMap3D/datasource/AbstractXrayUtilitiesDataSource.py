@@ -3,6 +3,7 @@
  See LICENSE file.
 '''
 import abc
+from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 
 class AbstractXrayutilitiesDataSource:
     __metaclass__ = abc.ABCMeta
@@ -10,7 +11,7 @@ class AbstractXrayutilitiesDataSource:
     classdocs
     '''
 
-    def __init__(self, params):
+    def __init__(self, transform=None):
         '''
         Constructor
         '''
@@ -34,6 +35,11 @@ class AbstractXrayutilitiesDataSource:
         self.sampleAngleNames = None
         self.detectorPixelDirection1 = None
         self.detectorPixelDirection2 = None
+        print transform
+        if transform == None:
+            self.transform = UnityTransform3D()
+        else:
+            self.transform = transform
         
     def getSampleCircleDirections(self):
         """ """
@@ -119,4 +125,7 @@ class AbstractXrayutilitiesDataSource:
     def getImage(self, index1=0, index2=0):
         """ """
         return None
+    
+    def setTransform(self, transform):
+        self.transform = transform
         
