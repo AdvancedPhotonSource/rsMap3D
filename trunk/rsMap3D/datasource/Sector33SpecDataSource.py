@@ -87,7 +87,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                     self.availableScans.append(scan)
                     angles = curScan.get_geo_angles()
                     ub = curScan.UB
-                    print float(curScan.energy)
                     self.incidentEnergy[scan] = \
                         curScan.energy
                     self.imageBounds[scan] = \
@@ -263,10 +262,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         self.rangeBounds = rangeBounds;
         self.processImageToBeUsed()
-        #=======================================================================
-        # if len(self.scanList.selectedItems()) > 0:
-        #    print "do something"
-        #=======================================================================
             
 if __name__ == '__main__':
     source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', \
