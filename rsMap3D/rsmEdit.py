@@ -10,6 +10,9 @@ from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.fileform import FileForm
 from rsMap3D.gui.datarange import DataRange
 from rsMap3D.gui.processscans import ProcessScans
+from rsMap3D.transforms.unitytransform3d import UnityTransform3D
+from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
+
 import sys
 
 class MainDialog(QWidget):
@@ -55,11 +58,20 @@ class MainDialog(QWidget):
         self.tabs.setTabEnabled(self.dataTabIndex, False)
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
+        if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
+            self.transform = UnityTransform3D()
+        elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
+            self.transform = PoleMapTransform3D()
+        else:
+            self.transform = None
+            
+             
         self.dataSource = \
             Sector33SpecDataSource(self.fileForm.getProjectDir(), \
                                    self.fileForm.getProjectName(), \
                                    self.fileForm.getInstConfigName(), \
-                                   self.fileForm.getDetConfigName())
+                                   self.fileForm.getDetConfigName(), \
+                                   transform = self.transform)
         
         self.scanForm.loadScanFile(self.dataSource)        
 
@@ -93,7 +105,7 @@ class MainDialog(QWidget):
             self.scanForm.renderOverallQs()
                                         
     def runMapper(self):
-        self.processScans.runMapper(self.dataSource)
+        self.processScans.runMapper(self.dataSource, self.transform)
         
 app = QApplication(sys.argv)
 mainForm = MainDialog()
