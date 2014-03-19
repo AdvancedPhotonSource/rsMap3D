@@ -70,7 +70,7 @@ class ProcessScans(QDialog):
         '''
         self.emit(SIGNAL("process"))
         
-    def runMapper(self, dataSource):
+    def runMapper(self, dataSource, transform):
         '''
         Run the selected mapper
         '''
@@ -80,10 +80,13 @@ class ProcessScans(QDialog):
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
         if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
-            gridMapper = QGridMapper(dataSource, nx=nx, ny=ny, nz=nz)
+            gridMapper = QGridMapper(dataSource, \
+                                     nx=nx, ny=ny, nz=nz,
+                                     transform = transform)
             gridMapper.doMap()
         else:
-            poleMapper = PoleFigureMapper(dataSource, nx=nx, ny=ny, nz=nz)
+            poleMapper = PoleFigureMapper(dataSource, nx=nx, ny=ny, nz=nz, \
+                                          transform = transform)
             poleMapper.doMap()
             
         

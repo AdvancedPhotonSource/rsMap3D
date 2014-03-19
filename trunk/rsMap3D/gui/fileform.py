@@ -11,11 +11,14 @@ from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QComboBox
 
 class FileForm(QDialog):
     '''
     This class presents information for selecting input files
     '''
+    POLE_MAP_STR = "Streographic Projection"
+    SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
     def __init__(self,parent=None):
         '''
         Constructor - Layout Widgets on the page and link actions
@@ -48,10 +51,22 @@ class FileForm(QDialog):
         layout.addWidget(self.detConfigTxt, 3, 1)
         layout.addWidget(self.detConfigFileButton, 3, 2)
         
+        label = QLabel("Scan Numbers")
+        layout.addWidget(label, 4, 0)
+        self.scanNumsTxt = QLineEdit()
+        layout.addWidget(self.scanNumsTxt, 4, 1)
+
+        label = QLabel("Output Type")
+        layout.addWidget(label, 5, 0)
+        self.outTypeChooser = QComboBox()
+        self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
+        self.outTypeChooser.addItem(self.POLE_MAP_STR)
+        layout.addWidget(self.outTypeChooser, 5, 1)
+
         
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton,4 , 1)
+        layout.addWidget(self.loadButton,6 , 1)
         
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
         self.connect(self.projectDirButton, SIGNAL("clicked()"), 
@@ -175,3 +190,6 @@ class FileForm(QDialog):
             self.loadButton.setEnabled(True)
         else:
             self.loadButton.setDisabled(True)
+            
+    def getOutputType(self):
+        return self.outTypeChooser.currentText()

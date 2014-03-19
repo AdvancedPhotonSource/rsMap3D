@@ -27,8 +27,9 @@ class QGridMapper(AbstractGridMapper):
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         for scan in self.dataSource.getAvailableScans():
             if True in imageToBeUsed[scan]:
-                qx, qy, qz, intensity = self.rawmap((scan,), **kwargs)
+                qx, qy, qz, intensity = self.rawmap((scan,),**kwargs)
+
                 # convert data to rectangular grid in reciprocal space
-                gridder(qx,qy,qz,intensity)
+                gridder(qx, qy, qz, intensity)
     
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.gdata,gridder

@@ -18,11 +18,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
 
 
-    def __init__(self, projectDir, projectName, instConfigFile, detConfigFile):
+    def __init__(self, projectDir, projectName, instConfigFile, detConfigFile, **kwargs):
         '''
         Constructor
         '''
-        super(Sector33SpecDataSource, self).__init__(self)
+        print kwargs
+        super(Sector33SpecDataSource, self).__init__(**kwargs)
 
         instConfig = InstReader.InstForXrayutilitiesReader(instConfigFile)
         self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
@@ -123,13 +124,15 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                      angles[:,3], \
                                      roi=roi, \
                                      Nav=nav)
-        idx = range(len(qx))
-        xmin = [np.min(qx[i]) for i in idx] 
-        xmax = [np.max(qx[i]) for i in idx] 
-        ymin = [np.min(qy[i]) for i in idx] 
-        ymax = [np.max(qy[i]) for i in idx] 
-        zmin = [np.min(qz[i]) for i in idx] 
-        zmax = [np.max(qz[i]) for i in idx] 
+        qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
+        
+        idx = range(len(qxTrans))
+        xmin = [np.min(qxTrans[i]) for i in idx] 
+        xmax = [np.max(qxTrans[i]) for i in idx] 
+        ymin = [np.min(qyTrans[i]) for i in idx] 
+        ymax = [np.max(qyTrans[i]) for i in idx] 
+        zmin = [np.min(qzTrans[i]) for i in idx] 
+        zmax = [np.max(qzTrans[i]) for i in idx] 
         
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
