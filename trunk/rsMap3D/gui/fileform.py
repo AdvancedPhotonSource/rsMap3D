@@ -12,6 +12,8 @@ from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QComboBox
+from PyQt4.QtGui import QRegExpValidator
+from rsMap3D.utils.srange import srange
 
 class FileForm(QDialog):
     '''
@@ -54,6 +56,8 @@ class FileForm(QDialog):
         label = QLabel("Scan Numbers")
         layout.addWidget(label, 4, 0)
         self.scanNumsTxt = QLineEdit()
+        rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
+        self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
         layout.addWidget(self.scanNumsTxt, 4, 1)
 
         label = QLabel("Output Type")
@@ -193,3 +197,10 @@ class FileForm(QDialog):
             
     def getOutputType(self):
         return self.outTypeChooser.currentText()
+    
+    def getScanList(self):
+        if str(self.scanNumsTxt.text()) == "":
+            return None
+        else:
+            scans = srange(str(self.scanNumsTxt.text()))
+            return scans.list() 

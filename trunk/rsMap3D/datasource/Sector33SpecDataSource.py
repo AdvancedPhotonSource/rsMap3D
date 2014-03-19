@@ -18,11 +18,15 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
 
 
-    def __init__(self, projectDir, projectName, instConfigFile, detConfigFile, **kwargs):
+    def __init__(self, 
+                 projectDir, 
+                 projectName, 
+                 instConfigFile, 
+                 detConfigFile, 
+                 **kwargs):
         '''
         Constructor
         '''
-        print kwargs
         super(Sector33SpecDataSource, self).__init__(**kwargs)
 
         instConfig = InstReader.InstForXrayutilitiesReader(instConfigFile)
@@ -65,9 +69,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             maxScan = max(self.sd.findex.keys())
-            
-            scans = range(1, maxScan+1)
-            print scans
+            if kwargs['scanList']  == None:
+                scans = range(1, maxScan+1)
+            else:
+                scans = kwargs['scanList']
             imagePath = os.path.join(str(projectDir), 
                             "images/%s" % str(projectName))
             
@@ -88,7 +93,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                     self.imageBounds[scan] = \
                         self.findImageQs(angles, ub, self.incidentEnergy[scan])
         except IOError:
-            print "Cannot open file " + str(self.specFile)
+            raise IOError( "Cannot open file " + str(self.specFile))
         
     def findImageQs(self, angles, ub, en):
         '''
