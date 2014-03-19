@@ -4,7 +4,12 @@
 '''
 
 from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QTabWidget
+from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QApplication
+ 
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.fileform import FileForm

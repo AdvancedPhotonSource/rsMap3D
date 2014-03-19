@@ -8,7 +8,6 @@ import numpy as np
 import xrayutilities as xu
 import Image
 
-from pyspec import spec
 import vtk
 from vtk.util import numpy_support
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
@@ -79,8 +78,7 @@ class AbstractGridMapper(object):
         pd = image_data.GetPointData()
         
         pd.SetScalars(data_array)
-        #pd.GetScalars().SetName("scattering data")
-        print "Starting to write the file"
+
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
         writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
@@ -214,7 +212,6 @@ class AbstractGridMapper(object):
                             arrayInitializedForScan = True
                     # add data to intensity array
                     intensity[foundIndex+offset,:,:] = img2
-                    #print sys.getsizeof(intensity)
                     for i in xrange(len(scan.geo_angle_names)):
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
@@ -243,5 +240,6 @@ class AbstractGridMapper(object):
         return qxTrans, qyTrans, qzTrans, intensity
 
     def setTransform(self, transform):
+        ''' '''
         self.transform = transform
         

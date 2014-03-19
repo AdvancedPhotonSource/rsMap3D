@@ -252,8 +252,6 @@ class ScanForm(QDialog):
         '''
         Display the angles associated with images in the scan in the table.
         '''
-        numAngles = len(self.dataSource.getSampleAngleNames() + \
-                        self.dataSource.getDetectorAngleNames())
         self.detail.setRowCount(angles.size)
         blackBrush = QBrush()
         blackBrush.setColor(QColor('black'))
