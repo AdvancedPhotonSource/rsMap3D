@@ -11,7 +11,10 @@ class AbstractXrayutilitiesDataSource:
     classdocs
     '''
 
-    def __init__(self, transform=None, scanList=None):
+    def __init__(self, transform=None, 
+                 scanList=None, 
+                 roi=None, 
+                 pixelsToAverage=None):
         '''
         Constructor
         '''
@@ -27,8 +30,8 @@ class AbstractXrayutilitiesDataSource:
         self.distanceToDetector = float('nan')
         self.detectorPixelWidth = None
         self.detectorChannelPerDegree = None
-        self.numPixelsToAverage = None
-        self.detectorROI = None
+        self.numPixelsToAverage = pixelsToAverage
+        self.detectorROI = roi
         self.detectorAngles = None
         self.sampleAngles = None
         self.detectorAngleNames = None
@@ -128,4 +131,7 @@ class AbstractXrayutilitiesDataSource:
     
     def setTransform(self, transform):
         self.transform = transform
+        
+    def setDetectorROIs(self, roi):
+        self.detectorROI = roi
         

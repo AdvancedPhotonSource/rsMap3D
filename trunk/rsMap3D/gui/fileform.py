@@ -14,6 +14,8 @@ from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QRegExpValidator
 from rsMap3D.utils.srange import srange
+from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
+     import DetectorGeometryForXrayutilitiesReader
 
 class FileForm(QDialog):
     '''
@@ -26,6 +28,11 @@ class FileForm(QDialog):
         Constructor - Layout Widgets on the page and link actions
         '''
         super(FileForm, self).__init__(parent)
+        self.roixmin = 1
+        self.roixmax = 680
+        self.roiymin = 1
+        self.roiymax = 480
+        
         layout = QGridLayout()
 
         label = QLabel("Project Directory:");
@@ -46,6 +53,7 @@ class FileForm(QDialog):
         layout.addWidget(label, 2, 0)
         layout.addWidget(self.instConfigTxt, 2, 1)
         layout.addWidget(self.instConfigFileButton, 2, 2)
+
         label = QLabel("Detector Config File:");
         self.detConfigTxt = QLineEdit()
         self.detConfigFileButton = QPushButton("Browse")
@@ -53,24 +61,39 @@ class FileForm(QDialog):
         layout.addWidget(self.detConfigTxt, 3, 1)
         layout.addWidget(self.detConfigFileButton, 3, 2)
         
-        label = QLabel("Scan Numbers")
+        label = QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = QLineEdit("1,1")
+        rxAvg = QRegExp('(\d)+,(\d)+')
+        self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
         layout.addWidget(label, 4, 0)
+        layout.addWidget(self.pixAvgTxt, 4, 1)
+
+        label = QLabel("Detector ROI:");
+        self.detROITxt = QLineEdit()
+        self.updateROITxt()
+        rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
+        self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
+        layout.addWidget(label, 5, 0)
+        layout.addWidget(self.detROITxt, 5, 1)
+        
+        label = QLabel("Scan Numbers")
         self.scanNumsTxt = QLineEdit()
         rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
         self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
-        layout.addWidget(self.scanNumsTxt, 4, 1)
+        layout.addWidget(label, 6, 0)
+        layout.addWidget(self.scanNumsTxt, 6, 1)
 
         label = QLabel("Output Type")
-        layout.addWidget(label, 5, 0)
         self.outTypeChooser = QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
-        layout.addWidget(self.outTypeChooser, 5, 1)
+        layout.addWidget(label, 7, 0)
+        layout.addWidget(self.outTypeChooser, 7, 1)
 
         
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton,6 , 1)
+        layout.addWidget(self.loadButton,8 , 1)
         
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
         self.connect(self.projectDirButton, SIGNAL("clicked()"), 
@@ -182,6 +205,7 @@ class FileForm(QDialog):
         if os.path.isfile(self.detConfigTxt.text()) or \
            self.detConfigTxt.text() == "":
             self.checkOkToLoad()
+            self.updateROIandNumAvg()
         else:
             message = QMessageBox()
             message.warning(self, \
@@ -207,3 +231,45 @@ class FileForm(QDialog):
         else:
             scans = srange(str(self.scanNumsTxt.text()))
             return scans.list() 
+        
+    def getDetectorROI(self):
+        roiStrings = str(self.detROITxt.text()).split(',')
+        roi = []
+        print("getting ROIs") + str(roiStrings)
+        for value in roiStrings:
+            roi.append(int(value))
+        print("Done getting ROIs")
+        return roi
+    
+    def getPixelsToAverage(self):
+        pixelStrings = str(self.pixAvgTxt.text()).split(',')
+        pixels = []
+        print "getting number of pixels to average" + str(pixelStrings)
+        for value in pixelStrings:
+            pixels.append(int(value))
+        return pixels
+    
+    def updateROIandNumAvg(self):
+        detConfig = \
+            DetectorGeometryForXrayutilitiesReader(self.detConfigTxt.text())
+        detector = detConfig.getDetectorById("Pilatus")
+        detSize = detConfig.getNpixels(detector)
+        print(detSize)
+        xmax = detSize[0]
+        ymax = detSize[1]
+        if xmax < self.roixmax:
+            self.roixmax = xmax
+        if ymax < self.roiymax:
+            self.roiymax = ymax
+        self.updateROITxt()
+        
+    def updateROITxt(self):
+        roiStr = str(self.roixmin) +\
+                "," +\
+                str(self.roixmax) +\
+                "," +\
+                str(self.roiymin) +\
+                "," +\
+                str(self.roiymax)
+        self.detROITxt.setText(roiStr)
+        
