@@ -11,7 +11,7 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
     as DetectorReader
 import numpy as np
 import xrayutilities as xu
-
+import time
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
     classdocs
@@ -21,6 +21,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     def __init__(self, 
                  projectDir, 
                  projectName, 
+                 projectExtension,
                  instConfigFile, 
                  detConfigFile, 
                  **kwargs):
@@ -50,8 +51,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.detectorPixelWidth = [detectorSize[0]/self.detectorDimensions[0],
                                    detectorSize[1]/self.detectorDimensions[1]]
         self.distanceToDetector = detConfig.getDistance(detector) 
-        self.numPixelsToAverage = [1,1]
-        self.detectorROI = [0, 487, 0, 195]
+        if self.numPixelsToAverage == None:
+            self.numPixelsToAverage = [1,1]
+        if self.detectorROI == None:
+            self.detectorROI = [0, self.detectorDimensions[0],  
+                                0, self.detectorDimensions[1]]
         self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
         self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
         
@@ -60,7 +64,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         print self.angleNames
         self.projectDir = str(projectDir)
         self.projectName = str(projectName)
-        self.specFile = os.path.join(self.projectDir, self.projectName + ".spc")
+        self.projectExt = str(projectExtension)
+        self.specFile = os.path.join(self.projectDir, self.projectName + \
+                                     self.projectExt)
         imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
         self.imageFileTmp = os.path.join(imageDir, \
                                 "S%%03d/%s_S%%03d_%%05d.tif" % 
@@ -89,8 +95,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                     ub = curScan.UB
                     self.incidentEnergy[scan] = \
                         curScan.energy
+                    _start_time = time.time()
                     self.imageBounds[scan] = \
                         self.findImageQs(angles, ub, self.incidentEnergy[scan])
+                    print 'Elapsed time for Finding qs for scan %d: %.3f seconds' % \
+                        (scan, (time.time() - _start_time))        
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         
@@ -106,7 +115,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                        qconv=qconv)
 
         cch = self.getDetectorCenterChannel() 
-        chpdeg = self.getDetectorChannelsPerDegree()
+#        chpdeg = self.getDetectorChannelsPerDegree()
         nav = self.getNumPixelsToAverage()
         roi = self.getDetectorROI()
         detDims = self.getDetectorDimensions()
@@ -137,7 +146,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         ymax = [np.max(qyTrans[i]) for i in idx] 
         zmin = [np.min(qzTrans[i]) for i in idx] 
         zmax = [np.max(qzTrans[i]) for i in idx] 
-        
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
