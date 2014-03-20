@@ -69,6 +69,7 @@ class MainDialog(QWidget):
             self.dataSource = \
                 Sector33SpecDataSource(self.fileForm.getProjectDir(), \
                                        self.fileForm.getProjectName(), \
+                                       self.fileForm.getProjectExtension(), \
                                        self.fileForm.getInstConfigName(), \
                                        self.fileForm.getDetConfigName(), \
                                        transform = self.transform, \

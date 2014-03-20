@@ -35,17 +35,17 @@ class FileForm(QDialog):
         
         layout = QGridLayout()
 
-        label = QLabel("Project Directory:");
-        self.projDirTxt = QLineEdit()
+        label = QLabel("Project File:");
+        self.projNameTxt = QLineEdit()
         self.projectDirButton = QPushButton("Browse")
         layout.addWidget(label, 0, 0)
-        layout.addWidget(self.projDirTxt, 0, 1)
+        layout.addWidget(self.projNameTxt, 0, 1)
         layout.addWidget(self.projectDirButton, 0, 2)
 
-        label = QLabel("Project Name:");
-        self.projNameTxt = QLineEdit()
-        layout.addWidget(label, 1, 0)
-        layout.addWidget(self.projNameTxt, 1, 1)
+#        label = QLabel("Project Name:");
+#        self.projNameTxt = QLineEdit()
+#        layout.addWidget(label, 1, 0)
+#        layout.addWidget(self.projNameTxt, 1, 1)
 
         label = QLabel("Instrument Config File:");
         self.instConfigTxt = QLineEdit()
@@ -102,12 +102,12 @@ class FileForm(QDialog):
                      self.browseForInstFile)
         self.connect(self.detConfigFileButton, SIGNAL("clicked()"), 
                      self.browseForDetFile)
-        self.connect(self.projDirTxt, 
-                     SIGNAL("editingFinished()"), 
-                     self.projectDirChanged)
         self.connect(self.projNameTxt, 
                      SIGNAL("editingFinished()"), 
-                     self.projectNameChanged)
+                     self.projectDirChanged)
+#        self.connect(self.projNameTxt, 
+#                     SIGNAL("editingFinished()"), 
+#                     self.projectNameChanged)
         self.connect(self.instConfigTxt, 
                      SIGNAL("editingFinished()"), 
                      self.instConfigChanged)
@@ -127,30 +127,53 @@ class FileForm(QDialog):
         '''
         Launch file selection dialog for instrument file.
         '''
-        fileName = QFileDialog.getOpenFileName(None, 
+        if self.instConfigTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Instrument Config File", 
                                                filter="*.xml")
-        self.instConfigTxt.setText(fileName)
-        self.instConfigTxt.emit(SIGNAL("editingFinished()"))
+        else:
+            fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Instrument Config File", 
+                                               filter="*.xml", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.instConfigTxt.setText(fileName)
+            self.instConfigTxt.emit(SIGNAL("editingFinished()"))
 
     def browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
         '''
-        fileName = QFileDialog.getOpenFileName(None, 
-                                               "Select Detector Config File", 
+        if self.detConfigTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, \
+                                               "Select Detector Config File", \
                                                filter="*.xml")
-        self.detConfigTxt.setText(fileName)
-        self.detConfigTxt.emit(SIGNAL("editingFinished()"))
+        else:
+            fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, \
+                                               "Select Detector Config File", \
+                                               filter="*.xml", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.detConfigTxt.setText(fileName)
+            self.detConfigTxt.emit(SIGNAL("editingFinished()"))
 
     def browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
         '''
-        dirName = QFileDialog.getExistingDirectory(None,
-                                                   QString())
-        self.projDirTxt.setText(dirName)
-        self.projDirTxt.emit(SIGNAL("editingFinished()"))
+        if self.projNameTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, \
+                                                   "Select Spec file")
+        else:
+            fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None,\
+                                                   "Select Spec file", \
+                                                   directory = fileDirectory)
+            
+        self.projNameTxt.setText(fileName)
+        self.projNameTxt.emit(SIGNAL("editingFinished()"))
 
 
     def getDetConfigName(self):
@@ -169,17 +192,24 @@ class FileForm(QDialog):
         '''
         Return the project directory
         '''
-        return self.projDirTxt.text()
+        return os.path.dirname(str(self.projNameTxt.text()))
         
     def getProjectName(self):
         '''
         Return the project name
         '''
-        return self.projNameTxt.text()
+        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
+    def getProjectExtension(self):
+        '''
+        Return the project name
+        '''
+        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[1]
+
+            
     def projectDirChanged(self):
-        if os.path.isdir(self.projDirTxt.text()) or \
-            self.projDirTxt.text() == "":
+        if os.path.isfile(self.projNameTxt.text()) or \
+            self.projNameTxt.text() == "":
             self.checkOkToLoad()
         else:
             message = QMessageBox()
@@ -214,10 +244,9 @@ class FileForm(QDialog):
                              "configuration is invalid")
         
     def checkOkToLoad(self):
-        if os.path.isdir(self.projDirTxt.text()) and \
+        if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
-            os.path.isfile(self.detConfigTxt.text()) and \
-            self.projNameTxt.text() != "":
+            os.path.isfile(self.detConfigTxt.text()):
             self.loadButton.setEnabled(True)
         else:
             self.loadButton.setDisabled(True)
