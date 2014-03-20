@@ -40,7 +40,6 @@ class DetectorGeometryForXrayutilitiesReader(object):
         dets = self.getDetectors().findall(DETECTOR)
         for detector in dets:
             detId = detector.find(DETECTOR_ID)
-            print detId.text
             if detId.text == id:
                 return detector
         return None

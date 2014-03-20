@@ -71,8 +71,12 @@ class MainDialog(QWidget):
                                        self.fileForm.getProjectName(), \
                                        self.fileForm.getInstConfigName(), \
                                        self.fileForm.getDetConfigName(), \
-                                       transform = self.transform, 
-                                       scanList = self.fileForm.getScanList())
+                                       transform = self.transform, \
+                                       scanList = self.fileForm.getScanList(), \
+                                       roi = self.fileForm.getDetectorROI(), \
+                                       pixelsToAverage = \
+                                          self.fileForm.getPixelsToAverage()
+                                       )
         except Exception as e:
             message = QMessageBox()
             message.warning(self, \

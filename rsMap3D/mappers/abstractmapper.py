@@ -12,9 +12,6 @@ import vtk
 from vtk.util import numpy_support
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 
-# region of interest on the detector
-default_roi = [0,487,0,195] 
-
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
     '''
@@ -105,7 +102,7 @@ class AbstractGridMapper(object):
     def processMap(self,**kwargs):
         print("Running abstract Method")
         
-    def rawmap(self,scans, roi=default_roi,angdelta=[0,0,0,0,0],
+    def rawmap(self,scans, angdelta=[0,0,0,0,0],
             adframes=None):
         """
         read ad frames and and convert them in reciprocal space
@@ -154,7 +151,8 @@ class AbstractGridMapper(object):
                 pwidth1=self.dataSource.getDetectorPixelWidth()[0], \
                 pwidth2=self.dataSource.getDetectorPixelWidth()[1], \
                 distance=self.dataSource.getDistanceToDetector(), \
-                Nav=self.dataSource.getNumPixelsToAverage(), roi=roi) 
+                Nav=self.dataSource.getNumPixelsToAverage(), \
+                roi=self.dataSource.getDetectorROI()) 
         else:
             hxrd.Ang2Q.init_area(self.dataSource.getDetectorPixelDirection1(), \
                 self.dataSource.getDetectorPixelDirection2(), \
@@ -164,7 +162,8 @@ class AbstractGridMapper(object):
                 Nch2=self.dataSource.getDetectorDimensions()[0], \
                 chpdeg1=self.dataSource.getDetectorChannelsPerDegree()[0], \
                 chpdeg2=self.dataSource.getDetectorChannelsPerDegree()[1], \
-                Nav=self.dataSource.getNumPixelsToAverage(), roi=roi) 
+                Nav=self.dataSource.getNumPixelsToAverage(), 
+                roi=self.dataSource.getDetectorROI()) 
             
         scanAngle = {}
         for i in xrange(len(self.dataSource.sd[self.dataSource.getAvailableScans()[0]].geo_angle_names)):
@@ -197,7 +196,7 @@ class AbstractGridMapper(object):
                     img2 = xu.blockAverage2D(img, 
                                             self.dataSource.getNumPixelsToAverage()[0], \
                                             self.dataSource.getNumPixelsToAverage()[1], \
-                                            roi=roi)
+                                            roi=self.dataSource.getDetectorROI())
                     # initialize data array
                     if not arrayInitializedForScan:
                         if not intensity.shape[0]:
@@ -229,7 +228,7 @@ class AbstractGridMapper(object):
                                      angleTuple[1], \
                                      angleTuple[2], \
                                      angleTuple[3],  \
-                                     roi=roi, 
+                                     roi=self.dataSource.getDetectorROI(), 
                                      Nav=self.dataSource.getNumPixelsToAverage())
 
         # apply selected transform
