@@ -19,6 +19,7 @@ from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 
 import sys
+import traceback
 
 class MainDialog(QWidget):
     '''
@@ -81,8 +82,9 @@ class MainDialog(QWidget):
         except Exception as e:
             message = QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            "Load Scanfile Warning", \
                              str(e))
+            print traceback.format_exc()
             return
         
         self.scanForm.loadScanFile(self.dataSource)        

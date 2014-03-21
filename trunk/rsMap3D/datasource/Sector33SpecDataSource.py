@@ -89,9 +89,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             for scan in scans:
                 if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
                     curScan = self.sd[scan]
-                    curScan.geo_angle_names=self.angleNames
                     self.availableScans.append(scan)
-                    angles = curScan.get_geo_angles()
+                    angles = self.getGeoAngles(curScan, self.angleNames)
                     ub = curScan.UB
                     self.incidentEnergy[scan] = \
                         curScan.energy
@@ -159,11 +158,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         scanZmax = np.max(  zmax)
         return scanXmin, scanXmax, scanYmin, scanYmax, scanZmin, scanZmax
 
-    def getAngles(self, scanNo):
+    def getAngles(self):
         '''
         '''
-        scan = self.sd[scanNo]
-        return scan.get_geo_angles()
+        return self.getSampleAngleNames() + self.getDetectorAngleNames()
     
     def getAvailableScans(self):
         '''
@@ -270,8 +268,27 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         self.rangeBounds = rangeBounds;
         self.processImageToBeUsed()
+        
+    def getGeoAngles(self, scan, angleNames):
+        """
+        This function returns all of the geometry angles for the
+        for the scan as a N-by-num_geo array, where N is the number of scan
+        points and num_geo is the number of geometry motors.
+        """
+#        scan = self.sd[scanNo]
+        geo_angles = np.zeros((scan.data.shape[0], len(angleNames)))
+        for i, name in enumerate(angleNames):
+            v = scan.scandata.get(name)
+            if v.size == 1:
+                v = np.ones(scan.data.shape[0]) * v
+            geo_angles[:,i] = v
+        
+        return geo_angles
+
+
+
             
 if __name__ == '__main__':
-    source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', \
+    source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', ".spc"\
                                 '/local/RSM/33BM-instForXrayutilities.xml', \
                                 '/local/RSM/33bmDetectorGeometry.xml')

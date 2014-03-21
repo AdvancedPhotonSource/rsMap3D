@@ -165,20 +165,19 @@ class AbstractGridMapper(object):
                 Nav=self.dataSource.getNumPixelsToAverage(), 
                 roi=self.dataSource.getDetectorROI()) 
             
+        angleNames = self.dataSource.getAngles()
         scanAngle = {}
-        for i in xrange(len(self.dataSource.sd[self.dataSource.getAvailableScans()[0]].geo_angle_names)):
+        for i in xrange(len(angleNames)):
             scanAngle[i] = np.array([])
     
         offset = 0
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         for scannr in scans:
             scan = self.dataSource.sd[scannr]
-            scan.geo_angle_names = self.dataSource.getSampleAngleNames() + \
-                                   self.dataSource.getDetectorAngleNames()
-            angles = scan.get_geo_angles()
+            angles = self.dataSource.getGeoAngles(scan, angleNames)
             scanAngle1 = {}
             scanAngle2 = {}
-            for i in xrange(len(scan.geo_angle_names)):
+            for i in xrange(len(angleNames)):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
             # read in the image data
@@ -211,17 +210,17 @@ class AbstractGridMapper(object):
                             arrayInitializedForScan = True
                     # add data to intensity array
                     intensity[foundIndex+offset,:,:] = img2
-                    for i in xrange(len(scan.geo_angle_names)):
+                    for i in xrange(len(angleNames)):
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
             if len(scanAngle2[0]) > 0:
-                for i in xrange(len(scan.geo_angle_names)):
+                for i in xrange(len(angleNames)):
                     scanAngle[i] = \
                         np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
                                           axis=0)
         # transform scan angles to reciprocal space coordinates for all detector pixels
         angleList = []
-        for i in xrange(len(scan.geo_angle_names)):
+        for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
         angleTuple = tuple(angleList)
         qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], \
