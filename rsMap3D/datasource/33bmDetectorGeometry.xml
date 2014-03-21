@@ -7,10 +7,10 @@
 	   <Detector>
             <pixelDirection1>x-</pixelDirection1>
             <pixelDirection2>z+</pixelDirection2>
-            <centerChannelPixel>206 85</centerChannelPixel>
+            <centerChannelPixel>210 85</centerChannelPixel>
             <Npixels>487 195</Npixels>
             <size unit="mm">83.764 33.54</size>
-            <distance unit="mm">1000</distance>
+            <distance unit="mm">1061</distance>
             <ID>Pilatus</ID>
             <note></note>
         </Detector>
