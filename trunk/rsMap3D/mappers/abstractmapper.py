@@ -19,11 +19,14 @@ class AbstractGridMapper(object):
     '''
 
 
-    def __init__(self, dataSource, nx=200, ny=201, nz=202, transform = None):
+    def __init__(self, dataSource, \
+                 outputFileName, \
+                 nx=200, ny=201, nz=202, transform = None):
         '''
         Constructor
         '''
         self.dataSource = dataSource
+        self.outputFileName = outputFileName
         self.nx = nx
         self.ny = ny
         self.nz = nz
@@ -78,8 +81,12 @@ class AbstractGridMapper(object):
 
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
-        writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
-                                           self.dataSource.availableScans[0]))
+        if self.outputFileName == "":
+            writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
+                                        self.dataSource.availableScans[0]))
+        else:
+            writer.SetFileName(self.outputFileName)
+            
         writer.SetInput(image_data)
         writer.Write()
 

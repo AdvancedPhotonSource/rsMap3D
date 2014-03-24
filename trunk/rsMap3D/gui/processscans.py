@@ -2,6 +2,7 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import os
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import QDialog
@@ -10,6 +11,8 @@ from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QLineEdit
+from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QMessageBox
 
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.polemapper import PoleFigureMapper
@@ -56,11 +59,22 @@ class ProcessScans(QDialog):
         self.zDimTxt.setText("200")
         layout.addWidget(self.zDimTxt, 3,1)
         
+        label = QLabel("Output File")
+        layout.addWidget(label, 4,0)
+        self.outFileTxt = QLineEdit()
+        layout.addWidget(self.outFileTxt, 4,1)
+        self.outputFileButton = QPushButton("Browse")
+        layout.addWidget(self.outputFileButton, 4, 2)
+        
         
         runButton = QPushButton("Run")
         layout.addWidget(runButton, 5, 3)
         self.setLayout(layout)                    
         self.connect(runButton, SIGNAL("clicked()"), self.process)
+        self.connect(self.outputFileButton, SIGNAL("clicked()"), 
+                     self.browseForOutputFile)
+        self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
+                     self.editFinishedOutputFile)
         
         
         
@@ -79,14 +93,53 @@ class ProcessScans(QDialog):
         nx = int(self.xDimTxt.text())
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
+        outputFileName = str(self.outFileTxt.text())
         if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
             gridMapper = QGridMapper(dataSource, \
+                                     outputFileName, \
                                      nx=nx, ny=ny, nz=nz,
                                      transform = transform)
             gridMapper.doMap()
         else:
-            poleMapper = PoleFigureMapper(dataSource, nx=nx, ny=ny, nz=nz, \
+            poleMapper = PoleFigureMapper(dataSource, \
+                                          outputFileName, \
+                                          nx=nx, ny=ny, nz=nz, \
                                           transform = transform)
             poleMapper.doMap()
             
+    
+    def browseForOutputFile(self):
+        if self.outFileTxt.text() == "":
+            fileName = QFileDialog.getSaveFileName(None, \
+                                               "Save File", \
+                                               filter="*.vti")
+        else:
+            fileDirectory = os.path.dirname(str(self.OutputFileTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Save File", 
+                                               filter="*.vti", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            if os.path.exists(os.path.dirname(str(fileName))):
+                self.outFileTxt.setText(fileName)
+                self.outFileTxt.emit(SIGNAL("editingFinished()"))
+            else:
+                message = QMessageBox()
+                message.warning(self, \
+                             "Warning"\
+                             "The specified directory does not exist")
+                self.outFileTxt.setText(fileName)
+                self.outFileTxt.emit(SIGNAL("editingFinished()"))
+                
+    def editFinishedOutputFile(self):
+        fileName = str(self.outFileTxt.text())
+        if fileName != "":
+            if os.path.exists(os.path.dirname(fileName)):
+                self.outFileTxt.setText(fileName)
+                self.outFileTxt.emit(SIGNAL("editingFinished()"))
+            else:
+                message = QMessageBox()
+                message.warning(self, \
+                             "Warning"\
+                             "The specified directory does not exist")
         
