@@ -32,4 +32,4 @@ class QGridMapper(AbstractGridMapper):
                 # convert data to rectangular grid in reciprocal space
                 gridder(qx, qy, qz, intensity)
     
-        return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.gdata,gridder
+        return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
