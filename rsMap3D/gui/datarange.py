@@ -10,6 +10,7 @@ from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QPushButton
+from PyQt4.QtGui import QDoubleValidator
 
 class DataRange(QDialog):
     '''
@@ -26,18 +27,30 @@ class DataRange(QDialog):
         xLabel = QLabel("X")
         xminLabel = QLabel("min")
         self.xminText = QLineEdit()
+        self.xminValidator = QDoubleValidator()
+        self.xminText.setValidator(self.xminValidator)
         xmaxLabel = QLabel("max")
         self.xmaxText = QLineEdit()
+        self.xmaxValidator = QDoubleValidator()
+        self.xmaxText.setValidator(self.xmaxValidator)
         yLabel = QLabel("Y")
         yminLabel = QLabel("min")
         self.yminText = QLineEdit()
+        self.yminValidator = QDoubleValidator()
+        self.yminText.setValidator(self.yminValidator)
         ymaxLabel = QLabel("max")
         self.ymaxText = QLineEdit()
+        self.ymaxValidator = QDoubleValidator()
+        self.ymaxText.setValidator(self.ymaxValidator)
         zLabel = QLabel("Z")
         zminLabel = QLabel("min")
         self.zminText = QLineEdit()
+        self.zminValidator = QDoubleValidator()
+        self.zminText.setValidator(self.zminValidator)
         zmaxLabel = QLabel("max")
         self.zmaxText = QLineEdit()
+        self.zmaxValidator = QDoubleValidator()
+        self.zmaxText.setValidator(self.zmaxValidator)
         buttonLayout = QHBoxLayout()
         resetButton = QPushButton("Reset")
         applyButton = QPushButton("Apply")
