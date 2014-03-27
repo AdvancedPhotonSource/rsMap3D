@@ -42,11 +42,6 @@ class FileForm(QDialog):
         layout.addWidget(self.projNameTxt, 0, 1)
         layout.addWidget(self.projectDirButton, 0, 2)
 
-#        label = QLabel("Project Name:");
-#        self.projNameTxt = QLineEdit()
-#        layout.addWidget(label, 1, 0)
-#        layout.addWidget(self.projNameTxt, 1, 1)
-
         label = QLabel("Instrument Config File:");
         self.instConfigTxt = QLineEdit()
         self.instConfigFileButton = QPushButton("Browse")
@@ -109,9 +104,6 @@ class FileForm(QDialog):
         self.connect(self.projNameTxt, 
                      SIGNAL("editingFinished()"), 
                      self.projectDirChanged)
-#        self.connect(self.projNameTxt, 
-#                     SIGNAL("editingFinished()"), 
-#                     self.projectNameChanged)
         self.connect(self.instConfigTxt, 
                      SIGNAL("editingFinished()"), 
                      self.instConfigChanged)

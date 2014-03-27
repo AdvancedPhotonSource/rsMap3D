@@ -57,9 +57,7 @@ class MainDialog(QWidget):
         self.connect(self, SIGNAL("fileError"), self.showFileError)
         
     def cancelLoadThread(self):
-        #if self.loadThread.isAlive():
-        print "Cancel Thread"
-        self.dataSource.cancelLoadSource()
+        self.dataSource.signalCancelLoadSource()
         
         
     def loadScanFile(self):
