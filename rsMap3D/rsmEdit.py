@@ -11,6 +11,7 @@ from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QApplication
  
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
+from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.fileform import FileForm
 from rsMap3D.gui.datarange import DataRange
@@ -46,11 +47,20 @@ class MainDialog(QWidget):
         layout.addWidget(self.tabs)
         self.setLayout(layout)
 
-        self.connect(self.fileForm, SIGNAL("loadFile"), self.loadScanFile)
+        self.connect(self.fileForm, SIGNAL("loadFile"), self.spawnLoadThread)
+        self.connect(self.fileForm, SIGNAL("cancelLoadFile"), 
+                     self.cancelLoadThread)
         self.connect(self.scanForm, SIGNAL("doneLoading"), self.setupRanges)
         self.connect(self.dataRange, SIGNAL("rangeChanged"), self.setScanRanges)
         self.connect(self.tabs, SIGNAL("currentChanged(int)"), self.tabChanged)
         self.connect(self.processScans, SIGNAL("process"), self.runMapper)
+        self.connect(self, SIGNAL("fileError"), self.showFileError)
+        
+    def cancelLoadThread(self):
+        #if self.loadThread.isAlive():
+        print "Cancel Thread"
+        self.dataSource.cancelLoadSource()
+        
         
     def loadScanFile(self):
         '''
@@ -68,27 +78,38 @@ class MainDialog(QWidget):
              
         try:
             self.dataSource = \
-                Sector33SpecDataSource(self.fileForm.getProjectDir(), \
-                                       self.fileForm.getProjectName(), \
-                                       self.fileForm.getProjectExtension(), \
-                                       self.fileForm.getInstConfigName(), \
-                                       self.fileForm.getDetConfigName(), \
+                Sector33SpecDataSource(str(self.fileForm.getProjectDir()), \
+                                       str(self.fileForm.getProjectName()), \
+                                       str(self.fileForm.getProjectExtension()), \
+                                       str(self.fileForm.getInstConfigName()), \
+                                       str(self.fileForm.getDetConfigName()), \
                                        transform = self.transform, \
                                        scanList = self.fileForm.getScanList(), \
                                        roi = self.fileForm.getDetectorROI(), \
                                        pixelsToAverage = \
                                           self.fileForm.getPixelsToAverage()
-                                       )
+                                          )
+            self.dataSource.loadSource()
+        except LoadCanceledException as e:
+            print "LoadCanceled"
+            self.tabs.setTabEnabled(self.dataTabIndex, False)
+            self.tabs.setTabEnabled(self.scanTabIndex, False)
+            self.tabs.setTabEnabled(self.processTabIndex, False)
+            self.fileForm.setLoadOK()
+            return
         except Exception as e:
-            message = QMessageBox()
-            message.warning(self, \
-                            "Load Scanfile Warning", \
-                             str(e))
+            self.emit(SIGNAL("fileError"), str(e))
             print traceback.format_exc()
             return
         
         self.scanForm.loadScanFile(self.dataSource)        
-
+        self.fileForm.setLoadOK()
+        
+    def spawnLoadThread(self):
+        self.fileForm.setCancelOK()
+        self.loadThread = LoadScanThread(self, parent=None)
+        self.loadThread.start()
+        
     def setupRanges(self):
         '''
         '''
@@ -111,7 +132,13 @@ class MainDialog(QWidget):
         ranges = self.dataRange.getRanges()
         self.dataSource.setRangeBounds(ranges)
         self.scanForm.renderOverallQs()
-        
+
+    def showFileError(self, error):
+        message = QMessageBox()
+        message.warning(self, \
+                            "Load Scanfile Warning", \
+                             str(error))
+              
     def tabChanged(self, index):
         '''
         '''
@@ -121,7 +148,17 @@ class MainDialog(QWidget):
     def runMapper(self):
         self.processScans.runMapper(self.dataSource, self.transform)
         
+class LoadScanThread(QThread):
+    def __init__(self, controller, **kwargs):
+        super(LoadScanThread, self).__init__( **kwargs)
+        self.controller = controller
+        
+    def run(self):
+        self.controller.loadScanFile()
+        
+        
 app = QApplication(sys.argv)
 mainForm = MainDialog()
 mainForm.show()
 app.exec_()
+
