@@ -31,14 +31,26 @@ class InstForXrayutilitiesReader():
             raise (IOError("Bad Instrument Configuration File") + str(ex))
         self.root = tree.getroot()
         
-    def getSampleCircles(self):
+    def getCircleAxisNumber(self, circle):
         '''
         '''
-        circles = self.root.find(SAMPLE_CIRCLES)
-        if circles == None:
-            raise IOError("Instrument configuration has no Sample Circles")
-        return circles.getchildren()
-
+        return int(circle.attrib[AXIS_NUMBER])
+        
+    def getCircleDirection(self, circle):
+        '''
+        '''
+        return circle.text
+    
+    def getDetectorCircleDirections(self):
+        '''
+        '''
+        return self.makeCircleDirections(self.getDetectorCircles())
+        
+    def getCircleSpecMotorName(self, circle):
+        '''
+        '''
+        return circle.attrib[SPEC_MOTOR_NAME]
+    
     def getDetectorCircles(self):
         '''
         '''
@@ -47,11 +59,59 @@ class InstForXrayutilitiesReader():
             raise IOError("Instrument configuration has no Detector Circles")
         return self.root.find(DETECTOR_CIRCLES).getchildren()
         
+    def getDetectorCircleNames(self):
+        '''
+        '''
+        return self.makeCircleNames(self.getDetectorCircles())
+        
+    def getInplaneReferenceDirection(self):
+        '''
+        '''
+        direction = \
+            self.root.find(INPLANE_REFERENCE_DIRECTION)
+        return self.makeReferenceDirection(direction )
+        
+    def getNumDetectorCircles(self):
+        '''
+        '''
+        return int(self.root.find(DETECTOR_CIRCLES).attrib[NUM_CIRCLES])
+    
+    def getNumSampleCircles(self):
+        '''
+        '''
+        return int(self.root.find(SAMPLE_CIRCLES).attrib[NUM_CIRCLES])
+    
+    def getPrimaryBeamDirection(self):
+        '''
+        '''
+        direction = \
+            self.root.find(PRIMARY_BEAM_DIRECTION)
+        return self.makeReferenceDirection(direction )
+        
     def getSampleCircleDirections(self):
+        '''
+        '''
         return self.makeCircleDirections(self.getSampleCircles())
         
-    def getDetectorCircleDirections(self):
-        return self.makeCircleDirections(self.getDetectorCircles())
+    def getSampleCircles(self):
+        '''
+        '''
+        circles = self.root.find(SAMPLE_CIRCLES)
+        if circles == None:
+            raise IOError("Instrument configuration has no Sample Circles")
+        return circles.getchildren()
+
+    def getSampleCircleNames(self):
+        '''
+        '''
+        return self.makeCircleNames(self.getSampleCircles())
+        
+    def getSampleSurfaceNormalDirection(self):
+        '''
+        '''
+        direction = \
+            self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)
+        return self.makeReferenceDirection(direction )
         
     def makeCircleDirections(self, circles):
         data = []
@@ -65,13 +125,9 @@ class InstForXrayutilitiesReader():
             directions.append(dataum[2])
         return directions
     
-    def getSampleCircleNames(self):
-        return self.makeCircleNames(self.getSampleCircles())
-        
-    def getDetectorCircleNames(self):
-        return self.makeCircleNames(self.getDetectorCircles())
-        
     def makeCircleNames(self, circles):
+        '''
+        '''
         data = []
         for circle in circles:
             data.append((int(circle.attrib[AXIS_NUMBER]), \
@@ -83,43 +139,9 @@ class InstForXrayutilitiesReader():
             names.append(dataum[1])
         return names
     
-    def getNumSampleCircles(self):
-        return int(self.root.find(SAMPLE_CIRCLES).attrib[NUM_CIRCLES])
-    
-    def getNumDetectorCircles(self):
-        return int(self.root.find(DETECTOR_CIRCLES).attrib[NUM_CIRCLES])
-    
-    def getCircleAxisNumber(self, circle):
-        return int(circle.attrib[AXIS_NUMBER])
-        
-    def getCircleSpecMotorName(self, circle):
-        return circle.attrib[SPEC_MOTOR_NAME]
-    
-    def getCircleDirection(self, circle):
-        return circle.text
-    
-    def getPrimaryBeamDirection(self):
-        '''
-        '''
-        direction = \
-            self.root.find(PRIMARY_BEAM_DIRECTION)
-        return self.makeReferenceDirection(direction )
-        
-    def getInplaneReferenceDirection(self):
-        '''
-        '''
-        direction = \
-            self.root.find(INPLANE_REFERENCE_DIRECTION)
-        return self.makeReferenceDirection(direction )
-        
-    def getSampleSurfaceNormalDirection(self):
-        '''
-        '''
-        direction = \
-            self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)
-        return self.makeReferenceDirection(direction )
-        
     def makeReferenceDirection(self, direction):
+        '''
+        '''
         axes = direction.findall(REFERENCE_AXIS)
         refAxis = {}
         for axis in axes:
