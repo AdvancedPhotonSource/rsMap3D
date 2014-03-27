@@ -94,8 +94,12 @@ class FileForm(QDialog):
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
         layout.addWidget(self.loadButton,8 , 1)
+        self.cancelButton = QPushButton("Cancel")        
+#        self.cancelButton.setDisabled(True)
+        layout.addWidget(self.cancelButton,8 , 2)
         
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
+        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
         self.connect(self.projectDirButton, SIGNAL("clicked()"), 
                      self.browseForProjectDir)
         self.connect(self.instConfigFileButton, SIGNAL("clicked()"), 
@@ -176,6 +180,10 @@ class FileForm(QDialog):
         self.projNameTxt.emit(SIGNAL("editingFinished()"))
 
 
+    def cancelLoadFile(self):
+        ''' Send signal to cancel a file load'''
+        self.emit(SIGNAL("cancelLoadFile"))
+        
     def getDetConfigName(self):
         '''
         Return the selected Detector Configuration file
@@ -301,4 +309,12 @@ class FileForm(QDialog):
                 "," +\
                 str(self.roiymax)
         self.detROITxt.setText(roiStr)
+        
+    def setLoadOK(self):
+        self.loadButton.setDisabled(False)
+        self.cancelButton.setDisabled(True)
+
+    def setCancelOK(self):
+        self.loadButton.setDisabled(True)
+        self.cancelButton.setDisabled(False)
         

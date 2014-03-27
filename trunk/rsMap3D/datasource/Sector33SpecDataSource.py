@@ -12,6 +12,7 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
 import numpy as np
 import xrayutilities as xu
 import time
+
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
     classdocs
@@ -29,8 +30,19 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         Constructor
         '''
         super(Sector33SpecDataSource, self).__init__(**kwargs)
-
-        instConfig = InstReader.InstForXrayutilitiesReader(instConfigFile)
+        self.projectDir = str(projectDir)
+        self.projectName = str(projectName)
+        self.projectExt = str(projectExtension)
+        self.instConfigFile = str(instConfigFile)
+        self.detConfigFile = str(detConfigFile)
+        if kwargs['scanList']  == None:
+            self.scans = None
+        else:
+            self.scans = kwargs['scanList']
+        self.cancelLoad = False
+        
+    def loadSource(self):
+        instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
         self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
         self.detectorCircleDirections = instConfig.getDetectorCircleDirections()
         self.primaryBeamDirection = instConfig.getPrimaryBeamDirection()
@@ -43,7 +55,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         
         detConfig = \
-            DetectorReader.DetectorGeometryForXrayutilitiesReader(detConfigFile)
+            DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
         detector = detConfig.getDetectorById("Pilatus")
         self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
         self.detectorDimensions = detConfig.getNpixels(detector)
@@ -61,10 +73,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         self.angleNames = instConfig.getSampleCircleNames() + \
             instConfig.getDetectorCircleNames()
-        print self.angleNames
-        self.projectDir = str(projectDir)
-        self.projectName = str(projectName)
-        self.projectExt = str(projectExtension)
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
         imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
@@ -75,32 +83,38 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             maxScan = max(self.sd.findex.keys())
-            if kwargs['scanList']  == None:
-                scans = range(1, maxScan+1)
-            else:
-                scans = kwargs['scanList']
-            imagePath = os.path.join(str(projectDir), 
-                            "images/%s" % str(projectName))
+            print maxScan
+            if self.scans  == None:
+                self.scans = range(1, maxScan+1)
+            imagePath = os.path.join(self.projectDir, 
+                            "images/%s" % self.projectName)
             
             self.imageBounds = {}
             self.imageToBeUsed = {}
             self.availableScans = []
             self.incidentEnergy = {}
-            for scan in scans:
-                if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
-                    curScan = self.sd[scan]
-                    self.availableScans.append(scan)
-                    angles = self.getGeoAngles(curScan, self.angleNames)
-                    ub = curScan.UB
-                    self.incidentEnergy[scan] = \
-                        curScan.energy
-                    _start_time = time.time()
-                    self.imageBounds[scan] = \
-                        self.findImageQs(angles, ub, self.incidentEnergy[scan])
-                    print 'Elapsed time for Finding qs for scan %d: %.3f seconds' % \
-                        (scan, (time.time() - _start_time))        
+            for scan in self.scans:
+                if (self.cancelLoad):
+                    raise LoadCanceledException()
+                else:
+                    if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
+                        curScan = self.sd[scan]
+                        self.availableScans.append(scan)
+                        angles = self.getGeoAngles(curScan, self.angleNames)
+                        ub = curScan.UB
+                        self.incidentEnergy[scan] = \
+                            curScan.energy
+                        _start_time = time.time()
+                        self.imageBounds[scan] = \
+                            self.findImageQs(angles, ub, self.incidentEnergy[scan])
+                        print 'Elapsed time for Finding qs for scan %d: %.3f seconds' % \
+                            (scan, (time.time() - _start_time))        
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
+        
+        
+    def cancelLoadSource(self):
+        self.cancelLoad = True
         
     def findImageQs(self, angles, ub, en):
         '''
@@ -285,7 +299,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         return geo_angles
 
-
+class LoadCanceledException(Exception):
+    def __init__(self):
+        super(LoadCanceledException, self).__init__()
 
             
 if __name__ == '__main__':
