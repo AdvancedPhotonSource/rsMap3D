@@ -3,7 +3,6 @@
  See LICENSE file.
 '''
 import xml.etree.ElementTree as ET
-import os
 
 NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/instForXrayutils}'
 SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
@@ -54,6 +53,8 @@ class InstForXrayutilitiesReader():
     
     def getDetectorCircles(self):
         '''
+        Return the detectpr childer as and element list.  If detector circles 
+        is not included in the file raise an IOError
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
         if circles == None:
@@ -74,8 +75,14 @@ class InstForXrayutilitiesReader():
         
     def getMonitorName(self):
         '''
+        Return the monitorName if included in config file.  Returns None if it
+        is not present. 
         '''
-        return str(self.root.find(MONITOR_NAME).text)
+        name = self.root.find(MONITOR_NAME)
+        if name == None:
+            return None
+        else:
+            return str(name.text)
     
     def getNumDetectorCircles(self):
         '''
@@ -101,6 +108,8 @@ class InstForXrayutilitiesReader():
         
     def getSampleCircles(self):
         '''
+        Return the detectpr childer as and element list.  If detector circles 
+        is not included in the file raise an IOError
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
         if circles == None:
@@ -120,6 +129,8 @@ class InstForXrayutilitiesReader():
         return self.makeReferenceDirection(direction )
         
     def makeCircleDirections(self, circles):
+        '''
+        '''
         data = []
         for circle in circles:
             data.append((int(circle.attrib[AXIS_NUMBER]), \
