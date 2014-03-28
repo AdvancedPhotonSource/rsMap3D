@@ -11,6 +11,7 @@ DETECTOR_CIRCLES = NAMESPACE + 'detectorCircles'
 PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'   
 INPLANE_REFERENCE_DIRECTION = NAMESPACE + 'inplaneReferenceDirection'   
 SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
+MONITOR_NAME = NAMESPACE + 'monitorName'   
 NUM_CIRCLES = 'numCircles'
 SPEC_MOTOR_NAME = 'specMotorName'
 AXIS_NUMBER = 'number'
@@ -71,6 +72,11 @@ class InstForXrayutilitiesReader():
             self.root.find(INPLANE_REFERENCE_DIRECTION)
         return self.makeReferenceDirection(direction )
         
+    def getMonitorName(self):
+        '''
+        '''
+        return str(self.root.find(MONITOR_NAME).text)
+    
     def getNumDetectorCircles(self):
         '''
         '''
