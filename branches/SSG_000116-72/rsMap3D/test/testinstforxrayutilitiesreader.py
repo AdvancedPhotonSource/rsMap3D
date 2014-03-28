@@ -11,8 +11,8 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.config = InstForXrayutilitiesReader('../datasource/33BM-instForXrayutilities.xml')
-        self.config2 = 
+        self.config = InstForXrayutilitiesReader('../resources/33BM-instForXrayutilities.xml')
+        #self.config2 = 
 
     def tearDown(self):
         pass
