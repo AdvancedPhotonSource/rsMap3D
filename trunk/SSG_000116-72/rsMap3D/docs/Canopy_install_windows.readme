@@ -1,0 +1,145 @@
+Installation Notes
+~~~~~~~~~~~~~~~~~~
+The initial version of these notes were compiled by Christian Schleputz (Argonne
+National Laboratory) and Yongsoo Yang (University of Michigan).  Many thanks to 
+them for their efforts in capturing this information.  These notes were 
+originally written for the installation on Windows.  Most steps are generally
+applicable to Unix and Mac as well.  
+
+These notes mention installation of Enthought Canopy.  It should be noted that 
+Canopy is a commercial packaging of Python and many of the packages that are 
+commonly used with Python.  Canopy is not a neccessary part of this installation 
+but is a common tool at the Advanced Photon Source at this time.
+
+Installation of Canopy can be replaced by installation of Python and all of the 
+necessary packages.  Many of the Packages used by rsMap3D are common and included
+with many distributions of Python.  Two exceptions to this, xrayutilities and 
+pyspec, are discussed below.  Other required packages are:
+
+numpy
+vtk
+pyqt4
+
+
+
+Canopy Installation
+~~~~~~~~~~~~~~~~~~~
+
+Grab the latest version of Canopy from (subscription may be required):
+https://www.enthought.com/downloads/
+
+Then run the Canopy installer (should not require administrator priviledges).
+
+Canopy installation location (default when running the Canopy installer):
+C:\Users\epix33bm\AppData\Local\Enthought\Canopy    (epix33bm is the username)
+
+
+Canopy python executable for normal use:
+C:\Users\epix33bm\AppData\Local\Enthought\Canopy\User\python.exe
+
+NOTE: that on Windows and Mac some shortcuts have been added by Enthought to
+add python to the path.  On Mac, you can elect on installation to make Enthoght the
+default and this will add the correct path elements.  On Windows, there is a 'Canopy
+Command Prompt' installed in the Canopy folder in the start menu which starts a
+shell with the correct path defined.  On Unix, you can add the correct path to PATH.
+
+Make sure the following packages are installed through the Canopy package manager:
+* PyQT4 
+
+Local Python code:
+~~~~~~~~~~~~~~~~~~
+
+We've added the local python package library to the following location::
+
+  Y:\python
+
+This is simply the samba mount of our beamline file servers::
+
+  \\s33dserv\sector33_34\python
+
+Add the local Sector33 python library to the python path (this needs
+administrator priviledges):
+Go to "Computer > System Properties > Advanced system settings > Advanced >
+Environment Variables > System Variables". Then add a new variable by pushing
+"New..."::
+
+    Name: PYTHONPATH
+    Value: Y:\python
+    
+Alternatively, you can enter:
+SET PYTHONPATH=Y:\python
+
+Configure Canopy to use the right compiler:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(At this time this step only seems necessary on Windows)	
+To get the compilation process working on Windows, do the following:
+
+1.) Create this file if it does not yet exist::
+  
+  C:\Users\epix33bm\AppData\Local\Enthought\Canopy\App\appdata\canopy-1.3.0.1715.win-x86_64\Lib\distutils\distutils.cfg
+
+And make sure the following lines are included (or changed to the below)::
+
+  [build]
+  compiler=mingw64
+
+NOTE: Make sure that the file name extension is actually ".cfg" and not
+".cfg.txt", as Windows is hiding the file name extensions by default.
+
+Install the required external packages:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The source code for the external packages is copied or downloaded to the local
+python library directory (Y:\python).
+
+xrayutilities
+-------------
+
+http://sourceforge.net/projects/xrayutilities/
+
+Grab the current version from subversion or download the bundled file::
+
+  cd Y:\python
+  git clone git://git.code.sf.net/p/xrayutilities/code xrayutilities-code
+
+Go to the xrayutilities-code directory and issue the build command in a
+“Windows command line”. Be sure to use the Canopy version of python.exe::
+ 
+  cd Y:\python\xrayutilities-code
+  C:\Users\epix33bm\AppData\Local\Enthought\Canopy\User\python.exe setup.py --without-openmp install
+
+pyspec
+------
+
+https://github.com/stuwilkins/pyspec
+
+Grab the latest version::
+
+  cd Y:\python
+  git clone https://github.com/stuwilkins/pyspec.git
+  
+or ::
+
+  cd Y:\python
+  svn co https://github.com/stuwilkins/pyspec
+
+Go to the pyspec directory and issue the build command::
+
+  cd Y:\python\pyspec
+  C:\Users\epix33bm\AppData\Local\Enthought\Canopy\User\python.exe setup.py install
+  
+rsMap3D
+-------
+
+Download from svn::
+
+  cd Y:\python
+  svn co https://subversion.xor.aps.anl.gov/RSM/rsMap3D/trunk/rsMap3D
+  
+No installation is required for this package at the moment.
+
+To run rsMap3D enter:
+
+python -m rsMap3D.rsEdit.py
+
+on the command line.
