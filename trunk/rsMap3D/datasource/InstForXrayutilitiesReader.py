@@ -3,7 +3,6 @@
  See LICENSE file.
 '''
 import xml.etree.ElementTree as ET
-import os
 
 NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/instForXrayutils}'
 SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
@@ -11,11 +10,13 @@ DETECTOR_CIRCLES = NAMESPACE + 'detectorCircles'
 PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'   
 INPLANE_REFERENCE_DIRECTION = NAMESPACE + 'inplaneReferenceDirection'   
 SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
+MONITOR_NAME = NAMESPACE + 'monitorName'   
 NUM_CIRCLES = 'numCircles'
 SPEC_MOTOR_NAME = 'specMotorName'
 AXIS_NUMBER = 'number'
 REFERENCE_AXIS = NAMESPACE + 'axis'
 DIRECTION_AXIS = 'directionAxis'
+SCALE_FACTOR = 'scaleFactor'
 
 class InstForXrayutilitiesReader():
     '''
@@ -28,7 +29,7 @@ class InstForXrayutilitiesReader():
         try:
             tree = ET.parse(filename)
         except IOError as ex:
-            raise (IOError("Bad Instrument Configuration File") + str(ex))
+            raise (IOError("Bad Instrument Configuration File" + str(ex)))
         self.root = tree.getroot()
         
     def getCircleAxisNumber(self, circle):
@@ -53,6 +54,8 @@ class InstForXrayutilitiesReader():
     
     def getDetectorCircles(self):
         '''
+        Return the detectpr childer as and element list.  If detector circles 
+        is not included in the file raise an IOError
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
         if circles == None:
@@ -71,6 +74,31 @@ class InstForXrayutilitiesReader():
             self.root.find(INPLANE_REFERENCE_DIRECTION)
         return self.makeReferenceDirection(direction )
         
+    def getMonitorName(self):
+        '''
+        Return the monitorName if included in config file.  Returns None if it
+        is not present. 
+        '''
+        name = self.root.find(MONITOR_NAME)
+        if name == None:
+            return None
+        else:
+            return str(name.text)
+    
+    def getMonitorScaleFactor(self):
+        '''
+        Return the monitorName if included in config file.  Returns None if it
+        is not present. 
+        '''
+        name = self.root.find(MONITOR_NAME)
+        if name == None:
+            return 1
+        else:
+            if name.attrib[SCALE_FACTOR] != None:
+                return float(name.attrib[SCALE_FACTOR])
+            else:
+                return 1
+    
     def getNumDetectorCircles(self):
         '''
         '''
@@ -95,6 +123,8 @@ class InstForXrayutilitiesReader():
         
     def getSampleCircles(self):
         '''
+        Return the detectpr childer as and element list.  If detector circles 
+        is not included in the file raise an IOError
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
         if circles == None:
@@ -114,6 +144,8 @@ class InstForXrayutilitiesReader():
         return self.makeReferenceDirection(direction )
         
     def makeCircleDirections(self, circles):
+        '''
+        '''
         data = []
         for circle in circles:
             data.append((int(circle.attrib[AXIS_NUMBER]), \
