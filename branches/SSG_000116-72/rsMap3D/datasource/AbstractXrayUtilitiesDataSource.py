@@ -206,6 +206,7 @@ class AbstractXrayutilitiesDataSource:
 
     def getPrimaryBeamDirection(self):
         '''
+        Return the Primary beam Direction
         '''
         return self.primaryBeamDirection
     
@@ -223,6 +224,7 @@ class AbstractXrayutilitiesDataSource:
     
     def getSampleCircleDirections(self):
         '''
+        Get a list of sample circle directions.
         '''
         return self.sampleCirclesDirections
     
@@ -284,11 +286,13 @@ class AbstractXrayutilitiesDataSource:
         
     def setTransform(self, transform):
         '''
+        Set a transform to be used in calculating the data coordinates
         '''
         self.transform = transform
         
     def setDetectorROIs(self, roi):
         '''
+        Set the Region of interest used for the detector.
         '''
         self.detectorROI = roi
 
