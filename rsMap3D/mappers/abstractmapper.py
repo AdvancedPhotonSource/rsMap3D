@@ -188,6 +188,8 @@ class AbstractGridMapper(object):
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         monitorName = self.dataSource.getMonitorName()
         monitorScaleFactor = self.dataSource.getMonitorScaleFactor()
+        filterName = self.dataSource.getFilterName()
+        filterScaleFactor = self.dataSource.getFilterScaleFactor()
         for scannr in scans:
             scan = self.dataSource.sd[scannr]
             angles = self.dataSource.getGeoAngles(scan, angleNames)
@@ -198,7 +200,20 @@ class AbstractGridMapper(object):
                 scanAngle2[i] = []
             if monitorName != None:
                 monitor_data = scan.scandata.get(monitorName)
-                
+                if monitor_data == None:
+                    raise IOError("Did not find Monitor source '" + \
+                                  monitorName + \
+                                  "' in the Spec file.  Make sure " + \
+                                  "monitorName is correct in the " + \
+                                  "instrument Config file")
+            if filterName != None:
+                filter_data = scan.scandata.get(filterName)
+                if filter_data == None:
+                    raise IOError("Did not find filter source '" + \
+                                  filterName + \
+                                  "' in the Spec file.  Make sure " + \
+                                  "filterName is correct in the " + \
+                                  "instrument Config file")
             # read in the image data
             arrayInitializedForScan = False
             foundIndex = 0
@@ -219,6 +234,8 @@ class AbstractGridMapper(object):
                     # apply intensity corrections
                     if monitorName != None:
                         img2 = img2 / monitor_data[ind] * monitorScaleFactor
+                    if filterName != None:
+                        img2 = img2 / filter_data[ind] * filterScaleFactor
 
                     # initialize data array
                     if not arrayInitializedForScan:

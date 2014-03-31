@@ -46,6 +46,8 @@ class AbstractXrayutilitiesDataSource:
         self.cancelLoad = False
         self.monitorName = None
         self.monitorScaleFactor = 1.0
+        self.filterName = None
+        self.filterScaleFactor = 1.0
         print transform
         if transform == None:
             self.transform = UnityTransform3D()
@@ -130,6 +132,20 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.detectorROI
     
+    def getFilterName(self):
+        '''
+        return the name of monitor variable in spec file.  Returns none if this
+        was not defined.
+        '''
+        return self.filterName
+
+    def getFilterScaleFactor(self):
+        '''
+        return the scale factor associated with monitor corrections.  Returns 1
+        if not defined
+        '''
+        return self.filterScaleFactor
+
     @abc.abstractmethod
     def getImage(self, index1=0, index2=0):
         '''

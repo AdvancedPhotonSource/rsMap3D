@@ -29,7 +29,7 @@ class DetectorGeometryForXrayutilitiesReader(object):
         try:
             tree = ET.parse(filename)
         except IOError as ex:
-            raise (IOError("Bad Detector Configuration File") + str(ex))
+            raise IOError("Bad Detector Configuration File" + str(ex))
         self.root = tree.getroot()
         
         

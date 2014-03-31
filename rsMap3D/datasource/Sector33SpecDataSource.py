@@ -36,10 +36,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.projectExt = str(projectExtension)
         self.instConfigFile = str(instConfigFile)
         self.detConfigFile = str(detConfigFile)
-        if kwargs['scanList']  == None:
-            self.scans = None
-        else:
+        try:
             self.scans = kwargs['scanList']
+        except KeyError:
+            self.scans = None
         
     def findImageQs(self, angles, ub, en):
         '''
@@ -98,36 +98,44 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         split off from the constructor to allow this to be threaded and later 
         canceled.
         '''
-        instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-        self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
-        self.detectorCircleDirections = instConfig.getDetectorCircleDirections()
-        self.primaryBeamDirection = instConfig.getPrimaryBeamDirection()
-        self.sampleInplaneReferenceDirection = \
-            instConfig.getInplaneReferenceDirection()
-        self.sampleSurfaceNormalDirection = \
-            instConfig.getSampleSurfaceNormalDirection()
-        self.sampleAngleNames = instConfig.getSampleCircleNames()
-        self.detectorAngleNames = instConfig.getDetectorCircleNames()
-        self.monitorName = instConfig.getMonitorName()
-        self.monitorScaleFactor = instConfig.getMonitorScaleFactor()
-
-        detConfig = \
-            DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
-        detector = detConfig.getDetectorById("Pilatus")
-        self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
-        self.detectorDimensions = detConfig.getNpixels(detector)
-        detectorSize = detConfig.getSize(detector)
-        self.detectorPixelWidth = [detectorSize[0]/self.detectorDimensions[0],
-                                   detectorSize[1]/self.detectorDimensions[1]]
-        self.distanceToDetector = detConfig.getDistance(detector) 
-        if self.numPixelsToAverage == None:
-            self.numPixelsToAverage = [1,1]
-        if self.detectorROI == None:
-            self.detectorROI = [0, self.detectorDimensions[0],  
-                                0, self.detectorDimensions[1]]
-        self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
-        self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
-        
+        try:
+            instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
+            self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
+            self.detectorCircleDirections = instConfig.getDetectorCircleDirections()
+            self.primaryBeamDirection = instConfig.getPrimaryBeamDirection()
+            self.sampleInplaneReferenceDirection = \
+                instConfig.getInplaneReferenceDirection()
+            self.sampleSurfaceNormalDirection = \
+                instConfig.getSampleSurfaceNormalDirection()
+            self.sampleAngleNames = instConfig.getSampleCircleNames()
+            self.detectorAngleNames = instConfig.getDetectorCircleNames()
+            self.monitorName = instConfig.getMonitorName()
+            self.monitorScaleFactor = instConfig.getMonitorScaleFactor()
+            self.filterName = instConfig.getFilterName()
+            self.filterScaleFactor = instConfig.getFilterScaleFactor()
+        except Exception as ex:
+            print ("---Error Reading instconfig")
+            raise ex
+        try:
+            detConfig = \
+                DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
+            detector = detConfig.getDetectorById("Pilatus")
+            self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
+            self.detectorDimensions = detConfig.getNpixels(detector)
+            detectorSize = detConfig.getSize(detector)
+            self.detectorPixelWidth = [detectorSize[0]/self.detectorDimensions[0],
+                                       detectorSize[1]/self.detectorDimensions[1]]
+            self.distanceToDetector = detConfig.getDistance(detector) 
+            if self.numPixelsToAverage == None:
+                self.numPixelsToAverage = [1,1]
+            if self.detectorROI == None:
+                self.detectorROI = [0, self.detectorDimensions[0],  
+                                    0, self.detectorDimensions[1]]
+            self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
+            self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
+        except Exception as ex:
+            print ("---Error Reading detconfig")
+            raise ex
         self.angleNames = instConfig.getSampleCircleNames() + \
             instConfig.getDetectorCircleNames()
         self.specFile = os.path.join(self.projectDir, self.projectName + \
@@ -173,7 +181,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                (scan, (time.time() - _start_time)))        
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
-        
         
     def getGeoAngles(self, scan, angleNames):
         """
