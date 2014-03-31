@@ -44,6 +44,8 @@ class AbstractXrayutilitiesDataSource:
         self.availableScans = []
         self.rangeBounds = None
         self.cancelLoad = False
+        self.monitorName = None
+        self.monitorScaleFactor = 1.0
         print transform
         if transform == None:
             self.transform = UnityTransform3D()
@@ -161,6 +163,20 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.sampleInplaneReferenceDirection
     
+    def getMonitorName(self):
+        '''
+        return the name of monitor variable in spec file.  Returns none if this
+        was not defined.
+        '''
+        return self.monitorName
+
+    def getMonitorScaleFactor(self):
+        '''
+        return the scale factor associated with monitor corrections.  Returns 1
+        if not defined
+        '''
+        return self.monitorScaleFactor
+
     def getNumPixelsToAverage(self):
         '''
         '''
