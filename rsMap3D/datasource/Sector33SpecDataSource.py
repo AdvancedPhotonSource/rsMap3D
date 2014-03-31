@@ -191,6 +191,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         return geo_angles
 
 class LoadCanceledException(Exception):
+    '''
+    An Exception to be thrown when load execution has been canceled
+    '''
     def __init__(self):
         super(LoadCanceledException, self).__init__()
 
