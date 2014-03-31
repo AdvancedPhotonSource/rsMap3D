@@ -9,7 +9,7 @@ from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 class AbstractXrayutilitiesDataSource:
     __metaclass__ = abc.ABCMeta
     '''
-    classdocs
+    Abstract class for loading data needed to analyze using Xrayutilities.
     '''
 
     def __init__(self, transform=None, 
@@ -223,6 +223,7 @@ class AbstractXrayutilitiesDataSource:
     
     def getSampleCircleDirections(self):
         '''
+        Return a list of sample circle directions.  
         '''
         return self.sampleCirclesDirections
     

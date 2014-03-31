@@ -5,18 +5,21 @@
 import xml.etree.ElementTree as ET
 
 NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/instForXrayutils}'
-SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
+#Element Names
 DETECTOR_CIRCLES = NAMESPACE + 'detectorCircles'   
-PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'   
+FILTER_NAME = NAMESPACE + 'filterName'   
 INPLANE_REFERENCE_DIRECTION = NAMESPACE + 'inplaneReferenceDirection'   
-SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
 MONITOR_NAME = NAMESPACE + 'monitorName'   
-NUM_CIRCLES = 'numCircles'
-SPEC_MOTOR_NAME = 'specMotorName'
+PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'   
+SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
+SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
+#Attribute Names
 AXIS_NUMBER = 'number'
-REFERENCE_AXIS = NAMESPACE + 'axis'
 DIRECTION_AXIS = 'directionAxis'
+NUM_CIRCLES = 'numCircles'
+REFERENCE_AXIS = NAMESPACE + 'axis'
 SCALE_FACTOR = 'scaleFactor'
+SPEC_MOTOR_NAME = 'specMotorName'
 
 class InstForXrayutilitiesReader():
     '''
@@ -67,6 +70,31 @@ class InstForXrayutilitiesReader():
         '''
         return self.makeCircleNames(self.getDetectorCircles())
         
+    def getFilterName(self):
+        '''
+        Return the filterName if included in config file.  Returns None if it
+        is not present. 
+        '''
+        name = self.root.find(FILTER_NAME)
+        if name == None:
+            return None
+        else:
+            return str(name.text)
+    
+    def getFilterScaleFactor(self):
+        '''
+        Return the scale factor to be used with filterName if included in 
+        config file.  Returns 1 if it is not present. 
+        '''
+        name = self.root.find(FILTER_NAME)
+        if name == None:
+            return 1
+        else:
+            try:
+                return float(name.attrib[SCALE_FACTOR])
+            except KeyError:
+                return 1
+    
     def getInplaneReferenceDirection(self):
         '''
         '''
@@ -87,25 +115,27 @@ class InstForXrayutilitiesReader():
     
     def getMonitorScaleFactor(self):
         '''
-        Return the monitorName if included in config file.  Returns None if it
-        is not present. 
+        Return the scale factor to be used with monitorName if included in 
+        config file.  Returns 1 if it is not present. 
         '''
         name = self.root.find(MONITOR_NAME)
         if name == None:
             return 1
         else:
-            if name.attrib[SCALE_FACTOR] != None:
+            try:
                 return float(name.attrib[SCALE_FACTOR])
-            else:
+            except KeyError:
                 return 1
     
     def getNumDetectorCircles(self):
         '''
+        return the number of circles associated with the detector
         '''
         return int(self.root.find(DETECTOR_CIRCLES).attrib[NUM_CIRCLES])
     
     def getNumSampleCircles(self):
         '''
+        return the number of circles associated with the sample
         '''
         return int(self.root.find(SAMPLE_CIRCLES).attrib[NUM_CIRCLES])
     
@@ -145,6 +175,7 @@ class InstForXrayutilitiesReader():
         
     def makeCircleDirections(self, circles):
         '''
+        Create a list of circle directions from the XML
         '''
         data = []
         for circle in circles:
@@ -159,6 +190,7 @@ class InstForXrayutilitiesReader():
     
     def makeCircleNames(self, circles):
         '''
+        Create a list of circle names from the XML
         '''
         data = []
         for circle in circles:
@@ -173,6 +205,7 @@ class InstForXrayutilitiesReader():
     
     def makeReferenceDirection(self, direction):
         '''
+        Create a list of reference directions from the XML
         '''
         axes = direction.findall(REFERENCE_AXIS)
         refAxis = {}
