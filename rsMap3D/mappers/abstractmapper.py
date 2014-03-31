@@ -91,6 +91,9 @@ class AbstractGridMapper(object):
         writer.Write()
 
     def setGridSize(self, nx, ny, nz):
+        '''
+        Set the extent of the grid size
+        '''
         self.nx = nx
         self.ny = ny
         self.nz = nz
@@ -114,6 +117,10 @@ class AbstractGridMapper(object):
 
     @abc.abstractmethod
     def processMap(self,**kwargs):
+        '''
+        Abstract method for processing the map needs to be overridden in 
+        subclass
+        '''
         print("Running abstract Method")
         
     def rawmap(self,scans, angdelta=[0,0,0,0,0],
@@ -121,7 +128,8 @@ class AbstractGridMapper(object):
         """
         read ad frames and and convert them in reciprocal space
         angular coordinates are taken from the spec file
-        or read from the edf file header when no scan number is given (scannr=None)
+        or read from the edf file header when no scan number is given 
+        (scannr=None)
         """
         
         #sd = spec.SpecDataFile(self.dataSource.specFile)
@@ -262,6 +270,8 @@ class AbstractGridMapper(object):
         return qxTrans, qyTrans, qzTrans, intensity
 
     def setTransform(self, transform):
-        ''' '''
+        '''
+        Set a transform to be used in calculating the data coordinates.
+        '''
         self.transform = transform
         
