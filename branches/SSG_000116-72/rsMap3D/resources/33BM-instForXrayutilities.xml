@@ -37,5 +37,5 @@
         <axis number="2">0</axis>
         <axis number="3">0</axis>
     </sampleSurfaceNormalDirection>
-    <monitorName>I0</monitorName>
+    <monitorName scaleFactor="20000">I0</monitorName>
 </instForXrayutils>
