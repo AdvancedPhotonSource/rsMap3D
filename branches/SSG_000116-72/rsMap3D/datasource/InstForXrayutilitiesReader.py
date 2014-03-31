@@ -16,6 +16,7 @@ SPEC_MOTOR_NAME = 'specMotorName'
 AXIS_NUMBER = 'number'
 REFERENCE_AXIS = NAMESPACE + 'axis'
 DIRECTION_AXIS = 'directionAxis'
+SCALE_FACTOR = 'scaleFactor'
 
 class InstForXrayutilitiesReader():
     '''
@@ -28,7 +29,7 @@ class InstForXrayutilitiesReader():
         try:
             tree = ET.parse(filename)
         except IOError as ex:
-            raise (IOError("Bad Instrument Configuration File") + str(ex))
+            raise (IOError("Bad Instrument Configuration File" + str(ex)))
         self.root = tree.getroot()
         
     def getCircleAxisNumber(self, circle):
@@ -83,6 +84,20 @@ class InstForXrayutilitiesReader():
             return None
         else:
             return str(name.text)
+    
+    def getMonitorScaleFactor(self):
+        '''
+        Return the monitorName if included in config file.  Returns None if it
+        is not present. 
+        '''
+        name = self.root.find(MONITOR_NAME)
+        if name == None:
+            return 1
+        else:
+            if name.attrib[SCALE_FACTOR] != None:
+                return float(name.attrib[SCALE_FACTOR])
+            else:
+                return 1
     
     def getNumDetectorCircles(self):
         '''
