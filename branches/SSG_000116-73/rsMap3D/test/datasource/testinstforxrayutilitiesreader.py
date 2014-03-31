@@ -1,7 +1,6 @@
 '''
-Created on Mar 28, 2014
-
-@author: hammonds
+ Copyright (c) 2012, UChicago Argonne, LLC
+ See LICENSE file.
 '''
 import unittest
 from rsMap3D.datasource.InstForXrayutilitiesReader import \
@@ -12,13 +11,13 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         self.config = InstForXrayutilitiesReader( \
-                     '../resources/33BM-instForXrayutilities.xml')
+                     '../../resources/33BM-instForXrayutilities.xml')
         self.config2 = InstForXrayutilitiesReader( \
-                      '../resources/33BM-instForXrayutilities-noMonitor.xml')
+                      '../../resources/33BM-instForXrayutilities-noMonitor.xml')
         self.config3 = InstForXrayutilitiesReader( \
-                      '../resources/33BM-instForXrayutilities-noCircles.xml')
+                      '../../resources/33BM-instForXrayutilities-noCircles.xml')
         self.config4 = InstForXrayutilitiesReader( \
-                      '../resources/33BM-instForXrayutilities-noScalingFactor.xml')
+                      '../../resources/33BM-instForXrayutilities-noScalingFactor.xml')
 
     def tearDown(self):
         pass
