@@ -54,8 +54,8 @@ class AbstractGridMapper(object):
         print 'qz: ', qz.min(), ' .... ', qz.max()
         
         # prepare data for export to VTK image file
-        INT = xu.maplog(gint, 5.0, 0)
-        
+        #INT = xu.maplog(gint, 5.0, 0)
+        INT = gint
         qx0 = qx.min()
         dqx  = (qx.max()-qx.min())/self.nx
         
@@ -102,6 +102,13 @@ class AbstractGridMapper(object):
         """
         
         #ad_data[44,159] = 0
+        ad_data[227,34] = 0
+        ad_data[348,170] = 0
+        ad_data[426,96] = 0
+        ad_data[426,97] = 0
+        ad_data[427,96] = 0
+        ad_data[427,97] = 0
+        ad_data[357,185] = 0
         
         return ad_data
 
@@ -179,6 +186,8 @@ class AbstractGridMapper(object):
     
         offset = 0
         imageToBeUsed = self.dataSource.getImageToBeUsed()
+        monitorName = self.dataSource.getMonitorName()
+        monitorScaleFactor = self.dataSource.getMonitorScaleFactor()
         for scannr in scans:
             scan = self.dataSource.sd[scannr]
             angles = self.dataSource.getGeoAngles(scan, angleNames)
@@ -187,6 +196,9 @@ class AbstractGridMapper(object):
             for i in xrange(len(angleNames)):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
+            if monitorName != None:
+                monitor_data = scan.scandata.get(monitorName)
+                
             # read in the image data
             arrayInitializedForScan = False
             foundIndex = 0
@@ -203,6 +215,11 @@ class AbstractGridMapper(object):
                                             self.dataSource.getNumPixelsToAverage()[0], \
                                             self.dataSource.getNumPixelsToAverage()[1], \
                                             roi=self.dataSource.getDetectorROI())
+
+                    # apply intensity corrections
+                    if monitorName != None:
+                        img2 = img2 / monitor_data[ind] * monitorScaleFactor
+
                     # initialize data array
                     if not arrayInitializedForScan:
                         if not intensity.shape[0]:

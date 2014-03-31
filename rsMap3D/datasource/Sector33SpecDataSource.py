@@ -107,8 +107,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             instConfig.getSampleSurfaceNormalDirection()
         self.sampleAngleNames = instConfig.getSampleCircleNames()
         self.detectorAngleNames = instConfig.getDetectorCircleNames()
-        
-        
+        self.monitorName = instConfig.getMonitorName()
+        self.monitorScaleFactor = instConfig.getMonitorScaleFactor()
+
         detConfig = \
             DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
         detector = detConfig.getDetectorById("Pilatus")
