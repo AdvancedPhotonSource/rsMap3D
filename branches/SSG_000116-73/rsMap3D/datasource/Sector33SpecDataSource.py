@@ -15,7 +15,8 @@ import time
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
-    classdocs
+    Class to load data from spec file and configuration xml files from 
+    for the way that data is collected at sector 33.
     '''
 
 
@@ -191,6 +192,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         return geo_angles
 
 class LoadCanceledException(Exception):
+    '''
+    Exception Thrown when loading data is canceled.
+    '''
     def __init__(self):
         super(LoadCanceledException, self).__init__()
 

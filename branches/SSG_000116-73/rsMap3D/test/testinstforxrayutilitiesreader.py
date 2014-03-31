@@ -34,15 +34,35 @@ class Test(unittest.TestCase):
 
     def testGetMonitorScaleFactor(self):
         scaleFactor = self.config.getMonitorScaleFactor()
-        self.assertEquals(scaleFactor, 1000000, "getMonitorScaleFactor")
+        self.assertEquals(scaleFactor, 20000, "getMonitorScaleFactor")
 
     def testGetMonitorScaleFactorNoMonitor(self):
         monitorName = self.config2.getMonitorScaleFactor()
         self.assertEquals(monitorName, 1, "getMonitorScaleFactorNoMonitor")
 
     def testGetMonitorScaleFactorNoScaleFactor(self):
-        monitorName = self.config2.getMonitorScaleFactor()
+        monitorName = self.config4.getMonitorScaleFactor()
         self.assertEquals(monitorName, 1, "getMonitorScaleFactorNoScaleFactor")
+
+    def testGetFiterName(self):
+        filterName = self.config.getFilterName()
+        self.assertEqual(filterName, "trans", "getFilterName")
+
+    def testGetFilterNameNoMonitor(self):
+        filterName = self.config2.getFilterName()
+        self.assertEquals(filterName, None, "getFilterNameNoMonitor")
+
+    def testGetFilterScaleFactor(self):
+        scaleFactor = self.config.getFilterScaleFactor()
+        self.assertEquals(scaleFactor, 1000000, "getFilterScaleFactor")
+
+    def testGetFilterScaleFactorNoFilter(self):
+        scaleFactor = self.config2.getFilterScaleFactor()
+        self.assertEquals(scaleFactor, 1, "getFilterScaleFactorNoFilter")
+
+    def testGetFilterScaleFactorNoScaleFactor(self):
+        scaleFactor = self.config4.getFilterScaleFactor()
+        self.assertEquals(scaleFactor, 1, "getFilterScaleFactorNoScaleFactor")
 
     def testGetDetectorCircles(self):
         circles = self.config.getDetectorCircles()
