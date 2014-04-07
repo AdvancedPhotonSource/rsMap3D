@@ -15,7 +15,10 @@ from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
     '''
-    classdocs
+    This class is an abstract class around which to build a reciprical space 
+    mapping class using the xrayutilities module.  It requires an input of the 
+    type AbstractXrayUtilitiesDataSource provided in the rsMap3D.datasource 
+    package. 
     '''
 
 
@@ -37,7 +40,9 @@ class AbstractGridMapper(object):
 
     def doMap(self):
         '''
-        Produce a q map of the data.
+        Produce a q map of the data.  This is the method typically called to 
+        run the mapper.  This method calls the processMap method which is an 
+        abstact method which needs to be defined in subclasses.
         '''
         
         # read and grid data with helper function
@@ -91,6 +96,9 @@ class AbstractGridMapper(object):
         writer.Write()
 
     def setGridSize(self, nx, ny, nz):
+        """
+        Set the grid size to be used for outputting data.
+        """
         self.nx = nx
         self.ny = ny
         self.nz = nz
@@ -114,6 +122,11 @@ class AbstractGridMapper(object):
 
     @abc.abstractmethod
     def processMap(self,**kwargs):
+        """
+        Abstract method for processing data.  This method is called by the
+        method doMap.  Typical access to this method is through the doMap
+        method.
+        """
         print("Running abstract Method")
         
     def rawmap(self,scans, angdelta=[0,0,0,0,0],
@@ -289,6 +302,11 @@ class AbstractGridMapper(object):
         return qxTrans, qyTrans, qzTrans, intensity
 
     def setTransform(self, transform):
-        ''' '''
+        '''
+        Set a transform which will define a mapping of q space to some other 
+        system.  The transform set here should be a subclass of 
+        AbstractTransform3D which is defined in 
+        rsMap3D.transform.abstracttransform3D.
+        '''
         self.transform = transform
         
