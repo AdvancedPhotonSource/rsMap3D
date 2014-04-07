@@ -42,6 +42,7 @@ class AbstractXrayutilitiesDataSource:
         self.imageBounds = {}
         self.imageToBeUsed = {}
         self.availableScans = []
+        self.ubMatrix = {}
         self.rangeBounds = None
         self.cancelLoad = False
         self.monitorName = None
@@ -248,6 +249,11 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.sampleSurfaceNormalDirection
     
+    def getUBMatrix(self, scan):
+        '''
+        '''
+        return self.ubMatrix[scan]
+    
     def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         Check to see if the input boundaries have area that lie within the 
@@ -267,7 +273,7 @@ class AbstractXrayutilitiesDataSource:
                  zmax <= self.rangeBounds[5]))
                
     @abc.abstractmethod
-    def loadSource(self):
+    def loadSource(self, mapHKL=False):
         print "Using Abstract Method"
 
     def processImageToBeUsed(self):

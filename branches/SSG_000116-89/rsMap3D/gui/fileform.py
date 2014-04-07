@@ -12,6 +12,7 @@ from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QComboBox
+from PyQt4.QtGui import QCheckBox
 from PyQt4.QtGui import QRegExpValidator
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
@@ -84,14 +85,18 @@ class FileForm(QDialog):
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
         layout.addWidget(label, 7, 0)
         layout.addWidget(self.outTypeChooser, 7, 1)
-
+        label = QLabel("HKL output")
+        layout.addWidget(label, 8,0)
+        self.hklCheckbox = QCheckBox()
+        layout.addWidget(self.hklCheckbox, 8, 1)
+        
         
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton,8 , 1)
+        layout.addWidget(self.loadButton,9 , 1)
         self.cancelButton = QPushButton("Cancel")        
 #        self.cancelButton.setDisabled(True)
-        layout.addWidget(self.cancelButton,8 , 2)
+        layout.addWidget(self.cancelButton,9 , 2)
         
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
@@ -110,6 +115,9 @@ class FileForm(QDialog):
         self.connect(self.detConfigTxt, 
                      SIGNAL("editingFinished()"), 
                      self.detConfigChanged)
+        self.connect(self.outTypeChooser, \
+                     SIGNAL("currentIndexChanged(QString )"), \
+                     self.outputTypeChanged)
         
         self.setLayout(layout);
         
@@ -182,6 +190,9 @@ class FileForm(QDialog):
         '''
         return self.detConfigTxt.text()
 
+    def getMapAsHKL(self):
+        return self.hklCheckbox.isChecked()
+        
     def getInstConfigName(self):
         '''
         Return the Instrument config file name
@@ -232,6 +243,8 @@ class FileForm(QDialog):
                              "configuration is invalid")
         
     def detConfigChanged(self):
+        '''
+        '''
         if os.path.isfile(self.detConfigTxt.text()) or \
            self.detConfigTxt.text() == "":
             self.checkOkToLoad()
@@ -244,6 +257,8 @@ class FileForm(QDialog):
                              "configuration is invalid")
         
     def checkOkToLoad(self):
+        '''
+        '''
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
             os.path.isfile(self.detConfigTxt.text()):
@@ -278,7 +293,38 @@ class FileForm(QDialog):
             pixels.append(int(value))
         return pixels
     
+    def outputTypeChanged(self, typeStr):
+        '''
+        If the output is selected to be a simple grid map type then allow
+        the user to select HKL as an output.
+        '''
+        if typeStr == self.SIMPLE_GRID_MAP_STR:
+            self.hklCheckbox.setEnabled(True)
+        else:
+            self.hklCheckbox.setDisabled(True)
+            self.hklCheckbox.setCheckState(False)
+            
+    def setLoadOK(self):
+        '''
+        If Load is OK the load button is enabled and the cancel button is 
+        disabled
+        '''
+        self.loadButton.setDisabled(False)
+        self.cancelButton.setDisabled(True)
+
+    def setCancelOK(self):
+        '''
+        If Cancel is OK the loadbutton is disabled and the cancel button is 
+        enabled
+        '''
+        self.loadButton.setDisabled(True)
+        self.cancelButton.setDisabled(False)
+
     def updateROIandNumAvg(self):
+        '''
+        Set defailt values into the ROI and number of pixel to average text 
+        boxes
+        '''
         detConfig = \
             DetectorGeometryForXrayutilitiesReader(self.detConfigTxt.text())
         detector = detConfig.getDetectorById("Pilatus")
@@ -293,6 +339,9 @@ class FileForm(QDialog):
         self.updateROITxt()
         
     def updateROITxt(self):
+        '''
+        Update the ROI string with the current value of the ROI
+        '''
         roiStr = str(self.roixmin) +\
                 "," +\
                 str(self.roixmax) +\
@@ -302,11 +351,4 @@ class FileForm(QDialog):
                 str(self.roiymax)
         self.detROITxt.setText(roiStr)
         
-    def setLoadOK(self):
-        self.loadButton.setDisabled(False)
-        self.cancelButton.setDisabled(True)
-
-    def setCancelOK(self):
-        self.loadButton.setDisabled(True)
-        self.cancelButton.setDisabled(False)
         
