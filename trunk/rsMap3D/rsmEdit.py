@@ -85,9 +85,9 @@ class MainDialog(QWidget):
                                        scanList = self.fileForm.getScanList(), \
                                        roi = self.fileForm.getDetectorROI(), \
                                        pixelsToAverage = \
-                                          self.fileForm.getPixelsToAverage()
-                                          )
-            self.dataSource.loadSource()
+                                          self.fileForm.getPixelsToAverage(), \
+                                      )
+            self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
             print "LoadCanceled"
             self.tabs.setTabEnabled(self.dataTabIndex, False)

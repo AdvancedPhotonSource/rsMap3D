@@ -70,12 +70,22 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
+        if ub == None:
+            qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
                                      angles[:,1], \
                                      angles[:,2], \
                                      angles[:,3], \
                                      roi=roi, \
                                      Nav=nav)
+        else:
+            qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
+                                     angles[:,1], \
+                                     angles[:,2], \
+                                     angles[:,3], \
+                                     roi=roi, \
+                                     Nav=nav, \
+                                     UB = ub)
+            
         qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
         
         idx = range(len(qxTrans))
@@ -92,7 +102,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         return
     
-    def loadSource(self):
+    def loadSource(self, mapHKL=False):
         '''
         This method does the work of loading data from the files.  This has been
         split off from the constructor to allow this to be threaded and later 
@@ -147,6 +157,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
         try:
             self.sd = spec.SpecDataFile(self.specFile)
+            self.mapHKL = mapHKL
             maxScan = max(self.sd.findex.keys())
             print maxScan
             if self.scans  == None:
@@ -158,6 +169,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.imageToBeUsed = {}
             self.availableScans = []
             self.incidentEnergy = {}
+            self.ubMatrix = {}
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
@@ -168,13 +180,15 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                         curScan = self.sd[scan]
                         self.availableScans.append(scan)
                         angles = self.getGeoAngles(curScan, self.angleNames)
-                        ub = curScan.UB
-                        self.incidentEnergy[scan] = \
-                            curScan.energy
+                        if self.mapHKL==True:
+                            self.ubMatrix[scan] = curScan.UB
+                        else:
+                            self.ubMatrix[scan] = None
+                        self.incidentEnergy[scan] =curScan.energy
                         _start_time = time.time()
                         self.imageBounds[scan] = \
                             self.findImageQs(angles, \
-                                             ub, \
+                                             self.ubMatrix[scan], \
                                              self.incidentEnergy[scan])
                         print (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
