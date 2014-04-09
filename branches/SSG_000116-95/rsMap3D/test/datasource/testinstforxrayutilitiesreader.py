@@ -18,6 +18,8 @@ class Test(unittest.TestCase):
                       '../../resources/33BM-instForXrayutilities-noCircles.xml')
         self.config4 = InstForXrayutilitiesReader( \
                       '../../resources/33BM-instForXrayutilities-noScalingFactor.xml')
+        self.config5 = InstForXrayutilitiesReader( \
+                      '../../resources/13BMC_Instrument.xml')
 
     def tearDown(self):
         pass
@@ -76,6 +78,48 @@ class Test(unittest.TestCase):
         
     def testGetSampleCirclesNoCircle(self):
         self.assertRaises(IOError, self.config3.getSampleCircles)
+        
+    def testGetSampleAngleMappingFunctionName(self):
+        name = self.config5.getSampleAngleMappingFunctionName()
+        self.assertEquals(name, \
+                          "_calc_eulerian_from_kappa", \
+                          "getSampleAngleMappingFunction: " + name)
+        
+    def testGetSampleAngleMappingFunctionNameNoMap(self):
+        name = self.config4.getSampleAngleMappingFunctionName()
+        self.assertEquals(name, \
+                          "", \
+                          "getSampleAngleMappingFunction: " + name)
+
+    def testGetSampleAngleMappingCalcOnScannedRef(self):
+        calc = self.config5.getSampleAngleMappingCalcOnScannedRef()
+        self.assertEquals(calc, \
+                          True, \
+                          "getSampleAngleMappingCalcOnScannedRef: " + str(calc))
+        
+    def testGetSampleAngleMappingFunctionCalcOnScannedRefNoMap(self):
+        self.assertRaises(ValueError, 
+                          self.config4.getSampleAngleMappingCalcOnScannedRef)
+        
+    def testGetSampleAngleMappingPrimaryAngles(self):
+        angles = self.config5.getSampleAngleMappingPrimaryAngles()
+        self.assertEquals(angles, \
+                          [2,3,4], \
+                          "getSampleAngleMappingPrimaryAngles: " + str(angles))
+
+    def testGetSampleAngleMappingFunctionPrimaryAnglesNoMap(self):
+        self.assertRaises(ValueError, 
+                          self.config4.getSampleAngleMappingPrimaryAngles)
+        
+    def testGetSampleAngleMappingRefereceAngles(self):
+        angles = self.config5.getSampleAngleMappingReferenceAngles()
+        self.assertEquals(angles, \
+                          {1:'keta', 2:"kap", 3:"kphi"}, \
+                          "getSampleAngleMappingReferenceAngles: " + str(angles))
+
+    def testGetSampleAngleMappingFunctionReferenceAnglesNoMap(self):
+        self.assertRaises(ValueError, 
+                          self.config4.getSampleAngleMappingReferenceAngles)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testGetMonitorName']
