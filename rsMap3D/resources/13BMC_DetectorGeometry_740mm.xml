@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<detectorGeometryForXrayutilities xmlns="https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils">
+    <dateWritten></dateWritten>
+    <timeWritten></timeWritten>
+	
+    <Detectors>
+	   <Detector>
+            <pixelDirection1>z-</pixelDirection1>
+            <pixelDirection2>x-</pixelDirection2>
+            <centerChannelPixel>273 101</centerChannelPixel>
+            <Npixels>487 195</Npixels>
+            <size unit="mm">83.764 33.54</size>
+            <distance unit="mm">1122.4</distance>
+            <ID>Pilatus</ID>
+            <note></note>
+        </Detector>
+    </Detectors>
+</detectorGeometryForXrayutilities>
