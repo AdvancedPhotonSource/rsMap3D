@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
     def testGetSampleAngleMappingRefereceAngles(self):
         angles = self.config5.getSampleAngleMappingReferenceAngles()
         self.assertEquals(angles, \
-                          {1:'keta', 2:"kap", 3:"kphi"}, \
+                          ['keta', "kap", "kphi"], \
                           "getSampleAngleMappingReferenceAngles: " + str(angles))
 
     def testGetSampleAngleMappingFunctionReferenceAnglesNoMap(self):

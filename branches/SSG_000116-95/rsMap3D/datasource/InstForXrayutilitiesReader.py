@@ -201,7 +201,7 @@ class InstForXrayutilitiesReader():
             "sampleAngleMapFunction in instrument config")
         for angle in primaryAngles:
             angles.append(int(angle.attrib[AXIS_NUMBER]))
-        return angles
+        return angles.sort()
 
     def getSampleAngleMappingReferenceAngles(self):
         '''
@@ -212,6 +212,7 @@ class InstForXrayutilitiesReader():
             raise ValueError("No Mapping function defined in instrument " + \
                              "config file")
         angles = {}
+        angleList = []
         referenceAngles = function.findall(REFERENCE_ANGLE)
         if referenceAngles == None:
             raise ValueError("No referenceAngle members in " + \
@@ -219,7 +220,9 @@ class InstForXrayutilitiesReader():
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
                 angle.attrib[SPEC_MOTOR_NAME]
-        return angles
+        for i in  len(angles):
+            angleList.append(angles[i+1])
+        return angleList
 
     def getSampleCircleDirections(self):
         '''
