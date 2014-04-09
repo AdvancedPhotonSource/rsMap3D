@@ -70,18 +70,15 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
+        angleList = []
+        for i in range(len(angles[0])):
+            angleList.append(angles[:,i])
         if ub == None:
-            qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
-                                     angles[:,1], \
-                                     angles[:,2], \
-                                     angles[:,3], \
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                      roi=roi, \
                                      Nav=nav)
         else:
-            qx, qy, qz = hxrd.Ang2Q.area(angles[:,0], \
-                                     angles[:,1], \
-                                     angles[:,2], \
-                                     angles[:,3], \
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                      roi=roi, \
                                      Nav=nav, \
                                      UB = ub)
@@ -157,6 +154,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
         try:
             self.sd = spec.SpecDataFile(self.specFile)
+            print self.sc.comments
             self.mapHKL = mapHKL
             maxScan = max(self.sd.findex.keys())
             print maxScan
@@ -211,6 +209,31 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             geo_angles[:,i] = v
         
         return geo_angles
+    
+    def _calc_eulerian_from_kappa(self):
+        """
+        Calculate the eulerian sample angles from the kappa stage angles.
+        """
+        
+        keta = self.angles['keta']
+        kappa = self.angles['kappa']
+        kphi = self.angles['kphi']
+        
+        _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
+        
+        if self.kappa_inverted:
+            eta = keta + _t1
+            phi = kphi + _t1
+        else:
+            eta = keta - _t1
+            phi = kphi - _t1
+        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * np.sin(self.kalpha))
+        
+        self.angles['eta'] = eta
+        self.angles['chi'] = chi
+        self.angles['phi'] = phi        
+        
+    
 
 class LoadCanceledException(Exception):
     '''
