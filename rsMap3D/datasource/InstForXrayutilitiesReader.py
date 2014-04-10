@@ -201,7 +201,9 @@ class InstForXrayutilitiesReader():
             "sampleAngleMapFunction in instrument config")
         for angle in primaryAngles:
             angles.append(int(angle.attrib[AXIS_NUMBER]))
-        return angles.sort()
+        angles.sort()
+        return angles
+    
 
     def getSampleAngleMappingReferenceAngles(self):
         '''
@@ -220,7 +222,7 @@ class InstForXrayutilitiesReader():
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
                 angle.attrib[SPEC_MOTOR_NAME]
-        for i in  len(angles):
+        for i in  range(len(angles)):
             angleList.append(angles[i+1])
         return angleList
 
