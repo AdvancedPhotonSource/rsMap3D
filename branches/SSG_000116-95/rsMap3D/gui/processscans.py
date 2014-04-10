@@ -92,15 +92,15 @@ class ProcessScans(QDialog):
         writable
         '''
         if self.outFileTxt.text() == "":
-            fileName = QFileDialog.getSaveFileName(None, \
+            fileName = str(QFileDialog.getSaveFileName(None, \
                                                "Save File", \
-                                               filter="*.vti")
+                                               filter="*.vti"))
         else:
             fileDirectory = os.path.dirname(str(self.outFileTxt.text()))
-            fileName = QFileDialog.getSaveFileName(None, 
+            fileName = str(QFileDialog.getSaveFileName(None, 
                                                "Save File", 
                                                filter="*.vti", \
-                                               directory = fileDirectory)
+                                               directory = fileDirectory))
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
@@ -112,7 +112,7 @@ class ProcessScans(QDialog):
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
-            if not os.access(fileName, os.W_OK):
+            if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = QMessageBox()
                 message.warning(self, \
                              "Warning", \
@@ -134,7 +134,7 @@ class ProcessScans(QDialog):
                 message.warning(self, \
                              "Warning"\
                              "The specified directory does not exist")
-            if not os.access(fileName, os.W_OK):
+            if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = QMessageBox()
                 message.warning(self, \
                              "Warning", \
@@ -156,7 +156,7 @@ class ProcessScans(QDialog):
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
         outputFileName = str(self.outFileTxt.text())
-        if os.access(outputFileName, os.W_OK):
+        if os.access(os.path.dirname(outputFileName), os.W_OK):
             if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
                 gridMapper = QGridMapper(dataSource, \
                                          outputFileName, \
