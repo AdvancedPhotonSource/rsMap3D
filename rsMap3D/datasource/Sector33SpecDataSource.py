@@ -12,6 +12,7 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
 import numpy as np
 import xrayutilities as xu
 import time
+import traceback
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -94,6 +95,45 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         zmax = [np.max(qzTrans[i]) for i in idx] 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
+    def fixGeoAngles(self, scan, angles):
+        '''
+        Fix the angles using a user selected function.  
+        '''
+        scanLine = scan.scan_command.split(' ') 
+        scannedAngles = []
+        if scanLine[0] == 'ascan':
+            scannedAngles.append(scanLine[1])
+        elif scanLine[0] == 'a2scan':
+            scannedAngles.append(scanLine[1])
+            scannedAngles.append(scanLine[4])
+        elif scanLine[0] == 'a3scan':
+            scannedAngles.append(scanLine[1])
+            scannedAngles.append(scanLine[4])
+            scannedAngles.append(scanLine[7])
+        else:
+            raise Exception("Scan type not supported by S33SpecDataSource " + \
+                            " when angle mapping is used")
+        refAngleNames = self.instConfig.getSampleAngleMappingReferenceAngles()
+        needToCorrect = False
+        for rAngle in refAngleNames:
+            if (rAngle in scannedAngles):
+                needToCorrect = True
+        
+        if needToCorrect:
+            refAngles = self.getScanAngles(scan, refAngleNames)
+            primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
+            functionName = self.instConfig.getSampleAngleMappingFunctionName()
+            #Call a defined method to calculate angles from the reference angles.
+            method = getattr(self, functionName)
+            fixedAngles = method(primaryAngles=primaryAngles, 
+                                   referenceAngles=refAngles)
+            #print fixedAngles
+            for i in range(len(primaryAngles)):
+                #print i
+                #print primaryAngles[i]
+                angles[:,primaryAngles[i]-1] = fixedAngles[i]
+    
+        
     def getImage(self):
         '''
         '''
@@ -106,20 +146,21 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         canceled.
         '''
         try:
-            instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-            self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
-            self.detectorCircleDirections = instConfig.getDetectorCircleDirections()
-            self.primaryBeamDirection = instConfig.getPrimaryBeamDirection()
+            self.instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
+            self.sampleCirclesDirections = self.instConfig.getSampleCircleDirections()
+            self.detectorCircleDirections = self.instConfig.getDetectorCircleDirections()
+            self.primaryBeamDirection = self.instConfig.getPrimaryBeamDirection()
             self.sampleInplaneReferenceDirection = \
-                instConfig.getInplaneReferenceDirection()
+                self.instConfig.getInplaneReferenceDirection()
             self.sampleSurfaceNormalDirection = \
-                instConfig.getSampleSurfaceNormalDirection()
-            self.sampleAngleNames = instConfig.getSampleCircleNames()
-            self.detectorAngleNames = instConfig.getDetectorCircleNames()
-            self.monitorName = instConfig.getMonitorName()
-            self.monitorScaleFactor = instConfig.getMonitorScaleFactor()
-            self.filterName = instConfig.getFilterName()
-            self.filterScaleFactor = instConfig.getFilterScaleFactor()
+                self.instConfig.getSampleSurfaceNormalDirection()
+            self.sampleAngleNames = self.instConfig.getSampleCircleNames()
+            self.detectorAngleNames = self.instConfig.getDetectorCircleNames()
+            self.monitorName = self.instConfig.getMonitorName()
+            self.monitorScaleFactor = self.instConfig.getMonitorScaleFactor()
+            self.filterName = self.instConfig.getFilterName()
+            self.filterScaleFactor = self.instConfig.getFilterScaleFactor()
+
         except Exception as ex:
             print ("---Error Reading instconfig")
             raise ex
@@ -143,8 +184,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         except Exception as ex:
             print ("---Error Reading detconfig")
             raise ex
-        self.angleNames = instConfig.getSampleCircleNames() + \
-            instConfig.getDetectorCircleNames()
+        self.angleNames = self.instConfig.getSampleCircleNames() + \
+            self.instConfig.getDetectorCircleNames()
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
         imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
@@ -154,7 +195,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
         try:
             self.sd = spec.SpecDataFile(self.specFile)
-            print self.sc.comments
             self.mapHKL = mapHKL
             maxScan = max(self.sd.findex.keys())
             print maxScan
@@ -201,37 +241,57 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         points and num_geo is the number of geometry motors.
         """
 #        scan = self.sd[scanNo]
-        geo_angles = np.zeros((scan.data.shape[0], len(angleNames)))
+        geoAngles = self.getScanAngles(scan, angleNames)
+        if not (self.instConfig.getSampleAngleMappingFunctionName() == ""):
+            tb = None
+            try:
+                self.fixGeoAngles(scan, geoAngles)
+            except Exception as ex:
+                tb = traceback.format_exc()
+                print "Handling exception in getGeoAngles"
+                print ex
+                print tb
+        return geoAngles
+    
+    def getScanAngles(self, scan, angleNames):
+        """
+        This function returns all of the geometry angles for the
+        for the scan as a N-by-num_geo array, where N is the number of scan
+        points and num_geo is the number of geometry motors.
+        """
+        geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
         for i, name in enumerate(angleNames):
             v = scan.scandata.get(name)
             if v.size == 1:
                 v = np.ones(scan.data.shape[0]) * v
-            geo_angles[:,i] = v
+            geoAngles[:,i] = v
         
-        return geo_angles
-    
-    def _calc_eulerian_from_kappa(self):
+
+        return geoAngles
+        
+    def _calc_eulerian_from_kappa(self, primaryAngles=None, \
+                                  referenceAngles = None):
         """
         Calculate the eulerian sample angles from the kappa stage angles.
         """
         
-        keta = self.angles['keta']
-        kappa = self.angles['kappa']
-        kphi = self.angles['kphi']
-        
+        keta = referenceAngles[:,0] * np.pi/180.0
+        kappa = referenceAngles[:,1] * np.pi/180.0
+        kphi = referenceAngles[:,2] * np.pi/180.0
+        self.kalpha = 49.9945 * np.pi/180.0
+        self.kappa_inverted = False
+
         _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
         
         if self.kappa_inverted:
-            eta = keta + _t1
-            phi = kphi + _t1
+            eta = (keta + _t1) * 180.0/np.pi
+            phi = (kphi + _t1) * 180.0/np.pi
         else:
-            eta = keta - _t1
-            phi = kphi - _t1
-        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * np.sin(self.kalpha))
+            eta = (keta - _t1) * 180.0/np.pi
+            phi = (kphi - _t1) * 180.0/np.pi
+        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * np.sin(self.kalpha)) * 180.0/np.pi
         
-        self.angles['eta'] = eta
-        self.angles['chi'] = chi
-        self.angles['phi'] = phi        
+        return eta, chi, phi
         
     
 
