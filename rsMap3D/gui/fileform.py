@@ -95,6 +95,7 @@ class FileForm(QDialog):
         self.loadButton.setDisabled(True)
         layout.addWidget(self.loadButton,9 , 1)
         self.cancelButton = QPushButton("Cancel")        
+        self.cancelButton.setDisabled(True)
 #        self.cancelButton.setDisabled(True)
         layout.addWidget(self.cancelButton,9 , 2)
         
