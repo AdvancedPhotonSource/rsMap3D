@@ -233,9 +233,7 @@ class ScanForm(QDialog):
         bounds of the selected images in that scan.
         '''
         scanNo = int(item.text().split(' ')[0])
-        angles = self.dataSource.getGeoAngles(self.dataSource.sd[scanNo], \
-                                              self.dataSource.getAngles())
-        self.showAngles(angles)
+        self.showAngles(scanNo)
         self.showQs(scanNo)
         self.selectAll.setEnabled(True)
         self.deselectAll.setEnabled(True)
@@ -249,10 +247,12 @@ class ScanForm(QDialog):
             self.dataSource.imageToBeUsed[scanNo][i] = True
         self.showQs(scanNo)
                         
-    def showAngles(self, angles):
+    def showAngles(self, scanNo):
         '''
         Display the angles associated with images in the scan in the table.
         '''
+        angles = self.dataSource.getGeoAngles(self.dataSource.sd[scanNo], \
+                                              self.dataSource.getAngles())
         self.detail.setRowCount(len(angles))
         blackBrush = QBrush()
         blackBrush.setColor(QColor('black'))
