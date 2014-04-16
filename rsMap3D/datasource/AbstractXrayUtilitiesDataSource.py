@@ -15,7 +15,8 @@ class AbstractXrayutilitiesDataSource:
     def __init__(self, transform=None, 
                  scanList=None, 
                  roi=None, 
-                 pixelsToAverage=None):
+                 pixelsToAverage=None,
+                 badPixelFile=None):
         '''
         Constructor
         '''
@@ -43,18 +44,19 @@ class AbstractXrayutilitiesDataSource:
         self.imageToBeUsed = {}
         self.availableScans = []
         self.ubMatrix = {}
+        self.badPixels = []
         self.rangeBounds = None
         self.cancelLoad = False
         self.monitorName = None
         self.monitorScaleFactor = 1.0
         self.filterName = None
         self.filterScaleFactor = 1.0
-        print transform
         if transform == None:
             self.transform = UnityTransform3D()
         else:
             self.transform = transform
-
+        self.badPixelFile = badPixelFile
+        
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         find the overall boundaries for a scan given the min/max boundaries
@@ -81,6 +83,12 @@ class AbstractXrayutilitiesDataSource:
         make sure that scans are available in the directory structure
         '''
         return self.availableScans
+    
+    def getBadPixels(self):
+        '''
+        Return a list of tuples holding the coordinates of bad pixels.
+        '''
+        return self.badPixels
     
     def getDetectorAngleNames(self):
         '''
