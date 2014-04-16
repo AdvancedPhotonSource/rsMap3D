@@ -12,6 +12,7 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
 import numpy as np
 import xrayutilities as xu
 import time
+import csv
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -154,7 +155,24 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.imageFileTmp = os.path.join(imageDir, \
                                 "S%%03d/%s_S%%03d_%%05d.tif" % 
                                 (self.projectName))
-
+        if not (self.badPixelFile == None):
+            
+            reader = csv.reader(open(self.badPixelFile), delimiter=' ',skipinitialspace=True) 
+            self.badPixels = []
+            for line in reader:
+                newLine = []
+                print "Line " + str(line)
+                for word in line:
+                    if not (word == ''):
+                        words = word.split(',')
+                        #print words
+                        for newWord in words:
+                            if not(newWord == ''):
+                                newLine.append(newWord)
+                print "newLine " + str(newLine)
+                for i in range(len(newLine)/2):
+                    self.badPixels.append((int(newLine[i*2]), int(newLine[2*i+1]))) 
+            print self.badPixels
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
