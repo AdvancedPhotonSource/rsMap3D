@@ -109,14 +109,8 @@ class AbstractGridMapper(object):
         ADD REMOVE VALUES IF NEEDED!
         """
         
-        #ad_data[44,159] = 0
-        ad_data[227,34] = 0
-        ad_data[348,170] = 0
-        ad_data[426,96] = 0
-        ad_data[426,97] = 0
-        ad_data[427,96] = 0
-        ad_data[427,97] = 0
-        ad_data[357,185] = 0
+        for pixel in self.dataSource.getBadPixels():
+            ad_data[pixel[0],pixel[1]] = 0
         
         return ad_data
 
