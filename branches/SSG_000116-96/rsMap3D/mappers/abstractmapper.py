@@ -231,7 +231,9 @@ class AbstractGridMapper(object):
                     img = np.array(Image.open(self.dataSource.imageFileTmp % 
                                                  (scannr, scannr, ind))).T
                     img = self.hotpixelkill(img)
-        
+                    ff_data = self.dataSource.getFlatFieldData()
+                    if not (ff_data == None):
+                        img = img * ff_data
                     # reduce data size
                     img2 = xu.blockAverage2D(img, 
                                             self.dataSource.getNumPixelsToAverage()[0], \
