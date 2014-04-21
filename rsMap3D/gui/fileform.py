@@ -168,9 +168,12 @@ class FileForm(QDialog):
         self.emit(SIGNAL("loadFile"))
 
     def badPixelFileChanged(self):
+        '''
+        Do some verification when the bad pixel file changes
+        '''
         if os.path.isfile(self.badPixelFileTxt.text()) or \
            self.badPixelFileTxt.text() == "":
-            pass
+            self.checkOkToLoad()
         else:
             message = QMessageBox()
             message.warning(self, \
@@ -180,15 +183,18 @@ class FileForm(QDialog):
             
                 
     def browseBadPixelFileName(self):
+        '''
+        Launch file browser for bad pixel file
+        '''
         if self.badPixelFileTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
                                                filter="*.txt")
         else:
-            fileDirectory = os.path.dirname(str(self.badPiselFileTxt.text()))
+            fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
-                                               filter="*.xml", \
+                                               filter="*.txt", \
                                                directory = fileDirectory)
         if fileName != "":
             self.badPixelFileTxt.setText(fileName)
@@ -196,7 +202,22 @@ class FileForm(QDialog):
 
     
     def browseFlatFieldFileName(self):
-        print "browse for flat Field file"
+        '''
+        Launch file browser for Flat field file
+        '''
+        if self.flatFieldFileTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Flat Field File", 
+                                               filter="TIFF Files (*.tiff *.tif)")
+        else:
+            fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Flat Field File", 
+                                               filter="TIFF Files (*.tiff *.tif)", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.flatFieldFileTxt.setText(fileName)
+            self.flatFieldFileTxt.emit(SIGNAL("editingFinished()"))
     
     def browseForInstFile(self):
         '''
@@ -271,10 +292,22 @@ class FileForm(QDialog):
             self.badPixelFileBrowseButton.setDisabled(True)
             self.flatFieldFileTxt.setDisabled(False)
             self.flatFieldFileBrowseButton.setDisabled(False)
+        self.checkOkToLoad()
             
             
     def flatFieldFileChanged(self):
-        print "flatFieldFileChanged"
+        '''
+        Do some verification when the flat field file changes
+        '''
+        if os.path.isfile(self.flatFieldFileTxt.text()) or \
+           self.flatFieldFileTxt.text() == "":
+            self.checkOkToLoad()
+        else:
+            message = QMessageBox()
+            message.warning(self, \
+                            "Warning", \
+                             "The filename entered for the flat field " + \
+                             "file is invalid")
                 
     def getBadPixelFileName(self):
         '''
@@ -293,6 +326,17 @@ class FileForm(QDialog):
         '''
         return self.detConfigTxt.text()
 
+    def getFlatFieldFileName(self):
+        '''
+        Return the flat field file name.  If empty or if the bad pixel radio 
+        button is not checked return None
+        '''
+        if (str(self.flatFieldFileTxt.text()) == "") or \
+           (not self.flatFieldRadio.isChecked()):
+            return None
+        else:
+            return str(self.flatFieldFileTxt.text())
+        
     def getMapAsHKL(self):
         return self.hklCheckbox.isChecked()
         
@@ -355,7 +399,7 @@ class FileForm(QDialog):
         else:
             message = QMessageBox()
             message.warning(self, \
-                             "Warning"\
+                             "Warning",\
                              "The filename entered for the detector " + \
                              "configuration is invalid")
         
@@ -364,7 +408,12 @@ class FileForm(QDialog):
         '''
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
-            os.path.isfile(self.detConfigTxt.text()):
+            os.path.isfile(self.detConfigTxt.text()) and \
+            (self.noFieldRadio.isChecked() or \
+             (self.badPixelRadio.isChecked() and \
+              not (str(self.badPixelFileTxt.text()) == "")) or \
+             (self.flatFieldRadio.isChecked() and \
+              not (str(self.flatFieldFileTxt.text()) == ""))):
             self.loadButton.setEnabled(True)
         else:
             self.loadButton.setDisabled(True)

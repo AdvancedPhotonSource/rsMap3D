@@ -13,6 +13,8 @@ import numpy as np
 import xrayutilities as xu
 import time
 import csv
+import Image
+import matplotlib.pyplot as plt
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -109,6 +111,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         split off from the constructor to allow this to be threaded and later 
         canceled.
         '''
+        # Load up the instrument configuration file
         try:
             instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
             self.sampleCirclesDirections = instConfig.getSampleCircleDirections()
@@ -127,6 +130,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         except Exception as ex:
             print ("---Error Reading instconfig")
             raise ex
+        #Load up the detector configuration file
         try:
             detConfig = \
                 DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
@@ -155,24 +159,26 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.imageFileTmp = os.path.join(imageDir, \
                                 "S%%03d/%s_S%%03d_%%05d.tif" % 
                                 (self.projectName))
+        # if needed load up the bad pixel file.
         if not (self.badPixelFile == None):
             
             reader = csv.reader(open(self.badPixelFile), delimiter=' ',skipinitialspace=True) 
             self.badPixels = []
             for line in reader:
                 newLine = []
-                print "Line " + str(line)
                 for word in line:
                     if not (word == ''):
                         words = word.split(',')
-                        #print words
                         for newWord in words:
                             if not(newWord == ''):
                                 newLine.append(newWord)
-                print "newLine " + str(newLine)
                 for i in range(len(newLine)/2):
                     self.badPixels.append((int(newLine[i*2]), int(newLine[2*i+1]))) 
-            print self.badPixels
+        # id needed load the flat field file
+        if not (self.flatFieldFile == None):
+            self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
+            print self.flatFieldData
+        # Load scan information from the spec file
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
