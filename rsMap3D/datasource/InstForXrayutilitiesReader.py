@@ -213,27 +213,3 @@ class InstForXrayutilitiesReader():
             refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
         return [refAxis[1], refAxis[2], refAxis[3]]
         
-if __name__ == '__main__':
-    config = InstForXrayutilitiesReader('33BM-instForXrayutilities.xml')
-    print config
-    print config.getSampleCircles()
-    print config.getDetectorCircles()
-    print '====Sample Circles ' + str(config.getNumSampleCircles())
-    for circle in config.getSampleCircles():
-        print config.getCircleAxisNumber(circle)
-        print config.getCircleSpecMotorName(circle)
-        print config.getCircleDirection(circle)
-    print '====Detector Circles ' + str(config.getNumDetectorCircles())
-    for circle in config.getDetectorCircles():
-        print config.getCircleAxisNumber(circle)
-        print config.getCircleSpecMotorName(circle)
-        print config.getCircleDirection(circle)
-
-    print config.getPrimaryBeamDirection()
-    print config.getInplaneReferenceDirection()
-    print config.getSampleSurfaceNormalDirection()
-    
-    print config.getSampleCircleDirections()
-    print config.getSampleCircleNames()
-    print config.getDetectorCircleDirections()
-    print config.getDetectorCircleNames()
