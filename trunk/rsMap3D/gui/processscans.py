@@ -114,7 +114,7 @@ class ProcessScans(QDialog):
                                                "Save File", \
                                                filter="*.vti")
         else:
-            fileDirectory = os.path.dirname(str(self.OutputFileTxt.text()))
+            fileDirectory = os.path.dirname(str(self.outFileTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Save File", 
                                                filter="*.vti", \

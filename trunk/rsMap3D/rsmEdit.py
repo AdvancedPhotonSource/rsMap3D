@@ -87,7 +87,9 @@ class MainDialog(QWidget):
                                        pixelsToAverage = \
                                           self.fileForm.getPixelsToAverage(), \
                                        badPixelFile = \
-                                          self.fileForm.getBadPixelFileName() \
+                                          self.fileForm.getBadPixelFileName(), \
+                                       flatFieldFile = \
+                                          self.fileForm.getFlatFieldFileName() \
                                       )
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:

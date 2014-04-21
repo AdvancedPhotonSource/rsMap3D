@@ -16,7 +16,8 @@ class AbstractXrayutilitiesDataSource:
                  scanList=None, 
                  roi=None, 
                  pixelsToAverage=None,
-                 badPixelFile=None):
+                 badPixelFile=None,
+                 flatFieldFile=None):
         '''
         Constructor
         '''
@@ -56,7 +57,8 @@ class AbstractXrayutilitiesDataSource:
         else:
             self.transform = transform
         self.badPixelFile = badPixelFile
-        
+        self.flatFieldFile = flatFieldFile
+        self.flatFieldData = None
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         find the overall boundaries for a scan given the min/max boundaries
@@ -140,6 +142,12 @@ class AbstractXrayutilitiesDataSource:
         '''
         '''
         return self.detectorROI
+    
+    def getFlatFieldData(self):
+        '''
+        Return image for the flat field correctiom
+        ''' 
+        return self.flatFieldData
     
     def getFilterName(self):
         '''
