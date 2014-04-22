@@ -13,6 +13,9 @@ import numpy as np
 import xrayutilities as xu
 import time
 import traceback
+import csv
+import Image
+import matplotlib.pyplot as plt
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -145,6 +148,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         split off from the constructor to allow this to be threaded and later 
         canceled.
         '''
+        # Load up the instrument configuration file
         try:
             self.instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
             self.sampleCirclesDirections = self.instConfig.getSampleCircleDirections()
@@ -192,7 +196,26 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.imageFileTmp = os.path.join(imageDir, \
                                 "S%%03d/%s_S%%03d_%%05d.tif" % 
                                 (self.projectName))
-
+        # if needed load up the bad pixel file.
+        if not (self.badPixelFile == None):
+            
+            reader = csv.reader(open(self.badPixelFile), delimiter=' ',skipinitialspace=True) 
+            self.badPixels = []
+            for line in reader:
+                newLine = []
+                for word in line:
+                    if not (word == ''):
+                        words = word.split(',')
+                        for newWord in words:
+                            if not(newWord == ''):
+                                newLine.append(newWord)
+                for i in range(len(newLine)/2):
+                    self.badPixels.append((int(newLine[i*2]), int(newLine[2*i+1]))) 
+        # id needed load the flat field file
+        if not (self.flatFieldFile == None):
+            self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
+            print self.flatFieldData
+        # Load scan information from the spec file
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
