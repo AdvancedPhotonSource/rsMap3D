@@ -109,14 +109,8 @@ class AbstractGridMapper(object):
         ADD REMOVE VALUES IF NEEDED!
         """
         
-        #ad_data[44,159] = 0
-        ad_data[227,34] = 0
-        ad_data[348,170] = 0
-        ad_data[426,96] = 0
-        ad_data[426,97] = 0
-        ad_data[427,96] = 0
-        ad_data[427,97] = 0
-        ad_data[357,185] = 0
+        for pixel in self.dataSource.getBadPixels():
+            ad_data[pixel[0],pixel[1]] = 0
         
         return ad_data
 
@@ -237,7 +231,9 @@ class AbstractGridMapper(object):
                     img = np.array(Image.open(self.dataSource.imageFileTmp % 
                                                  (scannr, scannr, ind))).T
                     img = self.hotpixelkill(img)
-        
+                    ff_data = self.dataSource.getFlatFieldData()
+                    if not (ff_data == None):
+                        img = img * ff_data
                     # reduce data size
                     img2 = xu.blockAverage2D(img, 
                                             self.dataSource.getNumPixelsToAverage()[0], \
