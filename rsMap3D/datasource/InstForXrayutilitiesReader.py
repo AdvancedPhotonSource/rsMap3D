@@ -292,5 +292,4 @@ class InstForXrayutilitiesReader():
         for axis in axes:
             refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
         return [refAxis[1], refAxis[2], refAxis[3]]
-    
         

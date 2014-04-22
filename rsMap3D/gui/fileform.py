@@ -14,6 +14,9 @@ from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QCheckBox
 from PyQt4.QtGui import QRegExpValidator
+from PyQt4.QtGui import QRadioButton
+from PyQt4.QtGui import QButtonGroup
+
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
@@ -57,47 +60,67 @@ class FileForm(QDialog):
         layout.addWidget(self.detConfigTxt, 3, 1)
         layout.addWidget(self.detConfigFileButton, 3, 2)
         
+        self.fieldCorrectionGroup = QButtonGroup(self)
+        self.noFieldRadio = QRadioButton("None")
+        self.badPixelRadio = QRadioButton("Bad Pixel File")
+        self.flatFieldRadio = QRadioButton("Flat Field Correction")
+        self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
+        self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
+        self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
+        self.badPixelFileTxt = QLineEdit()
+        self.flatFieldFileTxt = QLineEdit()
+        self.badPixelFileBrowseButton = QPushButton("Browse")
+        self.flatFieldFileBrowseButton = QPushButton("Browse")
+        
+        layout.addWidget(self.noFieldRadio, 4,0)
+        layout.addWidget(self.badPixelRadio, 5,0)
+        layout.addWidget(self.badPixelFileTxt,5,1)
+        layout.addWidget(self.badPixelFileBrowseButton,5,2)
+        layout.addWidget(self.flatFieldRadio, 6,0)
+        layout.addWidget(self.flatFieldFileTxt,6,1)
+        layout.addWidget(self.flatFieldFileBrowseButton,6,2)
+        
         label = QLabel("Number of Pixels To Average:");
         self.pixAvgTxt = QLineEdit("1,1")
         rxAvg = QRegExp('(\d)+,(\d)+')
         self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
-        layout.addWidget(label, 4, 0)
-        layout.addWidget(self.pixAvgTxt, 4, 1)
+        layout.addWidget(label, 7, 0)
+        layout.addWidget(self.pixAvgTxt, 7, 1)
 
         label = QLabel("Detector ROI:");
         self.detROITxt = QLineEdit()
         self.updateROITxt()
         rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
         self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
-        layout.addWidget(label, 5, 0)
-        layout.addWidget(self.detROITxt, 5, 1)
+        layout.addWidget(label, 8, 0)
+        layout.addWidget(self.detROITxt, 8, 1)
         
         label = QLabel("Scan Numbers")
         self.scanNumsTxt = QLineEdit()
         rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
         self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
-        layout.addWidget(label, 6, 0)
-        layout.addWidget(self.scanNumsTxt, 6, 1)
+        layout.addWidget(label, 9, 0)
+        layout.addWidget(self.scanNumsTxt, 9, 1)
 
         label = QLabel("Output Type")
         self.outTypeChooser = QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
-        layout.addWidget(label, 7, 0)
-        layout.addWidget(self.outTypeChooser, 7, 1)
+        layout.addWidget(label, 10, 0)
+        layout.addWidget(self.outTypeChooser, 10, 1)
         label = QLabel("HKL output")
-        layout.addWidget(label, 8,0)
+        layout.addWidget(label, 11,0)
         self.hklCheckbox = QCheckBox()
-        layout.addWidget(self.hklCheckbox, 8, 1)
+        layout.addWidget(self.hklCheckbox, 11, 1)
         
         
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton,9 , 1)
+        layout.addWidget(self.loadButton,12 , 1)
         self.cancelButton = QPushButton("Cancel")        
         self.cancelButton.setDisabled(True)
 #        self.cancelButton.setDisabled(True)
-        layout.addWidget(self.cancelButton,9 , 2)
+        layout.addWidget(self.cancelButton,12 , 2)
         
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
@@ -119,7 +142,24 @@ class FileForm(QDialog):
         self.connect(self.outTypeChooser, \
                      SIGNAL("currentIndexChanged(QString )"), \
                      self.outputTypeChanged)
-        
+        self.connect(self.fieldCorrectionGroup,\
+                     SIGNAL("buttonClicked(QAbstractButton *)"), \
+                     self.fieldCorrectionTypeChanged)
+        self.connect(self.badPixelFileTxt,
+                     SIGNAL("editingFinished()"),
+                     self.badPixelFileChanged)
+        self.connect(self.flatFieldFileTxt,
+                     SIGNAL("editingFinished()"),
+                     self.flatFieldFileChanged)
+        self.connect(self.badPixelFileBrowseButton, \
+                     SIGNAL("clicked()"), \
+                     self.browseBadPixelFileName)
+        self.connect(self.flatFieldFileBrowseButton, \
+                     SIGNAL("clicked()"), \
+                     self.browseFlatFieldFileName)
+        self.noFieldRadio.setChecked(True)
+        #print self.noFieldRadio.
+        self.fieldCorrectionTypeChanged(*(self.noFieldRadio,))
         self.setLayout(layout);
         
     def loadFile(self):
@@ -127,7 +167,59 @@ class FileForm(QDialog):
         Emit a signal to start loading data
         '''
         self.emit(SIGNAL("loadFile"))
-        
+
+    def badPixelFileChanged(self):
+        '''
+        Do some verification when the bad pixel file changes
+        '''
+        if os.path.isfile(self.badPixelFileTxt.text()) or \
+           self.badPixelFileTxt.text() == "":
+            self.checkOkToLoad()
+        else:
+            message = QMessageBox()
+            message.warning(self, \
+                            "Warning", \
+                             "The filename entered for the bad pixel " + \
+                             "file is invalid")
+            
+                
+    def browseBadPixelFileName(self):
+        '''
+        Launch file browser for bad pixel file
+        '''
+        if self.badPixelFileTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Bad Pixel File", 
+                                               filter="*.txt")
+        else:
+            fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Bad Pixel File", 
+                                               filter="*.txt", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.badPixelFileTxt.setText(fileName)
+            self.badPixelFileTxt.emit(SIGNAL("editingFinished()"))
+
+    
+    def browseFlatFieldFileName(self):
+        '''
+        Launch file browser for Flat field file
+        '''
+        if self.flatFieldFileTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Flat Field File", 
+                                               filter="TIFF Files (*.tiff *.tif)")
+        else:
+            fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, 
+                                               "Select Flat Field File", 
+                                               filter="TIFF Files (*.tiff *.tif)", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.flatFieldFileTxt.setText(fileName)
+            self.flatFieldFileTxt.emit(SIGNAL("editingFinished()"))
+    
     def browseForInstFile(self):
         '''
         Launch file selection dialog for instrument file.
@@ -185,12 +277,67 @@ class FileForm(QDialog):
         ''' Send signal to cancel a file load'''
         self.emit(SIGNAL("cancelLoadFile"))
         
+    def fieldCorrectionTypeChanged(self, *fieldCorrType):
+        if fieldCorrType[0].text() == "None":
+            self.badPixelFileTxt.setDisabled(True)
+            self.badPixelFileBrowseButton.setDisabled(True)
+            self.flatFieldFileTxt.setDisabled(True)
+            self.flatFieldFileBrowseButton.setDisabled(True)
+        elif fieldCorrType[0].text() == "Bad Pixel File":
+            self.badPixelFileTxt.setDisabled(False)
+            self.badPixelFileBrowseButton.setDisabled(False)
+            self.flatFieldFileTxt.setDisabled(True)
+            self.flatFieldFileBrowseButton.setDisabled(True)
+        elif fieldCorrType[0].text() == "Flat Field Correction":
+            self.badPixelFileTxt.setDisabled(True)
+            self.badPixelFileBrowseButton.setDisabled(True)
+            self.flatFieldFileTxt.setDisabled(False)
+            self.flatFieldFileBrowseButton.setDisabled(False)
+        self.checkOkToLoad()
+            
+            
+    def flatFieldFileChanged(self):
+        '''
+        Do some verification when the flat field file changes
+        '''
+        if os.path.isfile(self.flatFieldFileTxt.text()) or \
+           self.flatFieldFileTxt.text() == "":
+            self.checkOkToLoad()
+        else:
+            message = QMessageBox()
+            message.warning(self, \
+                            "Warning", \
+                             "The filename entered for the flat field " + \
+                             "file is invalid")
+                
+    def getBadPixelFileName(self):
+        '''
+        Return the badPixel file name.  If empty or if the bad pixel radio 
+        button is not checked return None
+        '''
+        if (str(self.badPixelFileTxt.text()) == "") or \
+           (not self.badPixelRadio.isChecked()):
+            return None
+        else:
+            return str(self.badPixelFileTxt.text())
+        
     def getDetConfigName(self):
         '''
         Return the selected Detector Configuration file
         '''
         return self.detConfigTxt.text()
 
+    def getFlatFieldFileName(self):
+        '''
+        Return the flat field file name.  If empty or if the bad pixel radio 
+        button is not checked return None
+        '''
+        if (str(self.flatFieldFileTxt.text()) == "") or \
+           (not self.flatFieldRadio.isChecked()):
+            return None
+        else:
+            return str(self.flatFieldFileTxt.text())
+        
     def getMapAsHKL(self):
         return self.hklCheckbox.isChecked()
         
@@ -253,7 +400,7 @@ class FileForm(QDialog):
         else:
             message = QMessageBox()
             message.warning(self, \
-                             "Warning"\
+                             "Warning",\
                              "The filename entered for the detector " + \
                              "configuration is invalid")
         
@@ -262,7 +409,12 @@ class FileForm(QDialog):
         '''
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
-            os.path.isfile(self.detConfigTxt.text()):
+            os.path.isfile(self.detConfigTxt.text()) and \
+            (self.noFieldRadio.isChecked() or \
+             (self.badPixelRadio.isChecked() and \
+              not (str(self.badPixelFileTxt.text()) == "")) or \
+             (self.flatFieldRadio.isChecked() and \
+              not (str(self.flatFieldFileTxt.text()) == ""))):
             self.loadButton.setEnabled(True)
         else:
             self.loadButton.setDisabled(True)
