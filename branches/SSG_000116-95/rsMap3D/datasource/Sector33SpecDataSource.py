@@ -135,7 +135,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 #print i
                 #print primaryAngles[i]
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
-    
         
     def getImage(self):
         '''
@@ -168,6 +167,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         except Exception as ex:
             print ("---Error Reading instconfig")
             raise ex
+        #Load up the detector configuration file
         try:
             detConfig = \
                 DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
