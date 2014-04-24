@@ -272,19 +272,12 @@ class AbstractGridMapper(object):
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-        angleTuple = tuple(angleList)
         if self.dataSource.getUBMatrix(scans[0]) == None:
-            qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], \
-                            angleTuple[1], \
-                            angleTuple[2], \
-                            angleTuple[3],  \
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
                             roi=self.dataSource.getDetectorROI(), 
                             Nav=self.dataSource.getNumPixelsToAverage())
         else:
-            qx, qy, qz = hxrd.Ang2Q.area(angleTuple[0], \
-                            angleTuple[1], \
-                            angleTuple[2], \
-                            angleTuple[3],  \
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                             roi=self.dataSource.getDetectorROI(), 
                             Nav=self.dataSource.getNumPixelsToAverage(), \
                             UB = self.dataSource.getUBMatrix(scans[0]))

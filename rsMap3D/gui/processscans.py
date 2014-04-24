@@ -13,6 +13,7 @@ from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QIntValidator
 
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.polemapper import PoleFigureMapper
@@ -31,7 +32,7 @@ class ProcessScans(QDialog):
         '''
         super(ProcessScans, self).__init__(parent)
         layout = QGridLayout()
-        label = QLabel("Output Type")        
+#        label = QLabel("Output Type")        
 #        layout.addWidget(label, 0, 0)
         self.outTypeChooser = QComboBox()
         self.outTypeChooser.addItem(self.GRID_MAP_STR)
@@ -45,18 +46,24 @@ class ProcessScans(QDialog):
         layout.addWidget(label, 1,0)
         self.xDimTxt = QLineEdit()
         self.xDimTxt.setText("200")
+        self.xDimValidator = QIntValidator()
+        self.xDimTxt.setValidator(self.xDimValidator)
         layout.addWidget(self.xDimTxt, 1,1)
         
         label = QLabel("Y")
         layout.addWidget(label, 2,0)
         self.yDimTxt = QLineEdit()
         self.yDimTxt.setText("200")
+        self.yDimValidator = QIntValidator()
+        self.yDimTxt.setValidator(self.yDimValidator)
         layout.addWidget(self.yDimTxt, 2,1)
         
         label = QLabel("Z")
         layout.addWidget(label, 3,0)
         self.zDimTxt = QLineEdit()
         self.zDimTxt.setText("200")
+        self.zDimValidator = QIntValidator()
+        self.zDimTxt.setValidator(self.zDimValidator)
         layout.addWidget(self.zDimTxt, 3,1)
         
         label = QLabel("Output File")
@@ -78,41 +85,16 @@ class ProcessScans(QDialog):
         
         
         
-    def process(self):
-        '''
-        Emit a signal to trigger the start of procesing.
-        '''
-        self.emit(SIGNAL("process"))
-        
-    def runMapper(self, dataSource, transform):
-        '''
-        Run the selected mapper
-        '''
-        self.dataSource = dataSource
-        print "Selected " + str(self.outTypeChooser.currentText())
-        nx = int(self.xDimTxt.text())
-        ny = int(self.yDimTxt.text())
-        nz = int(self.zDimTxt.text())
-        outputFileName = str(self.outFileTxt.text())
-        if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
-            gridMapper = QGridMapper(dataSource, \
-                                     outputFileName, \
-                                     nx=nx, ny=ny, nz=nz,
-                                     transform = transform)
-            gridMapper.doMap()
-        else:
-            poleMapper = PoleFigureMapper(dataSource, \
-                                          outputFileName, \
-                                          nx=nx, ny=ny, nz=nz, \
-                                          transform = transform)
-            poleMapper.doMap()
-            
-    
     def browseForOutputFile(self):
+        '''
+        Launch file browser to select the output file.  Checks are done to make
+        sure the selected directory exists and that the selected file is 
+        writable
+        '''
         if self.outFileTxt.text() == "":
-            fileName = QFileDialog.getSaveFileName(None, \
+            fileName = str(QFileDialog.getSaveFileName(None, \
                                                "Save File", \
-                                               filter="*.vti")
+                                               filter="*.vti"))
         else:
             fileDirectory = os.path.dirname(str(self.outFileTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
@@ -126,12 +108,22 @@ class ProcessScans(QDialog):
             else:
                 message = QMessageBox()
                 message.warning(self, \
-                             "Warning"\
+                             "Warning", \
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
+            if not os.access(os.path.dirname(fileName), os.W_OK):
+                message = QMessageBox()
+                message.warning(self, \
+                             "Warning", \
+                             "The specified fileis not writable")
+            
                 
     def editFinishedOutputFile(self):
+        '''
+        When edititing is finished the a check is done to make sure that the 
+        directory exists and the file is writable
+        '''
         fileName = str(self.outFileTxt.text())
         if fileName != "":
             if os.path.exists(os.path.dirname(fileName)):
@@ -142,4 +134,44 @@ class ProcessScans(QDialog):
                 message.warning(self, \
                              "Warning"\
                              "The specified directory does not exist")
+            if not os.access(os.path.dirname(fileName), os.W_OK):
+                message = QMessageBox()
+                message.warning(self, \
+                             "Warning", \
+                             "The specified fileis not writable")
+
+    def process(self):
+        '''
+        Emit a signal to trigger the start of procesing.
+        '''
+        self.emit(SIGNAL("process"))
+        
+    def runMapper(self, dataSource, transform):
+        '''
+        Run the selected mapper
+        '''
+        self.dataSource = dataSource
+#        print "Selected " + str(self.outTypeChooser.currentText())
+        nx = int(self.xDimTxt.text())
+        ny = int(self.yDimTxt.text())
+        nz = int(self.zDimTxt.text())
+        outputFileName = str(self.outFileTxt.text())
+        if os.access(os.path.dirname(outputFileName), os.W_OK):
+            if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
+                gridMapper = QGridMapper(dataSource, \
+                                         outputFileName, \
+                                         nx=nx, ny=ny, nz=nz,
+                                         transform = transform)
+                gridMapper.doMap()
+            else:
+                poleMapper = PoleFigureMapper(dataSource, \
+                                              outputFileName, \
+                                              nx=nx, ny=ny, nz=nz, \
+                                              transform = transform)
+                poleMapper.doMap()
+        else:
+            message = QMessageBox()
+            message.warning(self, \
+                         "Warning", \
+                         "The specified fileis not writable")
         
