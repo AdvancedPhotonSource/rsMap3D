@@ -10,16 +10,21 @@ DETECTOR_CIRCLES = NAMESPACE + 'detectorCircles'
 FILTER_NAME = NAMESPACE + 'filterName'   
 INPLANE_REFERENCE_DIRECTION = NAMESPACE + 'inplaneReferenceDirection'   
 MONITOR_NAME = NAMESPACE + 'monitorName'   
-PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'   
+PRIMARY_ANGLE = NAMESPACE + 'primaryAngle'   
+PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'
+REFERENCE_ANGLE = NAMESPACE + 'referenceAngle'
 SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
 SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
+SAMPLE_ANGLE_MAP_FUNCTION = NAMESPACE + 'sampleAngleMapFunction'   
 #Attribute Names
 AXIS_NUMBER = 'number'
 DIRECTION_AXIS = 'directionAxis'
+NAME = 'name'
 NUM_CIRCLES = 'numCircles'
 REFERENCE_AXIS = NAMESPACE + 'axis'
 SCALE_FACTOR = 'scaleFactor'
 SPEC_MOTOR_NAME = 'specMotorName'
+CALC_ON_SCANNED_REF = 'calcOnScannedRef'
 
 class InstForXrayutilitiesReader():
     '''
@@ -146,6 +151,81 @@ class InstForXrayutilitiesReader():
             self.root.find(PRIMARY_BEAM_DIRECTION)
         return self.makeReferenceDirection(direction )
         
+    def getSampleAngleMappingCalcOnScannedRef(self):
+        '''
+        Returns true to run mapping function only when a reference angle is 
+        scanned 
+        '''
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise ValueError("No Mapping function defined in instrument " + \
+                             "config file")
+        if function.attrib[CALC_ON_SCANNED_REF] == None:
+            return False
+        else:
+            if function.attrib[CALC_ON_SCANNED_REF].lower() in \
+                ['true', '1', 'yes']:
+                return True
+            elif function.attrib[CALC_ON_SCANNED_REF].lower() in \
+                ['false', '0', 'no']:
+                return False
+            else:
+                raise ValueError("Error reading value for " + \
+                                 "'calcOnScannedRef' from Instrument " + \
+                                 "Config : " + \
+                                 function.attrib[CALC_ON_SCANNED_REF])
+                
+                
+    def getSampleAngleMappingFunctionName(self):
+        '''
+        Retrieve the name of a function to be used in mapping 
+        '''
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            return ""
+        else:
+            return function.attrib[NAME]
+
+    def getSampleAngleMappingPrimaryAngles(self):
+        '''
+        Retrieve the name of a function to be used in mapping 
+        '''
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise ValueError("No Mapping function defined in instrument " + \
+                             "config file")
+        angles = []
+        primaryAngles = function.findall(PRIMARY_ANGLE)
+        if primaryAngles == None:
+            raise ValueError("No primaryAngle members in " + \
+            "sampleAngleMapFunction in instrument config")
+        for angle in primaryAngles:
+            angles.append(int(angle.attrib[AXIS_NUMBER]))
+        angles.sort()
+        return angles
+    
+
+    def getSampleAngleMappingReferenceAngles(self):
+        '''
+        Retrieve the name of a function to be used in mapping 
+        '''
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise ValueError("No Mapping function defined in instrument " + \
+                             "config file")
+        angles = {}
+        angleList = []
+        referenceAngles = function.findall(REFERENCE_ANGLE)
+        if referenceAngles == None:
+            raise ValueError("No referenceAngle members in " + \
+            "sampleAngleMapFunction in instrument config")
+        for angle in referenceAngles:
+            angles[int(angle.attrib[AXIS_NUMBER])] = \
+                angle.attrib[SPEC_MOTOR_NAME]
+        for i in  range(len(angles)):
+            angleList.append(angles[i+1])
+        return angleList
+
     def getSampleCircleDirections(self):
         '''
         '''
