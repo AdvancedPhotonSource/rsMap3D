@@ -5,6 +5,7 @@
 import unittest
 from rsMap3D.datasource.InstForXrayutilitiesReader import \
     InstForXrayutilitiesReader
+from rsMap3D.exception.rsmap3dexception import InstConfigException
 
 class Test(unittest.TestCase):
 
@@ -70,14 +71,32 @@ class Test(unittest.TestCase):
         self.assertEqual(len(circles), 1, "getDetectorCircles")
         
     def testGetDetectorCirclesNoCircle(self):
-        self.assertRaises(IOError, self.config3.getDetectorCircles)
+        self.assertRaises(InstConfigException, self.config3.getDetectorCircles)
+        
+    def testGetProjectionDirection(self):
+        direction = self.config.getProjectionDirection()
+        refDirection = [0, 0, 1]
+        self.assertEqual(direction, refDirection, \
+                         "getProjectionDirection " + str(direction) + " vs "\
+                         + str(refDirection) )
+        
+    def testGetProjectionDirection2(self):
+        direction = self.config5.getProjectionDirection()
+        refDirection = [0, 0, -1]
+        self.assertEqual(direction, refDirection, \
+                         "getProjectionDirection " + str(direction) + " vs "\
+                         + str(refDirection) )
+
+    def testGetProjectionDirectionNoDirection(self):
+        self.assertRaises(InstConfigException, 
+                          self.config3.getProjectionDirection)
         
     def testGetSampleCircles(self):
         circles = self.config.getSampleCircles()
         self.assertEqual(len(circles), 3, "getSampleCircles")
         
     def testGetSampleCirclesNoCircle(self):
-        self.assertRaises(IOError, self.config3.getSampleCircles)
+        self.assertRaises(InstConfigException, self.config3.getSampleCircles)
         
     def testGetSampleAngleMappingFunctionName(self):
         name = self.config5.getSampleAngleMappingFunctionName()
@@ -98,7 +117,7 @@ class Test(unittest.TestCase):
                           "getSampleAngleMappingCalcOnScannedRef: " + str(calc))
         
     def testGetSampleAngleMappingFunctionCalcOnScannedRefNoMap(self):
-        self.assertRaises(ValueError, 
+        self.assertRaises(InstConfigException, 
                           self.config4.getSampleAngleMappingCalcOnScannedRef)
         
     def testGetSampleAngleMappingPrimaryAngles(self):
@@ -108,7 +127,7 @@ class Test(unittest.TestCase):
                           "getSampleAngleMappingPrimaryAngles: " + str(angles))
 
     def testGetSampleAngleMappingFunctionPrimaryAnglesNoMap(self):
-        self.assertRaises(ValueError, 
+        self.assertRaises(InstConfigException, 
                           self.config4.getSampleAngleMappingPrimaryAngles)
         
     def testGetSampleAngleMappingRefereceAngles(self):
@@ -118,7 +137,7 @@ class Test(unittest.TestCase):
                           "getSampleAngleMappingReferenceAngles: " + str(angles))
 
     def testGetSampleAngleMappingFunctionReferenceAnglesNoMap(self):
-        self.assertRaises(ValueError, 
+        self.assertRaises(InstConfigException, 
                           self.config4.getSampleAngleMappingReferenceAngles)
         
 if __name__ == "__main__":
