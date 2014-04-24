@@ -3,6 +3,7 @@
  See LICENSE file.
 '''
 import xml.etree.ElementTree as ET
+from rsMap3D.exception.rsmap3dexception import InstConfigException
 
 NAMESPACE = '{https://subversion.xray.aps.anl.gov/RSM/instForXrayutils}'
 #Element Names
@@ -12,6 +13,7 @@ INPLANE_REFERENCE_DIRECTION = NAMESPACE + 'inplaneReferenceDirection'
 MONITOR_NAME = NAMESPACE + 'monitorName'   
 PRIMARY_ANGLE = NAMESPACE + 'primaryAngle'   
 PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'
+PROJECTION_DIRECTION = NAMESPACE + 'projectionDirection'
 REFERENCE_ANGLE = NAMESPACE + 'referenceAngle'
 SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
 SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
@@ -37,7 +39,7 @@ class InstForXrayutilitiesReader():
         try:
             tree = ET.parse(filename)
         except IOError as ex:
-            raise (IOError("Bad Instrument Configuration File" + str(ex)))
+            raise (InstConfigException("Bad Instrument Configuration File" + str(ex)))
         self.root = tree.getroot()
         
     def getCircleAxisNumber(self, circle):
@@ -63,11 +65,11 @@ class InstForXrayutilitiesReader():
     def getDetectorCircles(self):
         '''
         Return the detectpr childer as and element list.  If detector circles 
-        is not included in the file raise an IOError
+        is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
         if circles == None:
-            raise IOError("Instrument configuration has no Detector Circles")
+            raise InstConfigException("Instrument configuration has no Detector Circles")
         return self.root.find(DETECTOR_CIRCLES).getchildren()
         
     def getDetectorCircleNames(self):
@@ -146,9 +148,23 @@ class InstForXrayutilitiesReader():
     
     def getPrimaryBeamDirection(self):
         '''
+        Get direction of primart beam
         '''
         direction = \
             self.root.find(PRIMARY_BEAM_DIRECTION)
+        return self.makeReferenceDirection(direction )
+        
+    def getProjectionDirection(self):
+        '''
+        Get direction to be used for constructing Stereographic projections.
+        '''
+        
+        direction = \
+            self.root.find(PROJECTION_DIRECTION)
+        if direction == None:
+            message = PROJECTION_DIRECTION + \
+                                      " was not found in the instrument config file"
+            raise InstConfigException(message)
         return self.makeReferenceDirection(direction )
         
     def getSampleAngleMappingCalcOnScannedRef(self):
@@ -158,8 +174,8 @@ class InstForXrayutilitiesReader():
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
-            raise ValueError("No Mapping function defined in instrument " + \
-                             "config file")
+            raise InstConfigException("No Mapping function defined in " + \
+                             "instrument config file")
         if function.attrib[CALC_ON_SCANNED_REF] == None:
             return False
         else:
@@ -170,7 +186,7 @@ class InstForXrayutilitiesReader():
                 ['false', '0', 'no']:
                 return False
             else:
-                raise ValueError("Error reading value for " + \
+                raise InstConfigException("Error reading value for " + \
                                  "'calcOnScannedRef' from Instrument " + \
                                  "Config : " + \
                                  function.attrib[CALC_ON_SCANNED_REF])
@@ -192,12 +208,12 @@ class InstForXrayutilitiesReader():
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
-            raise ValueError("No Mapping function defined in instrument " + \
+            raise InstConfigException("No Mapping function defined in instrument " + \
                              "config file")
         angles = []
         primaryAngles = function.findall(PRIMARY_ANGLE)
         if primaryAngles == None:
-            raise ValueError("No primaryAngle members in " + \
+            raise InstConfigException("No primaryAngle members in " + \
             "sampleAngleMapFunction in instrument config")
         for angle in primaryAngles:
             angles.append(int(angle.attrib[AXIS_NUMBER]))
@@ -211,13 +227,13 @@ class InstForXrayutilitiesReader():
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
-            raise ValueError("No Mapping function defined in instrument " + \
-                             "config file")
+            raise InstConfigException("No Mapping function defined in " + \
+                             "instrument config file")
         angles = {}
         angleList = []
         referenceAngles = function.findall(REFERENCE_ANGLE)
         if referenceAngles == None:
-            raise ValueError("No referenceAngle members in " + \
+            raise InstConfigException("No referenceAngle members in " + \
             "sampleAngleMapFunction in instrument config")
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
@@ -234,11 +250,12 @@ class InstForXrayutilitiesReader():
     def getSampleCircles(self):
         '''
         Return the detectpr childer as and element list.  If detector circles 
-        is not included in the file raise an IOError
+        is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
         if circles == None:
-            raise IOError("Instrument configuration has no Sample Circles")
+            raise InstConfigException("Instrument configuration has no Sample" +
+                                      " Circles")
         return circles.getchildren()
 
     def getSampleCircleNames(self):
@@ -292,4 +309,6 @@ class InstForXrayutilitiesReader():
         for axis in axes:
             refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
         return [refAxis[1], refAxis[2], refAxis[3]]
+    
+
         

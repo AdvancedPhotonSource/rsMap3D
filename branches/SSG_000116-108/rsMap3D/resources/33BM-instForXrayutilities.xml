@@ -39,4 +39,9 @@
     </sampleSurfaceNormalDirection>
     <monitorName scaleFactor="20000">I0</monitorName>
     <filterName scaleFactor="1000000">trans</filterName>
+    <projectionDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">1</axis>
+    </projectionDirection>
 </instForXrayutils>
