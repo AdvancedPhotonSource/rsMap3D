@@ -69,7 +69,9 @@ class MainDialog(QWidget):
         if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
-            self.transform = PoleMapTransform3D()
+            self.transform = \
+                PoleMapTransform3D(projectionDirection=\
+                                   self.fileForm.getProjectionDirection())
         else:
             self.transform = None
             
