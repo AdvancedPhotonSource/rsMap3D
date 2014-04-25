@@ -166,7 +166,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.filterScaleFactor = self.instConfig.getFilterScaleFactor()
             self.angleNames = self.instConfig.getSampleCircleNames() + \
                 self.instConfig.getDetectorCircleNames()
-
+            self.projectionDirection = self.instConfig.getProjectionDirection()
         except InstConfigException as ex:
             raise ex
         except Exception as ex:

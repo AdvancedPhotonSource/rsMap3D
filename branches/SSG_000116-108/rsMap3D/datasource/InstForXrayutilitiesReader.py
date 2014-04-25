@@ -30,6 +30,8 @@ CALC_ON_SCANNED_REF = 'calcOnScannedRef'
 
 class InstForXrayutilitiesReader():
     '''
+    Class to read instrument config file associated with xrayutilities and spec
+    file
     '''
 
     def __init__(self, filename):
@@ -44,24 +46,22 @@ class InstForXrayutilitiesReader():
         
     def getCircleAxisNumber(self, circle):
         '''
+        Return the Axis number for a given circle
         '''
-        return int(circle.attrib[AXIS_NUMBER])
+        try:
+            axisNumberStr = circle.attrib[AXIS_NUMBER]
+        except KeyError:
+            raise InstConfigException("Axis number is empty in \n" + \
+                                      ET.tostring(circle) + \
+                                      "\nIn the instrument config file")
+        return int(axisNumberStr)
         
-    def getCircleDirection(self, circle):
-        '''
-        '''
-        return circle.text
-    
     def getDetectorCircleDirections(self):
         '''
+        return circle directions for the detector circles 
         '''
         return self.makeCircleDirections(self.getDetectorCircles())
         
-    def getCircleSpecMotorName(self, circle):
-        '''
-        '''
-        return circle.attrib[SPEC_MOTOR_NAME]
-    
     def getDetectorCircles(self):
         '''
         Return the detectpr childer as and element list.  If detector circles 
@@ -107,6 +107,9 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(INPLANE_REFERENCE_DIRECTION)
+        if direction == None:
+            raise InstConfigException("Missing inplane reference direction " + \
+                                      "in instrument config file")
         return self.makeReferenceDirection(direction )
         
     def getMonitorName(self):
@@ -152,6 +155,9 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(PRIMARY_BEAM_DIRECTION)
+        if direction == None:
+            raise InstConfigException("Missing primary beam direction " + \
+                                      "in instrument config file")
         return self.makeReferenceDirection(direction )
         
     def getProjectionDirection(self):
@@ -268,6 +274,9 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)
+        if direction == None:
+            raise InstConfigException("Missing sample surface normal " + \
+                                      "direction in instrument config file")
         return self.makeReferenceDirection(direction )
         
     def makeCircleDirections(self, circles):
@@ -276,13 +285,20 @@ class InstForXrayutilitiesReader():
         '''
         data = []
         for circle in circles:
-            data.append((int(circle.attrib[AXIS_NUMBER]), \
-                            circle.attrib[SPEC_MOTOR_NAME], \
-                            circle.attrib[DIRECTION_AXIS]))
+            try:
+                axisNum = circle.attrib[AXIS_NUMBER]
+                directionAxis = circle.attrib[DIRECTION_AXIS]
+            except KeyError:
+                raise InstConfigException("missing axis number or " + \
+                                          "axis direction in\n" + \
+                                          ET.tostring(circle) + \
+                                          "\nIn the instrument config file")
+            data.append((int(axisNum), \
+                            directionAxis))
         data.sort()
         directions = []
         for dataum in data:
-            directions.append(dataum[2])
+            directions.append(dataum[1])
         return directions
     
     def makeCircleNames(self, circles):
@@ -291,9 +307,16 @@ class InstForXrayutilitiesReader():
         '''
         data = []
         for circle in circles:
-            data.append((int(circle.attrib[AXIS_NUMBER]), \
-                            circle.attrib[SPEC_MOTOR_NAME], \
-                            circle.attrib[DIRECTION_AXIS]))
+            try:
+                motorName = circle.attrib[SPEC_MOTOR_NAME]
+                axisNumber = circle.attrib[AXIS_NUMBER]
+            except KeyError:
+                raise InstConfigException("missing axis number or " + \
+                                          "motorName in\n" + \
+                                          ET.tostring(circle) + \
+                                          "\nIn the instrument config file")
+            data.append((int(axisNumber), \
+                            motorName))
         data.sort()
         names = []
         for dataum in data:
@@ -304,7 +327,12 @@ class InstForXrayutilitiesReader():
         '''
         Create a list of reference directions from the XML
         '''
-        axes = direction.findall(REFERENCE_AXIS)
+        try:
+            axes = direction.findall(REFERENCE_AXIS)
+        except AttributeError:
+            raise InstConfigException("No reference axis found in " + \
+                                      "instrument config file")
+            
         refAxis = {}
         for axis in axes:
             refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)

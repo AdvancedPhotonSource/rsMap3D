@@ -41,7 +41,13 @@ class DetectorGeometryForXrayutilitiesReader(object):
         Return a list with two elements specifying the location of the center
         pixel
         ''' 
-        vals = string.split(detector.find(CENTER_CHANNEL_PIXEL).text)
+        try:
+            centerPix = detector.find(CENTER_CHANNEL_PIXEL).text
+        except AttributeError:
+            raise DetectorConfigException(CENTER_CHANNEL_PIXEL + 
+                                          " not found in detector config " + \
+                                          "file")
+        vals = string.split(centerPix)
         return [int(vals[0]), int(vals[1])]
     
     def getDetectors(self):

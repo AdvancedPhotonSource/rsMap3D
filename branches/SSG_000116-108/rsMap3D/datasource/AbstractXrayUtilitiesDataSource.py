@@ -50,6 +50,7 @@ class AbstractXrayutilitiesDataSource:
         self.cancelLoad = False
         self.monitorName = None
         self.monitorScaleFactor = 1.0
+        self.projectionDirection = None
         self.filterName = None
         self.filterScaleFactor = 1.0
         if transform == None:
@@ -59,6 +60,7 @@ class AbstractXrayutilitiesDataSource:
         self.badPixelFile = badPixelFile
         self.flatFieldFile = flatFieldFile
         self.flatFieldData = None
+
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         find the overall boundaries for a scan given the min/max boundaries
@@ -100,46 +102,57 @@ class AbstractXrayutilitiesDataSource:
     
     def getDetectorCenterChannel(self):
         '''
+        Return the center channel of the detector
         '''
         return self.detectorCenterChannel
     
     def getDetectorChannelsPerDegree(self):
         '''
+        Return the channels/degree for the detector
         '''
         return self.detectorChannelPerDegree
     
     def getDetectorCircleDirections(self):
         '''
+        return a list of detector circle directions
         '''
         return self.detectorCircleDirections
     
     def getDetectorDimensions(self):
         '''
+        Return the dimensions (in pixels of the detector
         '''
         return self.detectorDimensions
     
     def getDistanceToDetector(self):
         '''
+        Return the distance from sample to detector
         '''
         return self.distanceToDetector
     
     def getDetectorPixelDirection1(self):
         '''
+        Return the direction of increasing pixels for the area detector first
+        dimension.
         '''
         return self.detectorPixelDirection1
     
     def getDetectorPixelDirection2(self):
         '''
+        Return the direction of increasing pixels for the area detector second
+        dimension.
         '''
         return self.detectorPixelDirection2
     
     def getDetectorPixelWidth(self):
         '''
+        return the pixel with in mm of the detector
         '''
         return self.detectorPixelWidth
     
     def getDetectorROI(self):
         '''
+        return the detector region of interest
         '''
         return self.detectorROI
     
@@ -183,16 +196,19 @@ class AbstractXrayutilitiesDataSource:
      
     def getIncidentWavelength(self):
         '''
+        Return the incident wavelength for a scan
         '''
         return self.incidentWavelength
     
     def getIncidentEnergy(self, index1=0, index2=0):
         '''
+        return the incident energy for a scan
         '''
         return self.incidentEnergy
     
     def getInplaneReferenceDirection(self):
         '''
+        Return the inplane reference direction
         '''
         return self.sampleInplaneReferenceDirection
     
@@ -212,6 +228,7 @@ class AbstractXrayutilitiesDataSource:
 
     def getNumPixelsToAverage(self):
         '''
+        Return the number of pixels to average in each direction.
         '''
         return self.numPixelsToAverage
     
@@ -239,8 +256,15 @@ class AbstractXrayutilitiesDataSource:
 
     def getPrimaryBeamDirection(self):
         '''
+        Return the primary beam direction
         '''
         return self.primaryBeamDirection
+    
+    def getProjectionDirection(self):
+        '''
+        Return the axis direction for producing sterographic projection.
+        '''
+        return self.projectionDirection
     
     def getRangeBounds(self):
         '''
@@ -262,11 +286,13 @@ class AbstractXrayutilitiesDataSource:
     
     def getSampleSurfaceNormalDirection(self):
         '''
+        Return the sample surface normal direction
         '''
         return self.sampleSurfaceNormalDirection
     
     def getUBMatrix(self, scan):
         '''
+        Return the UB matrix
         '''
         return self.ubMatrix[scan]
     
@@ -290,6 +316,10 @@ class AbstractXrayutilitiesDataSource:
                
     @abc.abstractmethod
     def loadSource(self, mapHKL=False):
+        '''
+        Method to load data into the source for use in analysis.  This should
+        be defined by the subclass
+        '''
         print "Using Abstract Method"
 
     def processImageToBeUsed(self):
@@ -323,11 +353,14 @@ class AbstractXrayutilitiesDataSource:
         
     def setTransform(self, transform):
         '''
+        set the coordinate transform class to be used to 
+        transform qx, qy, qz in the output data.
         '''
         self.transform = transform
         
     def setDetectorROIs(self, roi):
         '''
+        Set the detector region of interest
         '''
         self.detectorROI = roi
 
