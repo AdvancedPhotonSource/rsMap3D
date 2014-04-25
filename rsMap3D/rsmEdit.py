@@ -142,6 +142,7 @@ class MainDialog(QWidget):
         message.warning(self, \
                             "Load Scanfile Warning", \
                              str(error))
+        self.fileForm.setLoadOK()
               
     def tabChanged(self, index):
         '''
