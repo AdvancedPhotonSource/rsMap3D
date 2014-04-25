@@ -327,12 +327,13 @@ class InstForXrayutilitiesReader():
         '''
         Create a list of reference directions from the XML
         '''
-        try:
-            axes = direction.findall(REFERENCE_AXIS)
-        except AttributeError:
-            raise InstConfigException("No reference axis found in " + \
-                                      "instrument config file")
-            
+        axes = direction.findall(REFERENCE_AXIS)
+        
+        if len(axes) <> 3:
+            raise InstConfigException("Axes not defined properly in \n" + \
+                                      ET.tostring(direction) + \
+                                      "\nin instrument config file")
+                  
         refAxis = {}
         for axis in axes:
             refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
