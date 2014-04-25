@@ -2,7 +2,8 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from PyQt4.QtCore import *
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QVBoxLayout
@@ -17,7 +18,6 @@ from PyQt4.QtGui import QBrush
 from PyQt4.QtGui import QColor
 
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtk.util import numpy_support
 
 import vtk
 

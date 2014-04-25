@@ -3,7 +3,9 @@
  See LICENSE file.
 '''
 import os
-from PyQt4.QtCore import *
+
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import QRegExp
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
