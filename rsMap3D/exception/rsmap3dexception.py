@@ -15,7 +15,7 @@ class InstConfigException(RSMap3DException):
     file
     '''
     def __init__(self, message):
-        super(RSMap3DException, self).__init__(message)
+        super(InstConfigException, self).__init__(message)
 
 class DetectorConfigException(RSMap3DException):
     '''
@@ -23,5 +23,13 @@ class DetectorConfigException(RSMap3DException):
     file
     '''
     def __init__(self, message):
-        super(RSMap3DException, self).__init__(message)
+        super(DetectorConfigException, self).__init__(message)
+
+class Transform3DException(RSMap3DException):
+    '''
+    Exception class to be raised if there is a problem with a detector config
+    file
+    '''
+    def __init__(self, message):
+        super(Transform3DException, self).__init__(message)
 
