@@ -100,11 +100,18 @@ class Test(unittest.TestCase):
         self.assertRaises(InstConfigException, \
                           config.getInplaneReferenceDirection)
         
-    def testGetPrimaryBeamDirectionDirectionNoDirection(self):
+    def testGetPrimaryBeamDirectionNoDirection(self):
         config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
                       'instNoReferenceDirections.xml')
         self.assertRaises(InstConfigException, \
                           config.getPrimaryBeamDirection)
+        
+    def testGetPrimaryBeamDirectionNoAxes(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instNoAxesOnReferenceAxes.xml')
+        self.assertRaises(InstConfigException, \
+                          config.getPrimaryBeamDirection)
+        
         
     def testGetProjectionDirection(self):
         direction = self.config.getProjectionDirection()
