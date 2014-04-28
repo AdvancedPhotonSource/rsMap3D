@@ -212,12 +212,14 @@ class FileForm(QDialog):
         if self.badPixelFileTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
-                                               filter="*.txt")
+                                               filter="Bad Pixel *.txt ;;" + \
+                                                      "All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
-                                               filter="*.txt", \
+                                               filter="Bad Pixel *.txt ;;" + \
+                                                      "All Files *.*", \
                                                directory = fileDirectory)
         if fileName != "":
             self.badPixelFileTxt.setText(fileName)
@@ -248,14 +250,16 @@ class FileForm(QDialog):
         '''
         if self.instConfigTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, 
-                                               "Select Instrument Config File", 
-                                               filter="*.xml")
+                                        "Select Instrument Config File", 
+                                        filter="Instrument Config *.xml" + \
+                                                " ;; All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
-                                               "Select Instrument Config File", 
-                                               filter="*.xml", \
-                                               directory = fileDirectory)
+                                        "Select Instrument Config File", 
+                                        filter="Instrument Config *.xml" + \
+                                                 + " ;; All Files *.*", \
+                                        directory = fileDirectory)
         if fileName != "":
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(SIGNAL("editingFinished()"))
@@ -284,12 +288,16 @@ class FileForm(QDialog):
         '''
         if self.projNameTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, \
-                                                   "Select Spec file")
+                                     "Select Spec file",
+                                     filter=("SPEC files *.spc *.spec ;; " + \
+                                                           "All files *.*"))
         else:
             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
             fileName = QFileDialog.getOpenFileName(None,\
                                                    "Select Spec file", \
-                                                   directory = fileDirectory)
+                                                   directory = fileDirectory,
+                                     filter=("SPEC files *.spc *.spec ;; " + \
+                                                           "All files *.*"))
             
         self.projNameTxt.setText(fileName)
         self.projNameTxt.emit(SIGNAL("editingFinished()"))
