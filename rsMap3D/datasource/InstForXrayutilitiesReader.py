@@ -336,7 +336,13 @@ class InstForXrayutilitiesReader():
                   
         refAxis = {}
         for axis in axes:
-            refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
+            try:
+                refAxis[int(axis.attrib[AXIS_NUMBER])] = int(axis.text)
+            except ValueError:
+                raise InstConfigException("Values and axis numbers in " + \
+                                           ET.tostring(direction) + \
+                                           " in instrument configuration file")
+                                            
         return [refAxis[1], refAxis[2], refAxis[3]]
     
 
