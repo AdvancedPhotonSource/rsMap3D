@@ -54,9 +54,13 @@ class DetectorGeometryForXrayutilitiesReader(object):
         '''
         Return a list of detectors in the configuration
         '''
-        return self.root.find(DETECTORS)
+        detectors = self.root.find(DETECTORS)
+        if detectors == None:
+            raise DetectorConfigException("No detectors found in detector " + \
+                                          "config file")
+        return detectors
     
-    def getDetectorById(self, id):
+    def getDetectorById(self, identifier):
         '''
         return a particular by specifying it's ID 
         '''
@@ -67,9 +71,11 @@ class DetectorGeometryForXrayutilitiesReader(object):
                                           "config file")
         for detector in dets:
             detId = detector.find(DETECTOR_ID)
-            if detId.text == id:
+            if detId.text == identifier:
                 return detector
-        return None
+        raise DetectorConfigException("Detector " + 
+                                      identifier + 
+                                      " not found in detector config file")
 
     def getDetectorID(self, detector):
         '''
