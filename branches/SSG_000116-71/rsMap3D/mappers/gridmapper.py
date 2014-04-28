@@ -8,6 +8,7 @@ from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 
 class QGridMapper(AbstractGridMapper):
     '''
+    This map provides an x, y, z grid of the data.
     '''
 
     def processMap(self, **kwargs):
