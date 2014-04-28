@@ -35,6 +35,7 @@ class AbstractGridMapper(object):
         self.ny = ny
         self.nz = nz
         self.haltMap = False
+        self.progressUpdater = None
         if transform == None:
             self.transform = UnityTransform3D()
         else:
@@ -293,6 +294,9 @@ class AbstractGridMapper(object):
 
     
         return qxTrans, qyTrans, qzTrans, intensity
+
+    def setProgressUpdater(self, updater):
+        self.progressUpdater = updater
 
     def setTransform(self, transform):
         '''
