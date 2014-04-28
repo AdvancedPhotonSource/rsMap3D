@@ -5,6 +5,7 @@
 import os
 
 from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
@@ -31,53 +32,65 @@ class ProcessScans(QDialog):
         Constructor - Layout widgets on the page & link up actions.
         '''
         super(ProcessScans, self).__init__(parent)
+        self.Mapper = None
         layout = QGridLayout()
+        row = 0       
 #        label = QLabel("Output Type")        
-#        layout.addWidget(label, 0, 0)
+#        layout.addWidget(label, row, 0)
         self.outTypeChooser = QComboBox()
         self.outTypeChooser.addItem(self.GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
-#        layout.addWidget(self.outTypeChooser, 0,1)
-        
+#        layout.addWidget(self.outTypeChooser, row,1)
+#        row += 1
+
         label = QLabel("Grid Dimensions")
-        layout.addWidget(label, 0,0)
-        
+        layout.addWidget(label, row,0)
+        row += 1
         label = QLabel("X")
-        layout.addWidget(label, 1,0)
+        layout.addWidget(label, row,0)
         self.xDimTxt = QLineEdit()
         self.xDimTxt.setText("200")
         self.xDimValidator = QIntValidator()
         self.xDimTxt.setValidator(self.xDimValidator)
-        layout.addWidget(self.xDimTxt, 1,1)
+        layout.addWidget(self.xDimTxt, row,1)
         
+        row += 1
         label = QLabel("Y")
-        layout.addWidget(label, 2,0)
+        layout.addWidget(label, row,0)
         self.yDimTxt = QLineEdit()
         self.yDimTxt.setText("200")
         self.yDimValidator = QIntValidator()
         self.yDimTxt.setValidator(self.yDimValidator)
-        layout.addWidget(self.yDimTxt, 2,1)
+        layout.addWidget(self.yDimTxt, row,1)
         
+        row += 1
         label = QLabel("Z")
-        layout.addWidget(label, 3,0)
+        layout.addWidget(label, row,0)
         self.zDimTxt = QLineEdit()
         self.zDimTxt.setText("200")
         self.zDimValidator = QIntValidator()
         self.zDimTxt.setValidator(self.zDimValidator)
-        layout.addWidget(self.zDimTxt, 3,1)
+        layout.addWidget(self.zDimTxt, row,1)
         
+        row += 1
         label = QLabel("Output File")
-        layout.addWidget(label, 4,0)
+        layout.addWidget(label, row,0)
         self.outFileTxt = QLineEdit()
-        layout.addWidget(self.outFileTxt, 4,1)
+        layout.addWidget(self.outFileTxt, row,1)
         self.outputFileButton = QPushButton("Browse")
-        layout.addWidget(self.outputFileButton, 4, 2)
+        layout.addWidget(self.outputFileButton, row, 2)
         
         
-        runButton = QPushButton("Run")
-        layout.addWidget(runButton, 5, 3)
+        row += 1
+        self.runButton = QPushButton("Run")
+        layout.addWidget(self.runButton, row, 3)
+        self.cancelButton = QPushButton("Cancel")
+        self.cancelButton.setDisabled(True)
+        layout.addWidget(self.cancelButton, row, 4)
         self.setLayout(layout)                    
-        self.connect(runButton, SIGNAL("clicked()"), self.process)
+
+        self.connect(self.runButton, SIGNAL("clicked()"), self.process)
+        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelProcess)
         self.connect(self.outputFileButton, SIGNAL("clicked()"), 
                      self.browseForOutputFile)
         self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
@@ -118,7 +131,12 @@ class ProcessScans(QDialog):
                              "Warning", \
                              "The specified fileis not writable")
             
-                
+    def cancelProcess(self):
+        '''
+        Emit a signal to trigger the cancelation of procesing.
+        '''
+        self.emit(SIGNAL("cancelProcess"))
+        
     def editFinishedOutputFile(self):
         '''
         When edititing is finished the a check is done to make sure that the 
@@ -158,20 +176,42 @@ class ProcessScans(QDialog):
         outputFileName = str(self.outFileTxt.text())
         if os.access(os.path.dirname(outputFileName), os.W_OK):
             if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
-                gridMapper = QGridMapper(dataSource, \
+                self.mapper = QGridMapper(dataSource, \
                                          outputFileName, \
                                          nx=nx, ny=ny, nz=nz,
                                          transform = transform)
-                gridMapper.doMap()
+                self.mapper.doMap()
             else:
-                poleMapper = PoleFigureMapper(dataSource, \
+                self.mapper = PoleFigureMapper(dataSource, \
                                               outputFileName, \
                                               nx=nx, ny=ny, nz=nz, \
                                               transform = transform)
-                poleMapper.doMap()
+                self.mapper.doMap()
         else:
             message = QMessageBox()
             message.warning(self, \
                          "Warning", \
                          "The specified fileis not writable")
+
+    def setRunOK(self):
+        '''
+        If Run is OK the load button is enabled and the cancel button is 
+        disabled
+        '''
+        self.runButton.setDisabled(False)
+        self.cancelButton.setDisabled(True)
+
+    def setCancelOK(self):
+        '''
+        If Cancel is OK the run button is disabled and the cancel button is 
+        enabled
+        '''
+        self.runButton.setDisabled(True)
+        self.cancelButton.setDisabled(False)
+
+    def stopMapper(self):
+        '''
+        Halt the mapping process
+        '''
+        self.mapper.stopMap()
         
