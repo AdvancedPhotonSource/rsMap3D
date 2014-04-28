@@ -3,7 +3,9 @@
  See LICENSE file.
 '''
 import os
-from PyQt4.QtCore import *
+
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import QRegExp
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
@@ -20,6 +22,7 @@ from PyQt4.QtGui import QButtonGroup
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
+from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
 
 class FileForm(QDialog):
     '''
@@ -36,7 +39,7 @@ class FileForm(QDialog):
         self.roixmax = 680
         self.roiymin = 1
         self.roiymax = 480
-        
+        self.projectionDirection = [0,0,1]
         layout = QGridLayout()
 
         label = QLabel("Project File:");
@@ -378,11 +381,18 @@ class FileForm(QDialog):
         
     def projectNameChanged(self):
         self.checkOkToLoad()
-        
+  
+    def getProjectionDirection(self):
+        '''
+        Return projection direction for stereographic projections
+        '''
+        return self.projectionDirection
+          
     def instConfigChanged(self):
         if os.path.isfile(self.instConfigTxt.text()) or \
            self.instConfigTxt.text() == "":
             self.checkOkToLoad()
+            self.updateProjectionDirection()
         else:
             message = QMessageBox()
             message.warning(self, \
@@ -473,6 +483,11 @@ class FileForm(QDialog):
         self.loadButton.setDisabled(True)
         self.cancelButton.setDisabled(False)
 
+    def updateProjectionDirection(self):
+        instConfig = \
+            InstForXrayutilitiesReader(self.instConfigTxt.text())
+        self.projectionDirection = instConfig.getProjectionDirection()
+        
     def updateROIandNumAvg(self):
         '''
         Set defailt values into the ROI and number of pixel to average text 

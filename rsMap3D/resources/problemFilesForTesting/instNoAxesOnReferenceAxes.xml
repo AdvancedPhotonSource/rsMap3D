@@ -24,23 +24,14 @@
     <!-- define referemce directions -->
     <primaryBeamDirection>
         <axis number="1">0</axis>
-        <axis number="2">1</axis>
-        <axis number="3">0</axis>
     </primaryBeamDirection>
     <inplaneReferenceDirection>
-        <axis number="1">0</axis>
-        <axis number="2">1</axis>
-        <axis number="3">0</axis>
     </inplaneReferenceDirection>
     <sampleSurfaceNormalDirection>
-        <axis number="1">1</axis>
-        <axis number="2">0</axis>
-        <axis number="3">0</axis>
     </sampleSurfaceNormalDirection>
     <monitorName scaleFactor="20000">I0</monitorName>
     <filterName scaleFactor="1000000">trans</filterName>
     <projectionDirection>
-        <axis number="1">0</axis>
         <axis number="2">0</axis>
         <axis number="3">1</axis>
     </projectionDirection>

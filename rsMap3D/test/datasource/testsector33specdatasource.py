@@ -1,7 +1,6 @@
 '''
-Created on Mar 31, 2014
-
-@author: hammonds
+ Copyright (c) 2012, UChicago Argonne, LLC
+ See LICENSE file.
 '''
 import unittest
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource

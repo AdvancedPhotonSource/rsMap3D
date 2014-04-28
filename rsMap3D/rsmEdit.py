@@ -3,7 +3,8 @@
  See LICENSE file.
 '''
 
-from PyQt4.QtCore import *
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QTabWidget
@@ -24,11 +25,14 @@ import traceback
 
 class MainDialog(QWidget):
     '''
+    Main dialog for rsMap3D.  This class also serves as the over action 
+    controller for the application
     '''
     def __init__(self,parent=None):
         '''
         '''
         super(MainDialog, self).__init__(parent)
+        #Create and layout the widgets
         layout = QGridLayout()
         self.tabs = QTabWidget()
         self.fileForm =FileForm()
@@ -47,6 +51,7 @@ class MainDialog(QWidget):
         layout.addWidget(self.tabs)
         self.setLayout(layout)
 
+        #Connect signals
         self.connect(self.fileForm, SIGNAL("loadFile"), self.spawnLoadThread)
         self.connect(self.fileForm, SIGNAL("cancelLoadFile"), 
                      self.cancelLoadThread)
@@ -57,11 +62,15 @@ class MainDialog(QWidget):
         self.connect(self, SIGNAL("fileError"), self.showFileError)
         
     def cancelLoadThread(self):
+        '''
+        Let the data source know that a cancel has been requested.
+        '''
         self.dataSource.signalCancelLoadSource()
         
         
     def loadScanFile(self):
         '''
+        Set up to load the scan file
         '''
         self.tabs.setTabEnabled(self.dataTabIndex, False)
         self.tabs.setTabEnabled(self.scanTabIndex, False)
@@ -69,7 +78,9 @@ class MainDialog(QWidget):
         if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
-            self.transform = PoleMapTransform3D()
+            self.transform = \
+                PoleMapTransform3D(projectionDirection=\
+                                   self.fileForm.getProjectionDirection())
         else:
             self.transform = None
             
@@ -108,12 +119,18 @@ class MainDialog(QWidget):
         self.fileForm.setLoadOK()
         
     def spawnLoadThread(self):
+        '''
+        Spawm a new thread to load the scan so that scan may be canceled later 
+        and so that this does not interfere with the GUI operation.
+        '''
         self.fileForm.setCancelOK()
         self.loadThread = LoadScanThread(self, parent=None)
         self.loadThread.start()
         
     def setupRanges(self):
         '''
+        Get the overall data extent from the datasource and set these values
+        in the dataRange tab.  
         '''
         overallXmin, overallXmax, overallYmin, overallYmax, \
                overallZmin, overallZmax = self.dataSource.getOverallRanges()
@@ -130,24 +147,36 @@ class MainDialog(QWidget):
     
     def setScanRanges(self):
         '''
+        Get the datarange from the dataRange tab and set the bounds in this 
+        class.  Tell scanForm tab to render the Qs for all scans.
         '''
         ranges = self.dataRange.getRanges()
         self.dataSource.setRangeBounds(ranges)
         self.scanForm.renderOverallQs()
 
     def showFileError(self, error):
+        '''
+        Show any errors from file loading in a message dialog.  When done, 
+        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
+        inactive
+        '''
         message = QMessageBox()
         message.warning(self, \
                             "Load Scanfile Warning", \
                              str(error))
+        self.fileForm.setLoadOK()
               
     def tabChanged(self, index):
         '''
+        When changing to the datarange tab, display all qs from all scans.
         '''
         if str(self.tabs.tabText(index)) == "Data Range":
             self.scanForm.renderOverallQs()
                                         
     def runMapper(self):
+        '''
+        Tell the processScans tab to launch the mapper.
+        '''
         self.processScans.runMapper(self.dataSource, self.transform)
         
 class LoadScanThread(QThread):

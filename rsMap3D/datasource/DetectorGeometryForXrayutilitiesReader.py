@@ -2,6 +2,7 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+from rsMap3D.exception.rsmap3dexception import DetectorConfigException
 NAMESPACE = \
     '{https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils}'
 DETECTORS = NAMESPACE + "Detectors"
@@ -19,7 +20,8 @@ import string
 
 class DetectorGeometryForXrayutilitiesReader(object):
     '''
-    classdocs
+    This class is for reading detecor geometry XML file for use with 
+    xrayutilities
     '''
 
     def __init__(self, filename):
@@ -29,7 +31,8 @@ class DetectorGeometryForXrayutilitiesReader(object):
         try:
             tree = ET.parse(filename)
         except IOError as ex:
-            raise IOError("Bad Detector Configuration File" + str(ex))
+            raise DetectorConfigException("Bad Detector Configuration File" + \
+                                          str(ex))
         self.root = tree.getroot()
         
         
@@ -38,25 +41,41 @@ class DetectorGeometryForXrayutilitiesReader(object):
         Return a list with two elements specifying the location of the center
         pixel
         ''' 
-        vals = string.split(detector.find(CENTER_CHANNEL_PIXEL).text)
+        try:
+            centerPix = detector.find(CENTER_CHANNEL_PIXEL).text
+        except AttributeError:
+            raise DetectorConfigException(CENTER_CHANNEL_PIXEL + 
+                                          " not found in detector config " + \
+                                          "file")
+        vals = string.split(centerPix)
         return [int(vals[0]), int(vals[1])]
     
     def getDetectors(self):
         '''
         Return a list of detectors in the configuration
         '''
-        return self.root.find(DETECTORS)
+        detectors = self.root.find(DETECTORS)
+        if detectors == None:
+            raise DetectorConfigException("No detectors found in detector " + \
+                                          "config file")
+        return detectors
     
-    def getDetectorById(self, id):
+    def getDetectorById(self, identifier):
         '''
         return a particular by specifying it's ID 
         '''
-        dets = self.getDetectors().findall(DETECTOR)
+        try:
+            dets = self.getDetectors().findall(DETECTOR)
+        except AttributeError:
+            raise DetectorConfigException("No detectors found in detector " + \
+                                          "config file")
         for detector in dets:
             detId = detector.find(DETECTOR_ID)
-            if detId.text == id:
+            if detId.text == identifier:
                 return detector
-        return None
+        raise DetectorConfigException("Detector " + 
+                                      identifier + 
+                                      " not found in detector config file")
 
     def getDetectorID(self, detector):
         '''

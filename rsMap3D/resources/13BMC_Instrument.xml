@@ -49,4 +49,9 @@
         <axis number="2">0</axis>
         <axis number="3">0</axis>
     </sampleSurfaceNormalDirection>
+    <projectionDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">-1</axis>
+    </projectionDirection>
 </instForXrayutils>

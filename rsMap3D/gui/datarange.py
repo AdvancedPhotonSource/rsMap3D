@@ -3,7 +3,7 @@
  See LICENSE file.
 '''
 
-from PyQt4.QtCore import *
+from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QHBoxLayout
