@@ -100,6 +100,12 @@ class Test(unittest.TestCase):
         self.assertRaises(InstConfigException, \
                           config.getInplaneReferenceDirection)
         
+    def testGetInplaneReferenceDirectionValueNotANumber(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instAxisValuesNotANumber.xml')
+        self.assertRaises(InstConfigException, 
+                          config.getInplaneReferenceDirection)
+        
     def testGetPrimaryBeamDirectionNoDirection(self):
         config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
                       'instNoReferenceDirections.xml')
@@ -112,6 +118,11 @@ class Test(unittest.TestCase):
         self.assertRaises(InstConfigException, \
                           config.getPrimaryBeamDirection)
         
+    def testGetPrimaryBeamDirectionValueNotANumber(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instAxisValuesNotANumber.xml')
+        self.assertRaises(InstConfigException, 
+                          config.getPrimaryBeamDirection)
         
     def testGetProjectionDirection(self):
         direction = self.config.getProjectionDirection()
@@ -130,6 +141,12 @@ class Test(unittest.TestCase):
     def testGetProjectionDirectionNoDirection(self):
         self.assertRaises(InstConfigException, 
                           self.config3.getProjectionDirection)
+        
+    def testGetProjectionDirectionValueNotANumber(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instAxisValuesNotANumber.xml')
+        self.assertRaises(InstConfigException, 
+                          config.getProjectionDirection)
         
     def testGetSampleCircleDirections(self):
         directions = self.config.getSampleCircleDirections()
@@ -226,6 +243,11 @@ class Test(unittest.TestCase):
         self.assertRaises(InstConfigException, \
                           config.getSampleSurfaceNormalDirection)
         
+    def testGetSampleSurfaceNormalDirectionValueNotANumber(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instAxisValuesNotANumber.xml')
+        self.assertRaises(InstConfigException, 
+                          config.getSampleSurfaceNormalDirection)
  
         
 if __name__ == "__main__":
