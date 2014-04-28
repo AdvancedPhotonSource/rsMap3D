@@ -258,7 +258,7 @@ class FileForm(QDialog):
             fileName = QFileDialog.getOpenFileName(None, 
                                         "Select Instrument Config File", 
                                         filter="Instrument Config *.xml" + \
-                                                 + " ;; All Files *.*", \
+                                                 " ;; All Files *.*", \
                                         directory = fileDirectory)
         if fileName != "":
             self.instConfigTxt.setText(fileName)
@@ -299,8 +299,9 @@ class FileForm(QDialog):
                                      filter=("SPEC files *.spc *.spec ;; " + \
                                                            "All files *.*"))
             
-        self.projNameTxt.setText(fileName)
-        self.projNameTxt.emit(SIGNAL("editingFinished()"))
+        if fileName != "":
+            self.projNameTxt.setText(fileName)
+            self.projNameTxt.emit(SIGNAL("editingFinished()"))
 
 
     def cancelLoadFile(self):
