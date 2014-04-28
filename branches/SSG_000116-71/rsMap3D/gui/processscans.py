@@ -5,10 +5,10 @@
 import os
 
 from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QProgressBar
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QLineEdit
@@ -82,6 +82,8 @@ class ProcessScans(QDialog):
         
         
         row += 1
+        self.progressBar = QProgressBar()
+        layout.addWidget(self.progressBar,row, 1)
         self.runButton = QPushButton("Run")
         layout.addWidget(self.runButton, row, 3)
         self.cancelButton = QPushButton("Cancel")
@@ -95,6 +97,8 @@ class ProcessScans(QDialog):
                      self.browseForOutputFile)
         self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
                      self.editFinishedOutputFile)
+        self.connect(self, SIGNAL("updateProgress"), 
+                     self.setProgress)
         
         
         
@@ -180,6 +184,7 @@ class ProcessScans(QDialog):
                                          outputFileName, \
                                          nx=nx, ny=ny, nz=nz,
                                          transform = transform)
+                self.mapper.setProgressUpdater(self.updateProgress)
                 self.mapper.doMap()
             else:
                 self.mapper = PoleFigureMapper(dataSource, \
@@ -193,14 +198,6 @@ class ProcessScans(QDialog):
                          "Warning", \
                          "The specified fileis not writable")
 
-    def setRunOK(self):
-        '''
-        If Run is OK the load button is enabled and the cancel button is 
-        disabled
-        '''
-        self.runButton.setDisabled(False)
-        self.cancelButton.setDisabled(True)
-
     def setCancelOK(self):
         '''
         If Cancel is OK the run button is disabled and the cancel button is 
@@ -209,9 +206,34 @@ class ProcessScans(QDialog):
         self.runButton.setDisabled(True)
         self.cancelButton.setDisabled(False)
 
+    def setProgress(self, value):
+        '''
+        Set the value in the progress bar
+        '''
+        self.progressBar.setValue(value)
+        
+    def setProgressLimits(self, min, max):
+        '''
+        Set the limits on the progress bar.
+        '''
+        self.progressBar.setMinimum(min)
+        self.progressBar.setMaximum(max)
+        
+    def setRunOK(self):
+        '''
+        If Run is OK the load button is enabled and the cancel button is 
+        disabled
+        '''
+        self.runButton.setDisabled(False)
+        self.cancelButton.setDisabled(True)
+        
     def stopMapper(self):
         '''
         Halt the mapping process
         '''
         self.mapper.stopMap()
+        
+    def updateProgress(self, value):
+        print("Made it to update progress")
+        self.emit(SIGNAL("updateProgress"), value)
         

@@ -174,6 +174,8 @@ class MainDialog(QWidget):
         Spawm a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
+        self.processScans.setProgressLimits(1, 
+                                len(self.dataSource.getAvailableScans()))
         self.processScans.setCancelOK()
         self.processThread = ProcessScanThread(self, parent=None)
         self.processThread.start()
