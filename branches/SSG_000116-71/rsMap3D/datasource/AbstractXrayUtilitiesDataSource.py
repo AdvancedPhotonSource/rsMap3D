@@ -60,7 +60,8 @@ class AbstractXrayutilitiesDataSource:
         self.badPixelFile = badPixelFile
         self.flatFieldFile = flatFieldFile
         self.flatFieldData = None
-
+        self.progressUpdater = None
+        
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         find the overall boundaries for a scan given the min/max boundaries
@@ -343,6 +344,9 @@ class AbstractXrayutilitiesDataSource:
                 else:
                     inUse.append(False)
             self.imageToBeUsed[scan] = inUse
+            
+    def setProgressUpdater(self, updater):
+        self.progressUpdater = updater
  
     def setRangeBounds(self, rangeBounds):
         '''

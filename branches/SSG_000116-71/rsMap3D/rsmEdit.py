@@ -145,6 +145,7 @@ class MainDialog(QWidget):
                                        flatFieldFile = \
                                           self.fileForm.getFlatFieldFileName() \
                                       )
+            self.dataSource.setProgressUpdater(self.fileForm.updateProgress)
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
             print "LoadCanceled"
