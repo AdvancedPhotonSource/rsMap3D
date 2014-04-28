@@ -22,6 +22,7 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 
 import sys
 import traceback
+from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 
 class MainDialog(QWidget):
     '''
@@ -58,8 +59,47 @@ class MainDialog(QWidget):
         self.connect(self.scanForm, SIGNAL("doneLoading"), self.setupRanges)
         self.connect(self.dataRange, SIGNAL("rangeChanged"), self.setScanRanges)
         self.connect(self.tabs, SIGNAL("currentChanged(int)"), self.tabChanged)
-        self.connect(self.processScans, SIGNAL("process"), self.runMapper)
+        self.connect(self.processScans, SIGNAL("process"), \
+                     self.spawnProcessThread)
+        self.connect(self.processScans, SIGNAL("cancelProcess"), \
+                     self.stopMapper)
         self.connect(self, SIGNAL("fileError"), self.showFileError)
+        self.connect(self, SIGNAL("processError"), self.showProcessError)
+        self.connect(self, SIGNAL("blockTabsForLoad"), 
+                     self.blockTabsForLoad)
+        self.connect(self, SIGNAL("unblockTabsForLoad"), 
+                     self.unblockTabsForLoad)
+        self.connect(self, SIGNAL("blockTabsForProcess"), 
+                     self.blockTabsForProcess)
+        self.connect(self, SIGNAL("unblockTabsForProcess"), 
+                     self.unblockTabsForProcess)
+        self.connect(self, SIGNAL("setProcessRunOK"), 
+                     self.processScans.setRunOK)
+        self.connect(self, SIGNAL("setProcessCancelOK"), 
+                     self.processScans.setCancelOK)
+        self.connect(self, SIGNAL("setScanLoadOK"), 
+                     self.fileForm.setLoadOK)
+        self.connect(self, SIGNAL("setScanLoadCancelOK"), 
+                     self.fileForm.setCancelOK)
+        self.connect(self, SIGNAL("loadDataSourceToScanForm"), 
+                     self.loadDataSourceToScanForm)
+        
+    def blockTabsForLoad(self):
+        '''
+        Disable tabs while loading
+        '''
+        self.tabs.setTabEnabled(self.dataTabIndex, False)
+        self.tabs.setTabEnabled(self.scanTabIndex, False)
+        self.tabs.setTabEnabled(self.processTabIndex, False)
+        
+    def blockTabsForProcess(self):
+        '''
+        disable tabs while processing
+        '''
+        self.tabs.setTabEnabled(self.dataTabIndex, False)
+        self.tabs.setTabEnabled(self.scanTabIndex, False)
+        self.tabs.setTabEnabled(self.fileTabIndex, False)
+        
         
     def cancelLoadThread(self):
         '''
@@ -68,13 +108,16 @@ class MainDialog(QWidget):
         self.dataSource.signalCancelLoadSource()
         
         
+    def loadDataSourceToScanForm(self):
+        '''
+        '''
+        self.scanForm.loadScanFile(self.dataSource)        
+        
     def loadScanFile(self):
         '''
         Set up to load the scan file
         '''
-        self.tabs.setTabEnabled(self.dataTabIndex, False)
-        self.tabs.setTabEnabled(self.scanTabIndex, False)
-        self.tabs.setTabEnabled(self.processTabIndex, False)
+        self.emit(SIGNAL("blockTabsForLoad"))
         if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
@@ -105,18 +148,17 @@ class MainDialog(QWidget):
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
             print "LoadCanceled"
-            self.tabs.setTabEnabled(self.dataTabIndex, False)
-            self.tabs.setTabEnabled(self.scanTabIndex, False)
-            self.tabs.setTabEnabled(self.processTabIndex, False)
-            self.fileForm.setLoadOK()
+            self.emit(SIGNAL("blockTabsForLoad"))
+            self.emit(SIGNAL("setScanLoadOK"))
+            #self.fileForm.setLoadOK()
             return
         except Exception as e:
             self.emit(SIGNAL("fileError"), str(e))
             print traceback.format_exc()
             return
         
-        self.scanForm.loadScanFile(self.dataSource)        
-        self.fileForm.setLoadOK()
+        self.emit(SIGNAL("loadDataSourceToScanForm"))
+        self.emit(SIGNAL("setScanLoadOK"))
         
     def spawnLoadThread(self):
         '''
@@ -126,6 +168,15 @@ class MainDialog(QWidget):
         self.fileForm.setCancelOK()
         self.loadThread = LoadScanThread(self, parent=None)
         self.loadThread.start()
+        
+    def spawnProcessThread(self):
+        '''
+        Spawm a new thread to load the scan so that scan may be canceled later 
+        and so that this does not interfere with the GUI operation.
+        '''
+        self.processScans.setCancelOK()
+        self.processThread = ProcessScanThread(self, parent=None)
+        self.processThread.start()
         
     def setupRanges(self):
         '''
@@ -141,10 +192,8 @@ class MainDialog(QWidget):
                                  overallZmin, \
                                  overallZmax)
         self.setScanRanges()
-        self.tabs.setTabEnabled(self.dataTabIndex, True)
-        self.tabs.setTabEnabled(self.scanTabIndex, True)
-        self.tabs.setTabEnabled(self.processTabIndex, True)
-    
+        self.emit(SIGNAL("unblockTabsForLoad"))
+        
     def setScanRanges(self):
         '''
         Get the datarange from the dataRange tab and set the bounds in this 
@@ -177,7 +226,53 @@ class MainDialog(QWidget):
         '''
         Tell the processScans tab to launch the mapper.
         '''
-        self.processScans.runMapper(self.dataSource, self.transform)
+        self.emit(SIGNAL("blockTabsForProcess"))
+        self.emit(SIGNAL("setProcessCancelOK"))
+        try:
+            self.processScans.runMapper(self.dataSource, self.transform)
+        except ProcessCanceledException:
+            self.emit(SIGNAL("unblockTabsForProcess"))
+        except Exception as e:
+            self.emit(SIGNAL("processError"), str(e))
+            print traceback.format_exc()
+            return
+        self.emit(SIGNAL("setProcessRunOK"))
+        self.emit(SIGNAL("unblockTabsForProcess"))
+        
+    def showProcessError(self, error):
+        '''
+        Show any errors from file processing in a message dialog.  When done, 
+        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
+        inactive
+        '''
+        message = QMessageBox()
+        message.warning(self, \
+                            "Processing Scanfile Warning", \
+                             str(error))
+        self.emit(SIGNAL("setProcessRunOK"))
+              
+    def stopMapper(self):
+        '''
+        Tell the processScans tab to stop the mapper.
+        '''
+        self.processScans.stopMapper()
+        
+    def unblockTabsForLoad(self):
+        '''
+        enable tabs when done loading
+        '''
+        self.tabs.setTabEnabled(self.dataTabIndex, True)
+        self.tabs.setTabEnabled(self.scanTabIndex, True)
+        self.tabs.setTabEnabled(self.processTabIndex, True)
+        
+    def unblockTabsForProcess(self):
+        '''
+        enable tabs when done processing
+        '''
+        self.tabs.setTabEnabled(self.dataTabIndex, True)
+        self.tabs.setTabEnabled(self.scanTabIndex, True)
+        self.tabs.setTabEnabled(self.fileTabIndex, True)
+        
         
 class LoadScanThread(QThread):
     def __init__(self, controller, **kwargs):
@@ -187,6 +282,13 @@ class LoadScanThread(QThread):
     def run(self):
         self.controller.loadScanFile()
         
+class ProcessScanThread(QThread):
+    def __init__(self, controller, **kwargs):
+        super(ProcessScanThread, self).__init__( **kwargs)
+        self.controller = controller
+
+    def run(self):
+        self.controller.runMapper()
         
 app = QApplication(sys.argv)
 mainForm = MainDialog()
