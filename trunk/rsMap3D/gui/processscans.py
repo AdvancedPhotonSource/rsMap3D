@@ -4,7 +4,7 @@
 '''
 import os
 
-from PyQt4.QtCore import *
+from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
@@ -97,10 +97,10 @@ class ProcessScans(QDialog):
                                                filter="*.vti"))
         else:
             fileDirectory = os.path.dirname(str(self.outFileTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = str(QFileDialog.getOpenFileName(None, 
                                                "Save File", 
                                                filter="*.vti", \
-                                               directory = fileDirectory)
+                                               directory = fileDirectory))
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)

@@ -4,6 +4,8 @@
 '''
 import os
 from pyspec import spec
+from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
+    InstConfigException, DetectorConfigException
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -15,7 +17,6 @@ import time
 import traceback
 import csv
 import Image
-import matplotlib.pyplot as plt
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -163,7 +164,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.monitorScaleFactor = self.instConfig.getMonitorScaleFactor()
             self.filterName = self.instConfig.getFilterName()
             self.filterScaleFactor = self.instConfig.getFilterScaleFactor()
-
+            self.angleNames = self.instConfig.getSampleCircleNames() + \
+                self.instConfig.getDetectorCircleNames()
+            self.projectionDirection = self.instConfig.getProjectionDirection()
+        except InstConfigException as ex:
+            raise ex
         except Exception as ex:
             print ("---Error Reading instconfig")
             raise ex
@@ -185,11 +190,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                     0, self.detectorDimensions[1]]
             self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
             self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
+        except DetectorConfigException as ex:
+            raise ex
         except Exception as ex:
             print ("---Error Reading detconfig")
             raise ex
-        self.angleNames = self.instConfig.getSampleCircleNames() + \
-            self.instConfig.getDetectorCircleNames()
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
         imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
@@ -234,7 +239,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
-                    raise LoadCanceledException()
+                    raise LoadCanceledException("Cancel")
                 
                 else:
                     if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
@@ -318,15 +323,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
     
 
-class LoadCanceledException(Exception):
+class LoadCanceledException(RSMap3DException):
     '''
     Exception Thrown when loading data is canceled.
     '''
-    def __init__(self):
-        super(LoadCanceledException, self).__init__()
+    def __init__(self, message):
+        super(LoadCanceledException, self).__init__(message)
 
-            
-if __name__ == '__main__':
-    source = Sector33SpecDataSource('/local/RSM/BFO_LAO', '130123B_2', ".spc"\
-                                '/local/RSM/33BM-instForXrayutilities.xml', \
-                                '/local/RSM/33bmDetectorGeometry.xml')

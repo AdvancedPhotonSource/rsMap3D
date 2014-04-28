@@ -12,7 +12,7 @@
              for the circle -->
     <sampleCircles numCircles="3">
        <circleAxis number="1" specMotorName="theta" directionAxis="z-"/>
-       <circleAxis number="2" specMotorName="chi" directionAxis="y+"/>
+       <circleAxis number="2"  directionAxis="y+"/>
        <circleAxis number="3" specMotorName="phi" directionAxis="z-"/>
     </sampleCircles>
 

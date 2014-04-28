@@ -11,9 +11,7 @@
          the value (z-, y+, etc.) are the rotation axis/direction 
              for the circle -->
     <sampleCircles numCircles="3">
-       <circleAxis number="1" specMotorName="theta" directionAxis="z-"/>
-       <circleAxis number="2" specMotorName="chi" directionAxis="y+"/>
-       <circleAxis number="3" specMotorName="phi" directionAxis="z-"/>
+       <circleAxis specMotorName="theta" directionAxis="z-"/>
     </sampleCircles>
 
     <!-- Define the detector circles as a series of axes. -->
