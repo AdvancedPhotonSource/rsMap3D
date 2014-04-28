@@ -10,6 +10,7 @@ from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QLineEdit
+from PyQt4.QtGui import QProgressBar
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
@@ -42,27 +43,31 @@ class FileForm(QDialog):
         self.projectionDirection = [0,0,1]
         layout = QGridLayout()
 
+        row = 0
         label = QLabel("Project File:");
         self.projNameTxt = QLineEdit()
         self.projectDirButton = QPushButton("Browse")
-        layout.addWidget(label, 0, 0)
-        layout.addWidget(self.projNameTxt, 0, 1)
-        layout.addWidget(self.projectDirButton, 0, 2)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.projNameTxt, row, 1)
+        layout.addWidget(self.projectDirButton, row, 2)
 
+        row += 1
         label = QLabel("Instrument Config File:");
         self.instConfigTxt = QLineEdit()
         self.instConfigFileButton = QPushButton("Browse")
-        layout.addWidget(label, 2, 0)
-        layout.addWidget(self.instConfigTxt, 2, 1)
-        layout.addWidget(self.instConfigFileButton, 2, 2)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.instConfigTxt, row, 1)
+        layout.addWidget(self.instConfigFileButton, row, 2)
 
+        row += 1
         label = QLabel("Detector Config File:");
         self.detConfigTxt = QLineEdit()
         self.detConfigFileButton = QPushButton("Browse")
-        layout.addWidget(label, 3, 0)
-        layout.addWidget(self.detConfigTxt, 3, 1)
-        layout.addWidget(self.detConfigFileButton, 3, 2)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.detConfigTxt, row, 1)
+        layout.addWidget(self.detConfigFileButton, row, 2)
         
+        row += 1
         self.fieldCorrectionGroup = QButtonGroup(self)
         self.noFieldRadio = QRadioButton("None")
         self.badPixelRadio = QRadioButton("Bad Pixel File")
@@ -75,56 +80,69 @@ class FileForm(QDialog):
         self.badPixelFileBrowseButton = QPushButton("Browse")
         self.flatFieldFileBrowseButton = QPushButton("Browse")
         
-        layout.addWidget(self.noFieldRadio, 4,0)
-        layout.addWidget(self.badPixelRadio, 5,0)
-        layout.addWidget(self.badPixelFileTxt,5,1)
-        layout.addWidget(self.badPixelFileBrowseButton,5,2)
-        layout.addWidget(self.flatFieldRadio, 6,0)
-        layout.addWidget(self.flatFieldFileTxt,6,1)
-        layout.addWidget(self.flatFieldFileBrowseButton,6,2)
+        layout.addWidget(self.noFieldRadio, row, 0)
+        row += 1
+        layout.addWidget(self.badPixelRadio, row, 0)
+        layout.addWidget(self.badPixelFileTxt, row, 1)
+        layout.addWidget(self.badPixelFileBrowseButton, row, 2)
+        row += 1
+        layout.addWidget(self.flatFieldRadio, row, 0)
+        layout.addWidget(self.flatFieldFileTxt, row, 1)
+        layout.addWidget(self.flatFieldFileBrowseButton, row, 2)
         
+        row += 1
         label = QLabel("Number of Pixels To Average:");
         self.pixAvgTxt = QLineEdit("1,1")
         rxAvg = QRegExp('(\d)+,(\d)+')
         self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
-        layout.addWidget(label, 7, 0)
-        layout.addWidget(self.pixAvgTxt, 7, 1)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.pixAvgTxt, row, 1)
 
+        row += 1
         label = QLabel("Detector ROI:");
         self.detROITxt = QLineEdit()
         self.updateROITxt()
         rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
         self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
-        layout.addWidget(label, 8, 0)
-        layout.addWidget(self.detROITxt, 8, 1)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.detROITxt, row, 1)
         
+        row += 1
         label = QLabel("Scan Numbers")
         self.scanNumsTxt = QLineEdit()
         rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
         self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
-        layout.addWidget(label, 9, 0)
-        layout.addWidget(self.scanNumsTxt, 9, 1)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.scanNumsTxt, row, 1)
 
+        row += 1
         label = QLabel("Output Type")
         self.outTypeChooser = QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
-        layout.addWidget(label, 10, 0)
-        layout.addWidget(self.outTypeChooser, 10, 1)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.outTypeChooser, row, 1)
+
+        row += 1
         label = QLabel("HKL output")
-        layout.addWidget(label, 11,0)
+        layout.addWidget(label, row, 0)
         self.hklCheckbox = QCheckBox()
-        layout.addWidget(self.hklCheckbox, 11, 1)
+        layout.addWidget(self.hklCheckbox, row, 1)
+       
+        row += 1
+        self.progressBar = QProgressBar()
+        layout.addWidget(self.progressBar, row, 1)
         
-        
+        row += 1
         self.loadButton = QPushButton("Load")        
         self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton,12 , 1)
+        layout.addWidget(self.loadButton, row, 1)
         self.cancelButton = QPushButton("Cancel")        
         self.cancelButton.setDisabled(True)
 #        self.cancelButton.setDisabled(True)
-        layout.addWidget(self.cancelButton,12 , 2)
+        layout.addWidget(self.cancelButton, row, 2)
         
+        # Add Signals between widgets
         self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
         self.connect(self.projectDirButton, SIGNAL("clicked()"), 
@@ -160,6 +178,7 @@ class FileForm(QDialog):
         self.connect(self.flatFieldFileBrowseButton, \
                      SIGNAL("clicked()"), \
                      self.browseFlatFieldFileName)
+        self.connect(self, SIGNAL("updateProgress"), self.setProgress)
         self.noFieldRadio.setChecked(True)
         #print self.noFieldRadio.
         self.fieldCorrectionTypeChanged(*(self.noFieldRadio,))
@@ -193,12 +212,14 @@ class FileForm(QDialog):
         if self.badPixelFileTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
-                                               filter="*.txt")
+                                               filter="Bad Pixel *.txt ;;" + \
+                                                      "All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
-                                               filter="*.txt", \
+                                               filter="Bad Pixel *.txt ;;" + \
+                                                      "All Files *.*", \
                                                directory = fileDirectory)
         if fileName != "":
             self.badPixelFileTxt.setText(fileName)
@@ -229,14 +250,16 @@ class FileForm(QDialog):
         '''
         if self.instConfigTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, 
-                                               "Select Instrument Config File", 
-                                               filter="*.xml")
+                                        "Select Instrument Config File", 
+                                        filter="Instrument Config *.xml" + \
+                                                " ;; All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
             fileName = QFileDialog.getOpenFileName(None, 
-                                               "Select Instrument Config File", 
-                                               filter="*.xml", \
-                                               directory = fileDirectory)
+                                        "Select Instrument Config File", 
+                                        filter="Instrument Config *.xml" + \
+                                                 + " ;; All Files *.*", \
+                                        directory = fileDirectory)
         if fileName != "":
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(SIGNAL("editingFinished()"))
@@ -265,12 +288,16 @@ class FileForm(QDialog):
         '''
         if self.projNameTxt.text() == "":
             fileName = QFileDialog.getOpenFileName(None, \
-                                                   "Select Spec file")
+                                     "Select Spec file",
+                                     filter=("SPEC files *.spc *.spec ;; " + \
+                                                           "All files *.*"))
         else:
             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
             fileName = QFileDialog.getOpenFileName(None,\
                                                    "Select Spec file", \
-                                                   directory = fileDirectory)
+                                                   directory = fileDirectory,
+                                     filter=("SPEC files *.spc *.spec ;; " + \
+                                                           "All files *.*"))
             
         self.projNameTxt.setText(fileName)
         self.projNameTxt.emit(SIGNAL("editingFinished()"))
@@ -483,6 +510,21 @@ class FileForm(QDialog):
         self.loadButton.setDisabled(True)
         self.cancelButton.setDisabled(False)
 
+    def setProgressLimits(self, min, max):
+        '''
+        Set the limits on the progress bar
+        '''
+        self.progressBar.setMinimum(min)
+        self.progressBar.setMaximum(max)
+        
+    def setProgress(self, value, maxValue):
+        '''
+        Set the value to be displayed in the progress bar.
+        '''
+        self.progressBar.setMinimum(1)
+        self.progressBar.setMaximum(maxValue)
+        self.progressBar.setValue(value)
+        
     def updateProjectionDirection(self):
         instConfig = \
             InstForXrayutilitiesReader(self.instConfigTxt.text())
@@ -519,4 +561,8 @@ class FileForm(QDialog):
                 str(self.roiymax)
         self.detROITxt.setText(roiStr)
         
-        
+    def updateProgress(self, value, maxValue):
+        '''
+        Emit a signal to update the progress bar
+        '''
+        self.emit(SIGNAL("updateProgress"), value, maxValue)

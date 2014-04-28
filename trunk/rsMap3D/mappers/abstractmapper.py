@@ -11,6 +11,7 @@ import Image
 import vtk
 from vtk.util import numpy_support
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
+from rsMap3D.exception.rsmap3dexception import RSMap3DException
 
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
@@ -33,6 +34,8 @@ class AbstractGridMapper(object):
         self.nx = nx
         self.ny = ny
         self.nz = nz
+        self.haltMap = False
+        self.progressUpdater = None
         if transform == None:
             self.transform = UnityTransform3D()
         else:
@@ -198,6 +201,8 @@ class AbstractGridMapper(object):
         filterName = self.dataSource.getFilterName()
         filterScaleFactor = self.dataSource.getFilterScaleFactor()
         for scannr in scans:
+            if self.haltMap:
+                raise ProcessCanceledException("Process Canceled")
             scan = self.dataSource.sd[scannr]
             angles = self.dataSource.getGeoAngles(scan, angleNames)
             scanAngle1 = {}
@@ -290,6 +295,9 @@ class AbstractGridMapper(object):
     
         return qxTrans, qyTrans, qzTrans, intensity
 
+    def setProgressUpdater(self, updater):
+        self.progressUpdater = updater
+
     def setTransform(self, transform):
         '''
         Set a transform which will define a mapping of q space to some other 
@@ -299,3 +307,12 @@ class AbstractGridMapper(object):
         '''
         self.transform = transform
         
+    def stopMap(self):
+        self.haltMap = True 
+        
+class ProcessCanceledException(RSMap3DException):
+    '''
+    Exception Thrown when loading data is canceled.
+    '''
+    def __init__(self, message):
+        super(ProcessCanceledException, self).__init__(message)
