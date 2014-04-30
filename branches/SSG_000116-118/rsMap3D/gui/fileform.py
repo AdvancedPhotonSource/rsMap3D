@@ -13,6 +13,7 @@ from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QGroupBox
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QMessageBox
@@ -48,11 +49,11 @@ class FileForm(QDialog):
         self.projectionDirection = [0,0,1]
         layout = QVBoxLayout()
 
-        self.dataLayout = self._createDataLayout()
-        controlLayout = self._createControlLayout()
+        self.dataBox = self._createDataBox()
+        controlBox = self._createControlBox()
         
-        layout.addLayout(self.dataLayout)
-        layout.addLayout(controlLayout)
+        layout.addWidget(self.dataBox)
+        layout.addWidget(controlBox)
         self.setLayout(layout);
 
         #Initialize a couple of widgets to do setup.
@@ -119,6 +120,24 @@ class FileForm(QDialog):
             self.flatFieldFileTxt.setText(fileName)
             self.flatFieldFileTxt.emit(SIGNAL("editingFinished()"))
     
+    def browseForDetFile(self):
+        '''
+        Launch file selection dialog for Detector file.
+        '''
+        if self.detConfigTxt.text() == "":
+            fileName = QFileDialog.getOpenFileName(None, \
+                                               "Select Detector Config File", \
+                                               filter="*.xml")
+        else:
+            fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
+            fileName = QFileDialog.getOpenFileName(None, \
+                                               "Select Detector Config File", \
+                                               filter="*.xml", \
+                                               directory = fileDirectory)
+        if fileName != "":
+            self.detConfigTxt.setText(fileName)
+            self.detConfigTxt.emit(SIGNAL("editingFinished()"))
+
     def browseForInstFile(self):
         '''
         Launch file selection dialog for instrument file.
@@ -138,24 +157,6 @@ class FileForm(QDialog):
         if fileName != "":
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(SIGNAL("editingFinished()"))
-
-    def browseForDetFile(self):
-        '''
-        Launch file selection dialog for Detector file.
-        '''
-        if self.detConfigTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, \
-                                               "Select Detector Config File", \
-                                               filter="*.xml")
-        else:
-            fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, \
-                                               "Select Detector Config File", \
-                                               filter="*.xml", \
-                                               directory = fileDirectory)
-        if fileName != "":
-            self.detConfigTxt.setText(fileName)
-            self.detConfigTxt.emit(SIGNAL("editingFinished()"))
 
     def browseForProjectDir(self):
         '''
@@ -183,10 +184,11 @@ class FileForm(QDialog):
         ''' Send signal to cancel a file load'''
         self.emit(SIGNAL("cancelLoadFile"))
         
-    def _createControlLayout(self):
+    def _createControlBox(self):
         '''
         Create Layout holding controls widgets
         '''
+        controlBox = QGroupBox()
         controlLayout = QGridLayout()       
         row =0
         self.progressBar = QProgressBar()
@@ -205,12 +207,14 @@ class FileForm(QDialog):
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
         self.connect(self, SIGNAL("updateProgress"), self.setProgress)
 
-        return controlLayout
+        controlBox.setLayout(controlLayout)
+        return controlBox
     
-    def _createDataLayout(self):
+    def _createDataBox(self):
         '''
         Create widgets for collecting data
         '''
+        dataBox = QGroupBox()
         dataLayout = QGridLayout()
         row = 0
         label = QLabel("Project File:");
@@ -333,10 +337,28 @@ class FileForm(QDialog):
         self.connect(self.flatFieldFileBrowseButton, \
                      SIGNAL("clicked()"), \
                      self.browseFlatFieldFileName)
-
-        return dataLayout
+        dataBox.setLayout(dataLayout)
+        return dataBox
     
+    def detConfigChanged(self):
+        '''
+        '''
+        if os.path.isfile(self.detConfigTxt.text()) or \
+           self.detConfigTxt.text() == "":
+            self.checkOkToLoad()
+            self.updateROIandNumAvg()
+        else:
+            message = QMessageBox()
+            message.warning(self, \
+                             "Warning",\
+                             "The filename entered for the detector " + \
+                             "configuration is invalid")
+        
     def fieldCorrectionTypeChanged(self, *fieldCorrType):
+        '''
+        React when the field type radio buttons change.  Disable/Enable other 
+        widgets as appropriate
+        '''
         if fieldCorrType[0].text() == "None":
             self.badPixelFileTxt.setDisabled(True)
             self.badPixelFileBrowseButton.setDisabled(True)
@@ -397,54 +419,46 @@ class FileForm(QDialog):
         else:
             return str(self.flatFieldFileTxt.text())
         
-    def getMapAsHKL(self):
-        return self.hklCheckbox.isChecked()
-        
     def getInstConfigName(self):
         '''
         Return the Instrument config file name
         '''
         return self.instConfigTxt.text()
 
+    def getMapAsHKL(self):
+        return self.hklCheckbox.isChecked()
+        
     def getProjectDir(self):
         '''
         Return the project directory
         '''
         return os.path.dirname(str(self.projNameTxt.text()))
         
-    def getProjectName(self):
-        '''
-        Return the project name
-        '''
-        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
-    
-    def getProjectExtension(self):
-        '''
-        Return the project name
-        '''
-        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[1]
-
-            
-    def projectDirChanged(self):
-        if os.path.isfile(self.projNameTxt.text()) or \
-            self.projNameTxt.text() == "":
-            self.checkOkToLoad()
-        else:
-            message = QMessageBox()
-            message.warning(self, \
-                             "Warning", \
-                             "The project directory entered is invalid")
-        
-    def projectNameChanged(self):
-        self.checkOkToLoad()
-  
     def getProjectionDirection(self):
         '''
         Return projection direction for stereographic projections
         '''
         return self.projectionDirection
           
+    def getProjectExtension(self):
+        '''
+        Return the project file extension
+        '''
+        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[1]
+
+    def getProjectName(self):
+        '''
+        Return the project name
+        '''
+        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
+    
+            
     def instConfigChanged(self):
+        '''
+        When the inst config file name changes check to make sure we have a 
+        valid file (if not empty) and the check to see if it is OK to enable
+        the Load button.  Also, grab the projection direction from the file.
+        '''
         if os.path.isfile(self.instConfigTxt.text()) or \
            self.instConfigTxt.text() == "":
             self.checkOkToLoad()
@@ -456,22 +470,25 @@ class FileForm(QDialog):
                              "The filename entered for the instrument " + \
                              "configuration is invalid")
         
-    def detConfigChanged(self):
+    def projectDirChanged(self):
         '''
+        When the project name changes, check to see if it is valid file and 
+        then check to see if it is OK to enable the Load button.
         '''
-        if os.path.isfile(self.detConfigTxt.text()) or \
-           self.detConfigTxt.text() == "":
+        if os.path.isfile(self.projNameTxt.text()) or \
+            self.projNameTxt.text() == "":
             self.checkOkToLoad()
-            self.updateROIandNumAvg()
         else:
             message = QMessageBox()
             message.warning(self, \
-                             "Warning",\
-                             "The filename entered for the detector " + \
-                             "configuration is invalid")
+                             "Warning", \
+                             "The project directory entered is invalid")
         
     def checkOkToLoad(self):
         '''
+        Make sure we have valid file names for project, instrument config, 
+        and the detector config.  If we do enable load button.  If not disable
+        the load button
         '''
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
@@ -486,9 +503,15 @@ class FileForm(QDialog):
             self.loadButton.setDisabled(True)
             
     def getOutputType(self):
+        '''
+        Get the output type to be used.
+        '''
         return self.outTypeChooser.currentText()
     
     def getScanList(self):
+        '''
+        return a list of scans to be used for loading data
+        '''
         if str(self.scanNumsTxt.text()) == "":
             return None
         else:
@@ -496,6 +519,9 @@ class FileForm(QDialog):
             return scans.list() 
         
     def getDetectorROI(self):
+        '''
+        Return the detector ROI as a list
+        '''
         roiStrings = str(self.detROITxt.text()).split(',')
         roi = []
         print("getting ROIs") + str(roiStrings)
@@ -505,6 +531,9 @@ class FileForm(QDialog):
         return roi
     
     def getPixelsToAverage(self):
+        '''
+        Return the pixels to average as a list
+        '''
         pixelStrings = str(self.pixAvgTxt.text()).split(',')
         pixels = []
         print "getting number of pixels to average" + str(pixelStrings)
@@ -523,14 +552,6 @@ class FileForm(QDialog):
             self.hklCheckbox.setDisabled(True)
             self.hklCheckbox.setCheckState(False)
             
-    def setLoadOK(self):
-        '''
-        If Load is OK the load button is enabled and the cancel button is 
-        disabled
-        '''
-        self.loadButton.setDisabled(False)
-        self.cancelButton.setDisabled(True)
-
     def setCancelOK(self):
         '''
         If Cancel is OK the loadbutton is disabled and the cancel button is 
@@ -538,14 +559,17 @@ class FileForm(QDialog):
         '''
         self.loadButton.setDisabled(True)
         self.cancelButton.setDisabled(False)
+        self.dataBox.setDisabled(True)
 
-    def setProgressLimits(self, min, max):
+    def setLoadOK(self):
         '''
-        Set the limits on the progress bar
+        If Load is OK the load button is enabled and the cancel button is 
+        disabled
         '''
-        self.progressBar.setMinimum(min)
-        self.progressBar.setMaximum(max)
-        
+        self.loadButton.setDisabled(False)
+        self.cancelButton.setDisabled(True)
+        self.dataBox.setDisabled(False)
+
     def setProgress(self, value, maxValue):
         '''
         Set the value to be displayed in the progress bar.
@@ -553,6 +577,19 @@ class FileForm(QDialog):
         self.progressBar.setMinimum(1)
         self.progressBar.setMaximum(maxValue)
         self.progressBar.setValue(value)
+        
+    def setProgressLimits(self, minVal, maxVal):
+        '''
+        Set the limits on the progress bar
+        '''
+        self.progressBar.setMinimum(minVal)
+        self.progressBar.setMaximum(maxVal)
+        
+    def updateProgress(self, value, maxValue):
+        '''
+        Emit a signal to update the progress bar
+        '''
+        self.emit(SIGNAL("updateProgress"), value, maxValue)
         
     def updateProjectionDirection(self):
         instConfig = \
@@ -589,9 +626,3 @@ class FileForm(QDialog):
                 "," +\
                 str(self.roiymax)
         self.detROITxt.setText(roiStr)
-        
-    def updateProgress(self, value, maxValue):
-        '''
-        Emit a signal to update the progress bar
-        '''
-        self.emit(SIGNAL("updateProgress"), value, maxValue)

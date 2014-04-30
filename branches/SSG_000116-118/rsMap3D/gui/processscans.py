@@ -9,6 +9,7 @@ from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QDialog
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QGroupBox
 from PyQt4.QtGui import QIntValidator
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QLineEdit
@@ -36,12 +37,12 @@ class ProcessScans(QDialog):
         self.Mapper = None
         layout = QVBoxLayout()
 
-        self.dataLayout = self.createDataLayout()
-        controlLayout = self.createControlLayout()
+        self.dataBox = self._createDataBox()
+        controlBox = self._createControlBox()
         
 
-        layout.addLayout(self.dataLayout)
-        layout.addLayout(controlLayout)
+        layout.addWidget(self.dataBox)
+        layout.addWidget(controlBox)
         self.setLayout(layout)                    
         
         
@@ -85,7 +86,8 @@ class ProcessScans(QDialog):
         '''
         self.emit(SIGNAL("cancelProcess"))
         
-    def createControlLayout(self):
+    def _createControlBox(self):
+        controlBox = QGroupBox()
         controlLayout = QGridLayout()
         row = 0
         self.progressBar = QProgressBar()
@@ -103,13 +105,14 @@ class ProcessScans(QDialog):
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelProcess)
         self.connect(self, SIGNAL("updateProgress"), 
                      self.setProgress)
+        controlBox.setLayout(controlLayout)
+        return controlBox
         
-        return controlLayout
-        
-    def createDataLayout(self):
+    def _createDataBox(self):
         '''
         Create Sub Layout for data gathering widgets
         '''
+        dataBox = QGroupBox()
         dataLayout = QGridLayout()
         row = 0       
 #        label = QLabel("Output Type")        
@@ -162,7 +165,8 @@ class ProcessScans(QDialog):
         self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
                      self.editFinishedOutputFile)
         
-        return dataLayout
+        dataBox.setLayout(dataLayout)
+        return dataBox
         
     def editFinishedOutputFile(self):
         '''
@@ -228,6 +232,7 @@ class ProcessScans(QDialog):
         '''
         self.runButton.setDisabled(True)
         self.cancelButton.setDisabled(False)
+        self.dataBox.setDisabled(True)
 
     def setProgress(self, value):
         '''
@@ -249,6 +254,7 @@ class ProcessScans(QDialog):
         '''
         self.runButton.setDisabled(False)
         self.cancelButton.setDisabled(True)
+        self.dataBox.setDisabled(False)
         
     def stopMapper(self):
         '''
