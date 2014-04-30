@@ -23,6 +23,8 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 import sys
 import traceback
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
+from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
+    DetectorConfigException, InstConfigException, Transform3DException
 
 class MainDialog(QWidget):
     '''
@@ -153,11 +155,27 @@ class MainDialog(QWidget):
             self.emit(SIGNAL("setScanLoadOK"))
             #self.fileForm.setLoadOK()
             return
+        except ScanDataMissingException as e:
+            self.emit(SIGNAL("fileError"), str(e))
+            return
+        except DetectorConfigException as e:
+            self.emit(SIGNAL("fileError"), str(e))
+            return
+        except InstConfigException as e:
+            self.emit(SIGNAL("fileError"), str(e))
+            return
+        except Transform3DException as e:
+            self.emit(SIGNAL("fileError"), str(e))
+            return 
+        except ScanDataMissingException as e:
+            self.emit(SIGNAL("fileError"), str(e))
+            return
         except Exception as e:
             self.emit(SIGNAL("fileError"), str(e))
             print traceback.format_exc()
             return
         
+            
         self.emit(SIGNAL("loadDataSourceToScanForm"))
         self.emit(SIGNAL("setScanLoadOK"))
         

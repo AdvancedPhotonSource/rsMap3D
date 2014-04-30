@@ -5,7 +5,7 @@
 import os
 from pyspec import spec
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
-    InstConfigException, DetectorConfigException
+    InstConfigException, DetectorConfigException, ScanDataMissingException
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -265,7 +265,17 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 progress +=1        
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
-        
+        if len(self.getAvailableScans()) == 0:
+            raise ScanDataMissingException("Could not find scan data for " + \
+                                           "input file \n" + self.specFile + \
+                                           "\nOne possible reason for this " + \
+                                           "is that the image files are " + \
+                                           "missing.  Images are assumed " + \
+                                           "to be in " + \
+                                           os.path.join(self.projectDir, 
+                                                        "images/%s" % self.projectName))
+
+
     def getGeoAngles(self, scan, angleNames):
         """
         This function returns all of the geometry angles for the
