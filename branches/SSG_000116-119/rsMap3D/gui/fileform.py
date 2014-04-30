@@ -26,6 +26,8 @@ from PyQt4.QtGui import QVBoxLayout
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
+from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
+    InstConfigException
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
 
@@ -345,7 +347,14 @@ class FileForm(QDialog):
         if os.path.isfile(self.detConfigTxt.text()) or \
            self.detConfigTxt.text() == "":
             self.checkOkToLoad()
-            self.updateROIandNumAvg()
+            try:
+                self.updateROIandNumAvg()
+            except DetectorConfigException as e:
+                message = QMessageBox()
+                message.warning(self, \
+                                 "Warning",\
+                                 "Trouble getting ROI or Num average " + \
+                                 "from the detector config file")
         else:
             message = QMessageBox()
             message.warning(self, \
@@ -461,7 +470,14 @@ class FileForm(QDialog):
         if os.path.isfile(self.instConfigTxt.text()) or \
            self.instConfigTxt.text() == "":
             self.checkOkToLoad()
-            self.updateProjectionDirection()
+            try:
+                self.updateProjectionDirection()
+            except InstConfigException:
+                message = QMessageBox()
+                message.warning(self, \
+                                "Warning", \
+                                 "Trouble getting the projection direction " + \
+                                 "from the instrument config file.")
         else:
             message = QMessageBox()
             message.warning(self, \
@@ -604,7 +620,6 @@ class FileForm(QDialog):
             DetectorGeometryForXrayutilitiesReader(self.detConfigTxt.text())
         detector = detConfig.getDetectorById("Pilatus")
         detSize = detConfig.getNpixels(detector)
-        print(detSize)
         xmax = detSize[0]
         ymax = detSize[1]
         if xmax < self.roixmax:
