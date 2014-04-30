@@ -21,6 +21,8 @@ from PyQt4.QtGui import QVBoxLayout
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.polemapper import PoleFigureMapper
 
+WARNING_STR = "Warning"
+
 class ProcessScans(QDialog):
     '''
     This class presents a form to select to start analysis.  This display
@@ -58,26 +60,28 @@ class ProcessScans(QDialog):
                                                "Save File", \
                                                filter="*.vti"))
         else:
-            fileDirectory = os.path.dirname(str(self.outFileTxt.text()))
+            inFileName = str(self.outFileTxt.text())
             fileName = str(QFileDialog.getOpenFileName(None, 
                                                "Save File", 
                                                filter="*.vti", \
-                                               directory = fileDirectory))
+                                               directory = inFileName))
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
             else:
                 message = QMessageBox()
                 message.warning(self, \
-                             "Warning", \
+                             WARNING_STR, \
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = QMessageBox()
                 message.warning(self, \
-                             "Warning", \
+                             WARNING_STR, \
                              "The specified fileis not writable")
             
     def cancelProcess(self):
@@ -155,7 +159,9 @@ class ProcessScans(QDialog):
         row += 1
         label = QLabel("Output File")
         dataLayout.addWidget(label, row,0)
+        self.outputFileName = ""
         self.outFileTxt = QLineEdit()
+        self.outFileTxt.setText(self.outputFileName)
         dataLayout.addWidget(self.outFileTxt, row,1)
         self.outputFileButton = QPushButton("Browse")
         dataLayout.addWidget(self.outputFileButton, row, 2)
@@ -164,6 +170,10 @@ class ProcessScans(QDialog):
                      self.browseForOutputFile)
         self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
                      self.editFinishedOutputFile)
+        self.connect(self.outFileTxt, SIGNAL("editingFinished()"), \
+                     self.editFinishedOutputFile)
+        self.connect(self, SIGNAL("setFileName"), 
+                     self.outFileTxt.setText)
         
         dataBox.setLayout(dataLayout)
         return dataBox
@@ -176,17 +186,29 @@ class ProcessScans(QDialog):
         fileName = str(self.outFileTxt.text())
         if fileName != "":
             if os.path.exists(os.path.dirname(fileName)):
-                self.outFileTxt.setText(fileName)
-                self.outFileTxt.emit(SIGNAL("editingFinished()"))
+                #self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
+                #self.outFileTxt.emit(SIGNAL("editingFinished()"))
             else:
-                message = QMessageBox()
-                message.warning(self, \
-                             "Warning"\
-                             "The specified directory does not exist")
+                if os.path.dirname(fileName) == "":
+                    print("joining filename with current path")
+                    curDir = os.path.realpath(os.path.curdir)
+                    fileName = str(os.path.join(curDir, fileName))
+                else:
+                    message = QMessageBox()
+                    message.warning(self, \
+                                 WARNING_STR, \
+                                 "The specified directory \n" + \
+                                 str(os.path.dirname(fileName)) + \
+                                 "\ndoes not exist")
+                
+#               self.outputFileName = fileName
+                self.emit(SIGNAL("setFileName"), fileName)
+                
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = QMessageBox()
                 message.warning(self, \
-                             "Warning", \
+                             WARNING_STR, \
                              "The specified fileis not writable")
 
     def process(self):
@@ -200,30 +222,32 @@ class ProcessScans(QDialog):
         Run the selected mapper
         '''
         self.dataSource = dataSource
-#        print "Selected " + str(self.outTypeChooser.currentText())
         nx = int(self.xDimTxt.text())
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
-        outputFileName = str(self.outFileTxt.text())
-        if os.access(os.path.dirname(outputFileName), os.W_OK):
+        if self.outputFileName == "":
+            self.outputFileName = os.path.join(dataSource.projectDir,  \
+                                               "%s.vti" %dataSource.projectName)
+            self.emit(SIGNAL("setFileName"), self.outputFileName)
+        if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
                 self.mapper = QGridMapper(dataSource, \
-                                         outputFileName, \
+                                         self.outputFileName, \
                                          nx=nx, ny=ny, nz=nz,
                                          transform = transform)
                 self.mapper.setProgressUpdater(self.updateProgress)
                 self.mapper.doMap()
             else:
                 self.mapper = PoleFigureMapper(dataSource, \
-                                              outputFileName, \
+                                              self.outputFileName, \
                                               nx=nx, ny=ny, nz=nz, \
                                               transform = transform)
                 self.mapper.doMap()
         else:
-            message = QMessageBox()
-            message.warning(self, \
-                         "Warning", \
-                         "The specified fileis not writable")
+            self.emit(SIGNAL("processError"), \
+                         "The specified directory \n" + \
+                         str(os.path.dirname(self.outputFileName)) + \
+                         "\nis not writable")
 
     def setCancelOK(self):
         '''
@@ -234,6 +258,13 @@ class ProcessScans(QDialog):
         self.cancelButton.setDisabled(False)
         self.dataBox.setDisabled(True)
 
+    def setOutFileName(self, name):
+        '''
+        Write a filename to the text widget and to the stored output file name
+        '''
+        self.outFileTxt.setText(name)
+        self.outputFileName = name
+        
     def setProgress(self, value):
         '''
         Set the value in the progress bar

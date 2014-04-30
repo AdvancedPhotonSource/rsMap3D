@@ -24,7 +24,8 @@ import sys
 import traceback
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
-    DetectorConfigException, InstConfigException, Transform3DException
+    DetectorConfigException, InstConfigException, Transform3DException,\
+    RSMap3DException
 
 class MainDialog(QWidget):
     '''
@@ -67,6 +68,9 @@ class MainDialog(QWidget):
                      self.stopMapper)
         self.connect(self, SIGNAL("fileError"), self.showFileError)
         self.connect(self, SIGNAL("processError"), self.showProcessError)
+        self.connect(self.processScans, SIGNAL("processError"), 
+                     self.showProcessError)
+        
         self.connect(self, SIGNAL("blockTabsForLoad"), 
                      self.blockTabsForLoad)
         self.connect(self, SIGNAL("unblockTabsForLoad"), 
@@ -253,6 +257,10 @@ class MainDialog(QWidget):
             self.processScans.runMapper(self.dataSource, self.transform)
         except ProcessCanceledException:
             self.emit(SIGNAL("unblockTabsForProcess"))
+        except RSMap3DException as e:
+            self.emit(SIGNAL("processError"), str(e))
+            print traceback.format_exc()
+            return
         except Exception as e:
             self.emit(SIGNAL("processError"), str(e))
             print traceback.format_exc()
