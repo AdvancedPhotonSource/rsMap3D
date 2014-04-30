@@ -33,3 +33,11 @@ class Transform3DException(RSMap3DException):
     def __init__(self, message):
         super(Transform3DException, self).__init__(message)
 
+class ScanDataMissingException(RSMap3DException):
+    '''
+    Exception class to be raised if the process of loading scan information
+    shows that the data is missing
+    '''
+    def __init__(self, message):
+        super(ScanDataMissingException, self).__init__(message)
+
