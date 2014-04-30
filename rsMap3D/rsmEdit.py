@@ -67,6 +67,9 @@ class MainDialog(QWidget):
                      self.stopMapper)
         self.connect(self, SIGNAL("fileError"), self.showFileError)
         self.connect(self, SIGNAL("processError"), self.showProcessError)
+        self.connect(self.processScans, SIGNAL("processError"), 
+                     self.showProcessError)
+        
         self.connect(self, SIGNAL("blockTabsForLoad"), 
                      self.blockTabsForLoad)
         self.connect(self, SIGNAL("unblockTabsForLoad"), 
