@@ -66,6 +66,7 @@ class ProcessScans(QDialog):
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
             else:
                 message = QMessageBox()
@@ -73,6 +74,7 @@ class ProcessScans(QDialog):
                              "Warning", \
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = QMessageBox()
@@ -155,7 +157,9 @@ class ProcessScans(QDialog):
         row += 1
         label = QLabel("Output File")
         dataLayout.addWidget(label, row,0)
+        self.outputFileName = ""
         self.outFileTxt = QLineEdit()
+        self.outFileTxt.setText(self.outputFileName)
         dataLayout.addWidget(self.outFileTxt, row,1)
         self.outputFileButton = QPushButton("Browse")
         dataLayout.addWidget(self.outputFileButton, row, 2)
@@ -164,6 +168,8 @@ class ProcessScans(QDialog):
                      self.browseForOutputFile)
         self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
                      self.editFinishedOutputFile)
+        self.connect(self, SIGNAL("setFileName"), 
+                     self.outFileTxt.setText)
         
         dataBox.setLayout(dataLayout)
         return dataBox
@@ -177,6 +183,7 @@ class ProcessScans(QDialog):
         if fileName != "":
             if os.path.exists(os.path.dirname(fileName)):
                 self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
                 self.outFileTxt.emit(SIGNAL("editingFinished()"))
             else:
                 message = QMessageBox()
@@ -200,30 +207,32 @@ class ProcessScans(QDialog):
         Run the selected mapper
         '''
         self.dataSource = dataSource
-#        print "Selected " + str(self.outTypeChooser.currentText())
         nx = int(self.xDimTxt.text())
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
-        outputFileName = str(self.outFileTxt.text())
-        if os.access(os.path.dirname(outputFileName), os.W_OK):
+        if self.outputFileName == "":
+            self.outputFileName = os.path.join(dataSource.projectDir,  \
+                                               "%s.vti" %dataSource.projectName)
+            self.emit(SIGNAL("setFileName"), self.outputFileName)
+        if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
                 self.mapper = QGridMapper(dataSource, \
-                                         outputFileName, \
+                                         self.outputFileName, \
                                          nx=nx, ny=ny, nz=nz,
                                          transform = transform)
                 self.mapper.setProgressUpdater(self.updateProgress)
                 self.mapper.doMap()
             else:
                 self.mapper = PoleFigureMapper(dataSource, \
-                                              outputFileName, \
+                                              self.outputFileName, \
                                               nx=nx, ny=ny, nz=nz, \
                                               transform = transform)
                 self.mapper.doMap()
         else:
-            message = QMessageBox()
-            message.warning(self, \
-                         "Warning", \
-                         "The specified fileis not writable")
+            self.emit(SIGNAL("processError"), \
+                         "The specified directory \n" + \
+                         str(os.path.dirname(self.outputFileName)) + \
+                         "\nis not writable")
 
     def setCancelOK(self):
         '''
