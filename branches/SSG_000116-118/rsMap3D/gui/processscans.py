@@ -5,16 +5,17 @@
 import os
 
 from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QIntValidator
 from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QLineEdit
+from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QComboBox
-from PyQt4.QtGui import QLineEdit
-from PyQt4.QtGui import QFileDialog
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QIntValidator
+from PyQt4.QtGui import QVBoxLayout
 
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.polemapper import PoleFigureMapper
@@ -33,72 +34,15 @@ class ProcessScans(QDialog):
         '''
         super(ProcessScans, self).__init__(parent)
         self.Mapper = None
-        layout = QGridLayout()
-        row = 0       
-#        label = QLabel("Output Type")        
-#        layout.addWidget(label, row, 0)
-        self.outTypeChooser = QComboBox()
-        self.outTypeChooser.addItem(self.GRID_MAP_STR)
-        self.outTypeChooser.addItem(self.POLE_MAP_STR)
-#        layout.addWidget(self.outTypeChooser, row,1)
-#        row += 1
+        layout = QVBoxLayout()
 
-        label = QLabel("Grid Dimensions")
-        layout.addWidget(label, row,0)
-        row += 1
-        label = QLabel("X")
-        layout.addWidget(label, row,0)
-        self.xDimTxt = QLineEdit()
-        self.xDimTxt.setText("200")
-        self.xDimValidator = QIntValidator()
-        self.xDimTxt.setValidator(self.xDimValidator)
-        layout.addWidget(self.xDimTxt, row,1)
+        self.dataLayout = self.createDataLayout()
+        controlLayout = self.createControlLayout()
         
-        row += 1
-        label = QLabel("Y")
-        layout.addWidget(label, row,0)
-        self.yDimTxt = QLineEdit()
-        self.yDimTxt.setText("200")
-        self.yDimValidator = QIntValidator()
-        self.yDimTxt.setValidator(self.yDimValidator)
-        layout.addWidget(self.yDimTxt, row,1)
-        
-        row += 1
-        label = QLabel("Z")
-        layout.addWidget(label, row,0)
-        self.zDimTxt = QLineEdit()
-        self.zDimTxt.setText("200")
-        self.zDimValidator = QIntValidator()
-        self.zDimTxt.setValidator(self.zDimValidator)
-        layout.addWidget(self.zDimTxt, row,1)
-        
-        row += 1
-        label = QLabel("Output File")
-        layout.addWidget(label, row,0)
-        self.outFileTxt = QLineEdit()
-        layout.addWidget(self.outFileTxt, row,1)
-        self.outputFileButton = QPushButton("Browse")
-        layout.addWidget(self.outputFileButton, row, 2)
-        
-        
-        row += 1
-        self.progressBar = QProgressBar()
-        layout.addWidget(self.progressBar,row, 1)
-        self.runButton = QPushButton("Run")
-        layout.addWidget(self.runButton, row, 3)
-        self.cancelButton = QPushButton("Cancel")
-        self.cancelButton.setDisabled(True)
-        layout.addWidget(self.cancelButton, row, 4)
+
+        layout.addLayout(self.dataLayout)
+        layout.addLayout(controlLayout)
         self.setLayout(layout)                    
-
-        self.connect(self.runButton, SIGNAL("clicked()"), self.process)
-        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelProcess)
-        self.connect(self.outputFileButton, SIGNAL("clicked()"), 
-                     self.browseForOutputFile)
-        self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
-                     self.editFinishedOutputFile)
-        self.connect(self, SIGNAL("updateProgress"), 
-                     self.setProgress)
         
         
         
@@ -140,6 +84,85 @@ class ProcessScans(QDialog):
         Emit a signal to trigger the cancelation of procesing.
         '''
         self.emit(SIGNAL("cancelProcess"))
+        
+    def createControlLayout(self):
+        controlLayout = QGridLayout()
+        row = 0
+        self.progressBar = QProgressBar()
+        controlLayout.addWidget(self.progressBar,row, 1)
+
+        self.runButton = QPushButton("Run")
+        controlLayout.addWidget(self.runButton, row, 3)
+
+        self.cancelButton = QPushButton("Cancel")
+        self.cancelButton.setDisabled(True)
+
+        controlLayout.addWidget(self.cancelButton, row, 4)
+
+        self.connect(self.runButton, SIGNAL("clicked()"), self.process)
+        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelProcess)
+        self.connect(self, SIGNAL("updateProgress"), 
+                     self.setProgress)
+        
+        return controlLayout
+        
+    def createDataLayout(self):
+        '''
+        Create Sub Layout for data gathering widgets
+        '''
+        dataLayout = QGridLayout()
+        row = 0       
+#        label = QLabel("Output Type")        
+#        dataLayout.addWidget(label, row, 0)
+        self.outTypeChooser = QComboBox()
+        self.outTypeChooser.addItem(self.GRID_MAP_STR)
+        self.outTypeChooser.addItem(self.POLE_MAP_STR)
+#        dataLayout.addWidget(self.outTypeChooser, row,1)
+#        row += 1
+
+        label = QLabel("Grid Dimensions")
+        dataLayout.addWidget(label, row,0)
+        row += 1
+        label = QLabel("X")
+        dataLayout.addWidget(label, row,0)
+        self.xDimTxt = QLineEdit()
+        self.xDimTxt.setText("200")
+        self.xDimValidator = QIntValidator()
+        self.xDimTxt.setValidator(self.xDimValidator)
+        dataLayout.addWidget(self.xDimTxt, row,1)
+        
+        row += 1
+        label = QLabel("Y")
+        dataLayout.addWidget(label, row,0)
+        self.yDimTxt = QLineEdit()
+        self.yDimTxt.setText("200")
+        self.yDimValidator = QIntValidator()
+        self.yDimTxt.setValidator(self.yDimValidator)
+        dataLayout.addWidget(self.yDimTxt, row,1)
+        
+        row += 1
+        label = QLabel("Z")
+        dataLayout.addWidget(label, row,0)
+        self.zDimTxt = QLineEdit()
+        self.zDimTxt.setText("200")
+        self.zDimValidator = QIntValidator()
+        self.zDimTxt.setValidator(self.zDimValidator)
+        dataLayout.addWidget(self.zDimTxt, row,1)
+        
+        row += 1
+        label = QLabel("Output File")
+        dataLayout.addWidget(label, row,0)
+        self.outFileTxt = QLineEdit()
+        dataLayout.addWidget(self.outFileTxt, row,1)
+        self.outputFileButton = QPushButton("Browse")
+        dataLayout.addWidget(self.outputFileButton, row, 2)
+
+        self.connect(self.outputFileButton, SIGNAL("clicked()"), 
+                     self.browseForOutputFile)
+        self.connect(self.outputFileButton, SIGNAL("editFinished()"), 
+                     self.editFinishedOutputFile)
+        
+        return dataLayout
         
     def editFinishedOutputFile(self):
         '''
@@ -234,6 +257,8 @@ class ProcessScans(QDialog):
         self.mapper.stopMap()
         
     def updateProgress(self, value):
-        print("Made it to update progress")
+        '''
+        Send signal to update the progress bar.
+        '''
         self.emit(SIGNAL("updateProgress"), value)
         

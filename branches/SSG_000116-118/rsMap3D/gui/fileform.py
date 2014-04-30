@@ -4,26 +4,29 @@
 '''
 import os
 
-from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import QRegExp
+from PyQt4.QtCore import SIGNAL
+
+from PyQt4.QtGui import QButtonGroup
+from PyQt4.QtGui import QCheckBox
+from PyQt4.QtGui import QComboBox
 from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QLineEdit
+from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QFileDialog
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QComboBox
-from PyQt4.QtGui import QCheckBox
-from PyQt4.QtGui import QRegExpValidator
 from PyQt4.QtGui import QRadioButton
-from PyQt4.QtGui import QButtonGroup
+from PyQt4.QtGui import QRegExpValidator
+from PyQt4.QtGui import QVBoxLayout
 
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
-from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
+from rsMap3D.datasource.InstForXrayutilitiesReader \
+    import InstForXrayutilitiesReader
 
 class FileForm(QDialog):
     '''
@@ -36,153 +39,25 @@ class FileForm(QDialog):
         Constructor - Layout Widgets on the page and link actions
         '''
         super(FileForm, self).__init__(parent)
+
+        #Initialize parameters
         self.roixmin = 1
         self.roixmax = 680
         self.roiymin = 1
         self.roiymax = 480
         self.projectionDirection = [0,0,1]
-        layout = QGridLayout()
+        layout = QVBoxLayout()
 
-        row = 0
-        label = QLabel("Project File:");
-        self.projNameTxt = QLineEdit()
-        self.projectDirButton = QPushButton("Browse")
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.projNameTxt, row, 1)
-        layout.addWidget(self.projectDirButton, row, 2)
-
-        row += 1
-        label = QLabel("Instrument Config File:");
-        self.instConfigTxt = QLineEdit()
-        self.instConfigFileButton = QPushButton("Browse")
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.instConfigTxt, row, 1)
-        layout.addWidget(self.instConfigFileButton, row, 2)
-
-        row += 1
-        label = QLabel("Detector Config File:");
-        self.detConfigTxt = QLineEdit()
-        self.detConfigFileButton = QPushButton("Browse")
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.detConfigTxt, row, 1)
-        layout.addWidget(self.detConfigFileButton, row, 2)
+        self.dataLayout = self._createDataLayout()
+        controlLayout = self._createControlLayout()
         
-        row += 1
-        self.fieldCorrectionGroup = QButtonGroup(self)
-        self.noFieldRadio = QRadioButton("None")
-        self.badPixelRadio = QRadioButton("Bad Pixel File")
-        self.flatFieldRadio = QRadioButton("Flat Field Correction")
-        self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
-        self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
-        self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
-        self.badPixelFileTxt = QLineEdit()
-        self.flatFieldFileTxt = QLineEdit()
-        self.badPixelFileBrowseButton = QPushButton("Browse")
-        self.flatFieldFileBrowseButton = QPushButton("Browse")
-        
-        layout.addWidget(self.noFieldRadio, row, 0)
-        row += 1
-        layout.addWidget(self.badPixelRadio, row, 0)
-        layout.addWidget(self.badPixelFileTxt, row, 1)
-        layout.addWidget(self.badPixelFileBrowseButton, row, 2)
-        row += 1
-        layout.addWidget(self.flatFieldRadio, row, 0)
-        layout.addWidget(self.flatFieldFileTxt, row, 1)
-        layout.addWidget(self.flatFieldFileBrowseButton, row, 2)
-        
-        row += 1
-        label = QLabel("Number of Pixels To Average:");
-        self.pixAvgTxt = QLineEdit("1,1")
-        rxAvg = QRegExp('(\d)+,(\d)+')
-        self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.pixAvgTxt, row, 1)
-
-        row += 1
-        label = QLabel("Detector ROI:");
-        self.detROITxt = QLineEdit()
-        self.updateROITxt()
-        rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
-        self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.detROITxt, row, 1)
-        
-        row += 1
-        label = QLabel("Scan Numbers")
-        self.scanNumsTxt = QLineEdit()
-        rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
-        self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.scanNumsTxt, row, 1)
-
-        row += 1
-        label = QLabel("Output Type")
-        self.outTypeChooser = QComboBox()
-        self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
-        self.outTypeChooser.addItem(self.POLE_MAP_STR)
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.outTypeChooser, row, 1)
-
-        row += 1
-        label = QLabel("HKL output")
-        layout.addWidget(label, row, 0)
-        self.hklCheckbox = QCheckBox()
-        layout.addWidget(self.hklCheckbox, row, 1)
-       
-        row += 1
-        self.progressBar = QProgressBar()
-        layout.addWidget(self.progressBar, row, 1)
-        
-        row += 1
-        self.loadButton = QPushButton("Load")        
-        self.loadButton.setDisabled(True)
-        layout.addWidget(self.loadButton, row, 1)
-        self.cancelButton = QPushButton("Cancel")        
-        self.cancelButton.setDisabled(True)
-#        self.cancelButton.setDisabled(True)
-        layout.addWidget(self.cancelButton, row, 2)
-        
-        # Add Signals between widgets
-        self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
-        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
-        self.connect(self.projectDirButton, SIGNAL("clicked()"), 
-                     self.browseForProjectDir)
-        self.connect(self.instConfigFileButton, SIGNAL("clicked()"), 
-                     self.browseForInstFile)
-        self.connect(self.detConfigFileButton, SIGNAL("clicked()"), 
-                     self.browseForDetFile)
-        self.connect(self.projNameTxt, 
-                     SIGNAL("editingFinished()"), 
-                     self.projectDirChanged)
-        self.connect(self.instConfigTxt, 
-                     SIGNAL("editingFinished()"), 
-                     self.instConfigChanged)
-        self.connect(self.detConfigTxt, 
-                     SIGNAL("editingFinished()"), 
-                     self.detConfigChanged)
-        self.connect(self.outTypeChooser, \
-                     SIGNAL("currentIndexChanged(QString )"), \
-                     self.outputTypeChanged)
-        self.connect(self.fieldCorrectionGroup,\
-                     SIGNAL("buttonClicked(QAbstractButton *)"), \
-                     self.fieldCorrectionTypeChanged)
-        self.connect(self.badPixelFileTxt,
-                     SIGNAL("editingFinished()"),
-                     self.badPixelFileChanged)
-        self.connect(self.flatFieldFileTxt,
-                     SIGNAL("editingFinished()"),
-                     self.flatFieldFileChanged)
-        self.connect(self.badPixelFileBrowseButton, \
-                     SIGNAL("clicked()"), \
-                     self.browseBadPixelFileName)
-        self.connect(self.flatFieldFileBrowseButton, \
-                     SIGNAL("clicked()"), \
-                     self.browseFlatFieldFileName)
-        self.connect(self, SIGNAL("updateProgress"), self.setProgress)
-        self.noFieldRadio.setChecked(True)
-        #print self.noFieldRadio.
-        self.fieldCorrectionTypeChanged(*(self.noFieldRadio,))
+        layout.addLayout(self.dataLayout)
+        layout.addLayout(controlLayout)
         self.setLayout(layout);
+
+        #Initialize a couple of widgets to do setup.
+        self.noFieldRadio.setChecked(True)
+        self.fieldCorrectionTypeChanged(*(self.noFieldRadio,))
         
     def loadFile(self):
         '''
@@ -308,6 +183,159 @@ class FileForm(QDialog):
         ''' Send signal to cancel a file load'''
         self.emit(SIGNAL("cancelLoadFile"))
         
+    def _createControlLayout(self):
+        '''
+        Create Layout holding controls widgets
+        '''
+        controlLayout = QGridLayout()       
+        row =0
+        self.progressBar = QProgressBar()
+        controlLayout.addWidget(self.progressBar, row, 1)
+        
+        row += 1
+        self.loadButton = QPushButton("Load")        
+        self.loadButton.setDisabled(True)
+        controlLayout.addWidget(self.loadButton, row, 1)
+        self.cancelButton = QPushButton("Cancel")        
+        self.cancelButton.setDisabled(True)
+#        self.cancelButton.setDisabled(True)
+        controlLayout.addWidget(self.cancelButton, row, 2)
+
+        self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
+        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
+        self.connect(self, SIGNAL("updateProgress"), self.setProgress)
+
+        return controlLayout
+    
+    def _createDataLayout(self):
+        '''
+        Create widgets for collecting data
+        '''
+        dataLayout = QGridLayout()
+        row = 0
+        label = QLabel("Project File:");
+        self.projNameTxt = QLineEdit()
+        self.projectDirButton = QPushButton("Browse")
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.projNameTxt, row, 1)
+        dataLayout.addWidget(self.projectDirButton, row, 2)
+
+        row += 1
+        label = QLabel("Instrument Config File:");
+        self.instConfigTxt = QLineEdit()
+        self.instConfigFileButton = QPushButton("Browse")
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.instConfigTxt, row, 1)
+        dataLayout.addWidget(self.instConfigFileButton, row, 2)
+
+        row += 1
+        label = QLabel("Detector Config File:");
+        self.detConfigTxt = QLineEdit()
+        self.detConfigFileButton = QPushButton("Browse")
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.detConfigTxt, row, 1)
+        dataLayout.addWidget(self.detConfigFileButton, row, 2)
+        
+        row += 1
+        self.fieldCorrectionGroup = QButtonGroup(self)
+        self.noFieldRadio = QRadioButton("None")
+        self.badPixelRadio = QRadioButton("Bad Pixel File")
+        self.flatFieldRadio = QRadioButton("Flat Field Correction")
+        self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
+        self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
+        self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
+        self.badPixelFileTxt = QLineEdit()
+        self.flatFieldFileTxt = QLineEdit()
+        self.badPixelFileBrowseButton = QPushButton("Browse")
+        self.flatFieldFileBrowseButton = QPushButton("Browse")
+
+        
+        dataLayout.addWidget(self.noFieldRadio, row, 0)
+        row += 1
+        dataLayout.addWidget(self.badPixelRadio, row, 0)
+        dataLayout.addWidget(self.badPixelFileTxt, row, 1)
+        dataLayout.addWidget(self.badPixelFileBrowseButton, row, 2)
+        row += 1
+        dataLayout.addWidget(self.flatFieldRadio, row, 0)
+        dataLayout.addWidget(self.flatFieldFileTxt, row, 1)
+        dataLayout.addWidget(self.flatFieldFileBrowseButton, row, 2)
+        
+        row += 1
+        label = QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = QLineEdit("1,1")
+        rxAvg = QRegExp('(\d)+,(\d)+')
+        self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.pixAvgTxt, row, 1)
+
+        row += 1
+        label = QLabel("Detector ROI:");
+        self.detROITxt = QLineEdit()
+        self.updateROITxt()
+        rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
+        self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.detROITxt, row, 1)
+        
+        row += 1
+        label = QLabel("Scan Numbers")
+        self.scanNumsTxt = QLineEdit()
+        rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
+        self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.scanNumsTxt, row, 1)
+
+        row += 1
+        label = QLabel("Output Type")
+        self.outTypeChooser = QComboBox()
+        self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
+        self.outTypeChooser.addItem(self.POLE_MAP_STR)
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.outTypeChooser, row, 1)
+
+        row += 1
+        label = QLabel("HKL output")
+        dataLayout.addWidget(label, row, 0)
+        self.hklCheckbox = QCheckBox()
+        dataLayout.addWidget(self.hklCheckbox, row, 1)
+
+        # Add Signals between widgets
+        self.connect(self.projectDirButton, SIGNAL("clicked()"), 
+                     self.browseForProjectDir)
+        self.connect(self.instConfigFileButton, SIGNAL("clicked()"), 
+                     self.browseForInstFile)
+        self.connect(self.detConfigFileButton, SIGNAL("clicked()"), 
+                     self.browseForDetFile)
+        self.connect(self.projNameTxt, 
+                     SIGNAL("editingFinished()"), 
+                     self.projectDirChanged)
+        self.connect(self.instConfigTxt, 
+                     SIGNAL("editingFinished()"), 
+                     self.instConfigChanged)
+        self.connect(self.detConfigTxt, 
+                     SIGNAL("editingFinished()"), 
+                     self.detConfigChanged)
+        self.connect(self.outTypeChooser, \
+                     SIGNAL("currentIndexChanged(QString )"), \
+                     self.outputTypeChanged)
+        self.connect(self.fieldCorrectionGroup,\
+                     SIGNAL("buttonClicked(QAbstractButton *)"), \
+                     self.fieldCorrectionTypeChanged)
+        self.connect(self.badPixelFileTxt,
+                     SIGNAL("editingFinished()"),
+                     self.badPixelFileChanged)
+        self.connect(self.flatFieldFileTxt,
+                     SIGNAL("editingFinished()"),
+                     self.flatFieldFileChanged)
+        self.connect(self.badPixelFileBrowseButton, \
+                     SIGNAL("clicked()"), \
+                     self.browseBadPixelFileName)
+        self.connect(self.flatFieldFileBrowseButton, \
+                     SIGNAL("clicked()"), \
+                     self.browseFlatFieldFileName)
+
+        return dataLayout
+    
     def fieldCorrectionTypeChanged(self, *fieldCorrType):
         if fieldCorrType[0].text() == "None":
             self.badPixelFileTxt.setDisabled(True)
