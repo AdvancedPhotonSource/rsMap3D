@@ -9,7 +9,6 @@ from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QVBoxLayout
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QListWidget
-from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QTableWidget
 from PyQt4.QtGui import QTableWidgetItem
@@ -48,25 +47,19 @@ class ScanForm(QDialog):
         qrange = QGridLayout()
         xLabel = QLabel("X")
         xminLabel = QLabel("min")
-        self.xminText = QLineEdit()
-        self.xminText.setReadOnly(True)
+        self.xminText = QLabel("")
         xmaxLabel = QLabel("max")
-        self.xmaxText = QLineEdit()
-        self.xmaxText.setReadOnly(True)
+        self.xmaxText = QLabel("")
         yLabel = QLabel("Y")
         yminLabel = QLabel("min")
-        self.yminText = QLineEdit()
-        self.yminText.setReadOnly(True)
+        self.yminText = QLabel("")
         ymaxLabel = QLabel("max")
-        self.ymaxText = QLineEdit()
-        self.ymaxText.setReadOnly(True)
+        self.ymaxText = QLabel("")
         zLabel = QLabel("Z")
         zminLabel = QLabel("min")
-        self.zminText = QLineEdit()
-        self.zminText.setReadOnly(True)
+        self.zminText = QLabel("")
         zmaxLabel = QLabel("max")
-        self.zmaxText = QLineEdit()
-        self.zmaxText.setReadOnly(True)
+        self.zmaxText = QLabel("")
 
         self.selectAll = QPushButton()
         self.selectAll.setText("Select All")
