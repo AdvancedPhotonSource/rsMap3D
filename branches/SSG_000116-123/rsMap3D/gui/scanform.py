@@ -124,6 +124,7 @@ class ScanForm(QDialog):
         '''
         item = QTableWidgetItem(str(value))
         item.setForeground(coloredBrush)
+        item.setFlags(item.flags() & (~Qt.ItemIsEditable))
         self.detail.setItem(row, column, item)
         
     def checkItemChanged(self,item):
@@ -149,6 +150,17 @@ class ScanForm(QDialog):
             self.dataSource.imageToBeUsed[scanNo][i] = False
         self.showQs(scanNo)
 
+    def getSelectedScan(self):
+        '''
+        Return the scan number of the selected scan
+        '''
+        scansSel = self.scanList.selectedItems()
+        if len(scansSel) > 1:
+            print "Should not be able to select more than one scan."
+        scan = scansSel[0]
+        scanNo = int(scan.text().split(' ')[0])
+        return scanNo
+        
     def loadScanFile(self, dataSource):
         '''
         Load information from the selected dataSource into this form.
@@ -170,17 +182,6 @@ class ScanForm(QDialog):
         self.emit(SIGNAL("doneLoading"))
         
    
-    def getSelectedScan(self):
-        '''
-        Return the scan number of the selected scan
-        '''
-        scansSel = self.scanList.selectedItems()
-        if len(scansSel) > 1:
-            print "Should not be able to select more than one scan."
-        scan = scansSel[0]
-        scanNo = int(scan.text().split(' ')[0])
-        return scanNo
-        
     def renderBounds(self, bounds):
         '''
         Render a box with boundaries from the given input
