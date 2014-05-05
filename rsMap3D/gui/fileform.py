@@ -31,17 +31,15 @@ from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
     InstConfigException, RSMap3DException
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
+from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
+    CURRENT_INDEX_CHANGED_SIGNAL, EDIT_FINISHED_SIGNAL, \
+    TEXT_CHANGED_SIGNAL
+
 
 class FileForm(QDialog):
     '''
     This class presents information for selecting input files
     '''
-    #Signal Strings
-    BUTTON_CLICKED_SIGNAL = "buttonClicked(QAbstractButton *)"
-    CLICKED_SIGNAL = "clicked()"
-    CURRENT_INDEX_CHANGED_SIGNAL = "currentIndexChanged(QString)"
-    EDIT_FINISHED_SIGNAL = "editingFinished()"
-    TEXT_CHANGED_SIGNAL = "textChanged(QString)"
     UPDATE_PROGRESS_SIGNAL = "updateProgress"
     # Regular expressions for string validation
     PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
@@ -241,10 +239,10 @@ class FileForm(QDialog):
         controlLayout.addWidget(self.cancelButton, row, 2)
 
         self.connect(self.loadButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.loadFile)
         self.connect(self.cancelButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.cancelLoadFile)
         self.connect(self, \
                      SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
@@ -348,46 +346,46 @@ class FileForm(QDialog):
 
         # Add Signals between widgets
         self.connect(self.projectDirButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.browseForProjectDir)
         self.connect(self.instConfigFileButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.browseForInstFile)
         self.connect(self.detConfigFileButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.browseForDetFile)
         self.connect(self.projNameTxt, \
-                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
+                     SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.projectDirChanged)
         self.connect(self.instConfigTxt, \
-                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
+                     SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.instConfigChanged)
         self.connect(self.detConfigTxt, \
-                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
+                     SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.detConfigChanged)
         self.connect(self.outTypeChooser, \
-                     SIGNAL(self.CURRENT_INDEX_CHANGED_SIGNAL), \
+                     SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self.outputTypeChanged)
         self.connect(self.fieldCorrectionGroup,\
-                     SIGNAL(self.BUTTON_CLICKED_SIGNAL), \
+                     SIGNAL(BUTTON_CLICKED_SIGNAL), \
                      self.fieldCorrectionTypeChanged)
         self.connect(self.badPixelFileTxt,
-                     SIGNAL(self.EDIT_FINISHED_SIGNAL),
+                     SIGNAL(EDIT_FINISHED_SIGNAL),
                      self.badPixelFileChanged)
         self.connect(self.flatFieldFileTxt,
-                     SIGNAL(self.EDIT_FINISHED_SIGNAL),
+                     SIGNAL(EDIT_FINISHED_SIGNAL),
                      self.flatFieldFileChanged)
         self.connect(self.badPixelFileBrowseButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.browseBadPixelFileName)
         self.connect(self.flatFieldFileBrowseButton, \
-                     SIGNAL(self.CLICKED_SIGNAL), \
+                     SIGNAL(CLICKED_SIGNAL), \
                      self.browseFlatFieldFileName)
         self.connect(self.pixAvgTxt,
-                     SIGNAL(self.TEXT_CHANGED_SIGNAL),
+                     SIGNAL(TEXT_CHANGED_SIGNAL),
                      self.pixAvgTxtChanged)
         self.connect(self.detROITxt,
-                     SIGNAL(self.TEXT_CHANGED_SIGNAL),
+                     SIGNAL(TEXT_CHANGED_SIGNAL),
                      self.detROITxtChanged)
         
         dataBox.setLayout(dataLayout)
