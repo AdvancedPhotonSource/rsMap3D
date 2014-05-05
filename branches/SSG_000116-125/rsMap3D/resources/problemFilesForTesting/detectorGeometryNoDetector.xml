@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<detectorGeometryForXrayutilities xmlns="https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils">
+    <dateWritten></dateWritten>
+    <timeWritten></timeWritten>
+	
+    <Detectors>
+    </Detectors>
+</detectorGeometryForXrayutilities>
