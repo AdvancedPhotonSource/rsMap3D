@@ -22,12 +22,13 @@ from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QRadioButton
 from PyQt4.QtGui import QRegExpValidator
 from PyQt4.QtGui import QVBoxLayout
+from PyQt4.QtGui import QValidator
 
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
-    InstConfigException
+    InstConfigException, RSMap3DException
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
 
@@ -35,8 +36,23 @@ class FileForm(QDialog):
     '''
     This class presents information for selecting input files
     '''
+    #Signal Strings
+    BUTTON_CLICKED_SIGNAL = "buttonClicked(QAbstractButton *)"
+    CLICKED_SIGNAL = "clicked()"
+    CURRENT_INDEX_CHANGED_SIGNAL = "currentIndexChanged(QString)"
+    EDIT_FINISHED_SIGNAL = "editingFinished()"
+    TEXT_CHANGED_SIGNAL = "textChanged(QString)"
+    UPDATE_PROGRESS_SIGNAL = "updateProgress"
+    # Regular expressions for string validation
+    PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
+    PIX_AVG_REGEXP_2 =  "^((\d)+,*){2}$"
+    DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
+    DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
+    SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
+    #Strings for Text Widgets
     POLE_MAP_STR = "Streographic Projection"
     SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
+
     def __init__(self,parent=None):
         '''
         Constructor - Layout Widgets on the page and link actions
@@ -186,6 +202,26 @@ class FileForm(QDialog):
         ''' Send signal to cancel a file load'''
         self.emit(SIGNAL("cancelLoadFile"))
         
+    def checkOkToLoad(self):
+        '''
+        Make sure we have valid file names for project, instrument config, 
+        and the detector config.  If we do enable load button.  If not disable
+        the load button
+        '''
+        if os.path.isfile(self.projNameTxt.text()) and \
+            os.path.isfile(self.instConfigTxt.text()) and \
+            os.path.isfile(self.detConfigTxt.text()) and \
+            (self.noFieldRadio.isChecked() or \
+             (self.badPixelRadio.isChecked() and \
+              not (str(self.badPixelFileTxt.text()) == "")) or \
+             (self.flatFieldRadio.isChecked() and \
+              not (str(self.flatFieldFileTxt.text()) == ""))) and \
+             self.pixAvgValid(self.pixAvgTxt.text()) and \
+             self.detROIValid(self.detROITxt.text()):
+            self.loadButton.setEnabled(True)
+        else:
+            self.loadButton.setDisabled(True)
+            
     def _createControlBox(self):
         '''
         Create Layout holding controls widgets
@@ -204,9 +240,15 @@ class FileForm(QDialog):
         self.cancelButton.setDisabled(True)
         controlLayout.addWidget(self.cancelButton, row, 2)
 
-        self.connect(self.loadButton, SIGNAL("clicked()"), self.loadFile)
-        self.connect(self.cancelButton, SIGNAL("clicked()"), self.cancelLoadFile)
-        self.connect(self, SIGNAL("updateProgress"), self.setProgress)
+        self.connect(self.loadButton, \
+                     SIGNAL(self.CLICKED_SIGNAL), \
+                     self.loadFile)
+        self.connect(self.cancelButton, \
+                     SIGNAL(self.CLICKED_SIGNAL), \
+                     self.cancelLoadFile)
+        self.connect(self, \
+                     SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
+                     self.setProgress)
 
         controlBox.setLayout(controlLayout)
         return controlBox
@@ -268,7 +310,7 @@ class FileForm(QDialog):
         row += 1
         label = QLabel("Number of Pixels To Average:");
         self.pixAvgTxt = QLineEdit("1,1")
-        rxAvg = QRegExp('(\d)+,(\d)+')
+        rxAvg = QRegExp(self.PIX_AVG_REGEXP_1)
         self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.pixAvgTxt, row, 1)
@@ -277,7 +319,7 @@ class FileForm(QDialog):
         label = QLabel("Detector ROI:");
         self.detROITxt = QLineEdit()
         self.updateROITxt()
-        rxROI = QRegExp('(\d)+,(\d)+,(\d)+,(\d)+')
+        rxROI = QRegExp(self.DET_ROI_REGEXP_1)
         self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detROITxt, row, 1)
@@ -285,7 +327,7 @@ class FileForm(QDialog):
         row += 1
         label = QLabel("Scan Numbers")
         self.scanNumsTxt = QLineEdit()
-        rx = QRegExp('((\d)+(-(\d)+)?\,( )?)+')
+        rx = QRegExp(self.SCAN_LIST_REGEXP)
         self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.scanNumsTxt, row, 1)
@@ -305,39 +347,49 @@ class FileForm(QDialog):
         dataLayout.addWidget(self.hklCheckbox, row, 1)
 
         # Add Signals between widgets
-        self.connect(self.projectDirButton, SIGNAL("clicked()"), 
+        self.connect(self.projectDirButton, \
+                     SIGNAL(self.CLICKED_SIGNAL), \
                      self.browseForProjectDir)
-        self.connect(self.instConfigFileButton, SIGNAL("clicked()"), 
+        self.connect(self.instConfigFileButton, \
+                     SIGNAL(self.CLICKED_SIGNAL), \
                      self.browseForInstFile)
-        self.connect(self.detConfigFileButton, SIGNAL("clicked()"), 
+        self.connect(self.detConfigFileButton, \
+                     SIGNAL(self.CLICKED_SIGNAL), \
                      self.browseForDetFile)
-        self.connect(self.projNameTxt, 
-                     SIGNAL("editingFinished()"), 
+        self.connect(self.projNameTxt, \
+                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
                      self.projectDirChanged)
-        self.connect(self.instConfigTxt, 
-                     SIGNAL("editingFinished()"), 
+        self.connect(self.instConfigTxt, \
+                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
                      self.instConfigChanged)
-        self.connect(self.detConfigTxt, 
-                     SIGNAL("editingFinished()"), 
+        self.connect(self.detConfigTxt, \
+                     SIGNAL(self.EDIT_FINISHED_SIGNAL), \
                      self.detConfigChanged)
         self.connect(self.outTypeChooser, \
-                     SIGNAL("currentIndexChanged(QString )"), \
+                     SIGNAL(self.CURRENT_INDEX_CHANGED_SIGNAL), \
                      self.outputTypeChanged)
         self.connect(self.fieldCorrectionGroup,\
-                     SIGNAL("buttonClicked(QAbstractButton *)"), \
+                     SIGNAL(self.BUTTON_CLICKED_SIGNAL), \
                      self.fieldCorrectionTypeChanged)
         self.connect(self.badPixelFileTxt,
-                     SIGNAL("editingFinished()"),
+                     SIGNAL(self.EDIT_FINISHED_SIGNAL),
                      self.badPixelFileChanged)
         self.connect(self.flatFieldFileTxt,
-                     SIGNAL("editingFinished()"),
+                     SIGNAL(self.EDIT_FINISHED_SIGNAL),
                      self.flatFieldFileChanged)
         self.connect(self.badPixelFileBrowseButton, \
-                     SIGNAL("clicked()"), \
+                     SIGNAL(self.CLICKED_SIGNAL), \
                      self.browseBadPixelFileName)
         self.connect(self.flatFieldFileBrowseButton, \
-                     SIGNAL("clicked()"), \
+                     SIGNAL(self.CLICKED_SIGNAL), \
                      self.browseFlatFieldFileName)
+        self.connect(self.pixAvgTxt,
+                     SIGNAL(self.TEXT_CHANGED_SIGNAL),
+                     self.pixAvgTxtChanged)
+        self.connect(self.detROITxt,
+                     SIGNAL(self.TEXT_CHANGED_SIGNAL),
+                     self.detROITxtChanged)
+        
         dataBox.setLayout(dataLayout)
         return dataBox
     
@@ -349,7 +401,7 @@ class FileForm(QDialog):
             self.checkOkToLoad()
             try:
                 self.updateROIandNumAvg()
-            except DetectorConfigException as e:
+            except DetectorConfigException:
                 message = QMessageBox()
                 message.warning(self, \
                                  "Warning",\
@@ -361,6 +413,34 @@ class FileForm(QDialog):
                              "Warning",\
                              "The filename entered for the detector " + \
                              "configuration is invalid")
+        
+    def detROITxtChanged(self, text):
+        '''
+        Check to make sure the text for detector roi is valid and indicate 
+        by a color change 
+        '''
+        if self.detROIValid(text):
+            self.detROITxt.setStyleSheet("QLineEdit {color : black;}")
+        else: 
+            self.detROITxt.setStyleSheet("QLineEdit {color : red;}")
+        self.checkOkToLoad()
+
+    def detROIValid(self, text):
+        '''
+        Check to make sure the text for is a vaid detector roi
+        '''
+        rxROI = QRegExp(self.DET_ROI_REGEXP_2)
+        validator = QRegExpValidator(rxROI, None)
+        pos = 0
+        if validator.validate(text, pos)[0] == QValidator.Acceptable:
+            roiVals = self.getDetectorROI(rois=str(text))
+            if (roiVals[0] <= roiVals[1]) and \
+               (roiVals[2] <= roiVals[3]):
+                return True
+            else:
+                return False
+        else:
+            return False
         
     def fieldCorrectionTypeChanged(self, *fieldCorrType):
         '''
@@ -499,24 +579,6 @@ class FileForm(QDialog):
                              "Warning", \
                              "The project directory entered is invalid")
         
-    def checkOkToLoad(self):
-        '''
-        Make sure we have valid file names for project, instrument config, 
-        and the detector config.  If we do enable load button.  If not disable
-        the load button
-        '''
-        if os.path.isfile(self.projNameTxt.text()) and \
-            os.path.isfile(self.instConfigTxt.text()) and \
-            os.path.isfile(self.detConfigTxt.text()) and \
-            (self.noFieldRadio.isChecked() or \
-             (self.badPixelRadio.isChecked() and \
-              not (str(self.badPixelFileTxt.text()) == "")) or \
-             (self.flatFieldRadio.isChecked() and \
-              not (str(self.flatFieldFileTxt.text()) == ""))):
-            self.loadButton.setEnabled(True)
-        else:
-            self.loadButton.setDisabled(True)
-            
     def getOutputType(self):
         '''
         Get the output type to be used.
@@ -533,16 +595,22 @@ class FileForm(QDialog):
             scans = srange(str(self.scanNumsTxt.text()))
             return scans.list() 
         
-    def getDetectorROI(self):
+    def getDetectorROI(self, rois=""):
         '''
         Return the detector ROI as a list
         '''
-        roiStrings = str(self.detROITxt.text()).split(',')
+        if rois == "":
+            roiStrings = str(self.detROITxt.text()).split(',')
+        else:
+            roiStrings = rois.split(',')
+            
         roi = []
-        print("getting ROIs") + str(roiStrings)
+        if len(roiStrings) <> 4:
+            raise RSMap3DException("Detector ROI needs 4 values. " + \
+                                   str(len(roiStrings)) + \
+                                   " were given.")
         for value in roiStrings:
             roi.append(int(value))
-        print("Done getting ROIs")
         return roi
     
     def getPixelsToAverage(self):
@@ -567,6 +635,29 @@ class FileForm(QDialog):
             self.hklCheckbox.setDisabled(True)
             self.hklCheckbox.setCheckState(False)
             
+    def pixAvgTxtChanged(self,text):
+        '''
+        Check to make sure the text for pix to average is valid and indicate 
+        by a color change 
+        '''
+        if self.pixAvgValid(text):
+            self.pixAvgTxt.setStyleSheet("QLineEdit {color : black;}")
+        else: 
+            self.pixAvgTxt.setStyleSheet("QLineEdit {color : red;}")
+        self.checkOkToLoad()
+            
+    def pixAvgValid(self, text):
+        '''
+        Check to make sure that the pixAvgText is valid
+        '''
+        rxPixAvg = QRegExp(self.PIX_AVG_REGEXP_2)
+        validator = QRegExpValidator(rxPixAvg, None)
+        pos = 0
+        if validator.validate(text, pos)[0] == QValidator.Acceptable:
+            return True
+        else:
+            return False
+        
     def setCancelOK(self):
         '''
         If Cancel is OK the loadbutton is disabled and the cancel button is 
