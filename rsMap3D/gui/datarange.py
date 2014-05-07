@@ -3,19 +3,12 @@
  See LICENSE file.
 '''
 
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QDialog
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QHBoxLayout
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QLineEdit
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QDoubleValidator
-from PyQt4.QtGui import QMessageBox
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
 
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
 
-class DataRange(QDialog):
+class DataRange(qtGui.QDialog):
     '''
     This class displays the overall data range for all selected images in
     the available scans.
@@ -28,40 +21,40 @@ class DataRange(QDialog):
         super(DataRange, self).__init__(parent)
         self._initializeRanges()
         
-        layout = QGridLayout()
-        xLabel = QLabel("X")
-        xminLabel = QLabel("min")
-        self.xminText = QLineEdit()
-        self.xminValidator = QDoubleValidator()
+        layout = qtGui.QGridLayout()
+        xLabel = qtGui.QLabel("X")
+        xminLabel = qtGui.QLabel("min")
+        self.xminText = qtGui.QLineEdit()
+        self.xminValidator = qtGui.QDoubleValidator()
         self.xminText.setValidator(self.xminValidator)
-        xmaxLabel = QLabel("max")
-        self.xmaxText = QLineEdit()
-        self.xmaxValidator = QDoubleValidator()
+        xmaxLabel = qtGui.QLabel("max")
+        self.xmaxText = qtGui.QLineEdit()
+        self.xmaxValidator = qtGui.QDoubleValidator()
         self.xmaxText.setValidator(self.xmaxValidator)
-        yLabel = QLabel("Y")
-        yminLabel = QLabel("min")
-        self.yminText = QLineEdit()
-        self.yminValidator = QDoubleValidator()
+        yLabel = qtGui.QLabel("Y")
+        yminLabel = qtGui.QLabel("min")
+        self.yminText = qtGui.QLineEdit()
+        self.yminValidator = qtGui.QDoubleValidator()
         self.yminText.setValidator(self.yminValidator)
-        ymaxLabel = QLabel("max")
-        self.ymaxText = QLineEdit()
-        self.ymaxValidator = QDoubleValidator()
+        ymaxLabel = qtGui.QLabel("max")
+        self.ymaxText = qtGui.QLineEdit()
+        self.ymaxValidator = qtGui.QDoubleValidator()
         self.ymaxText.setValidator(self.ymaxValidator)
-        zLabel = QLabel("Z")
-        zminLabel = QLabel("min")
-        self.zminText = QLineEdit()
-        self.zminValidator = QDoubleValidator()
+        zLabel = qtGui.QLabel("Z")
+        zminLabel = qtGui.QLabel("min")
+        self.zminText = qtGui.QLineEdit()
+        self.zminValidator = qtGui.QDoubleValidator()
         self.zminText.setValidator(self.zminValidator)
-        zmaxLabel = QLabel("max")
-        self.zmaxText = QLineEdit()
-        self.zmaxValidator = QDoubleValidator()
+        zmaxLabel = qtGui.QLabel("max")
+        self.zmaxText = qtGui.QLineEdit()
+        self.zmaxValidator = qtGui.QDoubleValidator()
         self.zmaxText.setValidator(self.zmaxValidator)
-        buttonLayout = QHBoxLayout()
+        buttonLayout = qtGui.QHBoxLayout()
 
-        self.resetButton = QPushButton("Reset")
+        self.resetButton = qtGui.QPushButton("Reset")
         self.resetButton.setDisabled(True)
         
-        self.applyButton = QPushButton("Apply")
+        self.applyButton = qtGui.QPushButton("Apply")
         self.applyButton.setDisabled(True)
         
         buttonLayout.addWidget(self.resetButton)
@@ -84,21 +77,21 @@ class DataRange(QDialog):
         layout.addWidget(self.zmaxText, 2,4)
         layout.addLayout(buttonLayout, 3,4)
 
-        self.connect(self.resetButton, SIGNAL(CLICKED_SIGNAL), self._resetRange)
-        self.connect(self.applyButton, SIGNAL(CLICKED_SIGNAL), self._applyRange)
-        self.connect(self.xminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.resetButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._resetRange)
+        self.connect(self.applyButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._applyRange)
+        self.connect(self.xminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._xValChanged)
-        self.connect(self.xmaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.xmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._xValChanged)
-        self.connect(self.yminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.yminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._yValChanged)
-        self.connect(self.ymaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.ymaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._yValChanged)
-        self.connect(self.zminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.zminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._zValChanged)
-        self.connect(self.zmaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.zmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._zValChanged)
-        self.connect(self, SIGNAL("rangeChanged"), 
+        self.connect(self, qtCore.SIGNAL("rangeChanged"), 
             self._checkOkToApply)
         self.setLayout(layout)
         
@@ -129,7 +122,7 @@ class DataRange(QDialog):
                        float(self.ymaxText.text()),
                        float(self.zminText.text()),
                        float(self.zmaxText.text()))
-        self.emit(SIGNAL("rangeChanged"))
+        self.emit(qtCore.SIGNAL("rangeChanged"))
         
     def _checkOkToApply(self):
         '''
@@ -208,7 +201,7 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.xValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                             "xmin must be less than xmax")
@@ -224,7 +217,7 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.yValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                             "ymin must be less than ymax")
@@ -238,7 +231,7 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.zValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                             "zmin must be less than zmax")
