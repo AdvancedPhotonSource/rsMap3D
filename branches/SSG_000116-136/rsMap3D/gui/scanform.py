@@ -5,6 +5,9 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
+from rsMap3D.gui.qtsignalstrings import LIST_ITEM_CLICKED_SIGNAL, \
+    CLICKED_SIGNAL, TABLE_ITEM_CHANGED_SIGNAL
+
 class ScanForm(qtGui.QDialog):
     '''
     This class presents a form to display available scans, lists the angles 
@@ -13,6 +16,10 @@ class ScanForm(qtGui.QDialog):
     to visualize the q space covered by the included images in the selected
     scan.
     '''
+    
+    RED = 'red'
+    BLACK = 'black'
+    
     def __init__(self, parent=None):
         '''
         Constructor - Layout widgets on the form and set up a VTK window for 
@@ -51,8 +58,11 @@ class ScanForm(qtGui.QDialog):
         self.deselectAll = qtGui.QPushButton()
         self.deselectAll.setText("Deselect All")
         self.deselectAll.setDisabled(True)
-        self.connect(self.selectAll, qtCore.SIGNAL("clicked()"), self.selectAllAction)
-        self.connect(self.deselectAll, qtCore.SIGNAL("clicked()"), 
+        self.connect(self.selectAll, \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
+                     self.selectAllAction)
+        self.connect(self.deselectAll, \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.deselectAllAction)
         
         qrange.addWidget(xLabel, 0,0)
@@ -79,7 +89,7 @@ class ScanForm(qtGui.QDialog):
         layout.addLayout(rightBox, 0,1)
         layout.setColumnStretch(1, 45)
                 
-        self.connect(self.scanList, qtCore.SIGNAL("itemClicked(QListWidgetItem *)"), 
+        self.connect(self.scanList, qtCore.SIGNAL(LIST_ITEM_CLICKED_SIGNAL), 
                 self.scanSelected)
          
         self.setLayout(layout);
@@ -207,9 +217,10 @@ class ScanForm(qtGui.QDialog):
                                               self.dataSource.getAngles())
         self.detail.setRowCount(len(angles))
         blackBrush = qtGui.QBrush()
-        blackBrush.setColor(qtGui.QColor('black'))
+        blackBrush.setColor(qtGui.QColor(self.BLACK))
         row = 0
-        self.disconnect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.disconnect(self.detail, \
+                        qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), \
                         self.checkItemChanged)
 
         for angle in angles:
@@ -220,7 +231,7 @@ class ScanForm(qtGui.QDialog):
             for i in xrange(len(angle)):
                 self.addValueToTable(angle[i], row, i+1, blackBrush)
             row +=1
-        self.connect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.connect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
                     self.checkItemChanged)
 
     def showQs(self, scan ):
@@ -230,13 +241,13 @@ class ScanForm(qtGui.QDialog):
         '''
         self.emit(qtCore.SIGNAL("clearRenderWindow"))
         redBrush = qtGui.QBrush()
-        redBrush.setColor(qtGui.QColor('red'))
+        redBrush.setColor(qtGui.QColor(self.RED))
         blackBrush = qtGui.QBrush()
-        blackBrush.setColor(qtGui.QColor('black'))
+        blackBrush.setColor(qtGui.QColor(self.BLACK))
         xmin, xmax, ymin, ymax, zmin, zmax = \
             self.dataSource.getImageBounds(scan)
         row = 0
-        self.disconnect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.disconnect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
                         self.checkItemChanged)
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         numAngles = len(self.dataSource.getAngles())
@@ -276,6 +287,6 @@ class ScanForm(qtGui.QDialog):
             scanZmin, scanZmax))
         self.emit(qtCore.SIGNAL("showRangeBounds"), (scanXmin, scanXmax, scanYmin, \
                                               scanYmax, scanZmin, scanZmax))
-        self.connect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.connect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
                     self.checkItemChanged)
 

@@ -4,25 +4,8 @@
 '''
 import os
 
-from PyQt4.QtCore import QRegExp
-from PyQt4.QtCore import SIGNAL
-
-from PyQt4.QtGui import QButtonGroup
-from PyQt4.QtGui import QCheckBox
-from PyQt4.QtGui import QComboBox
-from PyQt4.QtGui import QDialog
-from PyQt4.QtGui import QFileDialog
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QGroupBox
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QLineEdit
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QProgressBar
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QRadioButton
-from PyQt4.QtGui import QRegExpValidator
-from PyQt4.QtGui import QVBoxLayout
-from PyQt4.QtGui import QValidator
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
 
 from rsMap3D.utils.srange import srange
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
@@ -36,7 +19,7 @@ from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     TEXT_CHANGED_SIGNAL
 
 
-class FileForm(QDialog):
+class FileForm(qtGui.QDialog):
     '''
     This class presents information for selecting input files
     '''
@@ -48,7 +31,7 @@ class FileForm(QDialog):
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
     #Strings for Text Widgets
-    POLE_MAP_STR = "Streographic Projection"
+    POLE_MAP_STR = "Stereographic Projection"
     SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
 
     def __init__(self,parent=None):
@@ -63,7 +46,7 @@ class FileForm(QDialog):
         self.roiymin = 1
         self.roiymax = 480
         self.projectionDirection = [0,0,1]
-        layout = QVBoxLayout()
+        layout = qtGui.QVBoxLayout()
 
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
@@ -80,7 +63,7 @@ class FileForm(QDialog):
         '''
         Emit a signal to start loading data
         '''
-        self.emit(SIGNAL("loadFile"))
+        self.emit(qtCore.SIGNAL("loadFile"))
 
     def badPixelFileChanged(self):
         '''
@@ -90,7 +73,7 @@ class FileForm(QDialog):
            self.badPixelFileTxt.text() == "":
             self.checkOkToLoad()
         else:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                              "The filename entered for the bad pixel " + \
@@ -102,20 +85,20 @@ class FileForm(QDialog):
         Launch file browser for bad pixel file
         '''
         if self.badPixelFileTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
                                                filter="Bad Pixel *.txt ;;" + \
                                                       "All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                                "Select Bad Pixel File", 
                                                filter="Bad Pixel *.txt ;;" + \
                                                       "All Files *.*", \
                                                directory = fileDirectory)
         if fileName != "":
             self.badPixelFileTxt.setText(fileName)
-            self.badPixelFileTxt.emit(SIGNAL("editingFinished()"))
+            self.badPixelFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
     
     def browseFlatFieldFileName(self):
@@ -123,69 +106,69 @@ class FileForm(QDialog):
         Launch file browser for Flat field file
         '''
         if self.flatFieldFileTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                                "Select Flat Field File", 
                                                filter="TIFF Files (*.tiff *.tif)")
         else:
             fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                                "Select Flat Field File", 
                                                filter="TIFF Files (*.tiff *.tif)", \
                                                directory = fileDirectory)
         if fileName != "":
             self.flatFieldFileTxt.setText(fileName)
-            self.flatFieldFileTxt.emit(SIGNAL("editingFinished()"))
+            self.flatFieldFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
     
     def browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
         '''
         if self.detConfigTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, \
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                                "Select Detector Config File", \
                                                filter="*.xml")
         else:
             fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, \
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                                "Select Detector Config File", \
                                                filter="*.xml", \
                                                directory = fileDirectory)
         if fileName != "":
             self.detConfigTxt.setText(fileName)
-            self.detConfigTxt.emit(SIGNAL("editingFinished()"))
+            self.detConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
     def browseForInstFile(self):
         '''
         Launch file selection dialog for instrument file.
         '''
         if self.instConfigTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                         "Select Instrument Config File", 
                                         filter="Instrument Config *.xml" + \
                                                 " ;; All Files *.*")
         else:
             fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None, 
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                         "Select Instrument Config File", 
                                         filter="Instrument Config *.xml" + \
                                                  " ;; All Files *.*", \
                                         directory = fileDirectory)
         if fileName != "":
             self.instConfigTxt.setText(fileName)
-            self.instConfigTxt.emit(SIGNAL("editingFinished()"))
+            self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
     def browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
         '''
         if self.projNameTxt.text() == "":
-            fileName = QFileDialog.getOpenFileName(None, \
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                      "Select Spec file",
                                      filter=("SPEC files *.spc *.spec ;; " + \
                                                            "All files *.*"))
         else:
             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
-            fileName = QFileDialog.getOpenFileName(None,\
+            fileName = qtGui.QFileDialog.getOpenFileName(None,\
                                                    "Select Spec file", \
                                                    directory = fileDirectory,
                                      filter=("SPEC files *.spc *.spec ;; " + \
@@ -193,12 +176,12 @@ class FileForm(QDialog):
             
         if fileName != "":
             self.projNameTxt.setText(fileName)
-            self.projNameTxt.emit(SIGNAL("editingFinished()"))
+            self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
 
     def cancelLoadFile(self):
         ''' Send signal to cancel a file load'''
-        self.emit(SIGNAL("cancelLoadFile"))
+        self.emit(qtCore.SIGNAL("cancelLoadFile"))
         
     def checkOkToLoad(self):
         '''
@@ -224,28 +207,28 @@ class FileForm(QDialog):
         '''
         Create Layout holding controls widgets
         '''
-        controlBox = QGroupBox()
-        controlLayout = QGridLayout()       
+        controlBox = qtGui.QGroupBox()
+        controlLayout = qtGui.QGridLayout()       
         row =0
-        self.progressBar = QProgressBar()
+        self.progressBar = qtGui.QProgressBar()
         controlLayout.addWidget(self.progressBar, row, 1)
         
         row += 1
-        self.loadButton = QPushButton("Load")        
+        self.loadButton = qtGui.QPushButton("Load")        
         self.loadButton.setDisabled(True)
         controlLayout.addWidget(self.loadButton, row, 1)
-        self.cancelButton = QPushButton("Cancel")        
+        self.cancelButton = qtGui.QPushButton("Cancel")        
         self.cancelButton.setDisabled(True)
         controlLayout.addWidget(self.cancelButton, row, 2)
 
         self.connect(self.loadButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.loadFile)
         self.connect(self.cancelButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.cancelLoadFile)
         self.connect(self, \
-                     SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
+                     qtCore.SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
 
         controlBox.setLayout(controlLayout)
@@ -255,44 +238,44 @@ class FileForm(QDialog):
         '''
         Create widgets for collecting data
         '''
-        dataBox = QGroupBox()
-        dataLayout = QGridLayout()
+        dataBox = qtGui.QGroupBox()
+        dataLayout = qtGui.QGridLayout()
         row = 0
-        label = QLabel("Project File:");
-        self.projNameTxt = QLineEdit()
-        self.projectDirButton = QPushButton("Browse")
+        label = qtGui.QLabel("Project File:");
+        self.projNameTxt = qtGui.QLineEdit()
+        self.projectDirButton = qtGui.QPushButton("Browse")
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.projNameTxt, row, 1)
         dataLayout.addWidget(self.projectDirButton, row, 2)
 
         row += 1
-        label = QLabel("Instrument Config File:");
-        self.instConfigTxt = QLineEdit()
-        self.instConfigFileButton = QPushButton("Browse")
+        label = qtGui.QLabel("Instrument Config File:");
+        self.instConfigTxt = qtGui.QLineEdit()
+        self.instConfigFileButton = qtGui.QPushButton("Browse")
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.instConfigTxt, row, 1)
         dataLayout.addWidget(self.instConfigFileButton, row, 2)
 
         row += 1
-        label = QLabel("Detector Config File:");
-        self.detConfigTxt = QLineEdit()
-        self.detConfigFileButton = QPushButton("Browse")
+        label = qtGui.QLabel("Detector Config File:");
+        self.detConfigTxt = qtGui.QLineEdit()
+        self.detConfigFileButton = qtGui.QPushButton("Browse")
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detConfigTxt, row, 1)
         dataLayout.addWidget(self.detConfigFileButton, row, 2)
         
         row += 1
-        self.fieldCorrectionGroup = QButtonGroup(self)
-        self.noFieldRadio = QRadioButton("None")
-        self.badPixelRadio = QRadioButton("Bad Pixel File")
-        self.flatFieldRadio = QRadioButton("Flat Field Correction")
+        self.fieldCorrectionGroup = qtGui.QButtonGroup(self)
+        self.noFieldRadio = qtGui.QRadioButton("None")
+        self.badPixelRadio = qtGui.QRadioButton("Bad Pixel File")
+        self.flatFieldRadio = qtGui.QRadioButton("Flat Field Correction")
         self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
         self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
         self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
-        self.badPixelFileTxt = QLineEdit()
-        self.flatFieldFileTxt = QLineEdit()
-        self.badPixelFileBrowseButton = QPushButton("Browse")
-        self.flatFieldFileBrowseButton = QPushButton("Browse")
+        self.badPixelFileTxt = qtGui.QLineEdit()
+        self.flatFieldFileTxt = qtGui.QLineEdit()
+        self.badPixelFileBrowseButton = qtGui.QPushButton("Browse")
+        self.flatFieldFileBrowseButton = qtGui.QPushButton("Browse")
 
         
         dataLayout.addWidget(self.noFieldRadio, row, 0)
@@ -306,86 +289,86 @@ class FileForm(QDialog):
         dataLayout.addWidget(self.flatFieldFileBrowseButton, row, 2)
         
         row += 1
-        label = QLabel("Number of Pixels To Average:");
-        self.pixAvgTxt = QLineEdit("1,1")
-        rxAvg = QRegExp(self.PIX_AVG_REGEXP_1)
-        self.pixAvgTxt.setValidator(QRegExpValidator(rxAvg,self.pixAvgTxt))
+        label = qtGui.QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = qtGui.QLineEdit("1,1")
+        rxAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_1)
+        self.pixAvgTxt.setValidator(qtGui.QRegExpValidator(rxAvg,self.pixAvgTxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.pixAvgTxt, row, 1)
 
         row += 1
-        label = QLabel("Detector ROI:");
-        self.detROITxt = QLineEdit()
+        label = qtGui.QLabel("Detector ROI:");
+        self.detROITxt = qtGui.QLineEdit()
         self.updateROITxt()
-        rxROI = QRegExp(self.DET_ROI_REGEXP_1)
-        self.detROITxt.setValidator(QRegExpValidator(rxROI,self.detROITxt))
+        rxROI = qtCore.QRegExp(self.DET_ROI_REGEXP_1)
+        self.detROITxt.setValidator(qtGui.QRegExpValidator(rxROI,self.detROITxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detROITxt, row, 1)
         
         row += 1
-        label = QLabel("Scan Numbers")
-        self.scanNumsTxt = QLineEdit()
-        rx = QRegExp(self.SCAN_LIST_REGEXP)
-        self.scanNumsTxt.setValidator(QRegExpValidator(rx,self.scanNumsTxt))
+        label = qtGui.QLabel("Scan Numbers")
+        self.scanNumsTxt = qtGui.QLineEdit()
+        rx = qtCore.QRegExp(self.SCAN_LIST_REGEXP)
+        self.scanNumsTxt.setValidator(qtGui.QRegExpValidator(rx,self.scanNumsTxt))
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.scanNumsTxt, row, 1)
 
         row += 1
-        label = QLabel("Output Type")
-        self.outTypeChooser = QComboBox()
+        label = qtGui.QLabel("Output Type")
+        self.outTypeChooser = qtGui.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outTypeChooser, row, 1)
 
         row += 1
-        label = QLabel("HKL output")
+        label = qtGui.QLabel("HKL output")
         dataLayout.addWidget(label, row, 0)
-        self.hklCheckbox = QCheckBox()
+        self.hklCheckbox = qtGui.QCheckBox()
         dataLayout.addWidget(self.hklCheckbox, row, 1)
 
         # Add Signals between widgets
         self.connect(self.projectDirButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.browseForProjectDir)
         self.connect(self.instConfigFileButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.browseForInstFile)
         self.connect(self.detConfigFileButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.browseForDetFile)
         self.connect(self.projNameTxt, \
-                     SIGNAL(EDIT_FINISHED_SIGNAL), \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.projectDirChanged)
         self.connect(self.instConfigTxt, \
-                     SIGNAL(EDIT_FINISHED_SIGNAL), \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.instConfigChanged)
         self.connect(self.detConfigTxt, \
-                     SIGNAL(EDIT_FINISHED_SIGNAL), \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.detConfigChanged)
         self.connect(self.outTypeChooser, \
-                     SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
+                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self.outputTypeChanged)
         self.connect(self.fieldCorrectionGroup,\
-                     SIGNAL(BUTTON_CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(BUTTON_CLICKED_SIGNAL), \
                      self.fieldCorrectionTypeChanged)
         self.connect(self.badPixelFileTxt,
-                     SIGNAL(EDIT_FINISHED_SIGNAL),
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
                      self.badPixelFileChanged)
         self.connect(self.flatFieldFileTxt,
-                     SIGNAL(EDIT_FINISHED_SIGNAL),
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
                      self.flatFieldFileChanged)
         self.connect(self.badPixelFileBrowseButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.browseBadPixelFileName)
         self.connect(self.flatFieldFileBrowseButton, \
-                     SIGNAL(CLICKED_SIGNAL), \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.browseFlatFieldFileName)
         self.connect(self.pixAvgTxt,
-                     SIGNAL(TEXT_CHANGED_SIGNAL),
+                     qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
                      self.pixAvgTxtChanged)
         self.connect(self.detROITxt,
-                     SIGNAL(TEXT_CHANGED_SIGNAL),
+                     qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
                      self.detROITxtChanged)
         
         dataBox.setLayout(dataLayout)
@@ -400,13 +383,13 @@ class FileForm(QDialog):
             try:
                 self.updateROIandNumAvg()
             except DetectorConfigException:
-                message = QMessageBox()
+                message = qtGui.QMessageBox()
                 message.warning(self, \
                                  "Warning",\
                                  "Trouble getting ROI or Num average " + \
                                  "from the detector config file")
         else:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                              "Warning",\
                              "The filename entered for the detector " + \
@@ -427,10 +410,10 @@ class FileForm(QDialog):
         '''
         Check to make sure the text for is a vaid detector roi
         '''
-        rxROI = QRegExp(self.DET_ROI_REGEXP_2)
-        validator = QRegExpValidator(rxROI, None)
+        rxROI = qtCore.QRegExp(self.DET_ROI_REGEXP_2)
+        validator = qtGui.QRegExpValidator(rxROI, None)
         pos = 0
-        if validator.validate(text, pos)[0] == QValidator.Acceptable:
+        if validator.validate(text, pos)[0] == qtGui.QValidator.Acceptable:
             roiVals = self.getDetectorROI(rois=str(text))
             if (roiVals[0] <= roiVals[1]) and \
                (roiVals[2] <= roiVals[3]):
@@ -471,7 +454,7 @@ class FileForm(QDialog):
            self.flatFieldFileTxt.text() == "":
             self.checkOkToLoad()
         else:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                              "The filename entered for the flat field " + \
@@ -551,13 +534,13 @@ class FileForm(QDialog):
             try:
                 self.updateProjectionDirection()
             except InstConfigException:
-                message = QMessageBox()
+                message = qtGui.QMessageBox()
                 message.warning(self, \
                                 "Warning", \
                                  "Trouble getting the projection direction " + \
                                  "from the instrument config file.")
         else:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                             "Warning", \
                              "The filename entered for the instrument " + \
@@ -572,7 +555,7 @@ class FileForm(QDialog):
             self.projNameTxt.text() == "":
             self.checkOkToLoad()
         else:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
                              "Warning", \
                              "The project directory entered is invalid")
@@ -648,10 +631,10 @@ class FileForm(QDialog):
         '''
         Check to make sure that the pixAvgText is valid
         '''
-        rxPixAvg = QRegExp(self.PIX_AVG_REGEXP_2)
-        validator = QRegExpValidator(rxPixAvg, None)
+        rxPixAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_2)
+        validator = qtGui.QRegExpValidator(rxPixAvg, None)
         pos = 0
-        if validator.validate(text, pos)[0] == QValidator.Acceptable:
+        if validator.validate(text, pos)[0] == qtGui.QValidator.Acceptable:
             return True
         else:
             return False
@@ -693,7 +676,7 @@ class FileForm(QDialog):
         '''
         Emit a signal to update the progress bar
         '''
-        self.emit(SIGNAL("updateProgress"), value, maxValue)
+        self.emit(qtCore.SIGNAL("updateProgress"), value, maxValue)
         
     def updateProjectionDirection(self):
         instConfig = \
