@@ -22,6 +22,7 @@ from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
     RSMap3DException
+from rsMap3D.gui.qtsignalstrings import CURRENT_TAB_CHANGED
 
 class MainDialog(qtGui.QMainWindow):
     '''
@@ -63,7 +64,7 @@ class MainDialog(qtGui.QMainWindow):
         self.connect(self.dataRange, \
                      qtCore.SIGNAL("rangeChanged"), self.setScanRanges)
         self.connect(self.tabs, \
-                     qtCore.SIGNAL("currentChanged(int)"), 
+                     qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
                      self.tabChanged)
         self.connect(self.processScans, \
                      qtCore.SIGNAL("process"), \
