@@ -1,21 +1,17 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import QThread
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QTabWidget
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QApplication
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
  
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.fileform import FileForm
 from rsMap3D.gui.datarange import DataRange
+from rsMap3D.gui.dataextentview import DataExtentView
 from rsMap3D.gui.processscans import ProcessScans
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
@@ -27,7 +23,7 @@ from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
     RSMap3DException
 
-class MainDialog(QWidget):
+class MainDialog(qtGui.QMainWindow):
     '''
     Main dialog for rsMap3D.  This class also serves as the over action 
     controller for the application
@@ -37,12 +33,12 @@ class MainDialog(QWidget):
         '''
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
-        layout = QGridLayout()
-        self.tabs = QTabWidget()
+        self.tabs = qtGui.QTabWidget()
         self.fileForm =FileForm()
         self.scanForm = ScanForm()
         self.dataRange = DataRange()
         self.processScans = ProcessScans()
+        self.dataExtentView = DataExtentView()
         self.fileTabIndex = self.tabs.addTab(self.fileForm, "File")
         self.dataTabIndex = self.tabs.addTab(self.dataRange, "Data Range")
         self.scanTabIndex = self.tabs.addTab(self.scanForm, "Scans")
@@ -52,43 +48,78 @@ class MainDialog(QWidget):
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
         self.tabs.show()
-        layout.addWidget(self.tabs)
-        self.setLayout(layout)
+        self.setCentralWidget(self.tabs)
 
         #Connect signals
-        self.connect(self.fileForm, SIGNAL("loadFile"), self.spawnLoadThread)
-        self.connect(self.fileForm, SIGNAL("cancelLoadFile"), 
+        self.connect(self.fileForm, \
+                     qtCore.SIGNAL("loadFile"), \
+                     self.spawnLoadThread)
+        self.connect(self.fileForm, \
+                     qtCore.SIGNAL("cancelLoadFile"), \
                      self.cancelLoadThread)
-        self.connect(self.scanForm, SIGNAL("doneLoading"), self.setupRanges)
-        self.connect(self.dataRange, SIGNAL("rangeChanged"), self.setScanRanges)
-        self.connect(self.tabs, SIGNAL("currentChanged(int)"), self.tabChanged)
-        self.connect(self.processScans, SIGNAL("process"), \
+        self.connect(self.scanForm, \
+                     qtCore.SIGNAL("doneLoading"), \
+                     self.setupRanges)
+        self.connect(self.dataRange, \
+                     qtCore.SIGNAL("rangeChanged"), self.setScanRanges)
+        self.connect(self.tabs, \
+                     qtCore.SIGNAL("currentChanged(int)"), 
+                     self.tabChanged)
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL("process"), \
                      self.spawnProcessThread)
-        self.connect(self.processScans, SIGNAL("cancelProcess"), \
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL("cancelProcess"), \
                      self.stopMapper)
-        self.connect(self, SIGNAL("fileError"), self.showFileError)
-        self.connect(self, SIGNAL("processError"), self.showProcessError)
-        self.connect(self.processScans, SIGNAL("processError"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("fileError"), \
+                     self.showFileError)
+        self.connect(self, \
+                     qtCore.SIGNAL("processError"), \
+                     self.showProcessError)
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL("processError"), \
                      self.showProcessError)
         
-        self.connect(self, SIGNAL("blockTabsForLoad"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("blockTabsForLoad"), \
                      self.blockTabsForLoad)
-        self.connect(self, SIGNAL("unblockTabsForLoad"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("unblockTabsForLoad"), \
                      self.unblockTabsForLoad)
-        self.connect(self, SIGNAL("blockTabsForProcess"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("blockTabsForProcess"), \
                      self.blockTabsForProcess)
-        self.connect(self, SIGNAL("unblockTabsForProcess"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("unblockTabsForProcess"), \
                      self.unblockTabsForProcess)
-        self.connect(self, SIGNAL("setProcessRunOK"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("setProcessRunOK"), \
                      self.processScans.setRunOK)
-        self.connect(self, SIGNAL("setProcessCancelOK"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("setProcessCancelOK"), \
                      self.processScans.setCancelOK)
-        self.connect(self, SIGNAL("setScanLoadOK"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("setScanLoadOK"), \
                      self.fileForm.setLoadOK)
-        self.connect(self, SIGNAL("setScanLoadCancelOK"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("setScanLoadCancelOK"), \
                      self.fileForm.setCancelOK)
-        self.connect(self, SIGNAL("loadDataSourceToScanForm"), 
+        self.connect(self, \
+                     qtCore.SIGNAL("loadDataSourceToScanForm"), \
                      self.loadDataSourceToScanForm)
+        self.connect(self.scanForm, \
+                     qtCore.SIGNAL("showRangeBounds"),
+                     self.dataExtentView.showRangeBounds)
+        self.connect(self.scanForm, \
+                     qtCore.SIGNAL("clearRenderWindow"),
+                     self.dataExtentView.clearRenderWindow)
+        self.connect(self.scanForm, \
+                     qtCore.SIGNAL("renderBounds"),
+                     self.dataExtentView.renderBounds)
+#        self.connect(self, \
+#                     qtCore.SIGNAL("destroyed(QObject *)"), \
+#                     self.cleanup)
         
     def blockTabsForLoad(self):
         '''
@@ -114,6 +145,9 @@ class MainDialog(QWidget):
         self.dataSource.signalCancelLoadSource()
         
         
+    def closeEvent(self, event):
+        self.dataExtentView.vtkMain.close()
+        
     def loadDataSourceToScanForm(self):
         '''
         '''
@@ -123,7 +157,7 @@ class MainDialog(QWidget):
         '''
         Set up to load the scan file
         '''
-        self.emit(SIGNAL("blockTabsForLoad"))
+        self.emit(qtCore.SIGNAL("blockTabsForLoad"))
         if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
@@ -155,33 +189,33 @@ class MainDialog(QWidget):
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
             print "LoadCanceled"
-            self.emit(SIGNAL("blockTabsForLoad"))
-            self.emit(SIGNAL("setScanLoadOK"))
+            self.emit(qtCore.SIGNAL("blockTabsForLoad"))
+            self.emit(qtCore.SIGNAL("setScanLoadOK"))
             #self.fileForm.setLoadOK()
             return
         except ScanDataMissingException as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             return
         except DetectorConfigException as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             return
         except InstConfigException as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             return
         except Transform3DException as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             return 
         except ScanDataMissingException as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             return
         except Exception as e:
-            self.emit(SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL("fileError"), str(e))
             print traceback.format_exc()
             return
         
             
-        self.emit(SIGNAL("loadDataSourceToScanForm"))
-        self.emit(SIGNAL("setScanLoadOK"))
+        self.emit(qtCore.SIGNAL("loadDataSourceToScanForm"))
+        self.emit(qtCore.SIGNAL("setScanLoadOK"))
         
     def spawnLoadThread(self):
         '''
@@ -217,7 +251,7 @@ class MainDialog(QWidget):
                                  overallZmin, \
                                  overallZmax)
         self.setScanRanges()
-        self.emit(SIGNAL("unblockTabsForLoad"))
+        self.emit(qtCore.SIGNAL("unblockTabsForLoad"))
         
     def setScanRanges(self):
         '''
@@ -234,7 +268,7 @@ class MainDialog(QWidget):
         toggle Load and Cancel buttons in file tab to Load Active/Cancel 
         inactive
         '''
-        message = QMessageBox()
+        message = qtGui.QMessageBox()
         message.warning(self, \
                             "Load Scanfile Warning", \
                              str(error))
@@ -251,22 +285,22 @@ class MainDialog(QWidget):
         '''
         Tell the processScans tab to launch the mapper.
         '''
-        self.emit(SIGNAL("blockTabsForProcess"))
-        self.emit(SIGNAL("setProcessCancelOK"))
+        self.emit(qtCore.SIGNAL("blockTabsForProcess"))
+        self.emit(qtCore.SIGNAL("setProcessCancelOK"))
         try:
             self.processScans.runMapper(self.dataSource, self.transform)
         except ProcessCanceledException:
-            self.emit(SIGNAL("unblockTabsForProcess"))
+            self.emit(qtCore.SIGNAL("unblockTabsForProcess"))
         except RSMap3DException as e:
-            self.emit(SIGNAL("processError"), str(e))
+            self.emit(qtCore.SIGNAL("processError"), str(e))
             print traceback.format_exc()
             return
         except Exception as e:
-            self.emit(SIGNAL("processError"), str(e))
+            self.emit(qtCore.SIGNAL("processError"), str(e))
             print traceback.format_exc()
             return
-        self.emit(SIGNAL("setProcessRunOK"))
-        self.emit(SIGNAL("unblockTabsForProcess"))
+        self.emit(qtCore.SIGNAL("setProcessRunOK"))
+        self.emit(qtCore.SIGNAL("unblockTabsForProcess"))
         
     def showProcessError(self, error):
         '''
@@ -274,11 +308,11 @@ class MainDialog(QWidget):
         toggle Load and Cancel buttons in file tab to Load Active/Cancel 
         inactive
         '''
-        message = QMessageBox()
+        message = qtGui.QMessageBox()
         message.warning(self, \
                             "Processing Scanfile Warning", \
                              str(error))
-        self.emit(SIGNAL("setProcessRunOK"))
+        self.emit(qtCore.SIGNAL("setProcessRunOK"))
               
     def stopMapper(self):
         '''
@@ -302,8 +336,7 @@ class MainDialog(QWidget):
         self.tabs.setTabEnabled(self.scanTabIndex, True)
         self.tabs.setTabEnabled(self.fileTabIndex, True)
         
-        
-class LoadScanThread(QThread):
+class LoadScanThread(qtCore.QThread):
     def __init__(self, controller, **kwargs):
         super(LoadScanThread, self).__init__( **kwargs)
         self.controller = controller
@@ -311,7 +344,7 @@ class LoadScanThread(QThread):
     def run(self):
         self.controller.loadScanFile()
         
-class ProcessScanThread(QThread):
+class ProcessScanThread(qtCore.QThread):
     def __init__(self, controller, **kwargs):
         super(ProcessScanThread, self).__init__( **kwargs)
         self.controller = controller
@@ -319,8 +352,9 @@ class ProcessScanThread(QThread):
     def run(self):
         self.controller.runMapper()
         
-app = QApplication(sys.argv)
+app = qtGui.QApplication(sys.argv)
 mainForm = MainDialog()
 mainForm.show()
+
 app.exec_()
 
