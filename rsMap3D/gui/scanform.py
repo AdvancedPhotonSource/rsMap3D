@@ -1,27 +1,11 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QDialog
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QVBoxLayout
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QListWidget
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QTableWidget
-from PyQt4.QtGui import QTableWidgetItem
-from PyQt4.QtGui import QListWidgetItem
-from PyQt4.QtGui import QBrush
-from PyQt4.QtGui import QColor
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
 
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-
-import vtk
-
-
-class ScanForm(QDialog):
+class ScanForm(qtGui.QDialog):
     '''
     This class presents a form to display available scans, lists the angles 
     and q values for a selected scan and allows selecting of individual images 
@@ -38,37 +22,37 @@ class ScanForm(QDialog):
         self.rangeBounds = (float("Infinity"), float("-Infinity"), \
                         float("Infinity"), float("-Infinity"), \
                         float("Infinity"), float("-Infinity"))
-        layout = QGridLayout()
-        self.scanList = QListWidget()
+        layout = qtGui.QGridLayout()
+        self.scanList = qtGui.QListWidget()
         layout.addWidget(self.scanList, 0, 0)
         layout.setColumnStretch(0, 10)
         
-        rightBox = QVBoxLayout()
-        qrange = QGridLayout()
-        xLabel = QLabel("X")
-        xminLabel = QLabel("min")
-        self.xminText = QLabel("")
-        xmaxLabel = QLabel("max")
-        self.xmaxText = QLabel("")
-        yLabel = QLabel("Y")
-        yminLabel = QLabel("min")
-        self.yminText = QLabel("")
-        ymaxLabel = QLabel("max")
-        self.ymaxText = QLabel("")
-        zLabel = QLabel("Z")
-        zminLabel = QLabel("min")
-        self.zminText = QLabel("")
-        zmaxLabel = QLabel("max")
-        self.zmaxText = QLabel("")
+        rightBox = qtGui.QVBoxLayout()
+        qrange = qtGui.QGridLayout()
+        xLabel = qtGui.QLabel("X")
+        xminLabel = qtGui.QLabel("min")
+        self.xminText = qtGui.QLabel("")
+        xmaxLabel = qtGui.QLabel("max")
+        self.xmaxText = qtGui.QLabel("")
+        yLabel = qtGui.QLabel("Y")
+        yminLabel = qtGui.QLabel("min")
+        self.yminText = qtGui.QLabel("")
+        ymaxLabel = qtGui.QLabel("max")
+        self.ymaxText = qtGui.QLabel("")
+        zLabel = qtGui.QLabel("Z")
+        zminLabel = qtGui.QLabel("min")
+        self.zminText = qtGui.QLabel("")
+        zmaxLabel = qtGui.QLabel("max")
+        self.zmaxText = qtGui.QLabel("")
 
-        self.selectAll = QPushButton()
+        self.selectAll = qtGui.QPushButton()
         self.selectAll.setText("Select All")
         self.selectAll.setDisabled(True)
-        self.deselectAll = QPushButton()
+        self.deselectAll = qtGui.QPushButton()
         self.deselectAll.setText("Deselect All")
         self.deselectAll.setDisabled(True)
-        self.connect(self.selectAll, SIGNAL("clicked()"), self.selectAllAction)
-        self.connect(self.deselectAll, SIGNAL("clicked()"), 
+        self.connect(self.selectAll, qtCore.SIGNAL("clicked()"), self.selectAllAction)
+        self.connect(self.deselectAll, qtCore.SIGNAL("clicked()"), 
                      self.deselectAllAction)
         
         qrange.addWidget(xLabel, 0,0)
@@ -90,22 +74,12 @@ class ScanForm(QDialog):
         qrange.addWidget(self.deselectAll, 3,1)
         
         rightBox.addLayout(qrange)
-        self.detail = QTableWidget()
+        self.detail = qtGui.QTableWidget()
         rightBox.addWidget(self.detail)
         layout.addLayout(rightBox, 0,1)
         layout.setColumnStretch(1, 45)
-        
-        self.ren = vtk.vtkRenderer()
-
-        self.vtkMain = QVTKRenderWindowInteractor()
-        self.vtkMain.GetRenderWindow().AddRenderer(self.ren)
-        self.renWin = self.vtkMain.GetRenderWindow()
-        self.vtkMain.Initialize()
-        self.renWin.Render()
-        self.vtkMain.Start()
-        self.vtkMain.show()
-        
-        self.connect(self.scanList, SIGNAL("itemClicked(QListWidgetItem *)"), 
+                
+        self.connect(self.scanList, qtCore.SIGNAL("itemClicked(QListWidgetItem *)"), 
                 self.scanSelected)
          
         self.setLayout(layout);
@@ -115,9 +89,9 @@ class ScanForm(QDialog):
         Add a value to a cell in the table setting the value to display and 
         the foreground color
         '''
-        item = QTableWidgetItem(str(value))
+        item = qtGui.QTableWidgetItem(str(value))
         item.setForeground(coloredBrush)
-        item.setFlags(item.flags() & (~Qt.ItemIsEditable))
+        item.setFlags(item.flags() & (~qtCore.Qt.ItemIsEditable))
         self.detail.setItem(row, column, item)
         
     def checkItemChanged(self,item):
@@ -127,7 +101,7 @@ class ScanForm(QDialog):
         '''
         scanNo = self.getSelectedScan()
         row = item.row()
-        if item.checkState() == Qt.Checked:
+        if item.checkState() == qtCore.Qt.Checked:
             self.dataSource.imageToBeUsed[scanNo][row] = True
         else:
             self.dataSource.imageToBeUsed[scanNo][row] = False
@@ -161,7 +135,7 @@ class ScanForm(QDialog):
         self.dataSource = dataSource
         self.scanList.clear()
         for curScan in self.dataSource.getAvailableScans():
-            item = QListWidgetItem()
+            item = qtGui.QListWidgetItem()
             item.setText(str(curScan))
             self.scanList.addItem(item)
         self.detail.setColumnCount(7 + \
@@ -172,29 +146,21 @@ class ScanForm(QDialog):
                                             dataSource.getDetectorAngleNames() + \
                                             ['Min qx', 'Max qx', 'Min qy', \
                                             'Max qy', 'Min qz', 'Max qz'])
-        self.emit(SIGNAL("doneLoading"))
+        self.emit(qtCore.SIGNAL("doneLoading"))
         
    
     def renderBounds(self, bounds):
         '''
         Render a box with boundaries from the given input
         '''
-        cube = vtk.vtkOutlineSource()
-        cube.SetBounds(bounds)
-        cube.Update()
-        cubeMapper = vtk.vtkPolyDataMapper()
-        cubeMapper.SetInputConnection(cube.GetOutputPort())
-        cubeActor = vtk.vtkActor()
-        cubeActor.SetMapper(cubeMapper)
-        cubeActor.GetProperty().SetColor(0.6,0,0)
-        self.ren.AddActor(cubeActor)
-        return cube
+        self.emit(qtCore.SIGNAL("renderBounds"), bounds)
         
     def renderOverallQs(self):
         '''
         Render bounds for all selected images from all available scans 
         '''
-        self.ren.RemoveAllViewProps()
+        self.emit(qtCore.SIGNAL("clearRenderWindow"))
+        #self.ren.RemoveAllViewProps()
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         for scan in self.dataSource.getAvailableScans():
             minx, maxx, miny, maxy, minz, maxz = \
@@ -209,16 +175,8 @@ class ScanForm(QDialog):
                 if imageToBeUsed[scan][i]:
                     self.renderBounds((minx[i], maxx[i], miny[i], \
                                       maxy[i], minz[i], maxz[i]))
-        axes = vtk.vtkCubeAxesActor()
-        rangeBounds = self.dataSource.getRangeBounds()
-        
-        axes.SetBounds((rangeBounds[0], rangeBounds[1], \
-                        rangeBounds[2], rangeBounds[3], \
-                        rangeBounds[4], rangeBounds[5]))
-        axes.SetCamera(self.ren.GetActiveCamera())
-        self.ren.AddActor(axes)
-        self.ren.ResetCamera()
-        self.renWin.Render()
+        self.emit(qtCore.SIGNAL("showRangeBounds"), \
+                  self.dataSource.getRangeBounds())
                                 
     def scanSelected(self, item):
         '''
@@ -248,21 +206,21 @@ class ScanForm(QDialog):
         angles = self.dataSource.getGeoAngles(self.dataSource.sd[scanNo], \
                                               self.dataSource.getAngles())
         self.detail.setRowCount(len(angles))
-        blackBrush = QBrush()
-        blackBrush.setColor(QColor('black'))
+        blackBrush = qtGui.QBrush()
+        blackBrush.setColor(qtGui.QColor('black'))
         row = 0
-        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.disconnect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
                         self.checkItemChanged)
 
         for angle in angles:
-            checkItem = QTableWidgetItem(1)
-            checkItem.data(Qt.CheckStateRole)
-            checkItem.setCheckState(Qt.Checked)
+            checkItem = qtGui.QTableWidgetItem(1)
+            checkItem.data(qtCore.Qt.CheckStateRole)
+            checkItem.setCheckState(qtCore.Qt.Checked)
             self.detail.setItem(row, 0, checkItem)
             for i in xrange(len(angle)):
                 self.addValueToTable(angle[i], row, i+1, blackBrush)
             row +=1
-        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.connect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
                     self.checkItemChanged)
 
     def showQs(self, scan ):
@@ -270,15 +228,15 @@ class ScanForm(QDialog):
         Display q max/min value for the image in the selected scan in the table
         and render the boundaries for those Q values.
         '''
-        self.ren.RemoveAllViewProps()
-        redBrush = QBrush()
-        redBrush.setColor(QColor('red'))
-        blackBrush = QBrush()
-        blackBrush.setColor(QColor('black'))
+        self.emit(qtCore.SIGNAL("clearRenderWindow"))
+        redBrush = qtGui.QBrush()
+        redBrush.setColor(qtGui.QColor('red'))
+        blackBrush = qtGui.QBrush()
+        blackBrush.setColor(qtGui.QColor('black'))
         xmin, xmax, ymin, ymax, zmin, zmax = \
             self.dataSource.getImageBounds(scan)
         row = 0
-        self.disconnect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.disconnect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
                         self.checkItemChanged)
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         numAngles = len(self.dataSource.getAngles())
@@ -293,7 +251,7 @@ class ScanForm(QDialog):
                 self.renderBounds((xmin[row], xmax[row], ymin[row], ymax[row], \
                     zmin[row], zmax[row]))
                 checkItem = self.detail.item(row,0)
-                checkItem.setCheckState(Qt.Checked)
+                checkItem.setCheckState(qtCore.Qt.Checked)
             else:
                 self.addValueToTable(xmin[row], row, numAngles + 1, redBrush)
                 self.addValueToTable(xmax[row], row, numAngles + 2, redBrush)
@@ -302,7 +260,7 @@ class ScanForm(QDialog):
                 self.addValueToTable(zmin[row], row, numAngles + 5, redBrush)
                 self.addValueToTable(zmax[row], row, numAngles + 6, redBrush)
                 checkItem = self.detail.item(row,0)
-                checkItem.setCheckState(Qt.Unchecked)
+                checkItem.setCheckState(qtCore.Qt.Unchecked)
             row +=1
         
                          
@@ -316,14 +274,8 @@ class ScanForm(QDialog):
         self.zmaxText.setText(str(scanZmax))
         self.renderBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
             scanZmin, scanZmax))
-        axes = vtk.vtkCubeAxesActor()
-        axes.SetBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
-            scanZmin, scanZmax))
-        axes.SetCamera(self.ren.GetActiveCamera())
-
-        self.ren.AddActor(axes)
-        self.ren.ResetCamera()
-        self.renWin.Render()
-        self.connect(self.detail, SIGNAL("itemChanged(QTableWidgetItem *)"), 
+        self.emit(qtCore.SIGNAL("showRangeBounds"), (scanXmin, scanXmax, scanYmin, \
+                                              scanYmax, scanZmin, scanZmax))
+        self.connect(self.detail, qtCore.SIGNAL("itemChanged(QTableWidgetItem *)"), 
                     self.checkItemChanged)
 
