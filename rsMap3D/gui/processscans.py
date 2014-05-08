@@ -10,8 +10,12 @@ import PyQt4.QtCore as qtCore
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.polemapper import PoleFigureMapper
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import CANCEL_PROCESS_SIGNAL,\
+    UPDATE_PROGRESS_SIGNAL, SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
+    PROCESS_ERROR_SIGNAL
+from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, X_STR, Y_STR,\
+    CANCEL_STR, RUN_STR, Z_STR
 
-WARNING_STR = "Warning"
 
 class ProcessScans(qtGui.QDialog):
     '''
@@ -78,7 +82,7 @@ class ProcessScans(qtGui.QDialog):
         '''
         Emit a signal to trigger the cancellation of processing.
         '''
-        self.emit(qtCore.SIGNAL("cancelProcess"))
+        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
         
     def _createControlBox(self):
         controlBox = qtGui.QGroupBox()
@@ -87,10 +91,10 @@ class ProcessScans(qtGui.QDialog):
         self.progressBar = qtGui.QProgressBar()
         controlLayout.addWidget(self.progressBar,row, 1)
 
-        self.runButton = qtGui.QPushButton("Run")
+        self.runButton = qtGui.QPushButton(RUN_STR)
         controlLayout.addWidget(self.runButton, row, 3)
 
-        self.cancelButton = qtGui.QPushButton("Cancel")
+        self.cancelButton = qtGui.QPushButton(CANCEL_STR)
         self.cancelButton.setDisabled(True)
 
         controlLayout.addWidget(self.cancelButton, row, 4)
@@ -102,7 +106,7 @@ class ProcessScans(qtGui.QDialog):
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.cancelProcess)
         self.connect(self, \
-                     qtCore.SIGNAL("updateProgress"), \
+                     qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
         controlBox.setLayout(controlLayout)
         return controlBox
@@ -125,7 +129,7 @@ class ProcessScans(qtGui.QDialog):
         label = qtGui.QLabel("Grid Dimensions")
         dataLayout.addWidget(label, row,0)
         row += 1
-        label = qtGui.QLabel("X")
+        label = qtGui.QLabel(X_STR)
         dataLayout.addWidget(label, row,0)
         self.xDimTxt = qtGui.QLineEdit()
         self.xDimTxt.setText("200")
@@ -134,7 +138,7 @@ class ProcessScans(qtGui.QDialog):
         dataLayout.addWidget(self.xDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel("Y")
+        label = qtGui.QLabel(Y_STR)
         dataLayout.addWidget(label, row,0)
         self.yDimTxt = qtGui.QLineEdit()
         self.yDimTxt.setText("200")
@@ -143,7 +147,7 @@ class ProcessScans(qtGui.QDialog):
         dataLayout.addWidget(self.yDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel("Z")
+        label = qtGui.QLabel(Z_STR)
         dataLayout.addWidget(label, row,0)
         self.zDimTxt = qtGui.QLineEdit()
         self.zDimTxt.setText("200")
@@ -158,7 +162,7 @@ class ProcessScans(qtGui.QDialog):
         self.outFileTxt = qtGui.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
         dataLayout.addWidget(self.outFileTxt, row,1)
-        self.outputFileButton = qtGui.QPushButton("Browse")
+        self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
         dataLayout.addWidget(self.outputFileButton, row, 2)
 
         self.connect(self.outputFileButton, \
@@ -170,7 +174,7 @@ class ProcessScans(qtGui.QDialog):
         self.connect(self.outFileTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self.editFinishedOutputFile)
-        self.connect(self, qtCore.SIGNAL("setFileName"), 
+        self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
                      self.outFileTxt.setText)
         
         dataBox.setLayout(dataLayout)
@@ -184,9 +188,7 @@ class ProcessScans(qtGui.QDialog):
         fileName = str(self.outFileTxt.text())
         if fileName != "":
             if os.path.exists(os.path.dirname(fileName)):
-                #self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                #self.outFileTxt.emit(qtCore.SIGNAL("editingFinished()"))
             else:
                 if os.path.dirname(fileName) == "":
                     print("joining filename with current path")
@@ -201,7 +203,7 @@ class ProcessScans(qtGui.QDialog):
                                  "\ndoes not exist")
                 
 #               self.outputFileName = fileName
-                self.emit(qtCore.SIGNAL("setFileName"), fileName)
+                self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = qtGui.QMessageBox()
@@ -213,7 +215,7 @@ class ProcessScans(qtGui.QDialog):
         '''
         Emit a signal to trigger the start of procesing.
         '''
-        self.emit(qtCore.SIGNAL("process"))
+        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
         
     def runMapper(self, dataSource, transform):
         '''
@@ -226,7 +228,7 @@ class ProcessScans(qtGui.QDialog):
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
                                                "%s.vti" %dataSource.projectName)
-            self.emit(qtCore.SIGNAL("setFileName"), self.outputFileName)
+            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
                 self.mapper = QGridMapper(dataSource, \
@@ -242,7 +244,7 @@ class ProcessScans(qtGui.QDialog):
                                               transform = transform)
                 self.mapper.doMap()
         else:
-            self.emit(qtCore.SIGNAL("processError"), \
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                          "The specified directory \n" + \
                          str(os.path.dirname(self.outputFileName)) + \
                          "\nis not writable")
@@ -295,5 +297,5 @@ class ProcessScans(qtGui.QDialog):
         '''
         Send signal to update the progress bar.
         '''
-        self.emit(qtCore.SIGNAL("updateProgress"), value)
+        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value)
         

@@ -13,6 +13,8 @@ from vtk.util import numpy_support
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 
+VTI_OUTFILE_MERGE_STR = "%s_S%d.vti"
+
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
     '''
@@ -90,7 +92,7 @@ class AbstractGridMapper(object):
         # export data to file
         writer= vtk.vtkXMLImageDataWriter()
         if self.outputFileName == "":
-            writer.SetFileName("%s_S%d.vti" % (self.dataSource.projectName, \
+            writer.SetFileName(VTI_OUTFILE_MERGE_STR % (self.dataSource.projectName, \
                                         self.dataSource.availableScans[0]))
         else:
             writer.SetFileName(self.outputFileName)

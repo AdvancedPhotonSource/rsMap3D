@@ -6,6 +6,7 @@ import os
 from pyspec import spec
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
+from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR, COMMA_STR, CANCEL_STR
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -17,6 +18,11 @@ import time
 import traceback
 import csv
 import Image
+
+IMAGE_DIR_MERGE_STR = "images/%s"
+SCAN_NUMBER_MERGE_STR = "S%03d"
+TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
+ONE_EIGHTY = 180.0
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -150,10 +156,14 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         # Load up the instrument configuration file
         try:
-            self.instConfig = InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-            self.sampleCirclesDirections = self.instConfig.getSampleCircleDirections()
-            self.detectorCircleDirections = self.instConfig.getDetectorCircleDirections()
-            self.primaryBeamDirection = self.instConfig.getPrimaryBeamDirection()
+            self.instConfig = \
+                InstReader.InstForXrayutilitiesReader(self.instConfigFile)
+            self.sampleCirclesDirections = \
+                self.instConfig.getSampleCircleDirections()
+            self.detectorCircleDirections = \
+                self.instConfig.getDetectorCircleDirections()
+            self.primaryBeamDirection = \
+                self.instConfig.getPrimaryBeamDirection()
             self.sampleInplaneReferenceDirection = \
                 self.instConfig.getInplaneReferenceDirection()
             self.sampleSurfaceNormalDirection = \
@@ -175,21 +185,25 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         #Load up the detector configuration file
         try:
             detConfig = \
-                DetectorReader.DetectorGeometryForXrayutilitiesReader(self.detConfigFile)
+                DetectorReader.DetectorGeometryForXrayutilitiesReader(
+                                                      self.detConfigFile)
             detector = detConfig.getDetectorById("Pilatus")
             self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
             self.detectorDimensions = detConfig.getNpixels(detector)
             detectorSize = detConfig.getSize(detector)
-            self.detectorPixelWidth = [detectorSize[0]/self.detectorDimensions[0],
-                                       detectorSize[1]/self.detectorDimensions[1]]
+            self.detectorPixelWidth = \
+                [detectorSize[0]/self.detectorDimensions[0],\
+                 detectorSize[1]/self.detectorDimensions[1]]
             self.distanceToDetector = detConfig.getDistance(detector) 
             if self.numPixelsToAverage == None:
                 self.numPixelsToAverage = [1,1]
             if self.detectorROI == None:
                 self.detectorROI = [0, self.detectorDimensions[0],  
                                     0, self.detectorDimensions[1]]
-            self.detectorPixelDirection1 = detConfig.getPixelDirection1(detector)
-            self.detectorPixelDirection2 = detConfig.getPixelDirection2(detector)
+            self.detectorPixelDirection1 = \
+                detConfig.getPixelDirection1(detector)
+            self.detectorPixelDirection2 = \
+                detConfig.getPixelDirection2(detector)
         except DetectorConfigException as ex:
             raise ex
         except Exception as ex:
@@ -197,25 +211,29 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             raise ex
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
-        imageDir = os.path.join(self.projectDir, "images/%s" % self.projectName)
+        imageDir = os.path.join(self.projectDir, \
+                                IMAGE_DIR_MERGE_STR % self.projectName)
         self.imageFileTmp = os.path.join(imageDir, \
-                                "S%%03d/%s_S%%03d_%%05d.tif" % 
+                                TIFF_FILE_MERGE_STR % 
                                 (self.projectName))
         # if needed load up the bad pixel file.
         if not (self.badPixelFile == None):
             
-            reader = csv.reader(open(self.badPixelFile), delimiter=' ',skipinitialspace=True) 
+            reader = csv.reader(open(self.badPixelFile), \
+                                delimiter=' ', \
+                                skipinitialspace=True) 
             self.badPixels = []
             for line in reader:
                 newLine = []
                 for word in line:
-                    if not (word == ''):
-                        words = word.split(',')
+                    if not (word == EMPTY_STR):
+                        words = word.split(COMMA_STR)
                         for newWord in words:
-                            if not(newWord == ''):
+                            if not(newWord == EMPTY_STR):
                                 newLine.append(newWord)
                 for i in range(len(newLine)/2):
-                    self.badPixels.append((int(newLine[i*2]), int(newLine[2*i+1]))) 
+                    self.badPixels.append((int(newLine[i*2]), \
+                                           int(newLine[2*i+1]))) 
         # id needed load the flat field file
         if not (self.flatFieldFile == None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
@@ -229,7 +247,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             if self.scans  == None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
-                            "images/%s" % self.projectName)
+                            IMAGE_DIR_MERGE_STR % self.projectName)
             
             self.imageBounds = {}
             self.imageToBeUsed = {}
@@ -240,10 +258,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
-                    raise LoadCanceledException("Cancel")
+                    raise LoadCanceledException(CANCEL_STR)
                 
                 else:
-                    if (os.path.exists(os.path.join(imagePath, "S%03d" % scan))):
+                    if (os.path.exists(os.path.join(imagePath, \
+                                            SCAN_NUMBER_MERGE_STR % scan))):
                         curScan = self.sd[scan]
                         self.availableScans.append(scan)
                         angles = self.getGeoAngles(curScan, self.angleNames)
@@ -273,7 +292,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                            "missing.  Images are assumed " + \
                                            "to be in " + \
                                            os.path.join(self.projectDir, 
-                                                        "images/%s" % self.projectName))
+                                        IMAGE_DIR_MERGE_STR % self.projectName))
 
 
     def getGeoAngles(self, scan, angleNames):
@@ -317,21 +336,22 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         Calculate the eulerian sample angles from the kappa stage angles.
         """
         
-        keta = referenceAngles[:,0] * np.pi/180.0
-        kappa = referenceAngles[:,1] * np.pi/180.0
-        kphi = referenceAngles[:,2] * np.pi/180.0
-        self.kalpha = 49.9945 * np.pi/180.0
+        keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY
+        kappa = referenceAngles[:,1] * np.pi/ONE_EIGHTY
+        kphi = referenceAngles[:,2] * np.pi/ONE_EIGHTY
+        self.kalpha = 49.9945 * np.pi/ONE_EIGHTY
         self.kappa_inverted = False
 
         _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
         
         if self.kappa_inverted:
-            eta = (keta + _t1) * 180.0/np.pi
-            phi = (kphi + _t1) * 180.0/np.pi
+            eta = (keta + _t1) * ONE_EIGHTY/np.pi
+            phi = (kphi + _t1) * ONE_EIGHTY/np.pi
         else:
-            eta = (keta - _t1) * 180.0/np.pi
-            phi = (kphi - _t1) * 180.0/np.pi
-        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * np.sin(self.kalpha)) * 180.0/np.pi
+            eta = (keta - _t1) * ONE_EIGHTY/np.pi
+            phi = (kphi - _t1) * ONE_EIGHTY/np.pi
+        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * \
+                              np.sin(self.kalpha)) * ONE_EIGHTY/np.pi
         
         return eta, chi, phi
         

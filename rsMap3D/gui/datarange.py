@@ -7,14 +7,16 @@ import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import RANGE_CHANGED_SIGNAL
+from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, NEGATIVE_INFINITY,\
+    WARNING_STR, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, ZMIN_INDEX,\
+    ZMAX_INDEX, MIN_STR, MAX_STR, X_STR, Y_STR, Z_STR
 
 class DataRange(qtGui.QDialog):
     '''
     This class displays the overall data range for all selected images in
     the available scans.
     '''
-    POSITIVE_INFINITY = "Infinity"
-    NEGATIVE_INFINITY = "-Infinity"
     def __init__(self, parent=None):                
         '''
         '''
@@ -22,30 +24,30 @@ class DataRange(qtGui.QDialog):
         self._initializeRanges()
         
         layout = qtGui.QGridLayout()
-        xLabel = qtGui.QLabel("X")
-        xminLabel = qtGui.QLabel("min")
+        xLabel = qtGui.QLabel(X_STR)
+        xminLabel = qtGui.QLabel(MIN_STR)
         self.xminText = qtGui.QLineEdit()
         self.xminValidator = qtGui.QDoubleValidator()
         self.xminText.setValidator(self.xminValidator)
-        xmaxLabel = qtGui.QLabel("max")
+        xmaxLabel = qtGui.QLabel(MAX_STR)
         self.xmaxText = qtGui.QLineEdit()
         self.xmaxValidator = qtGui.QDoubleValidator()
         self.xmaxText.setValidator(self.xmaxValidator)
-        yLabel = qtGui.QLabel("Y")
-        yminLabel = qtGui.QLabel("min")
+        yLabel = qtGui.QLabel(Y_STR)
+        yminLabel = qtGui.QLabel(MIN_STR)
         self.yminText = qtGui.QLineEdit()
         self.yminValidator = qtGui.QDoubleValidator()
         self.yminText.setValidator(self.yminValidator)
-        ymaxLabel = qtGui.QLabel("max")
+        ymaxLabel = qtGui.QLabel(MAX_STR)
         self.ymaxText = qtGui.QLineEdit()
         self.ymaxValidator = qtGui.QDoubleValidator()
         self.ymaxText.setValidator(self.ymaxValidator)
-        zLabel = qtGui.QLabel("Z")
-        zminLabel = qtGui.QLabel("min")
+        zLabel = qtGui.QLabel(Z_STR)
+        zminLabel = qtGui.QLabel(MIN_STR)
         self.zminText = qtGui.QLineEdit()
         self.zminValidator = qtGui.QDoubleValidator()
         self.zminText.setValidator(self.zminValidator)
-        zmaxLabel = qtGui.QLabel("max")
+        zmaxLabel = qtGui.QLabel(MAX_STR)
         self.zmaxText = qtGui.QLineEdit()
         self.zmaxValidator = qtGui.QDoubleValidator()
         self.zmaxText.setValidator(self.zmaxValidator)
@@ -91,7 +93,7 @@ class DataRange(qtGui.QDialog):
             self._zValChanged)
         self.connect(self.zmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._zValChanged)
-        self.connect(self, qtCore.SIGNAL("rangeChanged"), 
+        self.connect(self, qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), 
             self._checkOkToApply)
         self.setLayout(layout)
         
@@ -100,12 +102,12 @@ class DataRange(qtGui.QDialog):
         Private class to initialize ranges at +- infinity.  This sets values 
         but puts them to bad values on purpose.
         '''
-        self.ranges = (float(self.POSITIVE_INFINITY), \
-                       float(self.NEGATIVE_INFINITY), \
-                        float(self.POSITIVE_INFINITY), \
-                        float(self.NEGATIVE_INFINITY), \
-                        float(self.POSITIVE_INFINITY), \
-                        float(self.NEGATIVE_INFINITY))
+        self.ranges = (float(POSITIVE_INFINITY), \
+                       float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY))
         self.xValsOk = True
         self.yValsOk = True
         self.zValsOk = True
@@ -122,7 +124,7 @@ class DataRange(qtGui.QDialog):
                        float(self.ymaxText.text()),
                        float(self.zminText.text()),
                        float(self.zmaxText.text()))
-        self.emit(qtCore.SIGNAL("rangeChanged"))
+        self.emit(qtCore.SIGNAL(RANGE_CHANGED_SIGNAL))
         
     def _checkOkToApply(self):
         '''
@@ -171,12 +173,12 @@ class DataRange(qtGui.QDialog):
         '''
         Reset the ranges to the last set of applied values.
         '''
-        self.xminText.setText(str(self.ranges[0]))
-        self.xmaxText.setText(str(self.ranges[1]))
-        self.yminText.setText(str(self.ranges[2]))
-        self.ymaxText.setText(str(self.ranges[3]))
-        self.zminText.setText(str(self.ranges[4]))
-        self.zmaxText.setText(str(self.ranges[5]))
+        self.xminText.setText(str(self.ranges[XMIN_INDEX]))
+        self.xmaxText.setText(str(self.ranges[XMAX_INDEX]))
+        self.yminText.setText(str(self.ranges[YMIN_INDEX]))
+        self.ymaxText.setText(str(self.ranges[YMAX_INDEX]))
+        self.zminText.setText(str(self.ranges[ZMIN_INDEX]))
+        self.zmaxText.setText(str(self.ranges[ZMAX_INDEX]))
         self.valsChanged = False
         self._checkOkToApply()
         
@@ -203,7 +205,7 @@ class DataRange(qtGui.QDialog):
         if not self.xValsOk:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "xmin must be less than xmax")
         self.valsChanged = True
         self._checkOkToApply()
@@ -219,7 +221,7 @@ class DataRange(qtGui.QDialog):
         if not self.yValsOk:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "ymin must be less than ymax")
         self.valsChanged = True
         self._checkOkToApply()
@@ -233,7 +235,7 @@ class DataRange(qtGui.QDialog):
         if not self.zValsOk:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "zmin must be less than zmax")
         self.valsChanged = True
         self._checkOkToApply()

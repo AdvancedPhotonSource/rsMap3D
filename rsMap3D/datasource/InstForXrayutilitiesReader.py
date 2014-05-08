@@ -169,7 +169,7 @@ class InstForXrayutilitiesReader():
             self.root.find(PROJECTION_DIRECTION)
         if direction == None:
             message = PROJECTION_DIRECTION + \
-                                      " was not found in the instrument config file"
+                      " was not found in the instrument config file"
             raise InstConfigException(message)
         return self.makeReferenceDirection(direction )
         
@@ -214,8 +214,8 @@ class InstForXrayutilitiesReader():
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
-            raise InstConfigException("No Mapping function defined in instrument " + \
-                             "config file")
+            raise InstConfigException("No Mapping function defined in " +\
+                                      "instrument config file")
         angles = []
         primaryAngles = function.findall(PRIMARY_ANGLE)
         if primaryAngles == None:
