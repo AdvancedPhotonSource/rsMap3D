@@ -14,7 +14,7 @@ from rsMap3D.gui.rsmap3dsignals import CANCEL_PROCESS_SIGNAL,\
     UPDATE_PROGRESS_SIGNAL, SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
     PROCESS_ERROR_SIGNAL
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, X_STR, Y_STR,\
-    CANCEL_STR, RUN_STR, Z_STR
+    CANCEL_STR, RUN_STR, Z_STR, VTI_FILTER_STR, SAVE_FILE_STR
 
 
 class ProcessScans(qtGui.QDialog):
@@ -51,13 +51,13 @@ class ProcessScans(qtGui.QDialog):
         '''
         if self.outFileTxt.text() == "":
             fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
-                                               "Save File", \
-                                               filter="*.vti"))
+                                               SAVE_FILE_STR, \
+                                               filter=VTI_FILTER_STR))
         else:
             inFileName = str(self.outFileTxt.text())
             fileName = str(qtGui.QFileDialog.getOpenFileName(None, 
-                                               "Save File", 
-                                               filter="*.vti", \
+                                               SAVE_FILE_STR, 
+                                               filter=VTI_FILTER_STR, \
                                                directory = inFileName))
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
@@ -182,7 +182,7 @@ class ProcessScans(qtGui.QDialog):
         
     def editFinishedOutputFile(self):
         '''
-        When edititing is finished the a check is done to make sure that the 
+        When editing is finished the a check is done to make sure that the 
         directory exists and the file is writable
         '''
         fileName = str(self.outFileTxt.text())
@@ -209,11 +209,11 @@ class ProcessScans(qtGui.QDialog):
                 message = qtGui.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
-                             "The specified fileis not writable")
+                             "The specified file is not writable")
 
     def process(self):
         '''
-        Emit a signal to trigger the start of procesing.
+        Emit a signal to trigger the start of processing.
         '''
         self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
         

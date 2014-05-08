@@ -10,7 +10,8 @@ from rsMap3D.gui.qtsignalstrings import LIST_ITEM_CLICKED_SIGNAL, \
 from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, RENDER_BOUNDS_SIGNAL,\
     CLEAR_RENDER_WINDOW_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL
 from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
-    NEGATIVE_INFINITY, X_STR, Y_STR, Z_STR, EMPTY_STR, RED, BLACK
+    NEGATIVE_INFINITY, X_STR, Y_STR, Z_STR, EMPTY_STR, RED, BLACK, MIN_STR,\
+    MAX_STR
 
 class ScanForm(qtGui.QDialog):
     '''
@@ -42,19 +43,19 @@ class ScanForm(qtGui.QDialog):
         rightBox = qtGui.QVBoxLayout()
         qrange = qtGui.QGridLayout()
         xLabel = qtGui.QLabel(X_STR)
-        xminLabel = qtGui.QLabel("min")
+        xminLabel = qtGui.QLabel(MIN_STR)
         self.xminText = qtGui.QLabel(EMPTY_STR)
-        xmaxLabel = qtGui.QLabel("max")
+        xmaxLabel = qtGui.QLabel(MAX_STR)
         self.xmaxText = qtGui.QLabel(EMPTY_STR)
         yLabel = qtGui.QLabel(Y_STR)
-        yminLabel = qtGui.QLabel("min")
+        yminLabel = qtGui.QLabel(MIN_STR)
         self.yminText = qtGui.QLabel(EMPTY_STR)
-        ymaxLabel = qtGui.QLabel("max")
+        ymaxLabel = qtGui.QLabel(MAX_STR)
         self.ymaxText = qtGui.QLabel(EMPTY_STR)
         zLabel = qtGui.QLabel(Z_STR)
-        zminLabel = qtGui.QLabel("min")
+        zminLabel = qtGui.QLabel(MIN_STR)
         self.zminText = qtGui.QLabel(EMPTY_STR)
-        zmaxLabel = qtGui.QLabel("max")
+        zmaxLabel = qtGui.QLabel(MAX_STR)
         self.zmaxText = qtGui.QLabel(EMPTY_STR)
 
         self.selectAll = qtGui.QPushButton()

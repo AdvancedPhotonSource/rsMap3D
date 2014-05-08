@@ -12,7 +12,7 @@ from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
 class AbstractXrayutilitiesDataSource:
     __metaclass__ = abc.ABCMeta
     '''
-    Abstract class for loading data needed to analyze using Xrayutilities.
+    Abstract class for loading data needed to analyze using xrayutilities.
     '''
 
     def __init__(self, transform=None, 
@@ -162,7 +162,7 @@ class AbstractXrayutilitiesDataSource:
     
     def getFlatFieldData(self):
         '''
-        Return image for the flat field correctiom
+        Return image for the flat field correction
         ''' 
         return self.flatFieldData
     
@@ -272,7 +272,7 @@ class AbstractXrayutilitiesDataSource:
     
     def getProjectionDirection(self):
         '''
-        Return the axis direction for producing sterographic projection.
+        Return the axis direction for producing stereographic projection.
         '''
         return self.projectionDirection
     

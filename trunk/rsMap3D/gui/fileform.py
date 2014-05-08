@@ -647,7 +647,7 @@ class FileForm(qtGui.QDialog):
         
     def setCancelOK(self):
         '''
-        If Cancel is OK the loadbutton is disabled and the cancel button is 
+        If Cancel is OK the load button is disabled and the cancel button is 
         enabled
         '''
         self.loadButton.setDisabled(True)
@@ -691,7 +691,7 @@ class FileForm(qtGui.QDialog):
         
     def updateROIandNumAvg(self):
         '''
-        Set defailt values into the ROI and number of pixel to average text 
+        Set default values into the ROI and number of pixel to average text 
         boxes
         '''
         detConfig = \

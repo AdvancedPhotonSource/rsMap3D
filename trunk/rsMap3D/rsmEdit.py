@@ -227,7 +227,7 @@ class MainDialog(qtGui.QMainWindow):
         
     def spawnLoadThread(self):
         '''
-        Spawm a new thread to load the scan so that scan may be canceled later 
+        Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
         self.fileForm.setCancelOK()
@@ -236,7 +236,7 @@ class MainDialog(qtGui.QMainWindow):
         
     def spawnProcessThread(self):
         '''
-        Spawm a new thread to load the scan so that scan may be canceled later 
+        Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
         self.processScans.setProgressLimits(1, 
@@ -247,7 +247,7 @@ class MainDialog(qtGui.QMainWindow):
         
     def setupRanges(self):
         '''
-        Get the overall data extent from the datasource and set these values
+        Get the overall data extent from the data source and set these values
         in the dataRange tab.  
         '''
         overallXmin, overallXmax, overallYmin, overallYmax, \
@@ -263,7 +263,7 @@ class MainDialog(qtGui.QMainWindow):
         
     def setScanRanges(self):
         '''
-        Get the datarange from the dataRange tab and set the bounds in this 
+        Get the data range from the dataRange tab and set the bounds in this 
         class.  Tell scanForm tab to render the Qs for all scans.
         '''
         ranges = self.dataRange.getRanges()
@@ -284,7 +284,7 @@ class MainDialog(qtGui.QMainWindow):
               
     def tabChanged(self, index):
         '''
-        When changing to the datarange tab, display all qs from all scans.
+        When changing to the data range tab, display all qs from all scans.
         '''
         if str(self.tabs.tabText(index)) == "Data Range":
             self.scanForm.renderOverallQs()
@@ -345,6 +345,9 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.fileTabIndex, True)
         
 class LoadScanThread(qtCore.QThread):
+    '''
+    Small thread class to launch the scan loading process
+    '''
     def __init__(self, controller, **kwargs):
         super(LoadScanThread, self).__init__( **kwargs)
         self.controller = controller
@@ -353,6 +356,9 @@ class LoadScanThread(qtCore.QThread):
         self.controller.loadScanFile()
         
 class ProcessScanThread(qtCore.QThread):
+    '''
+    Small thread class to launch data processing
+    '''
     def __init__(self, controller, **kwargs):
         super(ProcessScanThread, self).__init__( **kwargs)
         self.controller = controller
