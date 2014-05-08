@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 import os
@@ -12,6 +12,14 @@ from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
     InstConfigException, RSMap3DException
+from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
+    UPDATE_PROGRESS_SIGNAL
+from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, CANCEL_STR, BROWSE_STR,\
+    COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
+    BAD_PIXEL_FILE_FILTER, SELECT_BAD_PIXEL_TITLE, SELECT_FLAT_FIELD_TITLE,\
+    TIFF_FILE_FILTER, SELECT_DETECTOR_CONFIG_TITLE, DETECTOR_CONFIG_FILE_FILTER,\
+    INSTRUMENT_CONFIG_FILE_FILTER, SELECT_INSTRUMENT_CONFIG_TITLE,\
+    SPEC_FILE_FILTER, SELECT_SPEC_FILE_TITLE, LOAD_STR
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
@@ -33,7 +41,11 @@ class FileForm(qtGui.QDialog):
     #Strings for Text Widgets
     POLE_MAP_STR = "Stereographic Projection"
     SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
-
+    
+    NONE_RADIO_NAME = "None"
+    BAD_PIXEL_RADIO_NAME = "Bad Pixel File"
+    FLAT_FIELD_RADIO_NAME = "Flat Field Correction"
+    
     def __init__(self,parent=None):
         '''
         Constructor - Layout Widgets on the page and link actions
@@ -63,19 +75,19 @@ class FileForm(qtGui.QDialog):
         '''
         Emit a signal to start loading data
         '''
-        self.emit(qtCore.SIGNAL("loadFile"))
+        self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
 
     def badPixelFileChanged(self):
         '''
         Do some verification when the bad pixel file changes
         '''
         if os.path.isfile(self.badPixelFileTxt.text()) or \
-           self.badPixelFileTxt.text() == "":
+           self.badPixelFileTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                              "The filename entered for the bad pixel " + \
                              "file is invalid")
             
@@ -84,19 +96,17 @@ class FileForm(qtGui.QDialog):
         '''
         Launch file browser for bad pixel file
         '''
-        if self.badPixelFileTxt.text() == "":
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                               "Select Bad Pixel File", 
-                                               filter="Bad Pixel *.txt ;;" + \
-                                                      "All Files *.*")
+        if self.badPixelFileTxt.text() == EMPTY_STR:
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+                                               SELECT_BAD_PIXEL_TITLE, \
+                                               filter=BAD_PIXEL_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                               "Select Bad Pixel File", 
-                                               filter="Bad Pixel *.txt ;;" + \
-                                                      "All Files *.*", \
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+                                               SELECT_BAD_PIXEL_TITLE, \
+                                               filter=BAD_PIXEL_FILE_FILTER, \
                                                directory = fileDirectory)
-        if fileName != "":
+        if fileName != EMPTY_STR:
             self.badPixelFileTxt.setText(fileName)
             self.badPixelFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
@@ -105,17 +115,17 @@ class FileForm(qtGui.QDialog):
         '''
         Launch file browser for Flat field file
         '''
-        if self.flatFieldFileTxt.text() == "":
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                               "Select Flat Field File", 
-                                               filter="TIFF Files (*.tiff *.tif)")
+        if self.flatFieldFileTxt.text() == EMPTY_STR:
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+                                               SELECT_FLAT_FIELD_TITLE, \
+                                               filter=TIFF_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
             fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                               "Select Flat Field File", 
-                                               filter="TIFF Files (*.tiff *.tif)", \
+                                               SELECT_FLAT_FIELD_TITLE, 
+                                               filter=TIFF_FILE_FILTER, \
                                                directory = fileDirectory)
-        if fileName != "":
+        if fileName != EMPTY_STR:
             self.flatFieldFileTxt.setText(fileName)
             self.flatFieldFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
     
@@ -123,17 +133,17 @@ class FileForm(qtGui.QDialog):
         '''
         Launch file selection dialog for Detector file.
         '''
-        if self.detConfigTxt.text() == "":
+        if self.detConfigTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
-                                               "Select Detector Config File", \
-                                               filter="*.xml")
+                                            SELECT_DETECTOR_CONFIG_TITLE, \
+                                            filter=DETECTOR_CONFIG_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
-                                               "Select Detector Config File", \
-                                               filter="*.xml", \
-                                               directory = fileDirectory)
-        if fileName != "":
+                                         SELECT_DETECTOR_CONFIG_TITLE, \
+                                         filter=DETECTOR_CONFIG_FILE_FILTER, \
+                                         directory = fileDirectory)
+        if fileName != EMPTY_STR:
             self.detConfigTxt.setText(fileName)
             self.detConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
@@ -141,19 +151,17 @@ class FileForm(qtGui.QDialog):
         '''
         Launch file selection dialog for instrument file.
         '''
-        if self.instConfigTxt.text() == "":
+        if self.instConfigTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                        "Select Instrument Config File", 
-                                        filter="Instrument Config *.xml" + \
-                                                " ;; All Files *.*")
+                                        SELECT_INSTRUMENT_CONFIG_TITLE, 
+                                        filter=INSTRUMENT_CONFIG_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
             fileName = qtGui.QFileDialog.getOpenFileName(None, 
-                                        "Select Instrument Config File", 
-                                        filter="Instrument Config *.xml" + \
-                                                 " ;; All Files *.*", \
+                                        SELECT_INSTRUMENT_CONFIG_TITLE, 
+                                        filter=INSTRUMENT_CONFIG_FILE_FILTER, \
                                         directory = fileDirectory)
-        if fileName != "":
+        if fileName != EMPTY_STR:
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
@@ -161,27 +169,25 @@ class FileForm(qtGui.QDialog):
         '''
         Launch file selection dialog for instrument file.
         '''
-        if self.projNameTxt.text() == "":
+        if self.projNameTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
-                                     "Select Spec file",
-                                     filter=("SPEC files *.spc *.spec ;; " + \
-                                                           "All files *.*"))
+                                                   SELECT_SPEC_FILE_TITLE, \
+                                                   filter=SPEC_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
             fileName = qtGui.QFileDialog.getOpenFileName(None,\
-                                                   "Select Spec file", \
+                                                   SELECT_SPEC_FILE_TITLE, \
                                                    directory = fileDirectory,
-                                     filter=("SPEC files *.spc *.spec ;; " + \
-                                                           "All files *.*"))
+                                                   filter=SPEC_FILE_FILTER)
             
-        if fileName != "":
+        if fileName != EMPTY_STR:
             self.projNameTxt.setText(fileName)
             self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
 
     def cancelLoadFile(self):
         ''' Send signal to cancel a file load'''
-        self.emit(qtCore.SIGNAL("cancelLoadFile"))
+        self.emit(qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL))
         
     def checkOkToLoad(self):
         '''
@@ -214,10 +220,10 @@ class FileForm(qtGui.QDialog):
         controlLayout.addWidget(self.progressBar, row, 1)
         
         row += 1
-        self.loadButton = qtGui.QPushButton("Load")        
+        self.loadButton = qtGui.QPushButton(LOAD_STR)        
         self.loadButton.setDisabled(True)
         controlLayout.addWidget(self.loadButton, row, 1)
-        self.cancelButton = qtGui.QPushButton("Cancel")        
+        self.cancelButton = qtGui.QPushButton(CANCEL_STR)        
         self.cancelButton.setDisabled(True)
         controlLayout.addWidget(self.cancelButton, row, 2)
 
@@ -243,7 +249,7 @@ class FileForm(qtGui.QDialog):
         row = 0
         label = qtGui.QLabel("Project File:");
         self.projNameTxt = qtGui.QLineEdit()
-        self.projectDirButton = qtGui.QPushButton("Browse")
+        self.projectDirButton = qtGui.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.projNameTxt, row, 1)
         dataLayout.addWidget(self.projectDirButton, row, 2)
@@ -251,7 +257,7 @@ class FileForm(qtGui.QDialog):
         row += 1
         label = qtGui.QLabel("Instrument Config File:");
         self.instConfigTxt = qtGui.QLineEdit()
-        self.instConfigFileButton = qtGui.QPushButton("Browse")
+        self.instConfigFileButton = qtGui.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.instConfigTxt, row, 1)
         dataLayout.addWidget(self.instConfigFileButton, row, 2)
@@ -259,23 +265,23 @@ class FileForm(qtGui.QDialog):
         row += 1
         label = qtGui.QLabel("Detector Config File:");
         self.detConfigTxt = qtGui.QLineEdit()
-        self.detConfigFileButton = qtGui.QPushButton("Browse")
+        self.detConfigFileButton = qtGui.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detConfigTxt, row, 1)
         dataLayout.addWidget(self.detConfigFileButton, row, 2)
         
         row += 1
         self.fieldCorrectionGroup = qtGui.QButtonGroup(self)
-        self.noFieldRadio = qtGui.QRadioButton("None")
-        self.badPixelRadio = qtGui.QRadioButton("Bad Pixel File")
-        self.flatFieldRadio = qtGui.QRadioButton("Flat Field Correction")
+        self.noFieldRadio = qtGui.QRadioButton(self.NONE_RADIO_NAME)
+        self.badPixelRadio = qtGui.QRadioButton(self.BAD_PIXEL_RADIO_NAME)
+        self.flatFieldRadio = qtGui.QRadioButton(self.FLAT_FIELD_RADIO_NAME)
         self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
         self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
         self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
         self.badPixelFileTxt = qtGui.QLineEdit()
         self.flatFieldFileTxt = qtGui.QLineEdit()
-        self.badPixelFileBrowseButton = qtGui.QPushButton("Browse")
-        self.flatFieldFileBrowseButton = qtGui.QPushButton("Browse")
+        self.badPixelFileBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        self.flatFieldFileBrowseButton = qtGui.QPushButton(BROWSE_STR)
 
         
         dataLayout.addWidget(self.noFieldRadio, row, 0)
@@ -385,13 +391,13 @@ class FileForm(qtGui.QDialog):
             except DetectorConfigException:
                 message = qtGui.QMessageBox()
                 message.warning(self, \
-                                 "Warning",\
+                                 WARNING_STR,\
                                  "Trouble getting ROI or Num average " + \
                                  "from the detector config file")
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                             "Warning",\
+                             WARNING_STR,\
                              "The filename entered for the detector " + \
                              "configuration is invalid")
         
@@ -401,9 +407,9 @@ class FileForm(qtGui.QDialog):
         by a color change 
         '''
         if self.detROIValid(text):
-            self.detROITxt.setStyleSheet("QLineEdit {color : black;}")
+            self.detROITxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % BLACK)
         else: 
-            self.detROITxt.setStyleSheet("QLineEdit {color : red;}")
+            self.detROITxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % RED)
         self.checkOkToLoad()
 
     def detROIValid(self, text):
@@ -428,17 +434,17 @@ class FileForm(qtGui.QDialog):
         React when the field type radio buttons change.  Disable/Enable other 
         widgets as appropriate
         '''
-        if fieldCorrType[0].text() == "None":
+        if fieldCorrType[0].text() == self.NONE_RADIO_NAME:
             self.badPixelFileTxt.setDisabled(True)
             self.badPixelFileBrowseButton.setDisabled(True)
             self.flatFieldFileTxt.setDisabled(True)
             self.flatFieldFileBrowseButton.setDisabled(True)
-        elif fieldCorrType[0].text() == "Bad Pixel File":
+        elif fieldCorrType[0].text() == self.BAD_PIXEL_RADIO_NAME:
             self.badPixelFileTxt.setDisabled(False)
             self.badPixelFileBrowseButton.setDisabled(False)
             self.flatFieldFileTxt.setDisabled(True)
             self.flatFieldFileBrowseButton.setDisabled(True)
-        elif fieldCorrType[0].text() == "Flat Field Correction":
+        elif fieldCorrType[0].text() == self.FLAT_FIELD_RADIO_NAME:
             self.badPixelFileTxt.setDisabled(True)
             self.badPixelFileBrowseButton.setDisabled(True)
             self.flatFieldFileTxt.setDisabled(False)
@@ -456,7 +462,7 @@ class FileForm(qtGui.QDialog):
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                              "The filename entered for the flat field " + \
                              "file is invalid")
                 
@@ -465,7 +471,7 @@ class FileForm(qtGui.QDialog):
         Return the badPixel file name.  If empty or if the bad pixel radio 
         button is not checked return None
         '''
-        if (str(self.badPixelFileTxt.text()) == "") or \
+        if (str(self.badPixelFileTxt.text()) == EMPTY_STR) or \
            (not self.badPixelRadio.isChecked()):
             return None
         else:
@@ -482,7 +488,7 @@ class FileForm(qtGui.QDialog):
         Return the flat field file name.  If empty or if the bad pixel radio 
         button is not checked return None
         '''
-        if (str(self.flatFieldFileTxt.text()) == "") or \
+        if (str(self.flatFieldFileTxt.text()) == EMPTY_STR) or \
            (not self.flatFieldRadio.isChecked()):
             return None
         else:
@@ -529,20 +535,20 @@ class FileForm(qtGui.QDialog):
         the Load button.  Also, grab the projection direction from the file.
         '''
         if os.path.isfile(self.instConfigTxt.text()) or \
-           self.instConfigTxt.text() == "":
+           self.instConfigTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
             try:
                 self.updateProjectionDirection()
             except InstConfigException:
                 message = qtGui.QMessageBox()
                 message.warning(self, \
-                                "Warning", \
+                                WARNING_STR, \
                                  "Trouble getting the projection direction " + \
                                  "from the instrument config file.")
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                              "The filename entered for the instrument " + \
                              "configuration is invalid")
         
@@ -552,12 +558,12 @@ class FileForm(qtGui.QDialog):
         then check to see if it is OK to enable the Load button.
         '''
         if os.path.isfile(self.projNameTxt.text()) or \
-            self.projNameTxt.text() == "":
+            self.projNameTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
-                             "Warning", \
+                             WARNING_STR, \
                              "The project directory entered is invalid")
         
     def getOutputType(self):
@@ -570,20 +576,20 @@ class FileForm(qtGui.QDialog):
         '''
         return a list of scans to be used for loading data
         '''
-        if str(self.scanNumsTxt.text()) == "":
+        if str(self.scanNumsTxt.text()) == EMPTY_STR:
             return None
         else:
             scans = srange(str(self.scanNumsTxt.text()))
             return scans.list() 
         
-    def getDetectorROI(self, rois=""):
+    def getDetectorROI(self, rois=EMPTY_STR):
         '''
         Return the detector ROI as a list
         '''
-        if rois == "":
-            roiStrings = str(self.detROITxt.text()).split(',')
+        if rois == EMPTY_STR:
+            roiStrings = str(self.detROITxt.text()).split(COMMA_STR)
         else:
-            roiStrings = rois.split(',')
+            roiStrings = rois.split(COMMA_STR)
             
         roi = []
         if len(roiStrings) <> 4:
@@ -598,7 +604,7 @@ class FileForm(qtGui.QDialog):
         '''
         Return the pixels to average as a list
         '''
-        pixelStrings = str(self.pixAvgTxt.text()).split(',')
+        pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
         pixels = []
         print "getting number of pixels to average" + str(pixelStrings)
         for value in pixelStrings:
@@ -622,9 +628,9 @@ class FileForm(qtGui.QDialog):
         by a color change 
         '''
         if self.pixAvgValid(text):
-            self.pixAvgTxt.setStyleSheet("QLineEdit {color : black;}")
+            self.pixAvgTxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % BLACK)
         else: 
-            self.pixAvgTxt.setStyleSheet("QLineEdit {color : red;}")
+            self.pixAvgTxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % RED)
         self.checkOkToLoad()
             
     def pixAvgValid(self, text):
@@ -676,7 +682,7 @@ class FileForm(qtGui.QDialog):
         '''
         Emit a signal to update the progress bar
         '''
-        self.emit(qtCore.SIGNAL("updateProgress"), value, maxValue)
+        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value, maxValue)
         
     def updateProjectionDirection(self):
         instConfig = \
@@ -705,10 +711,10 @@ class FileForm(qtGui.QDialog):
         Update the ROI string with the current value of the ROI
         '''
         roiStr = str(self.roixmin) +\
-                "," +\
+                COMMA_STR +\
                 str(self.roixmax) +\
-                "," +\
+                COMMA_STR +\
                 str(self.roiymin) +\
-                "," +\
+                COMMA_STR +\
                 str(self.roiymax)
         self.detROITxt.setText(roiStr)
