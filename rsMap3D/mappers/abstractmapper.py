@@ -18,7 +18,7 @@ VTI_OUTFILE_MERGE_STR = "%s_S%d.vti"
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
     '''
-    This class is an abstract class around which to build a reciprical space 
+    This class is an abstract class around which to build a reciprocal space 
     mapping class using the xrayutilities module.  It requires an input of the 
     type AbstractXrayUtilitiesDataSource provided in the rsMap3D.datasource 
     package. 
@@ -47,7 +47,7 @@ class AbstractGridMapper(object):
         '''
         Produce a q map of the data.  This is the method typically called to 
         run the mapper.  This method calls the processMap method which is an 
-        abstact method which needs to be defined in subclasses.
+        abstract method which needs to be defined in subclasses.
         '''
         
         # read and grid data with helper function

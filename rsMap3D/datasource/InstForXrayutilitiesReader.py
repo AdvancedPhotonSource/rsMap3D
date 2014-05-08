@@ -64,12 +64,13 @@ class InstForXrayutilitiesReader():
         
     def getDetectorCircles(self):
         '''
-        Return the detectpr childer as and element list.  If detector circles 
+        Return the detector children as and element list.  If detector circles 
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
         if circles == None:
-            raise InstConfigException("Instrument configuration has no Detector Circles")
+            raise InstConfigException("Instrument configuration has no " +\
+                                      "Detector Circles")
         return self.root.find(DETECTOR_CIRCLES).getchildren()
         
     def getDetectorCircleNames(self):
@@ -108,7 +109,7 @@ class InstForXrayutilitiesReader():
         direction = \
             self.root.find(INPLANE_REFERENCE_DIRECTION)
         if direction == None:
-            raise InstConfigException("Missing inplane reference direction " + \
+            raise InstConfigException("Missing in-plane reference direction " + \
                                       "in instrument config file")
         return self.makeReferenceDirection(direction )
         
@@ -151,7 +152,7 @@ class InstForXrayutilitiesReader():
     
     def getPrimaryBeamDirection(self):
         '''
-        Get direction of primart beam
+        Get direction of primary beam
         '''
         direction = \
             self.root.find(PRIMARY_BEAM_DIRECTION)
@@ -255,7 +256,7 @@ class InstForXrayutilitiesReader():
         
     def getSampleCircles(self):
         '''
-        Return the detectpr childer as and element list.  If detector circles 
+        Return the sample children as and element list.  If sample circles 
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
@@ -266,11 +267,13 @@ class InstForXrayutilitiesReader():
 
     def getSampleCircleNames(self):
         '''
+        return the names of the sample circles
         '''
         return self.makeCircleNames(self.getSampleCircles())
         
     def getSampleSurfaceNormalDirection(self):
         '''
+        return the sample surface normal direction as a list of 3 numbers
         '''
         direction = \
             self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)

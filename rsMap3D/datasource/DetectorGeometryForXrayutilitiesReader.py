@@ -20,7 +20,7 @@ import string
 
 class DetectorGeometryForXrayutilitiesReader(object):
     '''
-    This class is for reading detecor geometry XML file for use with 
+    This class is for reading detector geometry XML file for use with 
     xrayutilities
     '''
 
@@ -79,7 +79,7 @@ class DetectorGeometryForXrayutilitiesReader(object):
 
     def getDetectorID(self, detector):
         '''
-        return the detecor ID
+        return the detector ID
         '''
         return detector.find(DETECTOR_ID).text
 

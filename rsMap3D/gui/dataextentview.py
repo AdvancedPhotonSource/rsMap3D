@@ -58,9 +58,6 @@ class DataExtentView(qtGui.QFrame):
         '''
         return self.vtkMain
 
-#    def render(self):
-#        self.renWin.Render()
-#        
     def renderBounds(self, bounds):
         '''
         Render a box with boundaries from the given input

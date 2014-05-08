@@ -207,7 +207,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         except DetectorConfigException as ex:
             raise ex
         except Exception as ex:
-            print ("---Error Reading detconfig")
+            print ("---Error Reading detector config")
             raise ex
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)

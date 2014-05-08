@@ -11,7 +11,7 @@ NEG_Z_DIRECTION = [0, 0, -1]
 
 class PoleMapTransform3D(AbstractTransform3D):
     '''
-    Transform axes for sterographic projection.
+    Transform axes for stereographic projection.
     '''
     def __init__(self, projectionDirection=POS_Z_DIRECTION):
         self.projectionDirection = projectionDirection
