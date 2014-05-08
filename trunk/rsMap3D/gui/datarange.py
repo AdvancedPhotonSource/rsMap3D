@@ -3,65 +3,60 @@
  See LICENSE file.
 '''
 
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QDialog
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QHBoxLayout
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QLineEdit
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QDoubleValidator
-from PyQt4.QtGui import QMessageBox
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
 
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import RANGE_CHANGED_SIGNAL
+from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, NEGATIVE_INFINITY,\
+    WARNING_STR, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, ZMIN_INDEX,\
+    ZMAX_INDEX, MIN_STR, MAX_STR, X_STR, Y_STR, Z_STR
 
-class DataRange(QDialog):
+class DataRange(qtGui.QDialog):
     '''
     This class displays the overall data range for all selected images in
     the available scans.
     '''
-    POSITIVE_INFINITY = "Infinity"
-    NEGATIVE_INFINITY = "-Infinity"
     def __init__(self, parent=None):                
         '''
         '''
         super(DataRange, self).__init__(parent)
         self._initializeRanges()
         
-        layout = QGridLayout()
-        xLabel = QLabel("X")
-        xminLabel = QLabel("min")
-        self.xminText = QLineEdit()
-        self.xminValidator = QDoubleValidator()
+        layout = qtGui.QGridLayout()
+        xLabel = qtGui.QLabel(X_STR)
+        xminLabel = qtGui.QLabel(MIN_STR)
+        self.xminText = qtGui.QLineEdit()
+        self.xminValidator = qtGui.QDoubleValidator()
         self.xminText.setValidator(self.xminValidator)
-        xmaxLabel = QLabel("max")
-        self.xmaxText = QLineEdit()
-        self.xmaxValidator = QDoubleValidator()
+        xmaxLabel = qtGui.QLabel(MAX_STR)
+        self.xmaxText = qtGui.QLineEdit()
+        self.xmaxValidator = qtGui.QDoubleValidator()
         self.xmaxText.setValidator(self.xmaxValidator)
-        yLabel = QLabel("Y")
-        yminLabel = QLabel("min")
-        self.yminText = QLineEdit()
-        self.yminValidator = QDoubleValidator()
+        yLabel = qtGui.QLabel(Y_STR)
+        yminLabel = qtGui.QLabel(MIN_STR)
+        self.yminText = qtGui.QLineEdit()
+        self.yminValidator = qtGui.QDoubleValidator()
         self.yminText.setValidator(self.yminValidator)
-        ymaxLabel = QLabel("max")
-        self.ymaxText = QLineEdit()
-        self.ymaxValidator = QDoubleValidator()
+        ymaxLabel = qtGui.QLabel(MAX_STR)
+        self.ymaxText = qtGui.QLineEdit()
+        self.ymaxValidator = qtGui.QDoubleValidator()
         self.ymaxText.setValidator(self.ymaxValidator)
-        zLabel = QLabel("Z")
-        zminLabel = QLabel("min")
-        self.zminText = QLineEdit()
-        self.zminValidator = QDoubleValidator()
+        zLabel = qtGui.QLabel(Z_STR)
+        zminLabel = qtGui.QLabel(MIN_STR)
+        self.zminText = qtGui.QLineEdit()
+        self.zminValidator = qtGui.QDoubleValidator()
         self.zminText.setValidator(self.zminValidator)
-        zmaxLabel = QLabel("max")
-        self.zmaxText = QLineEdit()
-        self.zmaxValidator = QDoubleValidator()
+        zmaxLabel = qtGui.QLabel(MAX_STR)
+        self.zmaxText = qtGui.QLineEdit()
+        self.zmaxValidator = qtGui.QDoubleValidator()
         self.zmaxText.setValidator(self.zmaxValidator)
-        buttonLayout = QHBoxLayout()
+        buttonLayout = qtGui.QHBoxLayout()
 
-        self.resetButton = QPushButton("Reset")
+        self.resetButton = qtGui.QPushButton("Reset")
         self.resetButton.setDisabled(True)
         
-        self.applyButton = QPushButton("Apply")
+        self.applyButton = qtGui.QPushButton("Apply")
         self.applyButton.setDisabled(True)
         
         buttonLayout.addWidget(self.resetButton)
@@ -84,21 +79,21 @@ class DataRange(QDialog):
         layout.addWidget(self.zmaxText, 2,4)
         layout.addLayout(buttonLayout, 3,4)
 
-        self.connect(self.resetButton, SIGNAL(CLICKED_SIGNAL), self._resetRange)
-        self.connect(self.applyButton, SIGNAL(CLICKED_SIGNAL), self._applyRange)
-        self.connect(self.xminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.resetButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._resetRange)
+        self.connect(self.applyButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._applyRange)
+        self.connect(self.xminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._xValChanged)
-        self.connect(self.xmaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.xmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._xValChanged)
-        self.connect(self.yminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.yminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._yValChanged)
-        self.connect(self.ymaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.ymaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._yValChanged)
-        self.connect(self.zminText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.zminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._zValChanged)
-        self.connect(self.zmaxText, SIGNAL(EDIT_FINISHED_SIGNAL), 
+        self.connect(self.zmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
             self._zValChanged)
-        self.connect(self, SIGNAL("rangeChanged"), 
+        self.connect(self, qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), 
             self._checkOkToApply)
         self.setLayout(layout)
         
@@ -107,12 +102,12 @@ class DataRange(QDialog):
         Private class to initialize ranges at +- infinity.  This sets values 
         but puts them to bad values on purpose.
         '''
-        self.ranges = (float(self.POSITIVE_INFINITY), \
-                       float(self.NEGATIVE_INFINITY), \
-                        float(self.POSITIVE_INFINITY), \
-                        float(self.NEGATIVE_INFINITY), \
-                        float(self.POSITIVE_INFINITY), \
-                        float(self.NEGATIVE_INFINITY))
+        self.ranges = (float(POSITIVE_INFINITY), \
+                       float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY))
         self.xValsOk = True
         self.yValsOk = True
         self.zValsOk = True
@@ -129,7 +124,7 @@ class DataRange(QDialog):
                        float(self.ymaxText.text()),
                        float(self.zminText.text()),
                        float(self.zmaxText.text()))
-        self.emit(SIGNAL("rangeChanged"))
+        self.emit(qtCore.SIGNAL(RANGE_CHANGED_SIGNAL))
         
     def _checkOkToApply(self):
         '''
@@ -178,12 +173,12 @@ class DataRange(QDialog):
         '''
         Reset the ranges to the last set of applied values.
         '''
-        self.xminText.setText(str(self.ranges[0]))
-        self.xmaxText.setText(str(self.ranges[1]))
-        self.yminText.setText(str(self.ranges[2]))
-        self.ymaxText.setText(str(self.ranges[3]))
-        self.zminText.setText(str(self.ranges[4]))
-        self.zmaxText.setText(str(self.ranges[5]))
+        self.xminText.setText(str(self.ranges[XMIN_INDEX]))
+        self.xmaxText.setText(str(self.ranges[XMAX_INDEX]))
+        self.yminText.setText(str(self.ranges[YMIN_INDEX]))
+        self.ymaxText.setText(str(self.ranges[YMAX_INDEX]))
+        self.zminText.setText(str(self.ranges[ZMIN_INDEX]))
+        self.zmaxText.setText(str(self.ranges[ZMAX_INDEX]))
         self.valsChanged = False
         self._checkOkToApply()
         
@@ -208,9 +203,9 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.xValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "xmin must be less than xmax")
         self.valsChanged = True
         self._checkOkToApply()
@@ -224,9 +219,9 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.yValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "ymin must be less than ymax")
         self.valsChanged = True
         self._checkOkToApply()
@@ -238,9 +233,9 @@ class DataRange(QDialog):
         #make sure this can be a float also make sure min < max
         self._checkValsOk()
         if not self.zValsOk:
-            message = QMessageBox()
+            message = qtGui.QMessageBox()
             message.warning(self, \
-                            "Warning", \
+                            WARNING_STR, \
                             "zmin must be less than zmax")
         self.valsChanged = True
         self._checkOkToApply()
