@@ -5,6 +5,9 @@
 import abc
 import numpy as np
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
+from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
+    NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
+    ZMIN_INDEX, ZMAX_INDEX
 
 class AbstractXrayutilitiesDataSource:
     __metaclass__ = abc.ABCMeta
@@ -237,20 +240,26 @@ class AbstractXrayutilitiesDataSource:
         '''
         Return the boundaries for all data in all availableScans
         '''
-        overallXmin = float("Infinity")
-        overallXmax = float("-Infinity")
-        overallYmin = float("Infinity")
-        overallYmax = float("-Infinity")
-        overallZmin = float("Infinity")
-        overallZmax = float("-Infinity")
+        overallXmin = float(POSITIVE_INFINITY)
+        overallXmax = float(NEGATIVE_INFINITY)
+        overallYmin = float(POSITIVE_INFINITY)
+        overallYmax = float(NEGATIVE_INFINITY)
+        overallZmin = float(POSITIVE_INFINITY)
+        overallZmax = float(NEGATIVE_INFINITY)
         
         for scan in self.availableScans:
-            overallXmin = min( overallXmin, np.min(self.imageBounds[scan][0]))
-            overallXmax = max( overallXmax, np.max(self.imageBounds[scan][1]))
-            overallYmin = min( overallYmin, np.min(self.imageBounds[scan][2]))
-            overallYmax = max( overallYmax, np.max(self.imageBounds[scan][3]))
-            overallZmin = min( overallZmin, np.min(self.imageBounds[scan][4]))
-            overallZmax = max( overallZmax, np.max(self.imageBounds[scan][5]))
+            overallXmin = min( overallXmin, \
+                               np.min(self.imageBounds[scan][XMIN_INDEX]))
+            overallXmax = max( overallXmax, \
+                               np.max(self.imageBounds[scan][XMAX_INDEX]))
+            overallYmin = min( overallYmin, \
+                               np.min(self.imageBounds[scan][YMIN_INDEX]))
+            overallYmax = max( overallYmax, \
+                               np.max(self.imageBounds[scan][YMAX_INDEX]))
+            overallZmin = min( overallZmin, \
+                               np.min(self.imageBounds[scan][ZMIN_INDEX]))
+            overallZmax = max( overallZmax, \
+                               np.max(self.imageBounds[scan][ZMAX_INDEX]))
                     
         return overallXmin, overallXmax, overallYmin, overallYmax, \
                overallZmin, overallZmax
@@ -302,18 +311,18 @@ class AbstractXrayutilitiesDataSource:
         Check to see if the input boundaries have area that lie within the 
         range boundaries specified for analysis.  True if yes, False if no.
         '''
-        return ((xmin >= self.rangeBounds[0] and \
-                 xmin <= self.rangeBounds[1]) or \
-                (xmax >= self.rangeBounds[0] and \
-                 xmax <= self.rangeBounds[1])) and \
-                ((ymin >= self.rangeBounds[2] and \
-                  ymin <= self.rangeBounds[3]) or \
-                (ymax >= self.rangeBounds[2] and \
-                 ymax <= self.rangeBounds[3])) and \
-                ((zmin >= self.rangeBounds[4] and \
-                  zmin <= self.rangeBounds[5]) or \
-                (zmax >= self.rangeBounds[4] and \
-                 zmax <= self.rangeBounds[5]))
+        return ((xmin >= self.rangeBounds[XMIN_INDEX] and \
+                 xmin <= self.rangeBounds[XMAX_INDEX]) or \
+                (xmax >= self.rangeBounds[XMIN_INDEX] and \
+                 xmax <= self.rangeBounds[XMAX_INDEX])) and \
+                ((ymin >= self.rangeBounds[YMIN_INDEX] and \
+                  ymin <= self.rangeBounds[YMAX_INDEX]) or \
+                (ymax >= self.rangeBounds[YMIN_INDEX] and \
+                 ymax <= self.rangeBounds[YMAX_INDEX])) and \
+                ((zmin >= self.rangeBounds[ZMIN_INDEX] and \
+                  zmin <= self.rangeBounds[ZMAX_INDEX]) or \
+                (zmax >= self.rangeBounds[ZMIN_INDEX] and \
+                 zmax <= self.rangeBounds[ZMAX_INDEX]))
                
     @abc.abstractmethod
     def loadSource(self, mapHKL=False):
@@ -334,12 +343,12 @@ class AbstractXrayutilitiesDataSource:
             inUse = []
             for i in xrange(len(self.imageBounds[scan][0])):
                 bounds = self.imageBounds[scan]
-                if self.inBounds(bounds[0][i], \
-                                 bounds[1][i], \
-                                 bounds[2][i], \
-                                 bounds[3][i], \
-                                 bounds[4][i], \
-                                 bounds[5][i]):
+                if self.inBounds(bounds[XMIN_INDEX][i], \
+                                 bounds[XMAX_INDEX][i], \
+                                 bounds[YMIN_INDEX][i], \
+                                 bounds[YMAX_INDEX][i], \
+                                 bounds[ZMIN_INDEX][i], \
+                                 bounds[ZMAX_INDEX][i]):
                     inUse.append(True)
                 else:
                     inUse.append(False)

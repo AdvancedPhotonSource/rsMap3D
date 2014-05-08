@@ -13,7 +13,7 @@ class PoleMapTransform3D(AbstractTransform3D):
     '''
     Transform axes for sterographic projection.
     '''
-    def __init__(self, projectionDirection=[0,0,1]):
+    def __init__(self, projectionDirection=POS_Z_DIRECTION):
         self.projectionDirection = projectionDirection
     
     def do3DTransform(self, axis1Data, axis2Data, axis3Data):
