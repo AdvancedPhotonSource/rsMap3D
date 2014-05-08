@@ -23,6 +23,15 @@ from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
     RSMap3DException
 from rsMap3D.gui.qtsignalstrings import CURRENT_TAB_CHANGED
+from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
+    DONE_LOADING_SIGNAL, RANGE_CHANGED_SIGNAL, PROCESS_SIGNAL,\
+    CANCEL_PROCESS_SIGNAL, FILE_ERROR_SIGNAL, PROCESS_ERROR_SIGNAL,\
+    BLOCK_TABS_FOR_LOAD_SIGNAL, UNBLOCK_TABS_FOR_LOAD_SIGNAL,\
+    BLOCK_TABS_FOR_PROCESS_SIGNAL, UNBLOCK_TABS_FOR_PROCESS_SIGNAL,\
+    SET_PROCESS_RUN_OK_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
+    SET_PROCESS_CANCEL_OK_SIGNAL, SET_SCAN_LOAD_CANCEL_SIGNAL,\
+    LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL,\
+    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL
 
 class MainDialog(qtGui.QMainWindow):
     '''
@@ -53,74 +62,72 @@ class MainDialog(qtGui.QMainWindow):
 
         #Connect signals
         self.connect(self.fileForm, \
-                     qtCore.SIGNAL("loadFile"), \
+                     qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
                      self.spawnLoadThread)
         self.connect(self.fileForm, \
-                     qtCore.SIGNAL("cancelLoadFile"), \
+                     qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
                      self.cancelLoadThread)
         self.connect(self.scanForm, \
-                     qtCore.SIGNAL("doneLoading"), \
+                     qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
                      self.setupRanges)
         self.connect(self.dataRange, \
-                     qtCore.SIGNAL("rangeChanged"), self.setScanRanges)
+                     qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), \
+                     self.setScanRanges)
         self.connect(self.tabs, \
                      qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
                      self.tabChanged)
         self.connect(self.processScans, \
-                     qtCore.SIGNAL("process"), \
+                     qtCore.SIGNAL(PROCESS_SIGNAL), \
                      self.spawnProcessThread)
         self.connect(self.processScans, \
-                     qtCore.SIGNAL("cancelProcess"), \
+                     qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL), \
                      self.stopMapper)
         self.connect(self, \
-                     qtCore.SIGNAL("fileError"), \
+                     qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
                      self.showFileError)
         self.connect(self, \
-                     qtCore.SIGNAL("processError"), \
+                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                      self.showProcessError)
         self.connect(self.processScans, \
-                     qtCore.SIGNAL("processError"), \
+                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                      self.showProcessError)
         
         self.connect(self, \
-                     qtCore.SIGNAL("blockTabsForLoad"), \
+                     qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
                      self.blockTabsForLoad)
         self.connect(self, \
-                     qtCore.SIGNAL("unblockTabsForLoad"), \
+                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL), \
                      self.unblockTabsForLoad)
         self.connect(self, \
-                     qtCore.SIGNAL("blockTabsForProcess"), \
+                     qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL), \
                      self.blockTabsForProcess)
         self.connect(self, \
-                     qtCore.SIGNAL("unblockTabsForProcess"), \
+                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL), \
                      self.unblockTabsForProcess)
         self.connect(self, \
-                     qtCore.SIGNAL("setProcessRunOK"), \
+                     qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL), \
                      self.processScans.setRunOK)
         self.connect(self, \
-                     qtCore.SIGNAL("setProcessCancelOK"), \
+                     qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL), \
                      self.processScans.setCancelOK)
         self.connect(self, \
-                     qtCore.SIGNAL("setScanLoadOK"), \
+                     qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
                      self.fileForm.setLoadOK)
         self.connect(self, \
-                     qtCore.SIGNAL("setScanLoadCancelOK"), \
+                     qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
                      self.fileForm.setCancelOK)
         self.connect(self, \
-                     qtCore.SIGNAL("loadDataSourceToScanForm"), \
+                     qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL), \
                      self.loadDataSourceToScanForm)
         self.connect(self.scanForm, \
-                     qtCore.SIGNAL("showRangeBounds"),
+                     qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL),
                      self.dataExtentView.showRangeBounds)
         self.connect(self.scanForm, \
-                     qtCore.SIGNAL("clearRenderWindow"),
+                     qtCore.SIGNAL(CLEAR_RENDER_WINDOW_SIGNAL),
                      self.dataExtentView.clearRenderWindow)
         self.connect(self.scanForm, \
-                     qtCore.SIGNAL("renderBounds"),
+                     qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL),
                      self.dataExtentView.renderBounds)
-#        self.connect(self, \
-#                     qtCore.SIGNAL("destroyed(QObject *)"), \
-#                     self.cleanup)
         
     def blockTabsForLoad(self):
         '''
@@ -158,7 +165,7 @@ class MainDialog(qtGui.QMainWindow):
         '''
         Set up to load the scan file
         '''
-        self.emit(qtCore.SIGNAL("blockTabsForLoad"))
+        self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
         if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
@@ -190,33 +197,33 @@ class MainDialog(qtGui.QMainWindow):
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
             print "LoadCanceled"
-            self.emit(qtCore.SIGNAL("blockTabsForLoad"))
-            self.emit(qtCore.SIGNAL("setScanLoadOK"))
+            self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
+            self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
             #self.fileForm.setLoadOK()
             return
         except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return
         except DetectorConfigException as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return
         except InstConfigException as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return
         except Transform3DException as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return 
         except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return
         except Exception as e:
-            self.emit(qtCore.SIGNAL("fileError"), str(e))
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             print traceback.format_exc()
             return
         
             
-        self.emit(qtCore.SIGNAL("loadDataSourceToScanForm"))
-        self.emit(qtCore.SIGNAL("setScanLoadOK"))
+        self.emit(qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL))
+        self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
         
     def spawnLoadThread(self):
         '''
@@ -252,7 +259,7 @@ class MainDialog(qtGui.QMainWindow):
                                  overallZmin, \
                                  overallZmax)
         self.setScanRanges()
-        self.emit(qtCore.SIGNAL("unblockTabsForLoad"))
+        self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL))
         
     def setScanRanges(self):
         '''
@@ -271,7 +278,7 @@ class MainDialog(qtGui.QMainWindow):
         '''
         message = qtGui.QMessageBox()
         message.warning(self, \
-                            "Load Scanfile Warning", \
+                            "Load Scan File Warning", \
                              str(error))
         self.fileForm.setLoadOK()
               
@@ -286,22 +293,22 @@ class MainDialog(qtGui.QMainWindow):
         '''
         Tell the processScans tab to launch the mapper.
         '''
-        self.emit(qtCore.SIGNAL("blockTabsForProcess"))
-        self.emit(qtCore.SIGNAL("setProcessCancelOK"))
+        self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL))
+        self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
             self.processScans.runMapper(self.dataSource, self.transform)
         except ProcessCanceledException:
-            self.emit(qtCore.SIGNAL("unblockTabsForProcess"))
+            self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         except RSMap3DException as e:
-            self.emit(qtCore.SIGNAL("processError"), str(e))
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), str(e))
             print traceback.format_exc()
             return
         except Exception as e:
-            self.emit(qtCore.SIGNAL("processError"), str(e))
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), str(e))
             print traceback.format_exc()
             return
-        self.emit(qtCore.SIGNAL("setProcessRunOK"))
-        self.emit(qtCore.SIGNAL("unblockTabsForProcess"))
+        self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
+        self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         
     def showProcessError(self, error):
         '''
@@ -311,9 +318,9 @@ class MainDialog(qtGui.QMainWindow):
         '''
         message = qtGui.QMessageBox()
         message.warning(self, \
-                            "Processing Scanfile Warning", \
+                            "Processing Scan File Warning", \
                              str(error))
-        self.emit(qtCore.SIGNAL("setProcessRunOK"))
+        self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
               
     def stopMapper(self):
         '''
