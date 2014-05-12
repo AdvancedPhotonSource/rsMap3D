@@ -10,6 +10,8 @@ import sys
 
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import vtk
+from rsMap3D.gui.rsm3dcommonstrings import XMIN_INDEX, XMAX_INDEX, YMAX_INDEX,\
+    YMIN_INDEX, ZMIN_INDEX
 
 class DataExtentView(qtGui.QFrame):
     '''
@@ -61,6 +63,7 @@ class DataExtentView(qtGui.QFrame):
     def renderBounds(self, bounds):
         '''
         Render a box with boundaries from the given input
+        :param bounds: Tuple holding max/min axes values
         '''
         cube = vtk.vtkOutlineSource()
         cube.SetBounds(bounds)
@@ -77,13 +80,14 @@ class DataExtentView(qtGui.QFrame):
     def showRangeBounds(self, rangeBounds):
         '''
         Display axes showing the range boundaries
+        :params rangeBounds: min/max values for the axes to be shown.
         '''
         axes = vtk.vtkCubeAxesActor()
         #rangeBounds = self.dataSource.getRangeBounds()
         
-        axes.SetBounds((rangeBounds[0], rangeBounds[1], \
-                        rangeBounds[2], rangeBounds[3], \
-                        rangeBounds[4], rangeBounds[5]))
+        axes.SetBounds((rangeBounds[XMIN_INDEX], rangeBounds[XMAX_INDEX], \
+                        rangeBounds[YMIN_INDEX], rangeBounds[YMAX_INDEX], \
+                        rangeBounds[ZMIN_INDEX], rangeBounds[XMAX_INDEX]))
         axes.SetCamera(self.ren.GetActiveCamera())
         self.ren.AddActor(axes)
         self.ren.ResetCamera()

@@ -185,6 +185,12 @@ class DataRange(qtGui.QDialog):
     def setRanges(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         Allow ranges to be set externally
+        :param xmin: minimum value in x direction
+        :param xmax: maximum value in x direction
+        :param ymin: minimum value in y direction
+        :param ymax: maximum value in y direction
+        :param zmin: minimum value in z direction
+        :param zmax: maximum value in z direction
         '''
         self.ranges = (xmin, xmax, ymin, ymax, zmin, zmax)
         self.xminText.setText(str(xmin))

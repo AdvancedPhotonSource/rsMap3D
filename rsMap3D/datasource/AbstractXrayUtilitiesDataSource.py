@@ -180,12 +180,6 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.filterScaleFactor
 
-    @abc.abstractmethod
-    def getImage(self, index1=0, index2=0):
-        '''
-        '''
-        return None
-    
     def getImageBounds(self, scan):
         '''
         return the boundaries for images in the scan
