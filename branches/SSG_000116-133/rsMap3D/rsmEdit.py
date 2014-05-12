@@ -154,10 +154,14 @@ class MainDialog(qtGui.QMainWindow):
         
         
     def closeEvent(self, event):
+        '''
+        process event on window close
+        '''
         self.dataExtentView.vtkMain.close()
         
     def loadDataSourceToScanForm(self):
         '''
+        When scan is done loading, load the data to the scan form.
         '''
         self.scanForm.loadScanFile(self.dataSource)        
         
