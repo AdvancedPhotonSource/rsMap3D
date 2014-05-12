@@ -584,7 +584,9 @@ class FileForm(qtGui.QDialog):
         
     def getDetectorROI(self, rois=EMPTY_STR):
         '''
-        Return the detector ROI as a list
+        :param rois: a string list with the roi values
+        :return: The detector ROI as a list
+        :raises RSMap3DException: if the string is not a 4 element list
         '''
         if rois == EMPTY_STR:
             roiStrings = str(self.detROITxt.text()).split(COMMA_STR)
@@ -602,7 +604,7 @@ class FileForm(qtGui.QDialog):
     
     def getPixelsToAverage(self):
         '''
-        Return the pixels to average as a list
+        :return: the pixels to average as a list
         '''
         pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
         pixels = []
@@ -615,6 +617,7 @@ class FileForm(qtGui.QDialog):
         '''
         If the output is selected to be a simple grid map type then allow
         the user to select HKL as an output.
+        :param typeStr: String holding the outpu type
         '''
         if typeStr == self.SIMPLE_GRID_MAP_STR:
             self.hklCheckbox.setEnabled(True)
@@ -622,10 +625,11 @@ class FileForm(qtGui.QDialog):
             self.hklCheckbox.setDisabled(True)
             self.hklCheckbox.setCheckState(False)
             
-    def pixAvgTxtChanged(self,text):
+    def pixAvgTxtChanged(self, text):
         '''
         Check to make sure the text for pix to average is valid and indicate 
         by a color change 
+        :param text: new values as a text list 
         '''
         if self.pixAvgValid(text):
             self.pixAvgTxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % BLACK)
@@ -636,6 +640,7 @@ class FileForm(qtGui.QDialog):
     def pixAvgValid(self, text):
         '''
         Check to make sure that the pixAvgText is valid
+        :param text: new values as a text list 
         '''
         rxPixAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_2)
         validator = qtGui.QRegExpValidator(rxPixAvg, None)
@@ -685,6 +690,9 @@ class FileForm(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value, maxValue)
         
     def updateProjectionDirection(self):
+        '''
+        update the stored value for the projection direction
+        '''
         instConfig = \
             InstForXrayutilitiesReader(self.instConfigTxt.text())
         self.projectionDirection = instConfig.getProjectionDirection()

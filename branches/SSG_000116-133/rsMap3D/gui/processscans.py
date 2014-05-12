@@ -81,6 +81,9 @@ class ProcessScans(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
         
     def _createControlBox(self):
+        '''
+        Create box wih the GUI controls Run & Cancel
+        '''
         controlBox = qtGui.QGroupBox()
         controlLayout = qtGui.QGridLayout()
         row = 0
@@ -243,6 +246,7 @@ class ProcessScans(qtGui.QDialog):
     def setOutFileName(self, name):
         '''
         Write a filename to the text widget and to the stored output file name
+        :param name: Name of output file
         '''
         self.outFileTxt.setText(name)
         self.outputFileName = name
@@ -250,12 +254,15 @@ class ProcessScans(qtGui.QDialog):
     def setProgress(self, value):
         '''
         Set the value in the progress bar
+        :param value: value to write to the progress bar
         '''
         self.progressBar.setValue(value)
         
     def setProgressLimits(self, progressMin, progressMax):
         '''
         Set the limits on the progress bar.
+        :param progressMin: Minimum value to store in the progress bar
+        :param progressMax: Maximum value to store in the progress bar
         '''
         self.progressBar.setMinimum(progressMin)
         self.progressBar.setMaximum(progressMax)
@@ -278,6 +285,7 @@ class ProcessScans(qtGui.QDialog):
     def updateProgress(self, value):
         '''
         Send signal to update the progress bar.
+        :param value: value to be put on the progress bar.
         '''
         self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value)
         

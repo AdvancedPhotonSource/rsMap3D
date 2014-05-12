@@ -107,16 +107,22 @@ class ScanForm(qtGui.QDialog):
         '''
         Add a value to a cell in the table setting the value to display and 
         the foreground color
+        :param value:  Value to be converted to a string for addition to the 
+        table
+        :param row:  Row to place the  value
+        :param column: Column to place the value
+        :param coloredBrush:  A colored brush  to use to affect a color change
         '''
         item = qtGui.QTableWidgetItem(str(value))
         item.setForeground(coloredBrush)
         item.setFlags(item.flags() & (~qtCore.Qt.ItemIsEditable))
         self.detail.setItem(row, column, item)
         
-    def checkItemChanged(self,item):
+    def checkItemChanged(self, item):
         '''
         Change whether a row is selected or not and register if the associated
         image will be used in analysis
+        :param item: checkbox item to check state of
         '''
         scanNo = self.getSelectedScan()
         row = item.row()
@@ -150,6 +156,7 @@ class ScanForm(qtGui.QDialog):
     def loadScanFile(self, dataSource):
         '''
         Load information from the selected dataSource into this form.
+        :param dataSource: source of scan data that will populate the scan form
         '''
         self.dataSource = dataSource
         self.scanList.clear()
@@ -168,12 +175,6 @@ class ScanForm(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(DONE_LOADING_SIGNAL))
         
    
-    def renderBounds(self, bounds):
-        '''
-        Render a box with boundaries from the given input
-        '''
-        self.emit(qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL), bounds)
-        
     def renderOverallQs(self):
         '''
         Render bounds for all selected images from all available scans 
@@ -192,8 +193,9 @@ class ScanForm(qtGui.QDialog):
             #display scan 
             for i in xrange(0, len(minx)-1,step ):
                 if imageToBeUsed[scan][i]:
-                    self.renderBounds((minx[i], maxx[i], miny[i], \
-                                      maxy[i], minz[i], maxz[i]))
+                    self.emit(qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL), \
+                              (minx[i], maxx[i], miny[i], \
+                               maxy[i], minz[i], maxz[i]))
         self.emit(qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL), \
                   self.dataSource.getRangeBounds())
                                 
@@ -202,6 +204,7 @@ class ScanForm(qtGui.QDialog):
         When a scan is selected from the list, change the table to display 
         information about the images in that scan and call to to show the 
         bounds of the selected images in that scan.
+        :param item: item selected from scan list.  
         '''
         scanNo = int(item.text().split(' ')[0])
         self.showAngles(scanNo)
@@ -221,6 +224,7 @@ class ScanForm(qtGui.QDialog):
     def showAngles(self, scanNo):
         '''
         Display the angles associated with images in the scan in the table.
+        :param scanNo: scan number of the scan to show.
         '''
         angles = self.dataSource.getGeoAngles(self.dataSource.sd[scanNo], \
                                               self.dataSource.getAngles())
@@ -239,7 +243,7 @@ class ScanForm(qtGui.QDialog):
             self.detail.setItem(row, 0, checkItem)
             for i in xrange(len(angle)):
                 self.addValueToTable(angle[i], row, i+1, blackBrush)
-            row +=1
+            row += 1
         self.connect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
                     self.checkItemChanged)
 
@@ -247,6 +251,7 @@ class ScanForm(qtGui.QDialog):
         '''
         Display q max/min value for the image in the selected scan in the table
         and render the boundaries for those Q values.
+        :param scan: The scan whos data will be shown
         '''
         self.emit(qtCore.SIGNAL(CLEAR_RENDER_WINDOW_SIGNAL))
         redBrush = qtGui.QBrush()
@@ -268,8 +273,9 @@ class ScanForm(qtGui.QDialog):
                 self.addValueToTable(ymax[row], row, numAngles + 4, blackBrush)
                 self.addValueToTable(zmin[row], row, numAngles + 5, blackBrush)
                 self.addValueToTable(zmax[row], row, numAngles + 6, blackBrush)
-                self.renderBounds((xmin[row], xmax[row], ymin[row], ymax[row], \
-                    zmin[row], zmax[row]))
+                self.emit(qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL), \
+                          (xmin[row], xmax[row], ymin[row], ymax[row], \
+                           zmin[row], zmax[row]))
                 checkItem = self.detail.item(row,0)
                 checkItem.setCheckState(qtCore.Qt.Checked)
             else:
@@ -292,8 +298,9 @@ class ScanForm(qtGui.QDialog):
         self.ymaxText.setText(str(scanYmax))
         self.zminText.setText(str(scanZmin))
         self.zmaxText.setText(str(scanZmax))
-        self.renderBounds((scanXmin, scanXmax, scanYmin, scanYmax, \
-            scanZmin, scanZmax))
+        self.emit(qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL), \
+                  (scanXmin, scanXmax, scanYmin, scanYmax, \
+                   scanZmin, scanZmax))
         self.emit(qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL), (scanXmin, scanXmax, scanYmin, \
                                               scanYmax, scanZmin, scanZmax))
         self.connect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
