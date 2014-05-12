@@ -8,7 +8,6 @@ import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
 from rsMap3D.mappers.gridmapper import QGridMapper
-from rsMap3D.mappers.polemapper import PoleFigureMapper
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import CANCEL_PROCESS_SIGNAL,\
     UPDATE_PROGRESS_SIGNAL, SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
@@ -22,9 +21,6 @@ class ProcessScans(qtGui.QDialog):
     This class presents a form to select to start analysis.  This display
     allows switching between Grid map and pole figure.
     '''
-    POLE_MAP_STR = "Pole Map"
-    GRID_MAP_STR = "Grid Map"
-    
     def __init__(self, parent=None):
         '''
         Constructor - Layout widgets on the page & link up actions.
@@ -118,13 +114,6 @@ class ProcessScans(qtGui.QDialog):
         dataBox = qtGui.QGroupBox()
         dataLayout = qtGui.QGridLayout()
         row = 0       
-#        label = QLabel("Output Type")        
-#        dataLayout.addWidget(label, row, 0)
-        self.outTypeChooser = qtGui.QComboBox()
-        self.outTypeChooser.addItem(self.GRID_MAP_STR)
-        self.outTypeChooser.addItem(self.POLE_MAP_STR)
-#        dataLayout.addWidget(self.outTypeChooser, row,1)
-#        row += 1
 
         label = qtGui.QLabel("Grid Dimensions")
         dataLayout.addWidget(label, row,0)
@@ -230,19 +219,12 @@ class ProcessScans(qtGui.QDialog):
                                                "%s.vti" %dataSource.projectName)
             self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
-            if (self.outTypeChooser.currentText() == self.GRID_MAP_STR):
-                self.mapper = QGridMapper(dataSource, \
-                                         self.outputFileName, \
-                                         nx=nx, ny=ny, nz=nz,
-                                         transform = transform)
-                self.mapper.setProgressUpdater(self.updateProgress)
-                self.mapper.doMap()
-            else:
-                self.mapper = PoleFigureMapper(dataSource, \
-                                              self.outputFileName, \
-                                              nx=nx, ny=ny, nz=nz, \
-                                              transform = transform)
-                self.mapper.doMap()
+            self.mapper = QGridMapper(dataSource, \
+                                     self.outputFileName, \
+                                     nx=nx, ny=ny, nz=nz,
+                                     transform = transform)
+            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.doMap()
         else:
             self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                          "The specified directory \n" + \
@@ -271,12 +253,12 @@ class ProcessScans(qtGui.QDialog):
         '''
         self.progressBar.setValue(value)
         
-    def setProgressLimits(self, min, max):
+    def setProgressLimits(self, progressMin, progressMax):
         '''
         Set the limits on the progress bar.
         '''
-        self.progressBar.setMinimum(min)
-        self.progressBar.setMaximum(max)
+        self.progressBar.setMinimum(progressMin)
+        self.progressBar.setMaximum(progressMax)
         
     def setRunOK(self):
         '''
