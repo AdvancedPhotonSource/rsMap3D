@@ -28,6 +28,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
     Class to load data from spec file and configuration xml files from 
     for the way that data is collected at sector 33.
+    :members
     '''
 
 
@@ -40,6 +41,14 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                  **kwargs):
         '''
         Constructor
+        :param projectDir: Directory holding the project file to open
+        :param projectName: First part of file name for the project
+        :param projectExt: File extension for the project file.
+        :param instConfigFile: Full path to Instrument configuration file.
+        :param detConfigFile: Full path to the detector configuration file
+        :param kwargs: Assorted keyword arguments
+
+        :rtype: Sector33SpecDataSource
         '''
         super(Sector33SpecDataSource, self).__init__(**kwargs)
         self.projectDir = str(projectDir)
@@ -56,6 +65,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         '''
         Find the minimum/maximum q boundaries associated with each scan given 
         the angles, energy and UB matrix.
+        :param angles: A list of angles used for Q calculations
+        :param ub: sample UB matrix
+        :param en: Incident Endergy
         '''
         qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
                                           self.getDetectorCircleDirections(), 
@@ -107,7 +119,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
     def fixGeoAngles(self, scan, angles):
         '''
-        Fix the angles using a user selected function.  
+        Fix the angles using a user selected function.
+        :param scan: scan to set the angles for
+        :param angles: Array of angles to set for this scan  
         '''
         scanLine = scan.scan_command.split(' ') 
         scannedAngles = []
@@ -143,16 +157,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 #print primaryAngles[i]
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
         
-    def getImage(self):
-        '''
-        '''
-        return
-    
     def loadSource(self, mapHKL=False):
         '''
         This method does the work of loading data from the files.  This has been
         split off from the constructor to allow this to be threaded and later 
         canceled.
+        :param mapHKL: boolean to mark if the data should be mapped to HKL
         '''
         # Load up the instrument configuration file
         try:
@@ -319,6 +329,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         This function returns all of the geometry angles for the
         for the scan as a N-by-num_geo array, where N is the number of scan
         points and num_geo is the number of geometry motors.
+        :param scan: scan from which to retrieve the angles
+        :params angleNames: a list of names for the angles to be returned
         """
         geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
         for i, name in enumerate(angleNames):
@@ -334,6 +346,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                   referenceAngles = None):
         """
         Calculate the eulerian sample angles from the kappa stage angles.
+        :param primaryAngles:  list of sample axis numbers to be handled by 
+        the conversion
+        :param referenceAngles: list of reference angles to be used in angle 
+        conversion
         """
         
         keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY

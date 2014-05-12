@@ -46,7 +46,8 @@ class InstForXrayutilitiesReader():
         
     def getCircleAxisNumber(self, circle):
         '''
-        Return the Axis number for a given circle
+        :param circle: specifies the detector who's return value is requested
+        :return: The axis number for the given circle
         '''
         try:
             axisNumberStr = circle.attrib[AXIS_NUMBER]
@@ -58,13 +59,13 @@ class InstForXrayutilitiesReader():
         
     def getDetectorCircleDirections(self):
         '''
-        return circle directions for the detector circles 
+        :return: Circle directions for the detector circles 
         '''
-        return self.makeCircleDirections(self.getDetectorCircles())
+        return self._makeCircleDirections(self.getDetectorCircles())
         
     def getDetectorCircles(self):
         '''
-        Return the detector children as and element list.  If detector circles 
+        :return: The detector children as and element list.  If detector circles 
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
@@ -75,12 +76,13 @@ class InstForXrayutilitiesReader():
         
     def getDetectorCircleNames(self):
         '''
+        :return the name of the detector circles
         '''
-        return self.makeCircleNames(self.getDetectorCircles())
+        return self._makeCircleNames(self.getDetectorCircles())
         
     def getFilterName(self):
         '''
-        Return the filterName if included in config file.  Returns None if it
+        :return: The filterName if included in config file.  Returns None if it
         is not present. 
         '''
         name = self.root.find(FILTER_NAME)
@@ -91,7 +93,7 @@ class InstForXrayutilitiesReader():
     
     def getFilterScaleFactor(self):
         '''
-        Return the scale factor to be used with filterName if included in 
+        :return: The scale factor to be used with filterName if included in 
         config file.  Returns 1 if it is not present. 
         '''
         name = self.root.find(FILTER_NAME)
@@ -105,17 +107,18 @@ class InstForXrayutilitiesReader():
     
     def getInplaneReferenceDirection(self):
         '''
+        :return: The In-plane reference direction
         '''
         direction = \
             self.root.find(INPLANE_REFERENCE_DIRECTION)
         if direction == None:
             raise InstConfigException("Missing in-plane reference direction " + \
                                       "in instrument config file")
-        return self.makeReferenceDirection(direction )
+        return self._makeReferenceDirection(direction )
         
     def getMonitorName(self):
         '''
-        Return the monitorName if included in config file.  Returns None if it
+        :return: the monitorName if included in config file.  Returns None if it
         is not present. 
         '''
         name = self.root.find(MONITOR_NAME)
@@ -126,7 +129,7 @@ class InstForXrayutilitiesReader():
     
     def getMonitorScaleFactor(self):
         '''
-        Return the scale factor to be used with monitorName if included in 
+        :return: The scale factor to be used with monitorName if included in 
         config file.  Returns 1 if it is not present. 
         '''
         name = self.root.find(MONITOR_NAME)
@@ -140,30 +143,31 @@ class InstForXrayutilitiesReader():
     
     def getNumDetectorCircles(self):
         '''
-        return the number of circles associated with the detector
+        :return: the number of circles associated with the detector
         '''
         return int(self.root.find(DETECTOR_CIRCLES).attrib[NUM_CIRCLES])
     
     def getNumSampleCircles(self):
         '''
-        return the number of circles associated with the sample
+        :return: the number of circles associated with the sample
         '''
         return int(self.root.find(SAMPLE_CIRCLES).attrib[NUM_CIRCLES])
     
     def getPrimaryBeamDirection(self):
         '''
-        Get direction of primary beam
+        :return: The direction of primary beam
         '''
         direction = \
             self.root.find(PRIMARY_BEAM_DIRECTION)
         if direction == None:
             raise InstConfigException("Missing primary beam direction " + \
                                       "in instrument config file")
-        return self.makeReferenceDirection(direction )
+        return self._makeReferenceDirection(direction )
         
     def getProjectionDirection(self):
         '''
-        Get direction to be used for constructing Stereographic projections.
+        :return: The direction to be used for constructing Stereographic 
+        projections.
         '''
         
         direction = \
@@ -172,11 +176,11 @@ class InstForXrayutilitiesReader():
             message = PROJECTION_DIRECTION + \
                       " was not found in the instrument config file"
             raise InstConfigException(message)
-        return self.makeReferenceDirection(direction )
+        return self._makeReferenceDirection(direction )
         
     def getSampleAngleMappingCalcOnScannedRef(self):
         '''
-        Returns true to run mapping function only when a reference angle is 
+        :return: true to run mapping function only when a reference angle is 
         scanned 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
@@ -201,7 +205,7 @@ class InstForXrayutilitiesReader():
                 
     def getSampleAngleMappingFunctionName(self):
         '''
-        Retrieve the name of a function to be used in mapping 
+        :return: The name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
@@ -211,7 +215,7 @@ class InstForXrayutilitiesReader():
 
     def getSampleAngleMappingPrimaryAngles(self):
         '''
-        Retrieve the name of a function to be used in mapping 
+        :return: The name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
@@ -230,7 +234,7 @@ class InstForXrayutilitiesReader():
 
     def getSampleAngleMappingReferenceAngles(self):
         '''
-        Retrieve the name of a function to be used in mapping 
+        :return: the name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
@@ -251,12 +255,13 @@ class InstForXrayutilitiesReader():
 
     def getSampleCircleDirections(self):
         '''
+        :return: The sample circle directions
         '''
-        return self.makeCircleDirections(self.getSampleCircles())
+        return self._makeCircleDirections(self.getSampleCircles())
         
     def getSampleCircles(self):
         '''
-        Return the sample children as and element list.  If sample circles 
+        :return: The sample children as and element list.  If sample circles 
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
@@ -267,24 +272,25 @@ class InstForXrayutilitiesReader():
 
     def getSampleCircleNames(self):
         '''
-        return the names of the sample circles
+        :return: the Names of the sample circles
         '''
-        return self.makeCircleNames(self.getSampleCircles())
+        return self._makeCircleNames(self.getSampleCircles())
         
     def getSampleSurfaceNormalDirection(self):
         '''
-        return the sample surface normal direction as a list of 3 numbers
+        :return: The sample surface normal direction as a list of 3 numbers
         '''
         direction = \
             self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)
         if direction == None:
             raise InstConfigException("Missing sample surface normal " + \
                                       "direction in instrument config file")
-        return self.makeReferenceDirection(direction )
+        return self._makeReferenceDirection(direction )
         
-    def makeCircleDirections(self, circles):
+    def _makeCircleDirections(self, circles):
         '''
         Create a list of circle directions from the XML
+        :param circles: the XML representation of the circles
         '''
         data = []
         for circle in circles:
@@ -304,9 +310,10 @@ class InstForXrayutilitiesReader():
             directions.append(dataum[1])
         return directions
     
-    def makeCircleNames(self, circles):
+    def _makeCircleNames(self, circles):
         '''
         Create a list of circle names from the XML
+        :param circles: the XML representation of the circles
         '''
         data = []
         for circle in circles:
@@ -326,9 +333,10 @@ class InstForXrayutilitiesReader():
             names.append(dataum[1])
         return names
     
-    def makeReferenceDirection(self, direction):
+    def _makeReferenceDirection(self, direction):
         '''
         Create a list of reference directions from the XML
+        :param direction: the XML representation of the circle
         '''
         axes = direction.findall(REFERENCE_AXIS)
         
