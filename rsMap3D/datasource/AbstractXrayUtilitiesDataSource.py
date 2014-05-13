@@ -128,12 +128,6 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.detectorDimensions
     
-    def getDistanceToDetector(self):
-        '''
-        Return the distance from sample to detector
-        '''
-        return self.distanceToDetector
-    
     def getDetectorPixelDirection1(self):
         '''
         Return the direction of increasing pixels for the area detector first
@@ -160,11 +154,11 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.detectorROI
     
-    def getFlatFieldData(self):
+    def getDistanceToDetector(self):
         '''
-        Return image for the flat field correction
-        ''' 
-        return self.flatFieldData
+        Return the distance from sample to detector
+        '''
+        return self.distanceToDetector
     
     def getFilterName(self):
         '''
@@ -180,11 +174,11 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.filterScaleFactor
 
-    @abc.abstractmethod
-    def getImage(self, index1=0, index2=0):
+    def getFlatFieldData(self):
         '''
-        '''
-        return None
+        Return image for the flat field correction
+        ''' 
+        return self.flatFieldData
     
     def getImageBounds(self, scan):
         '''

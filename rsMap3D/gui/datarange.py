@@ -97,22 +97,6 @@ class DataRange(qtGui.QDialog):
             self._checkOkToApply)
         self.setLayout(layout)
         
-    def _initializeRanges(self):
-        '''
-        Private class to initialize ranges at +- infinity.  This sets values 
-        but puts them to bad values on purpose.
-        '''
-        self.ranges = (float(POSITIVE_INFINITY), \
-                       float(NEGATIVE_INFINITY), \
-                        float(POSITIVE_INFINITY), \
-                        float(NEGATIVE_INFINITY), \
-                        float(POSITIVE_INFINITY), \
-                        float(NEGATIVE_INFINITY))
-        self.xValsOk = True
-        self.yValsOk = True
-        self.zValsOk = True
-        self.valsChanged = False
-        
     def _applyRange(self):
         '''
         Apply changes by recording them as current values and signaling that 
@@ -169,6 +153,22 @@ class DataRange(qtGui.QDialog):
         '''
         return self.ranges
         
+    def _initializeRanges(self):
+        '''
+        Private class to initialize ranges at +- infinity.  This sets values 
+        but puts them to bad values on purpose.
+        '''
+        self.ranges = (float(POSITIVE_INFINITY), \
+                       float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY))
+        self.xValsOk = True
+        self.yValsOk = True
+        self.zValsOk = True
+        self.valsChanged = False
+        
     def _resetRange(self):
         '''
         Reset the ranges to the last set of applied values.
@@ -185,6 +185,12 @@ class DataRange(qtGui.QDialog):
     def setRanges(self, xmin, xmax, ymin, ymax, zmin, zmax):
         '''
         Allow ranges to be set externally
+        :param xmin: minimum value in x direction
+        :param xmax: maximum value in x direction
+        :param ymin: minimum value in y direction
+        :param ymax: maximum value in y direction
+        :param zmin: minimum value in z direction
+        :param zmax: maximum value in z direction
         '''
         self.ranges = (xmin, xmax, ymin, ymax, zmin, zmax)
         self.xminText.setText(str(xmin))

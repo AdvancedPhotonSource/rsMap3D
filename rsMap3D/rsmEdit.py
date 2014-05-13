@@ -63,47 +63,47 @@ class MainDialog(qtGui.QMainWindow):
         #Connect signals
         self.connect(self.fileForm, \
                      qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
-                     self.spawnLoadThread)
+                     self._spawnLoadThread)
         self.connect(self.fileForm, \
                      qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
-                     self.cancelLoadThread)
+                     self._cancelLoadThread)
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
-                     self.setupRanges)
+                     self._setupRanges)
         self.connect(self.dataRange, \
                      qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), \
-                     self.setScanRanges)
+                     self._setScanRanges)
         self.connect(self.tabs, \
                      qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
-                     self.tabChanged)
+                     self._tabChanged)
         self.connect(self.processScans, \
                      qtCore.SIGNAL(PROCESS_SIGNAL), \
-                     self.spawnProcessThread)
+                     self._spawnProcessThread)
         self.connect(self.processScans, \
                      qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL), \
-                     self.stopMapper)
+                     self._stopMapper)
         self.connect(self, \
                      qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-                     self.showFileError)
+                     self._showFileError)
         self.connect(self, \
                      qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                     self.showProcessError)
+                     self._showProcessError)
         self.connect(self.processScans, \
                      qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                     self.showProcessError)
+                     self._showProcessError)
         
         self.connect(self, \
                      qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
-                     self.blockTabsForLoad)
+                     self._blockTabsForLoad)
         self.connect(self, \
                      qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL), \
-                     self.unblockTabsForLoad)
+                     self._unblockTabsForLoad)
         self.connect(self, \
                      qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self.blockTabsForProcess)
+                     self._blockTabsForProcess)
         self.connect(self, \
                      qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self.unblockTabsForProcess)
+                     self._unblockTabsForProcess)
         self.connect(self, \
                      qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL), \
                      self.processScans.setRunOK)
@@ -118,7 +118,7 @@ class MainDialog(qtGui.QMainWindow):
                      self.fileForm.setCancelOK)
         self.connect(self, \
                      qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL), \
-                     self.loadDataSourceToScanForm)
+                     self._loadDataSourceToScanForm)
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL),
                      self.dataExtentView.showRangeBounds)
@@ -129,7 +129,7 @@ class MainDialog(qtGui.QMainWindow):
                      qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL),
                      self.dataExtentView.renderBounds)
         
-    def blockTabsForLoad(self):
+    def _blockTabsForLoad(self):
         '''
         Disable tabs while loading
         '''
@@ -137,7 +137,7 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
         
-    def blockTabsForProcess(self):
+    def _blockTabsForProcess(self):
         '''
         disable tabs while processing
         '''
@@ -146,7 +146,7 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.fileTabIndex, False)
         
         
-    def cancelLoadThread(self):
+    def _cancelLoadThread(self):
         '''
         Let the data source know that a cancel has been requested.
         '''
@@ -154,10 +154,14 @@ class MainDialog(qtGui.QMainWindow):
         
         
     def closeEvent(self, event):
+        '''
+        process event on window close
+        '''
         self.dataExtentView.vtkMain.close()
         
-    def loadDataSourceToScanForm(self):
+    def _loadDataSourceToScanForm(self):
         '''
+        When scan is done loading, load the data to the scan form.
         '''
         self.scanForm.loadScanFile(self.dataSource)        
         
@@ -225,70 +229,6 @@ class MainDialog(qtGui.QMainWindow):
         self.emit(qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL))
         self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
         
-    def spawnLoadThread(self):
-        '''
-        Spawn a new thread to load the scan so that scan may be canceled later 
-        and so that this does not interfere with the GUI operation.
-        '''
-        self.fileForm.setCancelOK()
-        self.loadThread = LoadScanThread(self, parent=None)
-        self.loadThread.start()
-        
-    def spawnProcessThread(self):
-        '''
-        Spawn a new thread to load the scan so that scan may be canceled later 
-        and so that this does not interfere with the GUI operation.
-        '''
-        self.processScans.setProgressLimits(1, 
-                                len(self.dataSource.getAvailableScans()))
-        self.processScans.setCancelOK()
-        self.processThread = ProcessScanThread(self, parent=None)
-        self.processThread.start()
-        
-    def setupRanges(self):
-        '''
-        Get the overall data extent from the data source and set these values
-        in the dataRange tab.  
-        '''
-        overallXmin, overallXmax, overallYmin, overallYmax, \
-               overallZmin, overallZmax = self.dataSource.getOverallRanges()
-        self.dataRange.setRanges(overallXmin, \
-                                 overallXmax, \
-                                 overallYmin, \
-                                 overallYmax, \
-                                 overallZmin, \
-                                 overallZmax)
-        self.setScanRanges()
-        self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL))
-        
-    def setScanRanges(self):
-        '''
-        Get the data range from the dataRange tab and set the bounds in this 
-        class.  Tell scanForm tab to render the Qs for all scans.
-        '''
-        ranges = self.dataRange.getRanges()
-        self.dataSource.setRangeBounds(ranges)
-        self.scanForm.renderOverallQs()
-
-    def showFileError(self, error):
-        '''
-        Show any errors from file loading in a message dialog.  When done, 
-        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
-        inactive
-        '''
-        message = qtGui.QMessageBox()
-        message.warning(self, \
-                            "Load Scan File Warning", \
-                             str(error))
-        self.fileForm.setLoadOK()
-              
-    def tabChanged(self, index):
-        '''
-        When changing to the data range tab, display all qs from all scans.
-        '''
-        if str(self.tabs.tabText(index)) == "Data Range":
-            self.scanForm.renderOverallQs()
-                                        
     def runMapper(self):
         '''
         Tell the processScans tab to launch the mapper.
@@ -310,7 +250,44 @@ class MainDialog(qtGui.QMainWindow):
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
         self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         
-    def showProcessError(self, error):
+    def _setupRanges(self):
+        '''
+        Get the overall data extent from the data source and set these values
+        in the dataRange tab.  
+        '''
+        overallXmin, overallXmax, overallYmin, overallYmax, \
+               overallZmin, overallZmax = self.dataSource.getOverallRanges()
+        self.dataRange.setRanges(overallXmin, \
+                                 overallXmax, \
+                                 overallYmin, \
+                                 overallYmax, \
+                                 overallZmin, \
+                                 overallZmax)
+        self._setScanRanges()
+        self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL))
+        
+    def _setScanRanges(self):
+        '''
+        Get the data range from the dataRange tab and set the bounds in this 
+        class.  Tell scanForm tab to render the Qs for all scans.
+        '''
+        ranges = self.dataRange.getRanges()
+        self.dataSource.setRangeBounds(ranges)
+        self.scanForm.renderOverallQs()
+
+    def _showFileError(self, error):
+        '''
+        Show any errors from file loading in a message dialog.  When done, 
+        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
+        inactive
+        '''
+        message = qtGui.QMessageBox()
+        message.warning(self, \
+                            "Load Scan File Warning", \
+                             str(error))
+        self.fileForm.setLoadOK()
+              
+    def _showProcessError(self, error):
         '''
         Show any errors from file processing in a message dialog.  When done, 
         toggle Load and Cancel buttons in file tab to Load Active/Cancel 
@@ -322,13 +299,40 @@ class MainDialog(qtGui.QMainWindow):
                              str(error))
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
               
-    def stopMapper(self):
+    def _spawnLoadThread(self):
+        '''
+        Spawn a new thread to load the scan so that scan may be canceled later 
+        and so that this does not interfere with the GUI operation.
+        '''
+        self.fileForm.setCancelOK()
+        self.loadThread = LoadScanThread(self, parent=None)
+        self.loadThread.start()
+        
+    def _spawnProcessThread(self):
+        '''
+        Spawn a new thread to load the scan so that scan may be canceled later 
+        and so that this does not interfere with the GUI operation.
+        '''
+        self.processScans.setProgressLimits(1, 
+                                len(self.dataSource.getAvailableScans()))
+        self.processScans.setCancelOK()
+        self.processThread = ProcessScanThread(self, parent=None)
+        self.processThread.start()
+        
+    def _stopMapper(self):
         '''
         Tell the processScans tab to stop the mapper.
         '''
-        self.processScans.stopMapper()
+        self.processScans._stopMapper()
         
-    def unblockTabsForLoad(self):
+    def _tabChanged(self, index):
+        '''
+        When changing to the data range tab, display all qs from all scans.
+        '''
+        if str(self.tabs.tabText(index)) == "Data Range":
+            self.scanForm.renderOverallQs()
+                                        
+    def _unblockTabsForLoad(self):
         '''
         enable tabs when done loading
         '''
@@ -336,7 +340,7 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.scanTabIndex, True)
         self.tabs.setTabEnabled(self.processTabIndex, True)
         
-    def unblockTabsForProcess(self):
+    def _unblockTabsForProcess(self):
         '''
         enable tabs when done processing
         '''
