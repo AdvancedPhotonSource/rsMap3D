@@ -39,7 +39,7 @@ class ProcessScans(qtGui.QDialog):
         
         
         
-    def browseForOutputFile(self):
+    def _browseForOutputFile(self):
         '''
         Launch file browser to select the output file.  Checks are done to make
         sure the selected directory exists and that the selected file is 
@@ -74,13 +74,16 @@ class ProcessScans(qtGui.QDialog):
                              WARNING_STR, \
                              "The specified file is not writable")
             
-    def cancelProcess(self):
+    def _cancelProcess(self):
         '''
         Emit a signal to trigger the cancellation of processing.
         '''
         self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
         
     def _createControlBox(self):
+        '''
+        Create box wih the GUI controls Run & Cancel
+        '''
         controlBox = qtGui.QGroupBox()
         controlLayout = qtGui.QGridLayout()
         row = 0
@@ -97,10 +100,10 @@ class ProcessScans(qtGui.QDialog):
 
         self.connect(self.runButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.process)
+                     self._process)
         self.connect(self.cancelButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.cancelProcess)
+                     self._cancelProcess)
         self.connect(self, \
                      qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
@@ -156,20 +159,20 @@ class ProcessScans(qtGui.QDialog):
 
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), 
-                     self.browseForOutputFile)
+                     self._browseForOutputFile)
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-                     self.editFinishedOutputFile)
+                     self._editFinishedOutputFile)
         self.connect(self.outFileTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self.editFinishedOutputFile)
+                     self._editFinishedOutputFile)
         self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
                      self.outFileTxt.setText)
         
         dataBox.setLayout(dataLayout)
         return dataBox
         
-    def editFinishedOutputFile(self):
+    def _editFinishedOutputFile(self):
         '''
         When editing is finished the a check is done to make sure that the 
         directory exists and the file is writable
@@ -200,7 +203,7 @@ class ProcessScans(qtGui.QDialog):
                              WARNING_STR, \
                              "The specified file is not writable")
 
-    def process(self):
+    def _process(self):
         '''
         Emit a signal to trigger the start of processing.
         '''
@@ -243,6 +246,7 @@ class ProcessScans(qtGui.QDialog):
     def setOutFileName(self, name):
         '''
         Write a filename to the text widget and to the stored output file name
+        :param name: Name of output file
         '''
         self.outFileTxt.setText(name)
         self.outputFileName = name
@@ -250,12 +254,15 @@ class ProcessScans(qtGui.QDialog):
     def setProgress(self, value):
         '''
         Set the value in the progress bar
+        :param value: value to write to the progress bar
         '''
         self.progressBar.setValue(value)
         
     def setProgressLimits(self, progressMin, progressMax):
         '''
         Set the limits on the progress bar.
+        :param progressMin: Minimum value to store in the progress bar
+        :param progressMax: Maximum value to store in the progress bar
         '''
         self.progressBar.setMinimum(progressMin)
         self.progressBar.setMaximum(progressMax)
@@ -269,15 +276,16 @@ class ProcessScans(qtGui.QDialog):
         self.cancelButton.setDisabled(True)
         self.dataBox.setDisabled(False)
         
-    def stopMapper(self):
+    def _stopMapper(self):
         '''
-        Halt the mapping process
+        Halt the mapping _process
         '''
         self.mapper.stopMap()
         
     def updateProgress(self, value):
         '''
         Send signal to update the progress bar.
+        :param value: value to be put on the progress bar.
         '''
         self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value)
         

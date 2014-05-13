@@ -22,11 +22,13 @@ class DetectorGeometryForXrayutilitiesReader(object):
     '''
     This class is for reading detector geometry XML file for use with 
     xrayutilities
+    :members:
     '''
 
     def __init__(self, filename):
         '''
         Constructor
+        :param filename: name of the XML file holding the detector geomery
         '''
         try:
             tree = ET.parse(filename)
@@ -40,6 +42,8 @@ class DetectorGeometryForXrayutilitiesReader(object):
         '''
         Return a list with two elements specifying the location of the center
         pixel
+        :param detector: specifies the detector who's return value is requested
+        :return: The location of the detector's center pixel 
         ''' 
         try:
             centerPix = detector.find(CENTER_CHANNEL_PIXEL).text
@@ -52,7 +56,8 @@ class DetectorGeometryForXrayutilitiesReader(object):
     
     def getDetectors(self):
         '''
-        Return a list of detectors in the configuration
+        :return: a list of detectors in the configuration
+        
         '''
         detectors = self.root.find(DETECTORS)
         if detectors == None:
@@ -63,6 +68,8 @@ class DetectorGeometryForXrayutilitiesReader(object):
     def getDetectorById(self, identifier):
         '''
         return a particular by specifying it's ID 
+        :param identifier: the id of the specified detector 
+        :return: The requested detector
         '''
         try:
             dets = self.getDetectors().findall(DETECTOR)
@@ -79,57 +86,48 @@ class DetectorGeometryForXrayutilitiesReader(object):
 
     def getDetectorID(self, detector):
         '''
-        return the detector ID
+        :param detector: specifies the detector who's return value is requested
+        :return: The ID of the specified detector detector
         '''
         return detector.find(DETECTOR_ID).text
 
     def getDistance(self, detector):
         '''
-        return the sample to detector distance
+        :param detector: specifies the detector who's return value is requested
+        :return: The sample to detector distance
         '''
         return float(detector.find(DETECTOR_DISTANCE).text)
     
-    def getPixelDirection1(self, detector):
-        '''
-        Return the direction for increasing the first pixel dimension (x+ 
-        specifies the first dimension increases in the positive x direction)
-        '''
-        return detector.find(PIXEL_DIRECTION1).text
-
     def getNpixels(self, detector):
         '''
-        Return a list with two elements specifying the size of the detector
+        :param detector: specifies the detector who's return value is requested
+        :return: A list with two elements specifying the size of the detector
         in pixels
         ''' 
         vals = string.split(detector.find(NUMBER_OF_PIXELS).text)
         return [int(vals[0]), int(vals[1])]
     
+    def getPixelDirection1(self, detector):
+        '''
+        :param detector: specifies the detector who's return value is requested
+        :return: The direction for increasing the first pixel dimension (x+ 
+        specifies the first dimension increases in the positive x direction)
+        '''
+        return detector.find(PIXEL_DIRECTION1).text
+
     def getPixelDirection2(self, detector):
         '''
-        Return the direction for increasing the second pixel dimension (y- 
+        :param detector: specifies the detector who's return value is requested
+        :return:  The direction for increasing the second pixel dimension (y- 
         specifies the second dimension increases in the negative y direction)
         '''
         return detector.find(PIXEL_DIRECTION2).text
 
     def getSize(self, detector):
         '''
-        Return the size of the detector in millimeters
+        :param detector: specifies the detector who's return value is requested
+        :return: The size of the detector in millimeters
         '''
         vals = string.split(detector.find(DETECTOR_SIZE).text)
         return [float(vals[0]), float(vals[1])]
     
-if __name__ == '__main__':
-    config = DetectorGeometryForXrayutilitiesReader('33bmDetectorGeometry.xml')
-    print config
-    print config.getDetectors()
-    detector = config.getDetectorById('Pilatus')
-    print detector
-    print detector.find(DETECTOR_ID).text
-    print config.getDetectorById('Nonsense')
-    print config.getPixelDirection1(detector)
-    print config.getPixelDirection2(detector)
-    print config.getCenterChannelPixel(detector)
-    print config.getNpixels(detector)
-    print config.getSize(detector)
-    print config.getDetectorID(detector)
-    print config.getDistance(detector)
