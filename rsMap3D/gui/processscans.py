@@ -51,7 +51,7 @@ class ProcessScans(qtGui.QDialog):
                                                filter=VTI_FILTER_STR))
         else:
             inFileName = str(self.outFileTxt.text())
-            fileName = str(qtGui.QFileDialog.getOpenFileName(None, 
+            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=VTI_FILTER_STR, \
                                                directory = inFileName))
