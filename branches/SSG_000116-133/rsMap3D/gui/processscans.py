@@ -39,7 +39,7 @@ class ProcessScans(qtGui.QDialog):
         
         
         
-    def browseForOutputFile(self):
+    def _browseForOutputFile(self):
         '''
         Launch file browser to select the output file.  Checks are done to make
         sure the selected directory exists and that the selected file is 
@@ -74,7 +74,7 @@ class ProcessScans(qtGui.QDialog):
                              WARNING_STR, \
                              "The specified file is not writable")
             
-    def cancelProcess(self):
+    def _cancelProcess(self):
         '''
         Emit a signal to trigger the cancellation of processing.
         '''
@@ -100,10 +100,10 @@ class ProcessScans(qtGui.QDialog):
 
         self.connect(self.runButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.process)
+                     self._process)
         self.connect(self.cancelButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.cancelProcess)
+                     self._cancelProcess)
         self.connect(self, \
                      qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
@@ -159,20 +159,20 @@ class ProcessScans(qtGui.QDialog):
 
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), 
-                     self.browseForOutputFile)
+                     self._browseForOutputFile)
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-                     self.editFinishedOutputFile)
+                     self._editFinishedOutputFile)
         self.connect(self.outFileTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self.editFinishedOutputFile)
+                     self._editFinishedOutputFile)
         self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
                      self.outFileTxt.setText)
         
         dataBox.setLayout(dataLayout)
         return dataBox
         
-    def editFinishedOutputFile(self):
+    def _editFinishedOutputFile(self):
         '''
         When editing is finished the a check is done to make sure that the 
         directory exists and the file is writable
@@ -203,7 +203,7 @@ class ProcessScans(qtGui.QDialog):
                              WARNING_STR, \
                              "The specified file is not writable")
 
-    def process(self):
+    def _process(self):
         '''
         Emit a signal to trigger the start of processing.
         '''
@@ -276,9 +276,9 @@ class ProcessScans(qtGui.QDialog):
         self.cancelButton.setDisabled(True)
         self.dataBox.setDisabled(False)
         
-    def stopMapper(self):
+    def _stopMapper(self):
         '''
-        Halt the mapping process
+        Halt the mapping _process
         '''
         self.mapper.stopMap()
         

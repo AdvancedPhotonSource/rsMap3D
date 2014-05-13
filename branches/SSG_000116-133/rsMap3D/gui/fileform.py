@@ -69,15 +69,9 @@ class FileForm(qtGui.QDialog):
 
         #Initialize a couple of widgets to do setup.
         self.noFieldRadio.setChecked(True)
-        self.fieldCorrectionTypeChanged(*(self.noFieldRadio,))
+        self._fieldCorrectionTypeChanged(*(self.noFieldRadio,))
         
-    def loadFile(self):
-        '''
-        Emit a signal to start loading data
-        '''
-        self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
-
-    def badPixelFileChanged(self):
+    def _badPixelFileChanged(self):
         '''
         Do some verification when the bad pixel file changes
         '''
@@ -92,7 +86,7 @@ class FileForm(qtGui.QDialog):
                              "file is invalid")
             
                 
-    def browseBadPixelFileName(self):
+    def _browseBadPixelFileName(self):
         '''
         Launch file browser for bad pixel file
         '''
@@ -111,7 +105,7 @@ class FileForm(qtGui.QDialog):
             self.badPixelFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
     
-    def browseFlatFieldFileName(self):
+    def _browseFlatFieldFileName(self):
         '''
         Launch file browser for Flat field file
         '''
@@ -129,7 +123,7 @@ class FileForm(qtGui.QDialog):
             self.flatFieldFileTxt.setText(fileName)
             self.flatFieldFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
     
-    def browseForDetFile(self):
+    def _browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
         '''
@@ -147,7 +141,7 @@ class FileForm(qtGui.QDialog):
             self.detConfigTxt.setText(fileName)
             self.detConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
-    def browseForInstFile(self):
+    def _browseForInstFile(self):
         '''
         Launch file selection dialog for instrument file.
         '''
@@ -165,7 +159,7 @@ class FileForm(qtGui.QDialog):
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
-    def browseForProjectDir(self):
+    def _browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
         '''
@@ -185,7 +179,7 @@ class FileForm(qtGui.QDialog):
             self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
 
-    def cancelLoadFile(self):
+    def _cancelLoadFile(self):
         ''' Send signal to cancel a file load'''
         self.emit(qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL))
         
@@ -229,10 +223,10 @@ class FileForm(qtGui.QDialog):
 
         self.connect(self.loadButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.loadFile)
+                     self._loadFile)
         self.connect(self.cancelButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.cancelLoadFile)
+                     self._cancelLoadFile)
         self.connect(self, \
                      qtCore.SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
@@ -336,51 +330,51 @@ class FileForm(qtGui.QDialog):
         # Add Signals between widgets
         self.connect(self.projectDirButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.browseForProjectDir)
+                     self._browseForProjectDir)
         self.connect(self.instConfigFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.browseForInstFile)
+                     self._browseForInstFile)
         self.connect(self.detConfigFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.browseForDetFile)
+                     self._browseForDetFile)
         self.connect(self.projNameTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self.projectDirChanged)
+                     self._projectDirChanged)
         self.connect(self.instConfigTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self.instConfigChanged)
+                     self._instConfigChanged)
         self.connect(self.detConfigTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self.detConfigChanged)
+                     self._detConfigChanged)
         self.connect(self.outTypeChooser, \
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
-                     self.outputTypeChanged)
+                     self._outputTypeChanged)
         self.connect(self.fieldCorrectionGroup,\
                      qtCore.SIGNAL(BUTTON_CLICKED_SIGNAL), \
-                     self.fieldCorrectionTypeChanged)
+                     self._fieldCorrectionTypeChanged)
         self.connect(self.badPixelFileTxt,
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
-                     self.badPixelFileChanged)
+                     self._badPixelFileChanged)
         self.connect(self.flatFieldFileTxt,
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
-                     self.flatFieldFileChanged)
+                     self._flatFieldFileChanged)
         self.connect(self.badPixelFileBrowseButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.browseBadPixelFileName)
+                     self._browseBadPixelFileName)
         self.connect(self.flatFieldFileBrowseButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self.browseFlatFieldFileName)
+                     self._browseFlatFieldFileName)
         self.connect(self.pixAvgTxt,
                      qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
-                     self.pixAvgTxtChanged)
+                     self._pixAvgTxtChanged)
         self.connect(self.detROITxt,
                      qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
-                     self.detROITxtChanged)
+                     self._detROITxtChanged)
         
         dataBox.setLayout(dataLayout)
         return dataBox
     
-    def detConfigChanged(self):
+    def _detConfigChanged(self):
         '''
         '''
         if os.path.isfile(self.detConfigTxt.text()) or \
@@ -401,7 +395,7 @@ class FileForm(qtGui.QDialog):
                              "The filename entered for the detector " + \
                              "configuration is invalid")
         
-    def detROITxtChanged(self, text):
+    def _detROITxtChanged(self, text):
         '''
         Check to make sure the text for detector roi is valid and indicate 
         by a color change 
@@ -429,7 +423,7 @@ class FileForm(qtGui.QDialog):
         else:
             return False
         
-    def fieldCorrectionTypeChanged(self, *fieldCorrType):
+    def _fieldCorrectionTypeChanged(self, *fieldCorrType):
         '''
         React when the field type radio buttons change.  Disable/Enable other 
         widgets as appropriate
@@ -452,7 +446,7 @@ class FileForm(qtGui.QDialog):
         self.checkOkToLoad()
             
             
-    def flatFieldFileChanged(self):
+    def _flatFieldFileChanged(self):
         '''
         Do some verification when the flat field file changes
         '''
@@ -483,6 +477,26 @@ class FileForm(qtGui.QDialog):
         '''
         return self.detConfigTxt.text()
 
+    def getDetectorROI(self, rois=EMPTY_STR):
+        '''
+        :param rois: a string list with the roi values
+        :return: The detector ROI as a list
+        :raises RSMap3DException: if the string is not a 4 element list
+        '''
+        if rois == EMPTY_STR:
+            roiStrings = str(self.detROITxt.text()).split(COMMA_STR)
+        else:
+            roiStrings = rois.split(COMMA_STR)
+            
+        roi = []
+        if len(roiStrings) <> 4:
+            raise RSMap3DException("Detector ROI needs 4 values. " + \
+                                   str(len(roiStrings)) + \
+                                   " were given.")
+        for value in roiStrings:
+            roi.append(int(value))
+        return roi
+    
     def getFlatFieldFileName(self):
         '''
         Return the flat field file name.  If empty or if the bad pixel radio 
@@ -501,8 +515,27 @@ class FileForm(qtGui.QDialog):
         return self.instConfigTxt.text()
 
     def getMapAsHKL(self):
+        '''
+        '''
         return self.hklCheckbox.isChecked()
         
+    def getOutputType(self):
+        '''
+        Get the output type to be used.
+        '''
+        return self.outTypeChooser.currentText()
+    
+    def getPixelsToAverage(self):
+        '''
+        :return: the pixels to average as a list
+        '''
+        pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
+        pixels = []
+        print "getting number of pixels to average" + str(pixelStrings)
+        for value in pixelStrings:
+            pixels.append(int(value))
+        return pixels
+    
     def getProjectDir(self):
         '''
         Return the project directory
@@ -528,7 +561,17 @@ class FileForm(qtGui.QDialog):
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
             
-    def instConfigChanged(self):
+    def getScanList(self):
+        '''
+        return a list of scans to be used for loading data
+        '''
+        if str(self.scanNumsTxt.text()) == EMPTY_STR:
+            return None
+        else:
+            scans = srange(str(self.scanNumsTxt.text()))
+            return scans.list() 
+        
+    def _instConfigChanged(self):
         '''
         When the inst config file name changes check to make sure we have a 
         valid file (if not empty) and the check to see if it is OK to enable
@@ -552,7 +595,13 @@ class FileForm(qtGui.QDialog):
                              "The filename entered for the instrument " + \
                              "configuration is invalid")
         
-    def projectDirChanged(self):
+    def _loadFile(self):
+        '''
+        Emit a signal to start loading data
+        '''
+        self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
+
+    def _projectDirChanged(self):
         '''
         When the project name changes, check to see if it is valid file and 
         then check to see if it is OK to enable the Load button.
@@ -566,54 +615,7 @@ class FileForm(qtGui.QDialog):
                              WARNING_STR, \
                              "The project directory entered is invalid")
         
-    def getOutputType(self):
-        '''
-        Get the output type to be used.
-        '''
-        return self.outTypeChooser.currentText()
-    
-    def getScanList(self):
-        '''
-        return a list of scans to be used for loading data
-        '''
-        if str(self.scanNumsTxt.text()) == EMPTY_STR:
-            return None
-        else:
-            scans = srange(str(self.scanNumsTxt.text()))
-            return scans.list() 
-        
-    def getDetectorROI(self, rois=EMPTY_STR):
-        '''
-        :param rois: a string list with the roi values
-        :return: The detector ROI as a list
-        :raises RSMap3DException: if the string is not a 4 element list
-        '''
-        if rois == EMPTY_STR:
-            roiStrings = str(self.detROITxt.text()).split(COMMA_STR)
-        else:
-            roiStrings = rois.split(COMMA_STR)
-            
-        roi = []
-        if len(roiStrings) <> 4:
-            raise RSMap3DException("Detector ROI needs 4 values. " + \
-                                   str(len(roiStrings)) + \
-                                   " were given.")
-        for value in roiStrings:
-            roi.append(int(value))
-        return roi
-    
-    def getPixelsToAverage(self):
-        '''
-        :return: the pixels to average as a list
-        '''
-        pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
-        pixels = []
-        print "getting number of pixels to average" + str(pixelStrings)
-        for value in pixelStrings:
-            pixels.append(int(value))
-        return pixels
-    
-    def outputTypeChanged(self, typeStr):
+    def _outputTypeChanged(self, typeStr):
         '''
         If the output is selected to be a simple grid map type then allow
         the user to select HKL as an output.
@@ -625,7 +627,7 @@ class FileForm(qtGui.QDialog):
             self.hklCheckbox.setDisabled(True)
             self.hklCheckbox.setCheckState(False)
             
-    def pixAvgTxtChanged(self, text):
+    def _pixAvgTxtChanged(self, text):
         '''
         Check to make sure the text for pix to average is valid and indicate 
         by a color change 

@@ -97,22 +97,6 @@ class DataRange(qtGui.QDialog):
             self._checkOkToApply)
         self.setLayout(layout)
         
-    def _initializeRanges(self):
-        '''
-        Private class to initialize ranges at +- infinity.  This sets values 
-        but puts them to bad values on purpose.
-        '''
-        self.ranges = (float(POSITIVE_INFINITY), \
-                       float(NEGATIVE_INFINITY), \
-                        float(POSITIVE_INFINITY), \
-                        float(NEGATIVE_INFINITY), \
-                        float(POSITIVE_INFINITY), \
-                        float(NEGATIVE_INFINITY))
-        self.xValsOk = True
-        self.yValsOk = True
-        self.zValsOk = True
-        self.valsChanged = False
-        
     def _applyRange(self):
         '''
         Apply changes by recording them as current values and signaling that 
@@ -168,6 +152,22 @@ class DataRange(qtGui.QDialog):
         Return the range values
         '''
         return self.ranges
+        
+    def _initializeRanges(self):
+        '''
+        Private class to initialize ranges at +- infinity.  This sets values 
+        but puts them to bad values on purpose.
+        '''
+        self.ranges = (float(POSITIVE_INFINITY), \
+                       float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY), \
+                        float(POSITIVE_INFINITY), \
+                        float(NEGATIVE_INFINITY))
+        self.xValsOk = True
+        self.yValsOk = True
+        self.zValsOk = True
+        self.valsChanged = False
         
     def _resetRange(self):
         '''

@@ -98,14 +98,6 @@ class DetectorGeometryForXrayutilitiesReader(object):
         '''
         return float(detector.find(DETECTOR_DISTANCE).text)
     
-    def getPixelDirection1(self, detector):
-        '''
-        :param detector: specifies the detector who's return value is requested
-        :return: The direction for increasing the first pixel dimension (x+ 
-        specifies the first dimension increases in the positive x direction)
-        '''
-        return detector.find(PIXEL_DIRECTION1).text
-
     def getNpixels(self, detector):
         '''
         :param detector: specifies the detector who's return value is requested
@@ -115,6 +107,14 @@ class DetectorGeometryForXrayutilitiesReader(object):
         vals = string.split(detector.find(NUMBER_OF_PIXELS).text)
         return [int(vals[0]), int(vals[1])]
     
+    def getPixelDirection1(self, detector):
+        '''
+        :param detector: specifies the detector who's return value is requested
+        :return: The direction for increasing the first pixel dimension (x+ 
+        specifies the first dimension increases in the positive x direction)
+        '''
+        return detector.find(PIXEL_DIRECTION1).text
+
     def getPixelDirection2(self, detector):
         '''
         :param detector: specifies the detector who's return value is requested

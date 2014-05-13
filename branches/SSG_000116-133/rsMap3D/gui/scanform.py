@@ -99,7 +99,7 @@ class ScanForm(qtGui.QDialog):
         layout.setColumnStretch(1, 45)
                 
         self.connect(self.scanList, qtCore.SIGNAL(LIST_ITEM_CLICKED_SIGNAL), 
-                self.scanSelected)
+                self._scanSelected)
          
         self.setLayout(layout);
         
@@ -199,7 +199,7 @@ class ScanForm(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL), \
                   self.dataSource.getRangeBounds())
                                 
-    def scanSelected(self, item):
+    def _scanSelected(self, item):
         '''
         When a scan is selected from the list, change the table to display 
         information about the images in that scan and call to to show the 

@@ -61,6 +61,34 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         except KeyError:
             self.scans = None
         
+    def _calc_eulerian_from_kappa(self, primaryAngles=None, \
+                                  referenceAngles = None):
+        """
+        Calculate the eulerian sample angles from the kappa stage angles.
+        :param primaryAngles:  list of sample axis numbers to be handled by 
+        the conversion
+        :param referenceAngles: list of reference angles to be used in angle 
+        conversion
+        """
+        
+        keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY
+        kappa = referenceAngles[:,1] * np.pi/ONE_EIGHTY
+        kphi = referenceAngles[:,2] * np.pi/ONE_EIGHTY
+        self.kalpha = 49.9945 * np.pi/ONE_EIGHTY
+        self.kappa_inverted = False
+
+        _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
+        
+        if self.kappa_inverted:
+            eta = (keta + _t1) * ONE_EIGHTY/np.pi
+            phi = (kphi + _t1) * ONE_EIGHTY/np.pi
+        else:
+            eta = (keta - _t1) * ONE_EIGHTY/np.pi
+            phi = (kphi - _t1) * ONE_EIGHTY/np.pi
+        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * \
+                              np.sin(self.kalpha)) * ONE_EIGHTY/np.pi
+        
+        return eta, chi, phi
     def findImageQs(self, angles, ub, en):
         '''
         Find the minimum/maximum q boundaries associated with each scan given 
@@ -156,6 +184,43 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 #print i
                 #print primaryAngles[i]
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
+        
+    def getGeoAngles(self, scan, angleNames):
+        """
+        This function returns all of the geometry angles for the
+        for the scan as a N-by-num_geo array, where N is the number of scan
+        points and num_geo is the number of geometry motors.
+        """
+#        scan = self.sd[scanNo]
+        geoAngles = self.getScanAngles(scan, angleNames)
+        if not (self.instConfig.getSampleAngleMappingFunctionName() == ""):
+            tb = None
+            try:
+                self.fixGeoAngles(scan, geoAngles)
+            except Exception as ex:
+                tb = traceback.format_exc()
+                print "Handling exception in getGeoAngles"
+                print ex
+                print tb
+        return geoAngles
+    
+    def getScanAngles(self, scan, angleNames):
+        """
+        This function returns all of the geometry angles for the
+        for the scan as a N-by-num_geo array, where N is the number of scan
+        points and num_geo is the number of geometry motors.
+        :param scan: scan from which to retrieve the angles
+        :params angleNames: a list of names for the angles to be returned
+        """
+        geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
+        for i, name in enumerate(angleNames):
+            v = scan.scandata.get(name)
+            if v.size == 1:
+                v = np.ones(scan.data.shape[0]) * v
+            geoAngles[:,i] = v
+        
+
+        return geoAngles
         
     def loadSource(self, mapHKL=False):
         '''
@@ -305,71 +370,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                         IMAGE_DIR_MERGE_STR % self.projectName))
 
 
-    def getGeoAngles(self, scan, angleNames):
-        """
-        This function returns all of the geometry angles for the
-        for the scan as a N-by-num_geo array, where N is the number of scan
-        points and num_geo is the number of geometry motors.
-        """
-#        scan = self.sd[scanNo]
-        geoAngles = self.getScanAngles(scan, angleNames)
-        if not (self.instConfig.getSampleAngleMappingFunctionName() == ""):
-            tb = None
-            try:
-                self.fixGeoAngles(scan, geoAngles)
-            except Exception as ex:
-                tb = traceback.format_exc()
-                print "Handling exception in getGeoAngles"
-                print ex
-                print tb
-        return geoAngles
-    
-    def getScanAngles(self, scan, angleNames):
-        """
-        This function returns all of the geometry angles for the
-        for the scan as a N-by-num_geo array, where N is the number of scan
-        points and num_geo is the number of geometry motors.
-        :param scan: scan from which to retrieve the angles
-        :params angleNames: a list of names for the angles to be returned
-        """
-        geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
-        for i, name in enumerate(angleNames):
-            v = scan.scandata.get(name)
-            if v.size == 1:
-                v = np.ones(scan.data.shape[0]) * v
-            geoAngles[:,i] = v
-        
-
-        return geoAngles
-        
-    def _calc_eulerian_from_kappa(self, primaryAngles=None, \
-                                  referenceAngles = None):
-        """
-        Calculate the eulerian sample angles from the kappa stage angles.
-        :param primaryAngles:  list of sample axis numbers to be handled by 
-        the conversion
-        :param referenceAngles: list of reference angles to be used in angle 
-        conversion
-        """
-        
-        keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY
-        kappa = referenceAngles[:,1] * np.pi/ONE_EIGHTY
-        kphi = referenceAngles[:,2] * np.pi/ONE_EIGHTY
-        self.kalpha = 49.9945 * np.pi/ONE_EIGHTY
-        self.kappa_inverted = False
-
-        _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
-        
-        if self.kappa_inverted:
-            eta = (keta + _t1) * ONE_EIGHTY/np.pi
-            phi = (kphi + _t1) * ONE_EIGHTY/np.pi
-        else:
-            eta = (keta - _t1) * ONE_EIGHTY/np.pi
-            phi = (kphi - _t1) * ONE_EIGHTY/np.pi
-        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * \
-                              np.sin(self.kalpha)) * ONE_EIGHTY/np.pi
-        
-        return eta, chi, phi
         
     
 
