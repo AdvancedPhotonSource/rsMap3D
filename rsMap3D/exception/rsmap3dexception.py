@@ -14,6 +14,14 @@ class RSMap3DException(Exception):
         '''
         super(RSMap3DException, self).__init__(message)
 
+class DetectorConfigException(RSMap3DException):
+    '''
+    Exception class to be raised if there is a problem with a detector config
+    file
+    '''
+    def __init__(self, message):
+        super(DetectorConfigException, self).__init__(message)
+
 class InstConfigException(RSMap3DException):
     '''
     Exception class to be raised if there is a problem with an instrument config
@@ -26,14 +34,6 @@ class InstConfigException(RSMap3DException):
         raised.
         '''
         super(InstConfigException, self).__init__(message)
-
-class DetectorConfigException(RSMap3DException):
-    '''
-    Exception class to be raised if there is a problem with a detector config
-    file
-    '''
-    def __init__(self, message):
-        super(DetectorConfigException, self).__init__(message)
 
 class Transform3DException(RSMap3DException):
     '''

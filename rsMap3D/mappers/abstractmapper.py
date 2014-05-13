@@ -30,6 +30,12 @@ class AbstractGridMapper(object):
                  nx=200, ny=201, nz=202, transform = None):
         '''
         Constructor
+        :param dataSource: source of scan data
+        :param outputFileName: filename for output
+        :param nx: number of points in x direction for griidder
+        :param ny: number of points in y direction for griidder
+        :param nz: number of points in z direction for griidder
+        :param transform: Transform to be applied to the axes before gridding
         '''
         self.dataSource = dataSource
         self.outputFileName = outputFileName
@@ -100,27 +106,20 @@ class AbstractGridMapper(object):
         writer.SetInput(image_data)
         writer.Write()
 
-    def setGridSize(self, nx, ny, nz):
-        """
-        Set the grid size to be used for outputting data.
-        """
-        self.nx = nx
-        self.ny = ny
-        self.nz = nz
-        
-    def hotpixelkill(self, ad_data):
+    def hotpixelkill(self, areaData):
         """
         function to remove hot pixels from CCD frames
         ADD REMOVE VALUES IF NEEDED!
+        :param areaData: area detector data
         """
         
         for pixel in self.dataSource.getBadPixels():
-            ad_data[pixel[0],pixel[1]] = 0
+            areaData[pixel[0],pixel[1]] = 0
         
-        return ad_data
+        return areaData
 
     @abc.abstractmethod
-    def processMap(self,**kwargs):
+    def processMap(self, **kwargs):
         """
         Abstract method for processing data.  This method is called by the
         method doMap.  Typical access to this method is through the doMap
@@ -297,7 +296,21 @@ class AbstractGridMapper(object):
     
         return qxTrans, qyTrans, qzTrans, intensity
 
+    def setGridSize(self, nx, ny, nz):
+        """
+        Set the grid size to be used for outputting data.
+        :param nx: number of points in x direction for griidder
+        :param ny: number of points in y direction for griidder
+        :param nz: number of points in z direction for griidder
+        """
+        self.nx = nx
+        self.ny = ny
+        self.nz = nz
+        
     def setProgressUpdater(self, updater):
+        '''
+        Set the updater that will be used to maintain the progress bar value 
+        '''
         self.progressUpdater = updater
 
     def setTransform(self, transform):
@@ -306,10 +319,14 @@ class AbstractGridMapper(object):
         system.  The transform set here should be a subclass of 
         AbstractTransform3D which is defined in 
         rsMap3D.transform.abstracttransform3D.
+        :param tranfoem:
         '''
         self.transform = transform
         
     def stopMap(self):
+        '''
+        Set a flag that will be used to halt processing the scan using 
+        '''
         self.haltMap = True 
         
 class ProcessCanceledException(RSMap3DException):
@@ -317,4 +334,8 @@ class ProcessCanceledException(RSMap3DException):
     Exception Thrown when loading data is canceled.
     '''
     def __init__(self, message):
+        '''
+        Constructor
+        :param message:  Message to be carried conveyed with exception
+        '''
         super(ProcessCanceledException, self).__init__(message)
