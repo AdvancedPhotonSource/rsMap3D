@@ -180,10 +180,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             method = getattr(self, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
                                    referenceAngles=refAngles)
-            #print fixedAngles
             for i in range(len(primaryAngles)):
-                #print i
-                #print primaryAngles[i]
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
         
     def getGeoAngles(self, scan, angleNames):
@@ -200,9 +197,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 self.fixGeoAngles(scan, geoAngles)
             except Exception as ex:
                 tb = traceback.format_exc()
-                print "Handling exception in getGeoAngles"
-                print ex
-                print tb
+                raise RSMap3DException("Handling exception in getGeoAngles." + \
+                                       "\n" + \
+                                       str(ex) + \
+                                       "\n" + \
+                                       str(tb))
         return geoAngles
     
     def getScanAngles(self, scan, angleNames):
@@ -216,8 +215,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
         for i, name in enumerate(angleNames):
             v = scan.scandata.get(name)
-            if v.size == 1:
-                v = np.ones(scan.data.shape[0]) * v
+            if v != None:
+                if v.size == 1:
+                    v = np.ones(scan.data.shape[0]) * v
+            else:
+                raise InstConfigException("Could not find angle " + name + \
+                                          " in scan parameters")
             geoAngles[:,i] = v
         
 
@@ -255,8 +258,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.projectionDirection = self.instConfig.getProjectionDirection()
         except InstConfigException as ex:
             raise ex
+        except RSMap3DException as ex:
+            print ("---Error Reading instrument config")
+            raise ex
         except Exception as ex:
-            print ("---Error Reading instconfig")
+            print "Unhandle Exception loading instrument config" + str(ex)
             raise ex
         #Load up the detector configuration file
         try:
@@ -282,8 +288,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 detConfig.getPixelDirection2(detector)
         except DetectorConfigException as ex:
             raise ex
-        except Exception as ex:
+        except RSMap3DException as ex:
             print ("---Error Reading detector config")
+            raise ex
+        except Exception as ex:
+            print ("---Unhandled Exception in loading detector config")
             raise ex
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
@@ -313,13 +322,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         # id needed load the flat field file
         if not (self.flatFieldFile == None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
-            print self.flatFieldData
         # Load scan information from the spec file
         try:
             self.sd = spec.SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
             maxScan = max(self.sd.findex.keys())
-            print maxScan
             if self.scans  == None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
@@ -344,6 +351,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                         angles = self.getGeoAngles(curScan, self.angleNames)
                         if self.mapHKL==True:
                             self.ubMatrix[scan] = curScan.UB
+                            if self.ubMatrix[scan] == None:
+                                raise Sector33SpecFileException("UB matrix " + \
+                                                                "not found.")
                         else:
                             self.ubMatrix[scan] = None
                         self.incidentEnergy[scan] =curScan.energy
@@ -380,4 +390,15 @@ class LoadCanceledException(RSMap3DException):
     '''
     def __init__(self, message):
         super(LoadCanceledException, self).__init__(message)
+        
+class Sector33SpecFileException(RSMap3DException):
+    '''
+    Exception class to be raised if there is a problem loading information
+    from a spec file
+    file
+    '''
+    def __init__(self, message):
+        super(Sector33SpecFileException, self).__init__(message)
+
+
 
