@@ -200,7 +200,6 @@ class MainDialog(qtGui.QMainWindow):
             self.dataSource.setProgressUpdater(self.fileForm.updateProgress)
             self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
         except LoadCanceledException as e:
-            print "LoadCanceled"
             self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
             self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
             #self.fileForm.setLoadOK()
@@ -220,9 +219,12 @@ class MainDialog(qtGui.QMainWindow):
         except ScanDataMissingException as e:
             self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
             return
-        except Exception as e:
+        except RSMap3DException as e:
             self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            print traceback.format_exc()
+            return
+        except Exception as e:
+            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
+                      str(e)  + "\n" + str(traceback.format_exc()))
             return
         
             
@@ -240,12 +242,12 @@ class MainDialog(qtGui.QMainWindow):
         except ProcessCanceledException:
             self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         except RSMap3DException as e:
-            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), str(e))
-            print traceback.format_exc()
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
+                      str(e) + "\n" + str(traceback.format_exc()))
             return
         except Exception as e:
-            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), str(e))
-            print traceback.format_exc()
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
+                      str(e) + "\n" + str(traceback.format_exc()))
             return
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
         self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
