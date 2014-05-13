@@ -183,7 +183,6 @@ class ProcessScans(qtGui.QDialog):
                 self.outputFileName = fileName
             else:
                 if os.path.dirname(fileName) == "":
-                    print("joining filename with current path")
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
                 else:

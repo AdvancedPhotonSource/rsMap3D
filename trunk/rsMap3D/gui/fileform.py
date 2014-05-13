@@ -531,7 +531,6 @@ class FileForm(qtGui.QDialog):
         '''
         pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
         pixels = []
-        print "getting number of pixels to average" + str(pixelStrings)
         for value in pixelStrings:
             pixels.append(int(value))
         return pixels
