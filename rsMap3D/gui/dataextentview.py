@@ -11,7 +11,7 @@ import sys
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import vtk
 from rsMap3D.gui.rsm3dcommonstrings import XMIN_INDEX, XMAX_INDEX, YMAX_INDEX,\
-    YMIN_INDEX, ZMIN_INDEX
+    YMIN_INDEX, ZMIN_INDEX, ZMAX_INDEX
 
 class DataExtentView(qtGui.QFrame):
     '''
@@ -87,7 +87,7 @@ class DataExtentView(qtGui.QFrame):
         
         axes.SetBounds((rangeBounds[XMIN_INDEX], rangeBounds[XMAX_INDEX], \
                         rangeBounds[YMIN_INDEX], rangeBounds[YMAX_INDEX], \
-                        rangeBounds[ZMIN_INDEX], rangeBounds[XMAX_INDEX]))
+                        rangeBounds[ZMIN_INDEX], rangeBounds[ZMAX_INDEX]))
         axes.SetCamera(self.ren.GetActiveCamera())
         self.ren.AddActor(axes)
         self.ren.ResetCamera()

@@ -89,6 +89,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                               np.sin(self.kalpha)) * ONE_EIGHTY/np.pi
         
         return eta, chi, phi
+
     def findImageQs(self, angles, ub, en):
         '''
         Find the minimum/maximum q boundaries associated with each scan given 
