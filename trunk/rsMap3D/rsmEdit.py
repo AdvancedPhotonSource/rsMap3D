@@ -2,7 +2,7 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-
+import signal
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
  
@@ -371,10 +371,18 @@ class ProcessScanThread(qtCore.QThread):
 
     def run(self):
         self.controller.runMapper()
-        
+
+def ctrlCHandler(signal, frame):
+    qtGui.QApplication.closeAllWindows()
+    
+#This line allows CTRL_C to work with PyQt.
+signal.signal(signal.SIGINT, ctrlCHandler)
 app = qtGui.QApplication(sys.argv)
 mainForm = MainDialog()
 mainForm.show()
-
+#timer allows Python interupts to work
+timer = qtCore.QTimer()
+timer.start(1500)
+timer.timeout.connect(lambda: None)
 app.exec_()
 
