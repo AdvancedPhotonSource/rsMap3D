@@ -128,13 +128,15 @@ class AbstractGridMapper(object):
         print("Running abstract Method")
         
     def rawmap(self,scans, angdelta=[0,0,0,0,0],
-            adframes=None):
+            adframes=None, mask = None):
         """
         read ad frames and and convert them in reciprocal space
         angular coordinates are taken from the spec file
         or read from the edf file header when no scan number is given (scannr=None)
         """
         
+        if mask == None:
+            mask = [True] * len(self.dataSource.getImageToBeUsed()[scans[0]])
         #sd = spec.SpecDataFile(self.dataSource.specFile)
         intensity = np.array([])
         
@@ -232,7 +234,7 @@ class AbstractGridMapper(object):
             foundIndex = 0
             
             for ind in xrange(scan.data.shape[0]):
-                if imageToBeUsed[scannr][ind]:    
+                if imageToBeUsed[scannr][ind] and mask[ind]:    
                     # read tif image
                     img = np.array(Image.open(self.dataSource.imageFileTmp % 
                                                  (scannr, scannr, ind))).T
@@ -254,14 +256,15 @@ class AbstractGridMapper(object):
 
                     # initialize data array
                     if not arrayInitializedForScan:
+                        imagesToProcess = [imageToBeUsed[scannr][i] and mask[i] for i in range(len(imageToBeUsed[scannr]))]
                         if not intensity.shape[0]:
-                            intensity = np.zeros((np.count_nonzero(imageToBeUsed[scannr]),) + img2.shape)
+                            intensity = np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape)
                             arrayInitializedForScan = True
                         else: 
                             offset = intensity.shape[0]
                             intensity = np.concatenate(
                                 (intensity,
-                                (np.zeros((np.count_nonzero(imageToBeUsed[scannr]),) + img2.shape))),
+                                (np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape))),
                                 axis=0)
                             arrayInitializedForScan = True
                     # add data to intensity array
