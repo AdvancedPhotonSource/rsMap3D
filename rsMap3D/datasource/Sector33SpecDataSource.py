@@ -7,6 +7,7 @@ from pyspec import spec
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR, COMMA_STR, CANCEL_STR
+from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -122,28 +123,71 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        angleList = []
-        for i in range(len(angles[0])):
-            angleList.append(angles[:,i])
-        if ub == None:
-            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                     roi=roi, \
-                                     Nav=nav)
-        else:
-            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                     roi=roi, \
-                                     Nav=nav, \
-                                     UB = ub)
+        rsMap3DConfig = RSMap3DConfig()
+        maxImageMem = rsMap3DConfig.getMaxImageMemory()
+        imageSize = self.getDetectorDimensions()[0] * \
+                    self.getDetectorDimensions()[1]
+        print angles
+        numImages = len(angles)
+        print numImages
+        if imageSize*4*numImages <= maxImageMem:
+            angleList = []
+            for i in range(len(angles[0])):
+                angleList.append(angles[:,i])
+            if ub == None:
+                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                         roi=roi, \
+                                         Nav=nav)
+            else:
+                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                         roi=roi, \
+                                         Nav=nav, \
+                                         UB = ub)
+                
+            qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
             
-        qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
-        
-        idx = range(len(qxTrans))
-        xmin = [np.min(qxTrans[i]) for i in idx] 
-        xmax = [np.max(qxTrans[i]) for i in idx] 
-        ymin = [np.min(qyTrans[i]) for i in idx] 
-        ymax = [np.max(qyTrans[i]) for i in idx] 
-        zmin = [np.min(qzTrans[i]) for i in idx] 
-        zmax = [np.max(qzTrans[i]) for i in idx] 
+            idx = range(len(qxTrans))
+            xmin = [np.min(qxTrans[i]) for i in idx] 
+            xmax = [np.max(qxTrans[i]) for i in idx] 
+            ymin = [np.min(qyTrans[i]) for i in idx] 
+            ymax = [np.max(qyTrans[i]) for i in idx] 
+            zmin = [np.min(qzTrans[i]) for i in idx] 
+            zmax = [np.max(qzTrans[i]) for i in idx] 
+        else:
+            nPasses = imageSize*4*numImages/ maxImageMem + 1
+            xmin = []
+            xmax = []
+            ymin = []
+            ymax = []
+            zmin = []
+            zmax = []
+            for thisPass in range(nPasses):
+                firstImageInPass = thisPass*numImages/nPasses
+                lastImageInPass = (thisPass+1)*numImages/nPasses
+                angleList = []
+                for i in range(len(angles[0])):
+                    angleList.append(angles[firstImageInPass:lastImageInPass,i])
+                if ub == None:
+                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                             roi=roi, \
+                                             Nav=nav)
+                else:
+                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                             roi=roi, \
+                                             Nav=nav, \
+                                             UB = ub)
+                    
+                qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
+                
+                idx = range(len(qxTrans))
+                [xmin.append(np.min(qxTrans[i])) for i in idx] 
+                [xmax.append(np.max(qxTrans[i])) for i in idx] 
+                [ymin.append(np.min(qyTrans[i])) for i in idx] 
+                [ymax.append(np.max(qyTrans[i])) for i in idx] 
+                [zmin.append(np.min(qzTrans[i])) for i in idx] 
+                [zmax.append(np.max(qzTrans[i])) for i in idx] 
+                
+            
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def fixGeoAngles(self, scan, angles):
