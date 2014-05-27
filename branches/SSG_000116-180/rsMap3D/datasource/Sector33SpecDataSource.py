@@ -57,6 +57,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.projectExt = str(projectExtension)
         self.instConfigFile = str(instConfigFile)
         self.detConfigFile = str(detConfigFile)
+        self.progress = 0
+        self.progressInc = 1
+        self.progressMax = 1
         try:
             self.scans = kwargs['scanList']
         except KeyError:
@@ -131,6 +134,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         numImages = len(angles)
         print numImages
         if imageSize*4*numImages <= maxImageMem:
+            self.progressMax = len( self.scans) * 100
+            self.progressInc = 1.0 * 100.0
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
+            self.progress += self.progressInc        
             angleList = []
             for i in range(len(angles[0])):
                 angleList.append(angles[:,i])
@@ -162,6 +170,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             zmin = []
             zmax = []
             for thisPass in range(nPasses):
+                self.progressMax = len( self.scans) * 100.0
+                self.progressInc = 1.0 / nPasses * 100.0
+                if self.progressUpdater <> None:
+                    self.progressUpdater(self.progress, self.progressMax)
+                self.progress += self.progressInc        
                 firstImageInPass = thisPass*numImages/nPasses
                 lastImageInPass = (thisPass+1)*numImages/nPasses
                 angleList = []
@@ -381,7 +394,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.availableScans = []
             self.incidentEnergy = {}
             self.ubMatrix = {}
-            progress = 1
+            self.progress = 0
+            self.progressInc = 1
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
@@ -406,12 +420,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                             self.findImageQs(angles, \
                                              self.ubMatrix[scan], \
                                              self.incidentEnergy[scan])
+                        if self.progressUpdater <> None:
+                            self.progressUpdater(self.progress, self.progressMax)
                         print (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
                                (scan, (time.time() - _start_time)))
-                if self.progressUpdater <> None:
-                    self.progressUpdater(progress, len(self.scans))
-                progress +=1        
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         if len(self.getAvailableScans()) == 0:
