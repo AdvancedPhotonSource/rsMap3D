@@ -396,6 +396,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.ubMatrix = {}
             self.progress = 0
             self.progressInc = 1
+            # Zero the progress bar at the beginning.
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
@@ -425,6 +428,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                         print (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
                                (scan, (time.time() - _start_time)))
+                    #Make sure to show 100% completion
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         if len(self.getAvailableScans()) == 0:
