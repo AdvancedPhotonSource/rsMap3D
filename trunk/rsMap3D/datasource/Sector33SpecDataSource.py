@@ -7,6 +7,7 @@ from pyspec import spec
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR, COMMA_STR, CANCEL_STR
+from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -56,6 +57,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.projectExt = str(projectExtension)
         self.instConfigFile = str(instConfigFile)
         self.detConfigFile = str(detConfigFile)
+        self.progress = 0
+        self.progressInc = 1
+        self.progressMax = 1
         try:
             self.scans = kwargs['scanList']
         except KeyError:
@@ -122,28 +126,81 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        angleList = []
-        for i in range(len(angles[0])):
-            angleList.append(angles[:,i])
-        if ub == None:
-            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                     roi=roi, \
-                                     Nav=nav)
-        else:
-            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                     roi=roi, \
-                                     Nav=nav, \
-                                     UB = ub)
+        rsMap3DConfig = RSMap3DConfig()
+        maxImageMem = rsMap3DConfig.getMaxImageMemory()
+        imageSize = self.getDetectorDimensions()[0] * \
+                    self.getDetectorDimensions()[1]
+        print angles
+        numImages = len(angles)
+        print numImages
+        if imageSize*4*numImages <= maxImageMem:
+            self.progressMax = len( self.scans) * 100
+            self.progressInc = 1.0 * 100.0
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
+            self.progress += self.progressInc        
+            angleList = []
+            for i in range(len(angles[0])):
+                angleList.append(angles[:,i])
+            if ub == None:
+                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                         roi=roi, \
+                                         Nav=nav)
+            else:
+                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                         roi=roi, \
+                                         Nav=nav, \
+                                         UB = ub)
+                
+            qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
             
-        qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
-        
-        idx = range(len(qxTrans))
-        xmin = [np.min(qxTrans[i]) for i in idx] 
-        xmax = [np.max(qxTrans[i]) for i in idx] 
-        ymin = [np.min(qyTrans[i]) for i in idx] 
-        ymax = [np.max(qyTrans[i]) for i in idx] 
-        zmin = [np.min(qzTrans[i]) for i in idx] 
-        zmax = [np.max(qzTrans[i]) for i in idx] 
+            idx = range(len(qxTrans))
+            xmin = [np.min(qxTrans[i]) for i in idx] 
+            xmax = [np.max(qxTrans[i]) for i in idx] 
+            ymin = [np.min(qyTrans[i]) for i in idx] 
+            ymax = [np.max(qyTrans[i]) for i in idx] 
+            zmin = [np.min(qzTrans[i]) for i in idx] 
+            zmax = [np.max(qzTrans[i]) for i in idx] 
+        else:
+            nPasses = imageSize*4*numImages/ maxImageMem + 1
+            xmin = []
+            xmax = []
+            ymin = []
+            ymax = []
+            zmin = []
+            zmax = []
+            for thisPass in range(nPasses):
+                self.progressMax = len( self.scans) * 100.0
+                self.progressInc = 1.0 / nPasses * 100.0
+                if self.progressUpdater <> None:
+                    self.progressUpdater(self.progress, self.progressMax)
+                self.progress += self.progressInc        
+                firstImageInPass = thisPass*numImages/nPasses
+                lastImageInPass = (thisPass+1)*numImages/nPasses
+                angleList = []
+                for i in range(len(angles[0])):
+                    angleList.append(angles[firstImageInPass:lastImageInPass,i])
+                if ub == None:
+                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                             roi=roi, \
+                                             Nav=nav)
+                else:
+                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                                             roi=roi, \
+                                             Nav=nav, \
+                                             UB = ub)
+                    
+                qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
+                
+                idx = range(len(qxTrans))
+                [xmin.append(np.min(qxTrans[i])) for i in idx] 
+                [xmax.append(np.max(qxTrans[i])) for i in idx] 
+                [ymin.append(np.min(qyTrans[i])) for i in idx] 
+                [ymax.append(np.max(qyTrans[i])) for i in idx] 
+                [zmin.append(np.min(qzTrans[i])) for i in idx] 
+                [zmax.append(np.max(qzTrans[i])) for i in idx] 
+                
+            
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def fixGeoAngles(self, scan, angles):
@@ -337,7 +394,11 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.availableScans = []
             self.incidentEnergy = {}
             self.ubMatrix = {}
-            progress = 1
+            self.progress = 0
+            self.progressInc = 1
+            # Zero the progress bar at the beginning.
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
             for scan in self.scans:
                 if (self.cancelLoad):
                     self.cancelLoad = False
@@ -362,12 +423,14 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                             self.findImageQs(angles, \
                                              self.ubMatrix[scan], \
                                              self.incidentEnergy[scan])
+                        if self.progressUpdater <> None:
+                            self.progressUpdater(self.progress, self.progressMax)
                         print (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
                                (scan, (time.time() - _start_time)))
-                if self.progressUpdater <> None:
-                    self.progressUpdater(progress, len(self.scans))
-                progress +=1        
+                    #Make sure to show 100% completion
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         if len(self.getAvailableScans()) == 0:
