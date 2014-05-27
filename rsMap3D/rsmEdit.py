@@ -383,7 +383,7 @@ mainForm = MainDialog()
 mainForm.show()
 #timer allows Python interupts to work
 timer = qtCore.QTimer()
-timer.start(1500)
+timer.start(1000)
 timer.timeout.connect(lambda: None)
 app.exec_()
 
