@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 import abc
@@ -114,7 +114,10 @@ class AbstractGridMapper(object):
         """
         
         for pixel in self.dataSource.getBadPixels():
-            areaData[pixel[0],pixel[1]] = 0
+            badLoc = pixel.getBadLocation()
+            replaceLoc = pixel.getReplacementLocation()
+            areaData[badLoc[0],badLoc[1]] = \
+                areaData[replaceLoc[0],replaceLoc[1]]
         
         return areaData
 

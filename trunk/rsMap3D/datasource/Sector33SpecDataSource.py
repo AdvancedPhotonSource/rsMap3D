@@ -8,6 +8,7 @@ from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR, COMMA_STR, CANCEL_STR
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
+from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -130,9 +131,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         maxImageMem = rsMap3DConfig.getMaxImageMemory()
         imageSize = self.getDetectorDimensions()[0] * \
                     self.getDetectorDimensions()[1]
-        print angles
         numImages = len(angles)
-        print numImages
         if imageSize*4*numImages <= maxImageMem:
             self.progressMax = len( self.scans) * 100
             self.progressInc = 1.0 * 100.0
@@ -327,7 +326,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 DetectorReader.DetectorGeometryForXrayutilitiesReader(
                                                       self.detConfigFile)
             detector = detConfig.getDetectorById("Pilatus")
-            self.detectorCenterChannel = detConfig.getCenterChannelPixel(detector)
+            self.detectorCenterChannel = \
+                detConfig.getCenterChannelPixel(detector)
             self.detectorDimensions = detConfig.getNpixels(detector)
             detectorSize = detConfig.getSize(detector)
             self.detectorPixelWidth = \
@@ -361,21 +361,9 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         # if needed load up the bad pixel file.
         if not (self.badPixelFile == None):
             
-            reader = csv.reader(open(self.badPixelFile), \
-                                delimiter=' ', \
-                                skipinitialspace=True) 
-            self.badPixels = []
-            for line in reader:
-                newLine = []
-                for word in line:
-                    if not (word == EMPTY_STR):
-                        words = word.split(COMMA_STR)
-                        for newWord in words:
-                            if not(newWord == EMPTY_STR):
-                                newLine.append(newWord)
-                for i in range(len(newLine)/2):
-                    self.badPixels.append((int(newLine[i*2]), \
-                                           int(newLine[2*i+1]))) 
+            badPixelFile = PilatusBadPixelFile(self.badPixelFile)
+            self.badPixels = badPixelFile.getBadPixels()
+             
         # id needed load the flat field file
         if not (self.flatFieldFile == None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
