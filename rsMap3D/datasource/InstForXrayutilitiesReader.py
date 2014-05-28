@@ -89,7 +89,10 @@ class InstForXrayutilitiesReader():
         if name == None:
             return None
         else:
-            return str(name.text)
+            if name.text == None or name.text.strip() == "":
+                return None
+            else:
+                return str(name.text.strip())
     
     def getFilterScaleFactor(self):
         '''
@@ -119,13 +122,16 @@ class InstForXrayutilitiesReader():
     def getMonitorName(self):
         '''
         :return: the monitorName if included in config file.  Returns None if it
-        is not present. 
+        is not present or if the text string is empty
         '''
         name = self.root.find(MONITOR_NAME)
         if name == None:
             return None
         else:
-            return str(name.text)
+            if name.text == None or name.text.strip() == "":
+                return None
+            else:
+                return str(name.text.strip())
     
     def getMonitorScaleFactor(self):
         '''
