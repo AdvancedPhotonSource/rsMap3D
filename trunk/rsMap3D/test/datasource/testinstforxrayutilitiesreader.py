@@ -63,6 +63,26 @@ class Test(unittest.TestCase):
         monitorName = self.config2.getMonitorScaleFactor()
         self.assertEquals(monitorName, 1, "getMonitorScaleFactorNoMonitor")
 
+    def testGetMonitorNameEmptyName(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instEmptyMonitorAndFilter.xml')
+        monitorName = config.getMonitorName()
+        self.assertEquals(monitorName, None, 
+                          "testGetMonitorNameEmptyName: expecting: " +\
+                          str(None) + \
+                          ", got: " + \
+                          str(monitorName) )
+
+    def testGetMonitorNameWhiteSpace(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instWhiteSpaceMonitorAndFilter.xml')
+        monitorName = config.getMonitorName()
+        self.assertEquals(monitorName, None, 
+                          "testGetMonitorNameWhiteSpace: expecting: " +\
+                          str(None) + \
+                          ", got: " + \
+                          str(monitorName) )
+
     def testGetMonitorScaleFactorNoScaleFactor(self):
         monitorName = self.config4.getMonitorScaleFactor()
         self.assertEquals(monitorName, 1, "getMonitorScaleFactorNoScaleFactor")
@@ -74,6 +94,26 @@ class Test(unittest.TestCase):
     def testGetFilterNameNoMonitor(self):
         filterName = self.config2.getFilterName()
         self.assertEquals(filterName, None, "getFilterNameNoMonitor")
+
+    def testGetFilterNameEmptyName(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instEmptyMonitorAndFilter.xml')
+        filterName = config.getFilterName()
+        self.assertEquals(filterName, None, 
+                          "getFilterNameEmptyName: expecting: " +\
+                          str(None) + \
+                          ", got: " + \
+                          str(filterName) )
+
+    def testGetFilterNameWhiteSpace(self):
+        config = InstForXrayutilitiesReader( PROBLEM_FILES_DIR + \
+                      'instWhiteSpaceMonitorAndFilter.xml')
+        filterName = config.getFilterName()
+        self.assertEquals(filterName, None, 
+                          "getFilterNameWhiteSpace: expecting: " +\
+                          str(None) + \
+                          ", got: " + \
+                          str(filterName) )
 
     def testGetFilterScaleFactor(self):
         scaleFactor = self.config.getFilterScaleFactor()
