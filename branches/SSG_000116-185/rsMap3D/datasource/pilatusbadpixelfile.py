@@ -1,12 +1,16 @@
 '''
-Created on May 28, 2014
-
-@author: hammonds
+ Copyright (c) 2014, UChicago Argonne, LLC
+ See LICENSE file.
 '''
 import csv
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 
 class BadPixel(object):
+    '''
+    Class to define a bad pixel and a pixel whose value should replace the 
+    value in the bad pixel.  Note that this assumes that the replacement pixel
+    has a value similar to what the bad pixel should have.
+    '''
     def __init__(self, badX, badY, replacementX, replacementY):
         self.badX = badX
         self.badY = badY
@@ -14,9 +18,15 @@ class BadPixel(object):
         self.replacementY = replacementY
         
     def getBadLocation(self):
+        '''
+        Return the location of the Bad pixel
+        '''
         return (self.badX, self.badY)
     
     def getReplacementLocation(self):
+        '''
+        Return the value of the replacement pixel
+        '''
         return (self.replacementX, self.replacementY)
     
 class PilatusBadPixelFile(object):
@@ -24,8 +34,6 @@ class PilatusBadPixelFile(object):
     Bad Pixel file described at 
     http://cars.uchicago.edu/software/epics/pilatusDoc.html
     '''
-
-
     def __init__(self, fileName):
         '''
         Constructor
@@ -53,7 +61,13 @@ class PilatusBadPixelFile(object):
         print self.badPixels
         
     def getNumPixels(self):
+        '''
+        Return the number of bad pixels defined in the file
+        '''
         return len(self.badPixels)
     
     def getBadPixels(self):
+        '''
+        Return a list of BadPixel objects.
+        '''
         return self.badPixels
