@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 import abc
