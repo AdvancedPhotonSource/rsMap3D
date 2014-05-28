@@ -114,7 +114,10 @@ class AbstractGridMapper(object):
         """
         
         for pixel in self.dataSource.getBadPixels():
-            areaData[pixel[0],pixel[1]] = 0
+            badLoc = pixel.getBadLocation()
+            replaceLoc = pixel.getReplacementLocation()
+            areaData[badLoc[0],badLoc[1]] = \
+                areaData[replaceLoc[0],replaceLoc[1]]
         
         return areaData
 
