@@ -10,6 +10,7 @@ CANCEL_STR = "Cancel"
 LOAD_STR = "Load"
 RUN_STR = "Run"
 EMPTY_STR = ""
+SPACE_STR = " "
 COMMA_STR = ","
 QLINEEDIT_COLOR_STYLE = "QLineEdit {color : %s;}"
 RED = 'red'
