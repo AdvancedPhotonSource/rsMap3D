@@ -31,6 +31,8 @@
         <referenceAngle number="1" specMotorName="keta"/>
         <referenceAngle number="2" specMotorName="kap"/>
         <referenceAngle number="3" specMotorName="kphi"/>
+		<kappa>49.9945</kappa>
+		<kappaInverted>True</kappaInverted>
     </sampleAngleMapFunction>
         
     <!-- define referemce directions -->
