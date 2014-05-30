@@ -263,6 +263,22 @@ class Test(unittest.TestCase):
                           [2,3,4], \
                           "getSampleAngleMappingPrimaryAngles: " + str(angles))
 
+    def testGetSampleAngleMappingParameter(self):
+        param = self.config5.getSampleAngleMappingParameter('kappa')
+        kappa = 49.9945
+        self.assertEqual(param, str(kappa), \
+                         "testGetSampleAngleMappingParameter Expecting: " + \
+                         str(kappa) + \
+                         " got back: " + \
+                         str(param))
+        param = self.config5.getSampleAngleMappingParameter('kappaInverted')
+        kappaInverted = True
+        self.assertEqual(param, str(kappaInverted), \
+                         "testGetSampleAngleMappingParameter Expecting: " + \
+                         str(kappaInverted) + \
+                         " got back: " + \
+                         str(param))
+        
     def testGetSampleAngleMappingFunctionPrimaryAnglesNoMap(self):
         self.assertRaises(InstConfigException, 
                           self.config4.getSampleAngleMappingPrimaryAngles)
