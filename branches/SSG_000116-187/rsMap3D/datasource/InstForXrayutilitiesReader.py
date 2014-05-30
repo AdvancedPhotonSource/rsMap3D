@@ -219,6 +219,17 @@ class InstForXrayutilitiesReader():
         else:
             return function.attrib[NAME]
 
+    def getSampleAngleMappingParameter(self, name):
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise InstConfigException("No Mapping function defined in " +\
+                                      "instrument config file")
+        param = function.find(NAMESPACE + name)
+        if param != None and param.text != "":
+            return param.text
+        else:
+            return None
+    
     def getSampleAngleMappingPrimaryAngles(self):
         '''
         :return: The name of a function to be used in mapping 

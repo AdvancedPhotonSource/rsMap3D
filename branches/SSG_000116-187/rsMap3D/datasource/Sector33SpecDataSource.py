@@ -79,9 +79,24 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY
         kappa = referenceAngles[:,1] * np.pi/ONE_EIGHTY
         kphi = referenceAngles[:,2] * np.pi/ONE_EIGHTY
-        self.kalpha = 49.9945 * np.pi/ONE_EIGHTY
-        self.kappa_inverted = False
-
+        kappaParam = self.instConfig.getSampleAngleMappingParameter('kappa')
+        try:
+            if kappaParam != None:
+                self.kalpha = float(kappaParam) * np.pi/ONE_EIGHTY
+            else:
+                self.kalpha = 49.9945
+            kappaInvertedParam = \
+                self.instConfig.getSampleAngleMappingParameter('kappaInverted')
+            if kappaInvertedParam != None:
+                self.kappa_inverted = self.to_bool(kappaInvertedParam)
+            else:
+                self.kappa_inverted = False
+        except Exception as ex:
+            raise RSMap3DConfig("Error trying to get parameter for " + \
+                                "sampleAngleMappingFunction " + \
+                                "_calc_eulerian_from_kappa in inst config " + \
+                                "file\n" + \
+                                str(ex))
         _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
         
         if self.kappa_inverted:
@@ -434,6 +449,24 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
         
     
+    def to_bool(self, value):
+        """
+        Note this method found in answer to:
+        http://stackoverflow.com/questions/715417/converting-from-a-string-to-boolean-in-python
+        Converts 'something' to boolean. Raises exception if it gets a string 
+        it doesn't handle.
+        Case is ignored for strings. These string values are handled:
+          True: 'True', "1", "TRue", "yes", "y", "t"
+          False: "", "0", "faLse", "no", "n", "f"
+        Non-string values are passed to bool.
+        """
+        if type(value) == type(''):
+            if value.lower() in ("yes", "y", "true",  "t", "1"):
+                return True
+            if value.lower() in ("no",  "n", "false", "f", "0", ""):
+                return False
+            raise Exception('Invalid value for boolean conversion: ' + value)
+        return bool(value)
 
 class LoadCanceledException(RSMap3DException):
     '''
