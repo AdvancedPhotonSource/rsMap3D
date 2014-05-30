@@ -220,6 +220,16 @@ class InstForXrayutilitiesReader():
             return function.attrib[NAME]
 
     def getSampleAngleMappingParameter(self, name):
+        '''
+        Return a named parameter to be used by the mapping function.  This 
+        parameter is unique to the mapping function.  This method returns a 
+        string parameter which must be properly cast by the mapping function.
+        Mapping function needs to deal with error cases.  None is returned if 
+        the named parameter is not defined.
+        :param: name Name of the defined parameter
+        :return: Parameter defined by the XML element 'name'
+        
+        '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
             raise InstConfigException("No Mapping function defined in " +\

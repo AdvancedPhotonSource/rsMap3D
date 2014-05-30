@@ -2,8 +2,8 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import csv
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
+from rsMap3D.gui.rsm3dcommonstrings import COMMA_STR, SPACE_STR
 
 class BadPixel(object):
     '''
@@ -39,24 +39,25 @@ class PilatusBadPixelFile(object):
         Constructor
         '''
         self.badPixelFile = fileName
-        reader = csv.reader(open(self.badPixelFile), \
-                            delimiter=' ', \
-                            skipinitialspace=True) 
+        reader = open(self.badPixelFile) 
         self.badPixels = []
+        line_num = 0
         for line in reader:
             try:
-                badP = line[0].split(',')
-                replaceP = line[1].split(',')
-                self.badPixels.append(BadPixel(int(badP[0]), \
-                                       int(badP[1]), \
-                                       int(replaceP[0]), \
-                                       int(replaceP[1])))
-            except (IndexError, ValueError):
+                line_num += 1
+                line = line.replace(COMMA_STR, SPACE_STR)
+                values = line.split()
+                self.badPixels.append(BadPixel(int(values[0]), \
+                                       int(values[1]), \
+                                       int(values[2]), \
+                                       int(values[3])))
+            except (IndexError, ValueError) as ex:
                 raise RSMap3DException( "Error in bad Pixel file at " + \
                                         str(line) + \
                                         "  Format is at Line " + \
-                                        str(reader.line_num) + \
-                                        " badX1,badY1 replacementX1,replacementY1")
+                                        str(line_num) + \
+                                        " badX1,badY1 replacementX1,replacementY1\n" + \
+                                        str(ex))
 
         print self.badPixels
         
