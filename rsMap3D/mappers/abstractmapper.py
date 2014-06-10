@@ -139,7 +139,10 @@ class AbstractGridMapper(object):
         """
         
         if mask == None:
-            mask = [True] * len(self.dataSource.getImageToBeUsed()[scans[0]])
+            mask_was_none = True
+            #mask = [True] * len(self.dataSource.getImageToBeUsed()[scans[0]])
+        else:
+            mask_was_none = False
         #sd = spec.SpecDataFile(self.dataSource.specFile)
         intensity = np.array([])
         
@@ -235,6 +238,9 @@ class AbstractGridMapper(object):
             # read in the image data
             arrayInitializedForScan = False
             foundIndex = 0
+            
+            if mask_was_none:
+                mask = [True] * len(self.dataSource.getImageToBeUsed()[scannr])            
             
             for ind in xrange(scan.data.shape[0]):
                 if imageToBeUsed[scannr][ind] and mask[ind]:    
