@@ -39,6 +39,7 @@ class QGridMapper(AbstractGridMapper):
                             self.dataSource.getDetectorDimensions()[1]
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
+                    kwargs['mask'] = imageToBeUsed[scan]
                     qx, qy, qz, intensity = self.rawmap((scan,), **kwargs)
                     
                     # convert data to rectangular grid in reciprocal space
