@@ -223,26 +223,13 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         :param scan: scan to set the angles for
         :param angles: Array of angles to set for this scan  
         '''
-        scanLine = scan.scan_command.split(' ') 
-        scannedAngles = []
-        if scanLine[0] == 'ascan':
-            scannedAngles.append(scanLine[1])
-        elif scanLine[0] == 'a2scan':
-            scannedAngles.append(scanLine[1])
-            scannedAngles.append(scanLine[4])
-        elif scanLine[0] == 'a3scan':
-            scannedAngles.append(scanLine[1])
-            scannedAngles.append(scanLine[4])
-            scannedAngles.append(scanLine[7])
-        else:
-            raise Exception("Scan type not supported by S33SpecDataSource " + \
-                            " when angle mapping is used")
-        refAngleNames = self.instConfig.getSampleAngleMappingReferenceAngles()
+
         needToCorrect = False
-        for rAngle in refAngleNames:
-            if (rAngle in scannedAngles):
+        refAngleNames = self.instConfig.getSampleAngleMappingReferenceAngles()
+        for refAngleName in refAngleNames:
+            if refAngleName in scan.cols:
                 needToCorrect = True
-        
+                
         if needToCorrect:
             refAngles = self.getScanAngles(scan, refAngleNames)
             primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
