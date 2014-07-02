@@ -24,7 +24,6 @@ import Image
 IMAGE_DIR_MERGE_STR = "images/%s"
 SCAN_NUMBER_MERGE_STR = "S%03d"
 TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
-ONE_EIGHTY = 180.0
 
 class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     '''
@@ -75,16 +74,17 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         :param referenceAngles: list of reference angles to be used in angle 
         conversion
         """
-        
-        keta = referenceAngles[:,0] * np.pi/ONE_EIGHTY
-        kappa = referenceAngles[:,1] * np.pi/ONE_EIGHTY
-        kphi = referenceAngles[:,2] * np.pi/ONE_EIGHTY
+
+        keta = np.deg2rad(referenceAngles[:,0])
+        kappa = np.deg2rad(referenceAngles[:,1])
+        kphi = np.deg2rad(referenceAngles[:,2])
         kappaParam = self.instConfig.getSampleAngleMappingParameter('kappa')
+        
         try:
             if kappaParam != None:
-                self.kalpha = float(kappaParam) * np.pi/ONE_EIGHTY
+                self.kalpha = np.deg2rad(float(kappaParam))
             else:
-                self.kalpha = 49.9945
+                self.kalpha = np.deg2rad(50.000)
             kappaInvertedParam = \
                 self.instConfig.getSampleAngleMappingParameter('kappaInverted')
             if kappaInvertedParam != None:
@@ -97,16 +97,16 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                 "_calc_eulerian_from_kappa in inst config " + \
                                 "file\n" + \
                                 str(ex))
-        _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
         
+        _t1 = np.arctan(np.tan(kappa / 2.0) * np.cos(self.kalpha))
         if self.kappa_inverted:
-            eta = (keta + _t1) * ONE_EIGHTY/np.pi
-            phi = (kphi + _t1) * ONE_EIGHTY/np.pi
+            eta = np.rad2deg(keta + _t1)
+            phi = np.rad2deg(kphi + _t1)
         else:
-            eta = (keta - _t1) * ONE_EIGHTY/np.pi
-            phi = (kphi - _t1) * ONE_EIGHTY/np.pi
-        chi = 2.0 * np.arcsin(np.sin(kappa / 2.0) * \
-                              np.sin(self.kalpha)) * ONE_EIGHTY/np.pi
+            eta = np.rad2deg(keta - _t1)
+            phi = np.rad2deg(kphi - _t1)
+        chi = 2.0 * np.rad2deg(np.arcsin(np.sin(kappa / 2.0) * \
+                               np.sin(self.kalpha)))
         
         return eta, chi, phi
 
@@ -281,7 +281,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                           " in scan parameters")
             geoAngles[:,i] = v
         
-
         return geoAngles
         
     def loadSource(self, mapHKL=False):
