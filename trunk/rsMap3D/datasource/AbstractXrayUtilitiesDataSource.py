@@ -305,18 +305,13 @@ class AbstractXrayutilitiesDataSource:
         Check to see if the input boundaries have area that lie within the 
         range boundaries specified for analysis.  True if yes, False if no.
         '''
-        return ((xmin >= self.rangeBounds[XMIN_INDEX] and \
-                 xmin <= self.rangeBounds[XMAX_INDEX]) or \
-                (xmax >= self.rangeBounds[XMIN_INDEX] and \
-                 xmax <= self.rangeBounds[XMAX_INDEX])) and \
-                ((ymin >= self.rangeBounds[YMIN_INDEX] and \
-                  ymin <= self.rangeBounds[YMAX_INDEX]) or \
-                (ymax >= self.rangeBounds[YMIN_INDEX] and \
-                 ymax <= self.rangeBounds[YMAX_INDEX])) and \
-                ((zmin >= self.rangeBounds[ZMIN_INDEX] and \
-                  zmin <= self.rangeBounds[ZMAX_INDEX]) or \
-                (zmax >= self.rangeBounds[ZMIN_INDEX] and \
-                 zmax <= self.rangeBounds[ZMAX_INDEX]))
+               
+        return (xmin <= self.rangeBounds[XMAX_INDEX] and \
+                xmax >= self.rangeBounds[XMIN_INDEX]) and \
+               (ymin <= self.rangeBounds[YMAX_INDEX] and \
+                ymax >= self.rangeBounds[YMIN_INDEX]) and \
+               (zmin <= self.rangeBounds[ZMAX_INDEX] and \
+                zmax >= self.rangeBounds[ZMIN_INDEX])
                
     @abc.abstractmethod
     def loadSource(self, mapHKL=False):
