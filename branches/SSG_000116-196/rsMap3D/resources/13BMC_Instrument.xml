@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Sample instrument definition file for RSM program for sector 13-BMC -->
+<instForXrayutils xmlns="https://subversion.xray.aps.anl.gov/RSM/instForXrayutils">
+    <dateWritten>Wed, Mar 5, 2014</dateWritten>
+    <timeWritten>14:36:13.5 (-6)</timeWritten>
+
+    <!-- Define the sample circles as a series of axes.
+         number - is an index to define which circle.  1 is the outermost
+             circle working towards the innermost
+         specAngleName - is the name of the motor in spec file
+         the value (z-, y+, etc.) are the rotation axis/direction 
+             for the circle -->
+    <sampleCircles numCircles="4">
+       <circleAxis number="1" specMotorName="mu" directionAxis="x-"/>
+       <circleAxis number="2" specMotorName="eta" directionAxis="z-"/>
+       <circleAxis number="3" specMotorName="chi" directionAxis="y-"/>
+       <circleAxis number="4" specMotorName="phi" directionAxis="z-"/>
+    </sampleCircles>
+
+    <!-- Define the detector circles as a series of axes. -->
+    <detectorCircles numCircles="2">
+       <circleAxis number="1" specMotorName="nu" directionAxis="x-"/>
+       <circleAxis number="2" specMotorName="del" directionAxis="z-"/>
+    </detectorCircles>
+
+    <sampleAngleMapFunction name="_calc_eulerian_from_kappa" 
+                            calcOnScannedRef="True">
+        <primaryAngle number="2"/>
+        <primaryAngle number="3"/>
+        <primaryAngle number="4"/>
+        <referenceAngle number="1" specMotorName="keta"/>
+        <referenceAngle number="2" specMotorName="kap"/>
+        <referenceAngle number="3" specMotorName="kphi"/>
+		<kappa>49.9945</kappa>
+		<kappaInverted>True</kappaInverted>
+    </sampleAngleMapFunction>
+        
+    <!-- define referemce directions -->
+    <primaryBeamDirection>
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </primaryBeamDirection>
+    <inplaneReferenceDirection>
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </inplaneReferenceDirection>
+    <sampleSurfaceNormalDirection>
+        <axis number="1">1</axis>
+        <axis number="2">0</axis>
+        <axis number="3">0</axis>
+    </sampleSurfaceNormalDirection>
+    <projectionDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">-1</axis>
+    </projectionDirection>
+</instForXrayutils>

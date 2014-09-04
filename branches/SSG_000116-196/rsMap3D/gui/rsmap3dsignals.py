@@ -1,0 +1,26 @@
+'''
+ Copyright (c) 2014, UChicago Argonne, LLC
+ See LICENSE file.
+'''
+BLOCK_TABS_FOR_LOAD_SIGNAL = "blockTabsForLoad"
+BLOCK_TABS_FOR_PROCESS_SIGNAL = "blockTabsForProcess"
+CANCEL_LOAD_FILE_SIGNAL = "cancelLoadFile"
+CANCEL_PROCESS_SIGNAL = "cancelProcess"
+CLEAR_RENDER_WINDOW_SIGNAL = "clearRenderWindow"
+DONE_LOADING_SIGNAL = "doneLoading"
+FILE_ERROR_SIGNAL = "fileError"
+LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL = "loadDataSourceToScanForm"
+LOAD_FILE_SIGNAL = "loadFile"
+PROCESS_ERROR_SIGNAL = "processError"
+PROCESS_SIGNAL = "process"
+RANGE_CHANGED_SIGNAL = "rangeChanged"
+RENDER_BOUNDS_SIGNAL = "renderBounds"
+SET_FILE_NAME_SIGNAL = "setFileName"
+SET_PROCESS_CANCEL_OK_SIGNAL = "setProcessCancelOK"
+SET_PROCESS_RUN_OK_SIGNAL = "setProcessRunOK"
+SET_SCAN_LOAD_CANCEL_SIGNAL = "setScanLoadCancelOK"
+SET_SCAN_LOAD_OK_SIGNAL = "setScanLoadOK"
+SHOW_RANGE_BOUNDS_SIGNAL = "showRangeBounds"
+UNBLOCK_TABS_FOR_LOAD_SIGNAL = "unblockTabsForLoad"
+UNBLOCK_TABS_FOR_PROCESS_SIGNAL = "unblockTabsForProcess"
+UPDATE_PROGRESS_SIGNAL = "updateProgress"
