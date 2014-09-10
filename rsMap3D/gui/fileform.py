@@ -20,6 +20,7 @@ from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, CANCEL_STR, BROWSE_STR,\
     TIFF_FILE_FILTER, SELECT_DETECTOR_CONFIG_TITLE, DETECTOR_CONFIG_FILE_FILTER,\
     INSTRUMENT_CONFIG_FILE_FILTER, SELECT_INSTRUMENT_CONFIG_TITLE,\
     SPEC_FILE_FILTER, SELECT_SPEC_FILE_TITLE, LOAD_STR
+from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
@@ -27,7 +28,7 @@ from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     TEXT_CHANGED_SIGNAL
 
 
-class FileForm(qtGui.QDialog):
+class FileForm(AbstractImagePerFileView):
     '''
     This class presents information for selecting input files
     '''
@@ -58,14 +59,13 @@ class FileForm(qtGui.QDialog):
         self.roiymin = 1
         self.roiymax = 480
         self.projectionDirection = [0,0,1]
-        layout = qtGui.QVBoxLayout()
 
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
-        layout.addWidget(self.dataBox)
-        layout.addWidget(controlBox)
-        self.setLayout(layout);
+        self.layout.addWidget(self.dataBox)
+        self.layout.addWidget(controlBox)
+        self.setLayout(self.layout);
 
         #Initialize a couple of widgets to do setup.
         self.noFieldRadio.setChecked(True)
