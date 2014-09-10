@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2012, UChicago Argonne, LLC
+ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
@@ -135,11 +135,20 @@ class Sector34NexusEscanSource(object):
                         except Exception:
                             print "Trouble Opening File" + filename
             print self.incidentEnergy
-            self.imageBounds = self.findImageQs()
+            self.imageBounds[0] = self.findImageQs()
+            print "ImageBounds: " + str(self.imageBounds)
             self.availableScans.append(1)
             
     def findImageQs(self):
         (qx,qy, qz) = self.qsForDetector()
+        idx = range(len(qx))
+        xmin = [np.min(qx[i]) for i in idx]
+        xmax = [np.max(qx[i]) for i in idx]
+        ymin = [np.min(qy[i]) for i in idx]
+        ymax = [np.max(qy[i]) for i in idx]
+        zmin = [np.min(qz[i]) for i in idx]
+        zmax = [np.max(qz[i]) for i in idx]
+        return (xmin, xmax, ymin, ymax, zmin, zmax)
                      
     def qsForDetector(self):            
         xIndexArray =  range(self.detectorROI[0], self.detectorROI[1]+1)
@@ -173,9 +182,9 @@ class Sector34NexusEscanSource(object):
             qx[afile-1,:,:] = qpx * twoPiOverLamda 
             qy[afile-1,:,:] = qpy * twoPiOverLamda 
             qz[afile-1,:,:] = qpz * twoPiOverLamda 
-        print(qx)
-        print(qy)
-        print(qz)
+#        print(qx)
+#        print(qy)
+#        print(qz)
         return qx, qy, qz
 
     def pixel2XYZ(self, pixelX, pixelY):
