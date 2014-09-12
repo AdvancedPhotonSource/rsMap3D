@@ -12,14 +12,12 @@ from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader\
      import DetectorGeometryForXrayutilitiesReader
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
     InstConfigException, RSMap3DException
-from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
-    UPDATE_PROGRESS_SIGNAL
-from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, CANCEL_STR, BROWSE_STR,\
+from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
     BAD_PIXEL_FILE_FILTER, SELECT_BAD_PIXEL_TITLE, SELECT_FLAT_FIELD_TITLE,\
     TIFF_FILE_FILTER, SELECT_DETECTOR_CONFIG_TITLE, DETECTOR_CONFIG_FILE_FILTER,\
     INSTRUMENT_CONFIG_FILE_FILTER, SELECT_INSTRUMENT_CONFIG_TITLE,\
-    SPEC_FILE_FILTER, SELECT_SPEC_FILE_TITLE, LOAD_STR
+    SPEC_FILE_FILTER, SELECT_SPEC_FILE_TITLE
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
@@ -32,7 +30,7 @@ class FileForm(AbstractImagePerFileView):
     '''
     This class presents information for selecting input files
     '''
-    UPDATE_PROGRESS_SIGNAL = "updateProgress"
+    #UPDATE_PROGRESS_SIGNAL = "updateProgress"
     # Regular expressions for string validation
     PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
     PIX_AVG_REGEXP_2 =  "^((\d)+,*){2}$"
@@ -40,8 +38,6 @@ class FileForm(AbstractImagePerFileView):
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
     #Strings for Text Widgets
-    POLE_MAP_STR = "Stereographic Projection"
-    SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
     
     NONE_RADIO_NAME = "None"
     BAD_PIXEL_RADIO_NAME = "Bad Pixel File"
@@ -59,7 +55,9 @@ class FileForm(AbstractImagePerFileView):
         self.roiymin = 1
         self.roiymax = 480
         self.projectionDirection = [0,0,1]
-
+        self.fileDialogTitle = SELECT_SPEC_FILE_TITLE
+        self.fileDialogFilter = SPEC_FILE_FILTER
+        
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
@@ -159,30 +157,26 @@ class FileForm(AbstractImagePerFileView):
             self.instConfigTxt.setText(fileName)
             self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
 
-    def _browseForProjectDir(self):
-        '''
-        Launch file selection dialog for instrument file.
-        '''
-        if self.projNameTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
-                                                   SELECT_SPEC_FILE_TITLE, \
-                                                   filter=SPEC_FILE_FILTER)
-        else:
-            fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None,\
-                                                   SELECT_SPEC_FILE_TITLE, \
-                                                   directory = fileDirectory,
-                                                   filter=SPEC_FILE_FILTER)
-            
-        if fileName != EMPTY_STR:
-            self.projNameTxt.setText(fileName)
-            self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
-
-
-    def _cancelLoadFile(self):
-        ''' Send signal to cancel a file load'''
-        self.emit(qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL))
-        
+#     def _browseForProjectDir(self):
+#         '''
+#         Launch file selection dialog for instrument file.
+#         '''
+#         if self.projNameTxt.text() == EMPTY_STR:
+#             fileName = qtGui.QFileDialog.getOpenFileName(None, \
+#                                                    SELECT_SPEC_FILE_TITLE, \
+#                                                    filter=SPEC_FILE_FILTER)
+#         else:
+#             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
+#             fileName = qtGui.QFileDialog.getOpenFileName(None,\
+#                                                    SELECT_SPEC_FILE_TITLE, \
+#                                                    directory = fileDirectory,
+#                                                    filter=SPEC_FILE_FILTER)
+#             
+#         if fileName != EMPTY_STR:
+#             self.projNameTxt.setText(fileName)
+#             self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+# 
+# 
     def checkOkToLoad(self):
         '''
         Make sure we have valid file names for project, instrument config, 
@@ -199,56 +193,52 @@ class FileForm(AbstractImagePerFileView):
               not (str(self.flatFieldFileTxt.text()) == ""))) and \
              self.pixAvgValid(self.pixAvgTxt.text()) and \
              self.detROIValid(self.detROITxt.text()):
-            self.loadButton.setEnabled(True)
+            retVal = True
+            self.loadButton.setEnabled(retVal)
         else:
-            self.loadButton.setDisabled(True)
-            
+            retVal = False
+            self.loadButton.setDisabled(not retVal)
+        return retVal
+    
     def _createControlBox(self):
         '''
         Create Layout holding controls widgets
         '''
-        controlBox = qtGui.QGroupBox()
-        controlLayout = qtGui.QGridLayout()       
-        row =0
-        self.progressBar = qtGui.QProgressBar()
-        controlLayout.addWidget(self.progressBar, row, 1)
-        
-        row += 1
-        self.loadButton = qtGui.QPushButton(LOAD_STR)        
-        self.loadButton.setDisabled(True)
-        controlLayout.addWidget(self.loadButton, row, 1)
-        self.cancelButton = qtGui.QPushButton(CANCEL_STR)        
-        self.cancelButton.setDisabled(True)
-        controlLayout.addWidget(self.cancelButton, row, 2)
-
-        self.connect(self.loadButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._loadFile)
-        self.connect(self.cancelButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._cancelLoadFile)
-        self.connect(self, \
-                     qtCore.SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
-                     self.setProgress)
-
-        controlBox.setLayout(controlLayout)
+        controlBox = super(FileForm, self)._createControlBox()
+#         controlBox = qtGui.QGroupBox()
+#         controlLayout = qtGui.QGridLayout()       
+#         row =0
+#         self.progressBar = qtGui.QProgressBar()
+#         controlLayout.addWidget(self.progressBar, row, 1)
+#         
+#         row += 1
+#         self.loadButton = qtGui.QPushButton(LOAD_STR)        
+#         self.loadButton.setDisabled(True)
+#         controlLayout.addWidget(self.loadButton, row, 1)
+#         self.cancelButton = qtGui.QPushButton(CANCEL_STR)        
+#         self.cancelButton.setDisabled(True)
+#         controlLayout.addWidget(self.cancelButton, row, 2)
+# 
+#         self.connect(self.loadButton, \
+#                      qtCore.SIGNAL(CLICKED_SIGNAL), \
+#                      self._loadFile)
+#         self.connect(self.cancelButton, \
+#                      qtCore.SIGNAL(CLICKED_SIGNAL), \
+#                      self._cancelLoadFile)
+#         self.connect(self, \
+#                      qtCore.SIGNAL(self.UPDATE_PROGRESS_SIGNAL), \
+#                      self.setProgress)
+# 
+#         controlBox.setLayout(controlLayout)
         return controlBox
     
     def _createDataBox(self):
         '''
         Create widgets for collecting data
         '''
-        dataBox = qtGui.QGroupBox()
-        dataLayout = qtGui.QGridLayout()
-        row = 0
-        label = qtGui.QLabel("Project File:");
-        self.projNameTxt = qtGui.QLineEdit()
-        self.projectDirButton = qtGui.QPushButton(BROWSE_STR)
-        dataLayout.addWidget(label, row, 0)
-        dataLayout.addWidget(self.projNameTxt, row, 1)
-        dataLayout.addWidget(self.projectDirButton, row, 2)
-
-        row += 1
+        dataBox = super(FileForm, self)._createDataBox()
+        dataLayout = dataBox.layout()
+        row = dataLayout.rowCount()
         label = qtGui.QLabel("Instrument Config File:");
         self.instConfigTxt = qtGui.QLineEdit()
         self.instConfigFileButton = qtGui.QPushButton(BROWSE_STR)
@@ -328,18 +318,12 @@ class FileForm(AbstractImagePerFileView):
         dataLayout.addWidget(self.hklCheckbox, row, 1)
 
         # Add Signals between widgets
-        self.connect(self.projectDirButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseForProjectDir)
         self.connect(self.instConfigFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self._browseForInstFile)
         self.connect(self.detConfigFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self._browseForDetFile)
-        self.connect(self.projNameTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._projectDirChanged)
         self.connect(self.instConfigTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self._instConfigChanged)
@@ -535,30 +519,12 @@ class FileForm(AbstractImagePerFileView):
             pixels.append(int(value))
         return pixels
     
-    def getProjectDir(self):
-        '''
-        Return the project directory
-        '''
-        return os.path.dirname(str(self.projNameTxt.text()))
-        
     def getProjectionDirection(self):
         '''
         Return projection direction for stereographic projections
         '''
         return self.projectionDirection
           
-    def getProjectExtension(self):
-        '''
-        Return the project file extension
-        '''
-        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[1]
-
-    def getProjectName(self):
-        '''
-        Return the project name
-        '''
-        return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
-    
             
     def getScanList(self):
         '''
@@ -594,26 +560,7 @@ class FileForm(AbstractImagePerFileView):
                              "The filename entered for the instrument " + \
                              "configuration is invalid")
         
-    def _loadFile(self):
-        '''
-        Emit a signal to start loading data
-        '''
-        self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
-
-    def _projectDirChanged(self):
-        '''
-        When the project name changes, check to see if it is valid file and 
-        then check to see if it is OK to enable the Load button.
-        '''
-        if os.path.isfile(self.projNameTxt.text()) or \
-            self.projNameTxt.text() == EMPTY_STR:
-            self.checkOkToLoad()
-        else:
-            message = qtGui.QMessageBox()
-            message.warning(self, \
-                             WARNING_STR, \
-                             "The project directory entered is invalid")
-        
+         
     def _outputTypeChanged(self, typeStr):
         '''
         If the output is selected to be a simple grid map type then allow
@@ -650,45 +597,6 @@ class FileForm(AbstractImagePerFileView):
             return True
         else:
             return False
-        
-    def setCancelOK(self):
-        '''
-        If Cancel is OK the load button is disabled and the cancel button is 
-        enabled
-        '''
-        self.loadButton.setDisabled(True)
-        self.cancelButton.setDisabled(False)
-        self.dataBox.setDisabled(True)
-
-    def setLoadOK(self):
-        '''
-        If Load is OK the load button is enabled and the cancel button is 
-        disabled
-        '''
-        self.loadButton.setDisabled(False)
-        self.cancelButton.setDisabled(True)
-        self.dataBox.setDisabled(False)
-
-    def setProgress(self, value, maxValue):
-        '''
-        Set the value to be displayed in the progress bar.
-        '''
-        self.progressBar.setMinimum(1)
-        self.progressBar.setMaximum(maxValue)
-        self.progressBar.setValue(value)
-        
-    def setProgressLimits(self, minVal, maxVal):
-        '''
-        Set the limits on the progress bar
-        '''
-        self.progressBar.setMinimum(minVal)
-        self.progressBar.setMaximum(maxVal)
-        
-    def updateProgress(self, value, maxValue):
-        '''
-        Emit a signal to update the progress bar
-        '''
-        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value, maxValue)
         
     def updateProjectionDirection(self):
         '''
