@@ -148,40 +148,40 @@ class Sector34NexusEscanSource(AbstractDataSource):
             fileList = glob.glob(fileFilter)
         if fileList == []:
                 raise RSMap3DException("No files Found matching " + fileFilter)
-            self.files = range(1,len(fileList)+1)
+        self.files = range(1,len(fileList)+1)
 
-            if self.progressUpdater <> None:
-                self.progressUpdater(self.progress, self.progressMax)
-            for afile in self.files:
-                if (self.cancelLoad):
-                    self.cancelLoad = False
-                    raise LoadCanceledException(CANCEL_STR)
-                else:
-                    filename = os.path.join(self.projectDir, \
-                                   string.rsplit(self.projectName, '_', 1)[0]) + \
-                                   '_' + \
-                                   str(afile) + \
-                                   self.projectExtension
-                    print filename
-                    if os.path.exists(filename):
-                        #curScan = self.sd[afile]
-                        self.availableFiles.append(afile)
-                        try:
-                            hdfFile = h5py.File(filename, "r")
-                            self.incidentEnergy[afile] = \
-                                hdfFile[H5_INCIDENT_ENERGY].value[0]
-                            self.detectorROI = \
-                                [hdfFile[H5_ROI_START_X].value[0], \
-                                 hdfFile[H5_ROI_END_X].value[0], \
-                                 hdfFile[H5_ROI_START_Y].value[0], \
-                                 hdfFile[H5_ROI_END_Y].value[0]]
-                            hdfFile.close()
-                        except Exception:
-                            print "Trouble Opening File" + filename
-            print self.incidentEnergy
-            self.imageBounds[1] = self.findImageQs()
-            print "ImageBounds: " + str(self.imageBounds)
-            self.availableScans.append(1)
+        if self.progressUpdater <> None:
+            self.progressUpdater(self.progress, self.progressMax)
+        for afile in self.files:
+            if (self.cancelLoad):
+                self.cancelLoad = False
+                raise LoadCanceledException(CANCEL_STR)
+            else:
+                filename = os.path.join(self.projectDir, \
+                               string.rsplit(self.projectName, '_', 1)[0]) + \
+                               '_' + \
+                               str(afile) + \
+                               self.projectExtension
+                print filename
+                if os.path.exists(filename):
+                    #curScan = self.sd[afile]
+                    self.availableFiles.append(afile)
+                    try:
+                        hdfFile = h5py.File(filename, "r")
+                        self.incidentEnergy[afile] = \
+                            hdfFile[H5_INCIDENT_ENERGY].value[0]
+                        self.detectorROI = \
+                            [hdfFile[H5_ROI_START_X].value[0], \
+                             hdfFile[H5_ROI_END_X].value[0], \
+                             hdfFile[H5_ROI_START_Y].value[0], \
+                             hdfFile[H5_ROI_END_Y].value[0]]
+                        hdfFile.close()
+                    except Exception:
+                        print "Trouble Opening File" + filename
+        print self.incidentEnergy
+        self.imageBounds[1] = self.findImageQs()
+        print "ImageBounds: " + str(self.imageBounds)
+        self.availableScans.append(1)
             
     def pixel2XYZ(self, pixelX, pixelY):
         
