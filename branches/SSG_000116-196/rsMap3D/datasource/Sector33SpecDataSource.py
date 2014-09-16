@@ -6,9 +6,10 @@ import os
 from pyspec import spec
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
-from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR, COMMA_STR, CANCEL_STR
+from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
+from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
@@ -18,7 +19,6 @@ import numpy as np
 import xrayutilities as xu
 import time
 import traceback
-import csv
 import Image
 
 IMAGE_DIR_MERGE_STR = "images/%s"
@@ -60,6 +60,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         self.progress = 0
         self.progressInc = 1
         self.progressMax = 1
+        self.haltMap = False
         try:
             self.scans = kwargs['scanList']
         except KeyError:
@@ -262,6 +263,20 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                        str(tb))
         return geoAngles
     
+    def getReferenceNames(self):
+        '''
+        '''
+        names = []
+        names.extend(self.getSampleAngleNames())
+        names.extend(self.getDetectorAngleNames())
+        return names
+    
+    def getReferenceValues(self, scan):
+        '''
+        '''
+        angles = self.getGeoAngles(self.sd[scan], self.getReferenceNames())
+        return angles
+
     def getScanAngles(self, scan, angleNames):
         """
         This function returns all of the geometry angles for the
@@ -283,6 +298,21 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         return geoAngles
         
+    def hotpixelkill(self, areaData):
+        """
+        function to remove hot pixels from CCD frames
+        ADD REMOVE VALUES IF NEEDED!
+        :param areaData: area detector data
+        """
+        
+        for pixel in self.getBadPixels():
+            badLoc = pixel.getBadLocation()
+            replaceLoc = pixel.getReplacementLocation()
+            areaData[badLoc[0],badLoc[1]] = \
+                areaData[replaceLoc[0],replaceLoc[1]]
+        
+        return areaData
+
     def loadSource(self, mapHKL=False):
         '''
         This method does the work of loading data from the files.  This has been
@@ -454,6 +484,184 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             raise Exception('Invalid value for boolean conversion: ' + value)
         return bool(value)
 
+    def rawmap(self,scans, angdelta=[0,0,0,0,0],
+            adframes=None, mask = None):
+        """
+        read ad frames and and convert them in reciprocal space
+        angular coordinates are taken from the spec file
+        or read from the edf file header when no scan number is given (scannr=None)
+        """
+        
+        if mask == None:
+            mask_was_none = True
+            #mask = [True] * len(self.getImageToBeUsed()[scans[0]])
+        else:
+            mask_was_none = False
+        #sd = spec.SpecDataFile(self.specFile)
+        intensity = np.array([])
+        
+        # fourc goniometer in fourc coordinates
+        # convention for coordinate system:
+        # x: upwards;
+        # y: along the incident beam;
+        # z: "outboard" (makes coordinate system right-handed).
+        # QConversion will set up the goniometer geometry.
+        # So the first argument describes the sample rotations, the second the
+        # detector rotations and the third the primary beam direction.
+        qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), \
+                                    self.getDetectorCircleDirections(), \
+                                    self.getPrimaryBeamDirection())
+    
+        # define experimental class for angle conversion
+        #
+        # ipdir: inplane reference direction (ipdir points into the primary beam
+        #        direction at zero angles)
+        # ndir:  surface normal of your sample (ndir points in a direction
+        #        perpendicular to the primary beam and the innermost detector
+        #        rotation axis)
+        en = self.getIncidentEnergy()
+        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), \
+                       self.getSampleSurfaceNormalDirection(), \
+                       en=en[self.getAvailableScans()[0]], \
+                       qconv=qconv)
+
+        
+        # initialize area detector properties
+        if (self.getDetectorPixelWidth() != None ) and \
+            (self.getDistanceToDetector() != None):
+            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
+                self.getDetectorPixelDirection2(), \
+                cch1=self.getDetectorCenterChannel()[0], \
+                cch2=self.getDetectorCenterChannel()[1], \
+                Nch1=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[0], \
+                pwidth1=self.getDetectorPixelWidth()[0], \
+                pwidth2=self.getDetectorPixelWidth()[1], \
+                distance=self.getDistanceToDetector(), \
+                Nav=self.getNumPixelsToAverage(), \
+                roi=self.getDetectorROI()) 
+        else:
+            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
+                self.getDetectorPixelDirection2(), \
+                cch1=self.getDetectorCenterChannel()[0], \
+                cch2=self.getDetectorCenterChannel()[1], \
+                Nch1=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[0], \
+                chpdeg1=self.getDetectorChannelsPerDegree()[0], \
+                chpdeg2=self.getDetectorChannelsPerDegree()[1], \
+                Nav=self.getNumPixelsToAverage(), 
+                roi=self.getDetectorROI()) 
+            
+        angleNames = self.getAngles()
+        scanAngle = {}
+        for i in xrange(len(angleNames)):
+            scanAngle[i] = np.array([])
+    
+        offset = 0
+        imageToBeUsed = self.getImageToBeUsed()
+        monitorName = self.getMonitorName()
+        monitorScaleFactor = self.getMonitorScaleFactor()
+        filterName = self.getFilterName()
+        filterScaleFactor = self.getFilterScaleFactor()
+        for scannr in scans:
+            if self.haltMap:
+                raise ProcessCanceledException("Process Canceled")
+            scan = self.sd[scannr]
+            angles = self.getGeoAngles(scan, angleNames)
+            scanAngle1 = {}
+            scanAngle2 = {}
+            for i in xrange(len(angleNames)):
+                scanAngle1[i] = angles[:,i]
+                scanAngle2[i] = []
+            if monitorName != None:
+                monitor_data = scan.scandata.get(monitorName)
+                if monitor_data == None:
+                    raise IOError("Did not find Monitor source '" + \
+                                  monitorName + \
+                                  "' in the Spec file.  Make sure " + \
+                                  "monitorName is correct in the " + \
+                                  "instrument Config file")
+            if filterName != None:
+                filter_data = scan.scandata.get(filterName)
+                if filter_data == None:
+                    raise IOError("Did not find filter source '" + \
+                                  filterName + \
+                                  "' in the Spec file.  Make sure " + \
+                                  "filterName is correct in the " + \
+                                  "instrument Config file")
+            # read in the image data
+            arrayInitializedForScan = False
+            foundIndex = 0
+            
+            if mask_was_none:
+                mask = [True] * len(self.getImageToBeUsed()[scannr])            
+            
+            for ind in xrange(scan.data.shape[0]):
+                if imageToBeUsed[scannr][ind] and mask[ind]:    
+                    # read tif image
+                    img = np.array(Image.open(self.imageFileTmp % 
+                                                 (scannr, scannr, ind))).T
+                    img = self.hotpixelkill(img)
+                    ff_data = self.getFlatFieldData()
+                    if not (ff_data == None):
+                        img = img * ff_data
+                    # reduce data siz
+                    img2 = xu.blockAverage2D(img, 
+                                            self.getNumPixelsToAverage()[0], \
+                                            self.getNumPixelsToAverage()[1], \
+                                            roi=self.getDetectorROI())
+
+                    # apply intensity corrections
+                    if monitorName != None:
+                        img2 = img2 / monitor_data[ind] * monitorScaleFactor
+                    if filterName != None:
+                        img2 = img2 / filter_data[ind] * filterScaleFactor
+
+                    # initialize data array
+                    if not arrayInitializedForScan:
+                        imagesToProcess = [imageToBeUsed[scannr][i] and mask[i] for i in range(len(imageToBeUsed[scannr]))]
+                        if not intensity.shape[0]:
+                            intensity = np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape)
+                            arrayInitializedForScan = True
+                        else: 
+                            offset = intensity.shape[0]
+                            intensity = np.concatenate(
+                                (intensity,
+                                (np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape))),
+                                axis=0)
+                            arrayInitializedForScan = True
+                    # add data to intensity array
+                    intensity[foundIndex+offset,:,:] = img2
+                    for i in xrange(len(angleNames)):
+                        scanAngle2[i].append(scanAngle1[i][ind])
+                    foundIndex += 1
+            if len(scanAngle2[0]) > 0:
+                for i in xrange(len(angleNames)):
+                    scanAngle[i] = \
+                        np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
+                                          axis=0)
+        # transform scan angles to reciprocal space coordinates for all detector pixels
+        angleList = []
+        for i in xrange(len(angleNames)):
+            angleList.append(scanAngle[i])
+        if self.getUBMatrix(scans[0]) == None:
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
+                            roi=self.getDetectorROI(), 
+                            Nav=self.getNumPixelsToAverage())
+        else:
+            qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                            roi=self.getDetectorROI(), 
+                            Nav=self.getNumPixelsToAverage(), \
+                            UB = self.getUBMatrix(scans[0]))
+            
+
+        # apply selected transform
+        qxTrans, qyTrans, qzTrans = \
+            self.transform.do3DTransform(qx, qy, qz)
+
+    
+        return qxTrans, qyTrans, qzTrans, intensity
+        
 class LoadCanceledException(RSMap3DException):
     '''
     Exception Thrown when loading data is canceled.
