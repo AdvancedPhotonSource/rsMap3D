@@ -11,6 +11,9 @@ from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR,\
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
     CURRENT_INDEX_CHANGED_SIGNAL
 import os.path
+from rsMap3D.datasource.sector34nexusescansource import Sector34NexusEscanSource
+from rsMap3D.transforms.unitytransform3d import UnityTransform3D
+from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 
 class S34HDFEScanFileForm(AbstractImagePerFileView):
     '''
@@ -129,12 +132,38 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
                              "The filename entered for the detector " + \
                              "configuration is invalid")
         
+    def getDataSource(self):
+        print "S34 getDataSource"
+        if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
+            self.transform = UnityTransform3D()
+        elif self.getOutputType() == self.POLE_MAP_STR:
+            self.transform = \
+                PoleMapTransform3D(projectionDirection=\
+                                   self.fileForm.getProjectionDirection())
+        else:
+            self.transform = None
+
+        self.dataSource = \
+            Sector34NexusEscanSource(str(self.getProjectDir()), \
+                                   str(self.getProjectName()), \
+                                   str(self.getProjectExtension()), \
+                                   str(self.getDetConfigName()))
+        self.dataSource.setProgressUpdater(self.updateProgress)
+        self.dataSource.loadSource()
+        return self.dataSource
+    
     def getOutputType(self):
         '''
         Get the output type to be used.
         '''
         return self.outTypeChooser.currentText()
     
+    def getDetConfigName(self):
+        '''
+        Return the selected Detector Configuration file
+        '''
+        return self.detConfigTxt.text()
+
     def _outputTypeChanged(self, typeStr):
         '''
         If the output is selected to be a simple grid map type then allow

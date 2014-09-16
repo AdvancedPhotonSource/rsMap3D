@@ -11,8 +11,7 @@ from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL
     SET_SCAN_LOAD_CANCEL_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
     BLOCK_TABS_FOR_LOAD_SIGNAL, FILE_ERROR_SIGNAL,\
     LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL
-from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException,\
-    Sector33SpecDataSource
+from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
     RSMap3DException
@@ -50,6 +49,15 @@ class FileInputController(qtGui.QDialog):
         self.layout.addLayout(self.formLayout)
         self.setLayout(self.layout)
 
+        self._connectSignals()
+
+    def _cancelLoadThread(self):
+        '''
+        Let the data source know that a cancel has been requested.
+        '''
+        self.fileFormWidget.dataSource.signalCancelLoadSource()
+        
+    def _connectSignals(self):
         self.connect(self.formSelection, \
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self._selectedTypeChanged)
@@ -65,12 +73,23 @@ class FileInputController(qtGui.QDialog):
         self.connect(self, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
                      self.fileFormWidget.setCancelOK)
-
-    def _cancelLoadThread(self):
-        '''
-        Let the data source know that a cancel has been requested.
-        '''
-        self.dataSource.signalCancelLoadSource()
+        
+    def _disconnectSignals(self):
+        self.disconnect(self.formSelection, \
+                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
+                     self._selectedTypeChanged)
+        self.disconnect(self.fileFormWidget, \
+                     qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
+                     self._spawnLoadThread)
+        self.disconnect(self.fileFormWidget, \
+                     qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
+                     self._cancelLoadThread)
+        self.disconnect(self, \
+                     qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
+                     self.fileFormWidget.setLoadOK)
+        self.disconnect(self, \
+                     qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
+                     self.fileFormWidget.setCancelOK)
         
     def loadScanFile(self):
         '''
@@ -89,23 +108,7 @@ class FileInputController(qtGui.QDialog):
              
         try:
             self.dataSource = \
-                Sector33SpecDataSource(str(self.fileFormWidget.getProjectDir()), \
-                                       str(self.fileFormWidget.getProjectName()), \
-                                       str(self.fileFormWidget.getProjectExtension()), \
-                                       str(self.fileFormWidget.getInstConfigName()), \
-                                       str(self.fileFormWidget.getDetConfigName()), \
-                                       transform = self.transform, \
-                                       scanList = self.fileFormWidget.getScanList(), \
-                                       roi = self.fileFormWidget.getDetectorROI(), \
-                                       pixelsToAverage = \
-                                          self.fileFormWidget.getPixelsToAverage(), \
-                                       badPixelFile = \
-                                          self.fileFormWidget.getBadPixelFileName(), \
-                                       flatFieldFile = \
-                                          self.fileFormWidget.getFlatFieldFileName() \
-                                      )
-            self.dataSource.setProgressUpdater(self.fileFormWidget.updateProgress)
-            self.dataSource.loadSource(mapHKL = self.fileFormWidget.getMapAsHKL())
+                self.fileFormWidget.getDataSource()
         except LoadCanceledException as e:
             self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
             self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
@@ -140,16 +143,20 @@ class FileInputController(qtGui.QDialog):
         
     def _selectedTypeChanged(self, typeStr):
         if typeStr == self.S33SPECXML:
+            self._disconnectSignals()
             self.formLayout.removeWidget(self.fileFormWidget)
             self.fileFormWidget.deleteLater()
             self.fileFormWidget = FileForm()
             self.formLayout.addWidget(self.fileFormWidget)
+            self._connectSignals()
             self.update()
         elif typeStr == self.S34HDFXML:
+            self._disconnectSignals()
             self.formLayout.removeWidget(self.fileFormWidget)
             self.fileFormWidget.deleteLater()
             self.fileFormWidget = S34HDFEScanFileForm()
             self.formLayout.addWidget(self.fileFormWidget)
+            self._connectSignals()
             self.update()
             
     def setLoadOK(self):
@@ -177,5 +184,6 @@ class LoadScanThread(qtCore.QThread):
         self.controller = controller
         
     def run(self):
+        print("LoadScanThread Running")
         self.controller.loadScanFile()
         

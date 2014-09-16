@@ -5,11 +5,9 @@
 import abc
 import numpy as np
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
-from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
-    NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
-    ZMIN_INDEX, ZMAX_INDEX
+from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 
-class AbstractXrayutilitiesDataSource:
+class AbstractXrayutilitiesDataSource(AbstractDataSource):
     __metaclass__ = abc.ABCMeta
     '''
     Abstract class for loading data needed to analyze using xrayutilities.
@@ -24,6 +22,7 @@ class AbstractXrayutilitiesDataSource:
         '''
         Constructor
         '''
+        super(AbstractXrayutilitiesDataSource, self).__init__()
         self.sampleCirclesDirections = None
         self.detectorCircleDirections = None
         self.primaryBeamDirection = None
@@ -32,7 +31,6 @@ class AbstractXrayutilitiesDataSource:
         self.sampleInplaneReferenceDirection = None
         self.sampleSurfaceNormalDirection = None
         self.detectorCenterChannel = None
-        self.detectorDimensions = None
         self.distanceToDetector = float('nan')
         self.detectorPixelWidth = None
         self.detectorChannelPerDegree = None
@@ -44,7 +42,6 @@ class AbstractXrayutilitiesDataSource:
         self.sampleAngleNames = None
         self.detectorPixelDirection1 = None
         self.detectorPixelDirection2 = None
-        self.imageBounds = {}
         self.imageToBeUsed = {}
         self.availableScans = []
         self.ubMatrix = {}
@@ -85,13 +82,6 @@ class AbstractXrayutilitiesDataSource:
         return self.getSampleAngleNames() + self.getDetectorAngleNames()
     
         
-    def getAvailableScans(self):
-        '''
-        Return a list of the available scans. Note that loadSource checks to 
-        make sure that scans are available in the directory structure
-        '''
-        return self.availableScans
-    
     def getBadPixels(self):
         '''
         Return a list of tuples holding the coordinates of bad pixels.
@@ -121,12 +111,6 @@ class AbstractXrayutilitiesDataSource:
         return a list of detector circle directions
         '''
         return self.detectorCircleDirections
-    
-    def getDetectorDimensions(self):
-        '''
-        Return the dimensions (in pixels of the detector
-        '''
-        return self.detectorDimensions
     
     def getDetectorPixelDirection1(self):
         '''
@@ -180,12 +164,6 @@ class AbstractXrayutilitiesDataSource:
         ''' 
         return self.flatFieldData
     
-    def getImageBounds(self, scan):
-        '''
-        return the boundaries for images in the scan
-        '''
-        return self.imageBounds[scan]    
-
     def getImageToBeUsed(self):
         '''
         Return a dictionary containing list of images to be used in each scan.
@@ -230,34 +208,6 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.numPixelsToAverage
     
-    def getOverallRanges(self):
-        '''
-        Return the boundaries for all data in all availableScans
-        '''
-        overallXmin = float(POSITIVE_INFINITY)
-        overallXmax = float(NEGATIVE_INFINITY)
-        overallYmin = float(POSITIVE_INFINITY)
-        overallYmax = float(NEGATIVE_INFINITY)
-        overallZmin = float(POSITIVE_INFINITY)
-        overallZmax = float(NEGATIVE_INFINITY)
-        
-        for scan in self.availableScans:
-            overallXmin = min( overallXmin, \
-                               np.min(self.imageBounds[scan][XMIN_INDEX]))
-            overallXmax = max( overallXmax, \
-                               np.max(self.imageBounds[scan][XMAX_INDEX]))
-            overallYmin = min( overallYmin, \
-                               np.min(self.imageBounds[scan][YMIN_INDEX]))
-            overallYmax = max( overallYmax, \
-                               np.max(self.imageBounds[scan][YMAX_INDEX]))
-            overallZmin = min( overallZmin, \
-                               np.min(self.imageBounds[scan][ZMIN_INDEX]))
-            overallZmax = max( overallZmax, \
-                               np.max(self.imageBounds[scan][ZMAX_INDEX]))
-                    
-        return overallXmin, overallXmax, overallYmin, overallYmax, \
-               overallZmin, overallZmax
-
     def getPrimaryBeamDirection(self):
         '''
         Return the primary beam direction
@@ -269,12 +219,6 @@ class AbstractXrayutilitiesDataSource:
         Return the axis direction for producing stereographic projection.
         '''
         return self.projectionDirection
-    
-    def getRangeBounds(self):
-        '''
-        Return boundaries of all scans to be included for analysis
-        '''
-        return self.rangeBounds
     
     def getSampleAngleNames(self):
         '''
@@ -300,19 +244,6 @@ class AbstractXrayutilitiesDataSource:
         '''
         return self.ubMatrix[scan]
     
-    def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        '''
-        Check to see if the input boundaries have area that lie within the 
-        range boundaries specified for analysis.  True if yes, False if no.
-        '''
-               
-        return (xmin <= self.rangeBounds[XMAX_INDEX] and \
-                xmax >= self.rangeBounds[XMIN_INDEX]) and \
-               (ymin <= self.rangeBounds[YMAX_INDEX] and \
-                ymax >= self.rangeBounds[YMIN_INDEX]) and \
-               (zmin <= self.rangeBounds[ZMAX_INDEX] and \
-                zmax >= self.rangeBounds[ZMIN_INDEX])
-               
     @abc.abstractmethod
     def loadSource(self, mapHKL=False):
         '''
@@ -321,38 +252,6 @@ class AbstractXrayutilitiesDataSource:
         '''
         print "Using Abstract Method"
 
-    def processImageToBeUsed(self):
-        '''
-        process all available scans to see if the contained images fall within 
-        the range boundaries.  Results are stored internally and can be 
-        retrieved by getImageToBeUsed()
-        '''
-        self.imageToBeUsed = {}
-        for scan in self.availableScans:
-            inUse = []
-            for i in xrange(len(self.imageBounds[scan][0])):
-                bounds = self.imageBounds[scan]
-                if self.inBounds(bounds[XMIN_INDEX][i], \
-                                 bounds[XMAX_INDEX][i], \
-                                 bounds[YMIN_INDEX][i], \
-                                 bounds[YMAX_INDEX][i], \
-                                 bounds[ZMIN_INDEX][i], \
-                                 bounds[ZMAX_INDEX][i]):
-                    inUse.append(True)
-                else:
-                    inUse.append(False)
-            self.imageToBeUsed[scan] = inUse
-            
-    def setProgressUpdater(self, updater):
-        self.progressUpdater = updater
- 
-    def setRangeBounds(self, rangeBounds):
-        '''
-        Set the overall boundary to be used for analysis.
-        '''
-        self.rangeBounds = rangeBounds;
-        self.processImageToBeUsed()
-        
     def setTransform(self, transform):
         '''
         set the coordinate transform class to be used to 
