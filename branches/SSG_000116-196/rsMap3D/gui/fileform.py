@@ -19,6 +19,11 @@ from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     INSTRUMENT_CONFIG_FILE_FILTER, SELECT_INSTRUMENT_CONFIG_TITLE,\
     SPEC_FILE_FILTER, SELECT_SPEC_FILE_TITLE
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
+from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource,\
+    LoadCanceledException
+from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_LOAD_SIGNAL
+from rsMap3D.transforms.unitytransform3d import UnityTransform3D
+from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.datasource.InstForXrayutilitiesReader \
     import InstForXrayutilitiesReader
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
@@ -454,6 +459,36 @@ class FileForm(AbstractImagePerFileView):
             return None
         else:
             return str(self.badPixelFileTxt.text())
+        
+    def getDataSource(self):
+        if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
+            self.transform = UnityTransform3D()
+        elif self.getOutputType() == self.POLE_MAP_STR:
+            self.transform = \
+                PoleMapTransform3D(projectionDirection=\
+                                   self.fileForm.getProjectionDirection())
+        else:
+            self.transform = None
+            
+        self.dataSource = \
+            Sector33SpecDataSource(str(self.getProjectDir()), \
+                                   str(self.getProjectName()), \
+                                   str(self.getProjectExtension()), \
+                                   str(self.getInstConfigName()), \
+                                   str(self.getDetConfigName()), \
+                                   transform = self.transform, \
+                                   scanList = self.getScanList(), \
+                                   roi = self.getDetectorROI(), \
+                                   pixelsToAverage = \
+                                      self.getPixelsToAverage(), \
+                                   badPixelFile = \
+                                      self.getBadPixelFileName(), \
+                                   flatFieldFile = \
+                                      self.getFlatFieldFileName() \
+                                  )
+        self.dataSource.setProgressUpdater(self.updateProgress)
+        self.dataSource.loadSource(mapHKL = self.getMapAsHKL())
+        return self.dataSource
         
     def getDetConfigName(self):
         '''
