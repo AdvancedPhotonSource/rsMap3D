@@ -48,7 +48,7 @@ class QGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
-                    qx, qy, qz, intensity = self.rawmap((scan,), **kwargs)
+                    qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
                     
                     # convert data to rectangular grid in reciprocal space
                     gridder(qx, qy, qz, intensity)
@@ -66,10 +66,6 @@ class QGridMapper(AbstractGridMapper):
                         kwargs['mask'] = imageToBeUsedInPass
                         qx, qy, qz, intensity = \
                             self.dataSource.rawmap((scan,), **kwargs)
-                        print qx.shape
-                        print qy.shape
-                        print qz.shape
-                        print intensity.shape
                         # convert data to rectangular grid in reciprocal space
                         gridder(qx, qy, qz, intensity)
                     
