@@ -4,19 +4,21 @@
 '''
 import abc
 import numpy as np
-from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, NEGATIVE_INFINITY,\
-    XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, ZMIN_INDEX, ZMAX_INDEX
+from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
+    NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
+    ZMIN_INDEX, ZMAX_INDEX
 
 class AbstractDataSource(object):
     __metaclass__ = abc.ABCMeta
     '''
-    classdocs
+    This is the base class for all data sources to be used with rsMap3D.  
+    it provides some basic functionality for all data sour
     '''
 
 
     def __init__(self):
         '''
-        Constructor
+        Constructor.  Initialize members needed for calls made by this class.
         '''
         self.availableScans = []
         self.imageBounds = {}
@@ -130,6 +132,10 @@ class AbstractDataSource(object):
             self.imageToBeUsed[scan] = inUse
             
     def setProgressUpdater(self, updater):
+        '''
+        set an updater that will affect a progress bar to indicate progress on
+        loading.  Especially useful for slow loading
+        ''' 
         self.progressUpdater = updater
  
     def setRangeBounds(self, rangeBounds):
