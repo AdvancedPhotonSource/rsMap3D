@@ -11,9 +11,15 @@ NAMESPACE = \
     
 class DetectorGeometryForEScan(DetectorGeometryBase):
     '''
+    Detector geometry file to get information for Energy scans how they are done 
+    in Sector 34
     '''
     
     def __init__(self, filename):
+        '''
+        Constructor, load superclass init and set up a couple
+        of constants used for location data in the XML file.
+        '''
         super(DetectorGeometryForEScan,self).__init__(filename, NAMESPACE)
         self.TRANSLATION = self.nameSpace + "P"
         self.ROTATION = self.nameSpace + "R"
