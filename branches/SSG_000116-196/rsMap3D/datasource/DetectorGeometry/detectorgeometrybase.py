@@ -8,11 +8,13 @@ from rsMap3D.exception.rsmap3dexception import DetectorConfigException
 
 class DetectorGeometryBase(object):
     '''
+    Base class for detector geometry XML configurations.  
     '''
     
     def __init__(self, filename, nameSpace):
         '''
-        '''
+        initialize the class and make sure the file seems to be valid XML
+        '''        
         self._initXmlConstants(nameSpace)
         try:
             tree = ET.parse(filename)
