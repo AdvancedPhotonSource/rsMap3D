@@ -48,6 +48,12 @@ class TestDataSource(AbstractXrayutilitiesDataSource):
     def getImage(self):
         return
     
+    def getReferenceNames(self):
+        return AbstractXrayutilitiesDataSource.getReferenceNames(self)
+    
+    def getReferenceValues(self):
+        return AbstractXrayutilitiesDataSource.getReferenceValues(self)
+    
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
