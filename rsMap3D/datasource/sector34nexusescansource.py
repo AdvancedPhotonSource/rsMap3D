@@ -162,7 +162,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                                '_' + \
                                str(afile) + \
                                self.projectExtension
-                print filename
+                #print filename
                 if os.path.exists(filename):
                     #curScan = self.sd[afile]
                     self.availableFiles.append(afile)
@@ -178,9 +178,9 @@ class Sector34NexusEscanSource(AbstractDataSource):
                         hdfFile.close()
                     except Exception:
                         print "Trouble Opening File" + filename
-        print self.incidentEnergy
+        #print self.incidentEnergy
         self.imageBounds[1] = self.findImageQs()
-        print "ImageBounds: " + str(self.imageBounds)
+        #print "ImageBounds: " + str(self.imageBounds)
         self.availableScans.append(1)
             
     def pixel2XYZ(self, pixelX, pixelY):
@@ -217,7 +217,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         return qhat
     
     def qsForDetector(self):            
-        print self.detectorROI
+        #print self.detectorROI
         xIndexArray =  range(self.detectorROI[0], self.detectorROI[1]+1)
         yIndexArray =  range(self.detectorROI[2], self.detectorROI[3]+1)
         qx = np.zeros([len(self.availableFiles), \
@@ -235,7 +235,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                        len(xIndexArray)])
         qpz = np.zeros([len(yIndexArray), \
                        len(xIndexArray)])
-        print xIndexArray, yIndexArray
+        #print xIndexArray, yIndexArray
         for row in yIndexArray:
             for column in xIndexArray:
                 startx = self.detectorROI[0]
@@ -262,7 +262,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         offset=0
         foundIndex = 0
         self.availableFiles.sort()
-        print "availableFiles:" + str(self.availableFiles)
+        #print "availableFiles:" + str(self.availableFiles)
         for afile in self.availableFiles:
             filename = os.path.join(self.projectDir, \
                            string.rsplit(self.projectName, '_', 1)[0]) + \
