@@ -165,13 +165,13 @@ class ScanForm(qtGui.QDialog):
             item.setText(str(curScan))
             self.scanList.addItem(item)
         self.detail.setColumnCount(7 + \
-                                   len(dataSource.getDetectorAngleNames()) + \
-                                   len(dataSource.getSampleAngleNames()))
-        self.detail.setHorizontalHeaderLabels(['Use Image'] + \
-                                            dataSource.getSampleAngleNames() + \
-                                            dataSource.getDetectorAngleNames() + \
-                                            ['Min qx', 'Max qx', 'Min qy', \
-                                            'Max qy', 'Min qz', 'Max qz'])
+                                   len(dataSource.getReferenceNames()))
+        labels = []
+        labels.append('Use Image')
+        labels.extend(dataSource.getReferenceNames())
+        labels.extend(['Min qx', 'Max qx', 'Min qy', \
+                       'Max qy', 'Min qz', 'Max qz'])
+        self.detail.setHorizontalHeaderLabels(labels)
         self.emit(qtCore.SIGNAL(DONE_LOADING_SIGNAL))
         
    
@@ -226,8 +226,8 @@ class ScanForm(qtGui.QDialog):
         Display the angles associated with images in the scan in the table.
         :param scanNo: scan number of the scan to show.
         '''
-        angles = self.dataSource.getGeoAngles(self.dataSource.sd[scanNo], \
-                                              self.dataSource.getAngles())
+        angles = self.dataSource.getReferenceValues(scanNo)
+        #print "Angles:" + str(angles)
         self.detail.setRowCount(len(angles))
         blackBrush = qtGui.QBrush()
         blackBrush.setColor(qtGui.QColor(BLACK))
@@ -264,7 +264,7 @@ class ScanForm(qtGui.QDialog):
         self.disconnect(self.detail, qtCore.SIGNAL(TABLE_ITEM_CHANGED_SIGNAL), 
                         self.checkItemChanged)
         imageToBeUsed = self.dataSource.getImageToBeUsed()
-        numAngles = len(self.dataSource.getAngles())
+        numAngles = len(self.dataSource.getReferenceNames())
         for value in xmin:
             if imageToBeUsed[scan][row]:
                 self.addValueToTable(xmin[row], row, numAngles + 1, blackBrush)

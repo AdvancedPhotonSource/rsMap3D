@@ -32,6 +32,8 @@ from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL
     SET_PROCESS_CANCEL_OK_SIGNAL, SET_SCAN_LOAD_CANCEL_SIGNAL,\
     LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL,\
     CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL
+from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
+from rsMap3D.gui.input.fileinputcontroller import FileInputController
 
 class MainDialog(qtGui.QMainWindow):
     '''
@@ -44,7 +46,9 @@ class MainDialog(qtGui.QMainWindow):
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
         self.tabs = qtGui.QTabWidget()
-        self.fileForm =FileForm()
+#        self.fileForm =FileForm()
+#        self.fileForm = S34HDFEScanFileForm()
+        self.fileForm = FileInputController()
         self.scanForm = ScanForm()
         self.dataRange = DataRange()
         self.processScans = ProcessScans()
@@ -61,12 +65,12 @@ class MainDialog(qtGui.QMainWindow):
         self.setCentralWidget(self.tabs)
 
         #Connect signals
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
-                     self._spawnLoadThread)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
-                     self._cancelLoadThread)
+#         self.connect(self.fileForm, \
+#                      qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
+#                      self._spawnLoadThread)
+#         self.connect(self.fileForm, \
+#                      qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
+#                      self._cancelLoadThread)
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
                      self._setupRanges)
@@ -85,6 +89,9 @@ class MainDialog(qtGui.QMainWindow):
         self.connect(self, \
                      qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
                      self._showFileError)
+        self.connect(self.fileForm, \
+                     qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
+                     self._showFileError)
         self.connect(self, \
                      qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                      self._showProcessError)
@@ -92,7 +99,7 @@ class MainDialog(qtGui.QMainWindow):
                      qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                      self._showProcessError)
         
-        self.connect(self, \
+        self.connect(self.fileForm, \
                      qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
                      self._blockTabsForLoad)
         self.connect(self, \
@@ -110,13 +117,13 @@ class MainDialog(qtGui.QMainWindow):
         self.connect(self, \
                      qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL), \
                      self.processScans.setCancelOK)
-        self.connect(self, \
+        self.connect(self.fileForm, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
                      self.fileForm.setLoadOK)
         self.connect(self, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
                      self.fileForm.setCancelOK)
-        self.connect(self, \
+        self.connect(self.fileForm, \
                      qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL), \
                      self._loadDataSourceToScanForm)
         self.connect(self.scanForm, \
@@ -146,12 +153,6 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.fileTabIndex, False)
         
         
-    def _cancelLoadThread(self):
-        '''
-        Let the data source know that a cancel has been requested.
-        '''
-        self.dataSource.signalCancelLoadSource()
-        
         
     def closeEvent(self, event):
         '''
@@ -163,73 +164,7 @@ class MainDialog(qtGui.QMainWindow):
         '''
         When scan is done loading, load the data to the scan form.
         '''
-        self.scanForm.loadScanFile(self.dataSource)        
-        
-    def loadScanFile(self):
-        '''
-        Set up to load the scan file
-        '''
-        self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
-        if self.fileForm.getOutputType() == self.fileForm.SIMPLE_GRID_MAP_STR:
-            self.transform = UnityTransform3D()
-        elif self.fileForm.getOutputType() == self.fileForm.POLE_MAP_STR:
-            self.transform = \
-                PoleMapTransform3D(projectionDirection=\
-                                   self.fileForm.getProjectionDirection())
-        else:
-            self.transform = None
-            
-             
-        try:
-            self.dataSource = \
-                Sector33SpecDataSource(str(self.fileForm.getProjectDir()), \
-                                       str(self.fileForm.getProjectName()), \
-                                       str(self.fileForm.getProjectExtension()), \
-                                       str(self.fileForm.getInstConfigName()), \
-                                       str(self.fileForm.getDetConfigName()), \
-                                       transform = self.transform, \
-                                       scanList = self.fileForm.getScanList(), \
-                                       roi = self.fileForm.getDetectorROI(), \
-                                       pixelsToAverage = \
-                                          self.fileForm.getPixelsToAverage(), \
-                                       badPixelFile = \
-                                          self.fileForm.getBadPixelFileName(), \
-                                       flatFieldFile = \
-                                          self.fileForm.getFlatFieldFileName() \
-                                      )
-            self.dataSource.setProgressUpdater(self.fileForm.updateProgress)
-            self.dataSource.loadSource(mapHKL = self.fileForm.getMapAsHKL())
-        except LoadCanceledException as e:
-            self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
-            self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
-            #self.fileForm.setLoadOK()
-            return
-        except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return
-        except DetectorConfigException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return
-        except InstConfigException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return
-        except Transform3DException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return 
-        except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return
-        except RSMap3DException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
-            return
-        except Exception as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-                      str(e)  + "\n" + str(traceback.format_exc()))
-            return
-        
-            
-        self.emit(qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL))
-        self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
+        self.scanForm.loadScanFile(self.fileForm.dataSource)        
         
     def runMapper(self):
         '''
@@ -238,7 +173,7 @@ class MainDialog(qtGui.QMainWindow):
         self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL))
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
-            self.processScans.runMapper(self.dataSource, self.transform)
+            self.processScans.runMapper(self.fileForm.dataSource, self.fileForm.transform)
         except ProcessCanceledException:
             self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         except RSMap3DException as e:
@@ -258,7 +193,7 @@ class MainDialog(qtGui.QMainWindow):
         in the dataRange tab.  
         '''
         overallXmin, overallXmax, overallYmin, overallYmax, \
-               overallZmin, overallZmax = self.dataSource.getOverallRanges()
+               overallZmin, overallZmax = self.fileForm.dataSource.getOverallRanges()
         self.dataRange.setRanges(overallXmin, \
                                  overallXmax, \
                                  overallYmin, \
@@ -274,7 +209,7 @@ class MainDialog(qtGui.QMainWindow):
         class.  Tell scanForm tab to render the Qs for all scans.
         '''
         ranges = self.dataRange.getRanges()
-        self.dataSource.setRangeBounds(ranges)
+        self.fileForm.dataSource.setRangeBounds(ranges)
         self.scanForm.renderOverallQs()
 
     def _showFileError(self, error):
@@ -301,22 +236,13 @@ class MainDialog(qtGui.QMainWindow):
                              str(error))
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
               
-    def _spawnLoadThread(self):
-        '''
-        Spawn a new thread to load the scan so that scan may be canceled later 
-        and so that this does not interfere with the GUI operation.
-        '''
-        self.fileForm.setCancelOK()
-        self.loadThread = LoadScanThread(self, parent=None)
-        self.loadThread.start()
-        
     def _spawnProcessThread(self):
         '''
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
         self.processScans.setProgressLimits(0, 
-                                len(self.dataSource.getAvailableScans())*100)
+                                len(self.fileForm.dataSource.getAvailableScans())*100)
         self.processScans.setProgress(0)
         self.processScans.setCancelOK()
         self.processThread = ProcessScanThread(self, parent=None)
@@ -350,17 +276,6 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.dataTabIndex, True)
         self.tabs.setTabEnabled(self.scanTabIndex, True)
         self.tabs.setTabEnabled(self.fileTabIndex, True)
-        
-class LoadScanThread(qtCore.QThread):
-    '''
-    Small thread class to launch the scan loading process
-    '''
-    def __init__(self, controller, **kwargs):
-        super(LoadScanThread, self).__init__( **kwargs)
-        self.controller = controller
-        
-    def run(self):
-        self.controller.loadScanFile()
         
 class ProcessScanThread(qtCore.QThread):
     '''
