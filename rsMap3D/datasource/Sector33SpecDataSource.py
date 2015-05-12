@@ -599,8 +599,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             for ind in xrange(scan.data.shape[0]):
                 if imageToBeUsed[scannr][ind] and mask[ind]:    
                     # read tif image
-                    img = np.array(Image.open(self.imageFileTmp % 
-                                                 (scannr, scannr, ind))).T
+                    im = Image.open(self.imageFileTmp % (scannr, scannr, ind))
+                    img = np.array(im.getdata()).reshape(im.size[1],im.size[0]).T
                     img = self.hotpixelkill(img)
                     ff_data = self.getFlatFieldData()
                     if not (ff_data == None):
