@@ -11,13 +11,13 @@ Introduction
 rsMap3D is an application for producing 3D reciprocal space maps from x-ray 
 diffraction data.  This application allows the user to select input files, 
 view a 3D representation of the data volume sampled during a set of 
-measurements, allows selection of a subset of the data and processes the data 
+measurements, select a subset of the data, and processes the data 
 into a 3D map.
 
-rsMap 3D is written in python and relies on a number of external python 
+rsMap3D is written in python and relies on a number of external python 
 modules.  These modules include:
 
-* numpy 
+* numpy
 * PyQt4
 * vtk
 * pyspec
@@ -31,40 +31,45 @@ Running rsMap3D
 ---------------
 Once rsMap3D is installed, it can be run by issuing the following command:
 
-.. code-block:: none
+.. code-block:: sh
 
- python -m rsMap3D.rsmEdit
+  python -m rsMap3D.rsmEdit
 
 After launching you should see a screen that looks like this:
 
 .. image:: Images/rsMap3DonLaunch.png
 
 The black box on the left is a 3D display which will display the extent of 
-data volumes for all selected scans or selected scans depending on the tab 
+data volumes for all scans or a subset of selected scans, depending on the tab 
 selected in the right box.  The right box is used for entering input files, 
-selection of scans or processing the data.  On launch, the only tab active is 
-the File tab.  This allows entry of input  files for processing.  The current 
+selection of scans, and processing the data.  On launch, the only tab active is 
+the File tab. The functionality of all tabs is described in the following sections.
+
+File Tab
+~~~~~~~~
+
+This tab allows entry of input  files for processing.  The current 
 version allows processing of spec data files with a couple of configuration 
 files.  The parameters on this page are:
 
-* Project file - This is the full path to the spec data file.
-* Instrument Config File:  This is an XML file to describe parameters such as diffractometer circles, beam direction, etc.
-* Detector Config File:  This is an XML file for describing the detector parameters such as size, number of pixels, center, etc.
+* Project file - This is the spec data file, including the full path.
+* Instrument Config File -  This is an XML file to describe parameters such as diffractometer circles, beam direction, etc.
+* Detector Config File -  This is an XML file for describing the detector parameters such as size, number of pixels, center, etc.
+* Image correction: Options include "None" to simply use the raw images, "Bad Pixel File" to exclude abberant or dead pixels from the analysis, or "Flat Field Correction" to apply the proper sensitivity correction to each pixel in the detector images.
 * Number of pixels to average - this parameter allows averaging of pixels in the x and y direction.
 * Detector ROI - Describes a region of interest on the detector to be used in processing.
-* Scan numbers - This allows entry of a subset of scans to process.  This field is optional.  If left blank, all available scans will be processed. 
+* Scan numbers - This allows entry of a subset of scans to process.  This field is optional.  If left blank, all available scans will be processed. Data can be entered as a "string range", e.g. ``1-3,5``, ``[4,5,8,10]``, ``2-10:2``
 * Output Type - The user can select between **qx, qy, qz Map** or **Stereographic projection**
 * HKL output - This option is only enabled for **qx, qy, qz Map** and will transform the data to HKL
 * Load - Once proper files are set in the entries, this button will become active.  Pressing this will start loading information about detector angles for each scan.  This information is used in the initial presentation of the data volume used.
 * Cancel - Allow the user to cancel in the middle of loading the data.
 
-Once data is loaded, the other tabs will be enabled.  As shown below.  Note 
+Once data is loaded, the other tabs will be enabled, as shown below.  Note 
 that the box on the left now shows a representation of the data volume covered 
 by the selected data.
 
 .. image:: Images/rsMap3DafterLoading.png
 
-The remaining tabs are described in the following sections.
 
 Data Range Tab
 ~~~~~~~~~~~~~~
@@ -134,65 +139,4 @@ Viewing Output data
 rsMap3D is not intended as an application that will view 3D maps of processed 
 data.  There are other applications that will handle looking at the output 
 files.  We have been using Paraview (http://www.paraview.org/) as a viewer for 
-the output files.  Paraview is an opensource project for viewing large 
-datasets.  Paraview can load the vti files directly enabling users to quickly 
-view their data and perform a number of operations on the data such as slicing, 
-contours, etc.
-
-Loading files for basic viewing with Paraview
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The VTI file created in the previous step can be loaded into paraview using 
-the File->Open menu option.  Note that if no file name was specified in the 
-processing phase a file should have been created in the current directory when 
-the program was run.  When the file is first loaded you will see a dataset 
-loaded for this in the Pipeline Browser on the left.  At this point, no data is 
-shown. In the view window as shown
-
-.. image:: Images/ParaviewJustAfterLoading.png
-
-In the properties panel below the pipeline browser you can click apply to make 
-this data active.  Once the data active more options will appear in the 
-properties and a box will appear in the center pane.  Note that in properties 
-pane the Representation is set to outline.  This option is responsible for the 
-box shown in the central window.  We are seeing a box representing the bounds 
-of the data volume.
-
-.. image:: Images/ParaviewJustAfterFirstApply.png
-
-The Representation property has many options: Outline, Points, Surface, 
-Volume, etc.  For now we will select Volume.  At first look there may not seem 
-to be much change but if you look closely you may see a few data points and 
-should also see a Color Map Editor on the right.
-
-.. image:: Images/ParaviewVolumeRendered.png
-
-In this case, the reason there is little showing is that the intensity covers 
-many orders of magnitude.  Typically to deal with this, the data would be 
-plotted on a log scale.  This does not work in all cases since the data is 
-often zero.  To deal with this we will add a calculator filter to the pipeline 
-to rescale the data to a near log scale.  Select the vti file dataset in the 
-Pipeline Browser and then select the Calculator filter from either the 
-**Filters->Data Analysis** menu or the toolbar above the Pipeline Browser.  A 
-new menu item will appear in the Pipeline Browser for this filter, which uses 
-the vti file data as a source.  A new set of options appear in the properties 
-when this item is selected as shown.  In the calculation field enter 
-
-.. code-block:: none
-
- (Scalars_)^.2 
-
-and once again, click apply to make this active and set the 
-representation to visible. You will now see the collected data as shown.
-
-.. image:: Images/ParaviewWithCalcFilter.png
-
-A couple of changes to the color map will bring out a few more features of the 
-data.   To the right of the Mapping Data (in Color Map Editor) there is a 
-set of icons that change the color map.  Select "Choose Preset" |choosePreset|
-and select "Rainbow Blended Grey".
-
-.. |choosePreset| image:: Images/ParaviewChoosePresetButton.png
-
-.. image:: Images/ParaviewPresetColorScales.png
-
-
+the output files. See `View 3D volume data files in ParaView`_ .

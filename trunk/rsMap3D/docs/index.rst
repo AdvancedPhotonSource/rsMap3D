@@ -6,19 +6,30 @@
 Welcome to rsMap3D's documentation!
 ===================================
 
-Contents:
+
+Tutorial
+--------
 
 .. toctree::
    :maxdepth: 3
    :glob:
-   
-   Installation/*
+
    Tutorial/*
+   
+   
+Installation Instructions
+-------------------------
+      
+.. toctree::
+   :maxdepth: 3
+   :glob:
+      
+   Installation/*
 
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
