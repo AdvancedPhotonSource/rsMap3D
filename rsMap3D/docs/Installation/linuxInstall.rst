@@ -41,7 +41,7 @@ you to download.  Go to the Enthought page and download the Canopy distribution
 (canopy-1.4.0-full-rh5-64.sh as of this writing).  To install this file first 
 set the file as executable and then execute the script:
 
-.. code-block:: none
+.. code-block:: sh
 
  chmod +x canopy-1.4.0-full-rh5-64.sh
  canopy-1.4.0-full-rh5-64.sh
@@ -52,7 +52,7 @@ installation) and confirm the installation.  Once the install is completed,
 you will need to launch the Canopy GUI to ensure that other packages needed are 
 installed.  Launch canopy with 
 
-.. code-block:: none
+.. code-block:: sh
 
  /local/Canopy/canopy      (we installed to /local/Canopy)
 
@@ -99,14 +99,14 @@ downloaded as a tar.gz file from http://sourceforge.net/projects/xrayutilities/.
 
 To unbundle the package in /local/xrayutilities-1.0.6:
 
-.. code-block:: none
+.. code-block:: sh
 
  cd /local
  tar -xzvf 'path to file'/xrayutilities-1.0.6.tar.gz
 
 This package includes a setup.py file to help with the install.   To install xrayutilities run:
 
-.. code-block:: none
+.. code-block:: sh
 
  cd /local/xrayutilities-1.0.6
  ~/Enthought/Canopy_64bit/User/bin/python setup.py install
@@ -117,14 +117,14 @@ Installing pySpec
 
 pySpec is a python package written by Stuart Wilkins.  We have been downloading the latest version of pyspec from the repository on github.  To download into /local/pyspec:
 
-.. code-block:: none
+.. code-block:: sh
 
  cd /local
  git clone https://github.com/stuwilkins/pyspec
 
 Like xrayutilities, pyspec comes with a setup.py file to help with the installation.  To install pyspec run:
 
-.. code-block:: none
+.. code-block:: sh
 
  cd /local/pyspec
  ~/Enthought/Canopy_64bit/User/bin/python setup.py install
@@ -138,14 +138,14 @@ application is run.
 
 To install this package in /local/rsmap3d:
 
-.. code-block:: none
+.. code-block:: sh
 
  cd /local
  svn co https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/  rsmap3d
 
 We can now set the python path and run the application.  
 
-.. code-block:: none
+.. code-block:: sh
 
  setenv PYTHONPATH /local/rsmap3d
  ~/Enthought/Canopy_64bit/User/bin/python -m rsMap3D.rsmEdit.
