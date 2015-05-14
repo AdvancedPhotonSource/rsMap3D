@@ -45,6 +45,8 @@ help:
 	@echo "  pseudoxml  to make pseudoxml-XML files for display purposes"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  svn        to run all svn propset commands for html builds in SVN"
+	@echo "  clean      to clean up all files in"
 
 clean:
 	rm -rf $(BUILDDIR)/*
@@ -175,3 +177,8 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+svn:
+	./svn_propset.sh
+	@echo
+	@echo "Build finished. SVN properties have been set."
