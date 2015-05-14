@@ -1,0 +1,404 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>View 3D volume data files in ParaView &mdash; rsMap3D Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="shortcut icon" href="../_static/rsMap3D.ico"/>
+    <link rel="top" title="rsMap3D Documentation" href="../index.html" />
+    <link rel="next" title="Installation of rsMap3D on Linux Host" href="../Installation/linuxInstall.html" />
+    <link rel="prev" title="Processing Data with rsMap3D" href="ProcessingWithRSMap3D.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../Installation/linuxInstall.html" title="Installation of rsMap3D on Linux Host"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ProcessingWithRSMap3D.html" title="Processing Data with rsMap3D"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rsMap3D.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">View 3D volume data files in ParaView</a><ul>
+<li><a class="reference internal" href="#general-notes">General Notes</a></li>
+<li><a class="reference internal" href="#loading-the-vti-data-set">Loading the .vti data set</a></li>
+<li><a class="reference internal" href="#scaling-intensities">Scaling Intensities</a></li>
+<li><a class="reference internal" href="#applying-filters-to-data-sets">Applying Filters to Data Sets</a><ul>
+<li><a class="reference internal" href="#contour">Contour</a></li>
+<li><a class="reference internal" href="#calculator">Calculator</a></li>
+<li><a class="reference internal" href="#slice">Slice</a></li>
+<li><a class="reference internal" href="#line-profile">Line Profile</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-coordinate-axes-to-the-plot">Adding coordinate axes to the plot</a></li>
+<li><a class="reference internal" href="#exporting-data-from-slices-lines-etc">Exporting data from Slices, Lines, etc.</a><ul>
+<li><a class="reference internal" href="#plotting-slice-data-in-other-programs">Plotting slice data in other programs</a><ul>
+<li><a class="reference internal" href="#matlab">Matlab</a></li>
+<li><a class="reference internal" href="#python-matplotlib">Python matplotlib</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ProcessingWithRSMap3D.html"
+                        title="previous chapter">Processing Data with rsMap3D</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Installation/linuxInstall.html"
+                        title="next chapter">Installation of rsMap3D on Linux Host</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Tutorial/ViewingWithParaView.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="view-3d-volume-data-files-in-paraview">
+<h1>View 3D volume data files in ParaView<a class="headerlink" href="#view-3d-volume-data-files-in-paraview" title="Permalink to this headline">¶</a></h1>
+<p>ParaView is an opensource project for viewing large volume datasets.  Paraview
+can load the vti files created by rsMap3D, directly enabling users to quickly
+view their data and perform a number of operations on the data such as slicing,
+contours, etc.</p>
+<p>ParaView is available for all major operating systems for free:</p>
+<p><a class="reference external" href="http://www.paraview.org">http://www.paraview.org</a></p>
+<p>Tutorials and intro guides to ParaView are also available through that website.</p>
+<p>In the following, we will describe a few basic steps to work with some typical
+volume data set created by rsMap3D.</p>
+<div class="section" id="general-notes">
+<h2>General Notes<a class="headerlink" href="#general-notes" title="Permalink to this headline">¶</a></h2>
+<p>Since ParaView is written with large data sets in mind, a few precautions have
+been taken to avoid unnecessary and expensive calculations. As a rule of thumb,
+most actions in ParaView will need to be configured first (for example, setting
+the origin and normal direction for a slice through the data set), and then
+applied to the data by hitting the <strong>Apply</strong> push button in the <strong>Properties</strong>
+tab. There is an option in the general ParaView Preferences to enable <strong>Auto
+Apply</strong>, but this should be used with caution!</p>
+<p>You can get quick help on almost any icon or property in the GUI by hovering
+the mouse cursor over it for a little while, which should display the
+corresponding tool tip.</p>
+<p>We used ParaView version 4.3.1 for this tutorial. Historically, the ParaView
+interface has undergone changes from version to version, so not all of the
+features will be available for all versions, and the graphical representation
+might differ for new releases.</p>
+</div>
+<div class="section" id="loading-the-vti-data-set">
+<h2>Loading the .vti data set<a class="headerlink" href="#loading-the-vti-data-set" title="Permalink to this headline">¶</a></h2>
+<p>The VTI file created by rsMap3D can be loaded into ParaView using the <em>File -&gt;
+Open</em> menu option.  Note that if no file name was specified in the processing
+phase, a file should have been created in the current directory when the
+program was run.  When the file is first opened, you will see a dataset ready
+to be loaded in the ParaView Pipeline Browser on the left (show in bold
+script).  At this point, no data is shown yet:</p>
+<img alt="../_images/ParaviewJustAfterLoading.png" src="../_images/ParaviewJustAfterLoading.png" />
+<p>In the <strong>Properties</strong> panel below the pipeline browser you can click <strong>Apply</strong>
+to initiate the actual loading of the data set (this step causes the actual
+data file to be read into memory).  Once the data is loaded and active, more
+options will appear in the <strong>Properties</strong> tab and a box will appear in the
+center pane.</p>
+<p>Note that in <strong>Properties</strong> pane the <strong>Representation</strong> is set to &#8220;Outline&#8221;.
+This option is responsible for the box shown in the central window.  We are
+seeing a box representing the bounds of the data volume.</p>
+<img alt="../_images/ParaviewJustAfterFirstApply.png" src="../_images/ParaviewJustAfterFirstApply.png" />
+<p>The <strong>Representation</strong> property has many options: Outline, Points, Surface,
+Volume, etc.  For now we will select Volume.  (Caution, this is a very
+computationally intensive process for large data files! You may be better off
+exploring your data set with isocontours in that case) At first look there may
+not seem to be much change but if you look closely you may see a few data
+points and should also see a Color Map Editor on the right.</p>
+<img alt="../_images/ParaviewVolumeRendered.png" src="../_images/ParaviewVolumeRendered.png" />
+<p>In this case, the reason there is little showing is that the intensity covers
+many orders of magnitude. To play with the contrast, go to the <strong>Color Map
+Editor</strong> in the right pane, and change the contrast by using the <strong>Rescale to
+Custom Range</strong> button <img alt="customRange" src="../_images/ParaviewCustomRangeButton.png" /> next to the colormap. You can also choose a
+different colormap through the <strong>Choose preset</strong> button <img alt="choosePreset" src="../_images/ParaviewChoosePresetButton.png" />. After
+rescaling the data range and changing the color map to &#8220;Rainbow desaturated&#8221;,
+our data set now looks as follows:</p>
+<img alt="../_images/ParaviewVolumeAfterRescale.png" src="../_images/ParaviewVolumeAfterRescale.png" />
+</div>
+<div class="section" id="scaling-intensities">
+<h2>Scaling Intensities<a class="headerlink" href="#scaling-intensities" title="Permalink to this headline">¶</a></h2>
+<p>There are essentially two ways to re-scale the intensities in the volume files:</p>
+<ul class="simple">
+<li>The easy option is to check the checkbox <strong>Use log scale when mapping data to
+colors</strong> in the colormap editor (in the right pane). You may now need to play
+with the data range again to make relevant features visible.</li>
+<li>Another more flexible and powerful way is to apply a Calculator filter
+<img alt="calculator" src="../_images/ParaviewCalculatorButton.png" /> to the data set and to rescale the intensity values using any
+custom configurable transform function. See the Section <a class="reference internal" href="#calculator">Calculator</a> below.</li>
+</ul>
+</div>
+<div class="section" id="applying-filters-to-data-sets">
+<h2>Applying Filters to Data Sets<a class="headerlink" href="#applying-filters-to-data-sets" title="Permalink to this headline">¶</a></h2>
+<p>Now that we are sure that the data has been loaded into ParaView, we can apply
+a number of analysis tools to it. ParaView calls these tools <em>Filters</em>. These
+are accessible either through the <em>Filters</em> option in the menu bar, or through
+a number of icons just above the <strong>Pipeline Browser</strong> and <strong>Layout</strong> panes.</p>
+<p>ParaView relies heavily on the concept of <em>pipelines</em>, meaning that data can be
+processed in a series of discrete steps. This structure is represented in the
+<strong>Pipeline Browser</strong> panel as an object tree. The general idea is that one
+needs to select an object in the object tree, and can then apply the next kind
+of filter to this object, thereby creating a child object of the selected
+parent. Each object can be made visible or turned off in the <strong>Layout</strong> pane by
+clicking the little eye symbol to its left.</p>
+<p>Here are a few commonly useful filters for the kind of data sets that rsMap3D
+delivers. We will directly illustrate their use by applying them to our test
+data set.</p>
+<div class="section" id="contour">
+<h3>Contour<a class="headerlink" href="#contour" title="Permalink to this headline">¶</a></h3>
+<p><img alt="contour" src="../_images/ParaviewContourButton.png" /></p>
+<p>This draws one or more isocontour surfaces from the data set (or whatever
+parent object it is applied to). The opacity and coloring of the contour can be
+adjusted in the <strong>Properties</strong> pane below the <strong>Pipeline Browser</strong>.</p>
+<img alt="../_images/ParaviewVolumeContour.png" src="../_images/ParaviewVolumeContour.png" />
+<p>And the same thing with two isocontour surfaces that are colored according to
+their contour level values:</p>
+<img alt="../_images/ParaviewVolumeContour2.png" src="../_images/ParaviewVolumeContour2.png" />
+</div>
+<div class="section" id="calculator">
+<h3>Calculator<a class="headerlink" href="#calculator" title="Permalink to this headline">¶</a></h3>
+<p><img alt="calculator" src="../_images/ParaviewCalculatorButton.png" /></p>
+<p>This filter can be used to perform any custom calculation on the data set (more
+accurately, the available data arrays of the parent object). We will illustrate
+its use here to apply a logarithmic intensity scaling to our volume data set.
+Select the data set object in the <strong>Pipeline Browser</strong> and click on the
+calculator icon <img alt="calculator" src="../_images/ParaviewCalculatorButton.png" />, or go through the menu via <em>Filters -&gt; Common -&gt;
+Calculator</em>.</p>
+<p>In the <strong>Properties</strong> pane below the pipeline browser, you should now see the
+following properties:</p>
+<img alt="../_images/ParaviewCalculatorPane.png" src="../_images/ParaviewCalculatorPane.png" />
+<p>We&#8217;ve already entered the equation into the corresponding text field (which was
+initially empty). The available data arrays for the calculations can be
+retrieved from the two dropdown menus below the mathematical symbols, one for
+scalar type data, the other one for vector type data. In this case, we&#8217;ve
+pulled up the intensity data from the original data set, which is stored in the
+array named &#8220;<a href="#id1"><span class="problematic" id="id2">Scalars_</span></a>&#8221;. (Note that you can see the available data arrays of the
+data set by selecting it and inspecting the <strong>Information</strong> tab below the
+pipeline browser.)</p>
+<p>The scaling equation we&#8217;ve entered is</p>
+<div class="highlight-none"><div class="highlight"><pre>log10(Scalars_)
+</pre></div>
+</div>
+<p>The calculator produces a new array with the result of this calculation, which
+will be named &#8220;Result&#8221;, according to the <strong>Result Array Name</strong> field. You can
+change this name to anything you like.</p>
+<p>After hitting <strong>Apply</strong> for the calculator, inspection of the <strong>Information</strong>
+pane of the calculator shows that it now carries two array data sets: the
+original &#8220;<a href="#id3"><span class="problematic" id="id4">Scalars_</span></a>&#8221; and the new &#8220;Result&#8221;:</p>
+<img alt="../_images/ParaviewCalculatorInfo.png" src="../_images/ParaviewCalculatorInfo.png" />
+<p>Now we are ready to perform some more interesting analysis using the scaled
+data set.</p>
+</div>
+<div class="section" id="slice">
+<h3>Slice<a class="headerlink" href="#slice" title="Permalink to this headline">¶</a></h3>
+<p><img alt="slice" src="../_images/ParaviewSliceButton.png" /></p>
+<p>This filter draws a 2-dimensional slice through a 3D data set. Let&#8217;s see what
+an HL-plane cut through our data set looks like. The center of our intensity
+feature is located at (HKL) = (002). The HL-plane (for a cubic HKL lattice) has
+a normal direction along the K-axis, i.e.: (010). After selecting the
+Calculator1 object, we hit the slice icon, and enter the following parameters
+in the properties tab:</p>
+<img alt="../_images/ParaviewSlicePane.png" src="../_images/ParaviewSlicePane.png" />
+<p>The Layout pane shows the orientation of the slice in our data set
+interactively while we edit these numbers:</p>
+<img alt="../_images/ParaviewSlice1.png" src="../_images/ParaviewSlice1.png" />
+<p>After hitting <strong>Apply</strong>, we then get the following intensity map (after
+reorienting the 3-D view to look straight along the K-direction):</p>
+<img alt="../_images/ParaviewSlice2.png" src="../_images/ParaviewSlice2.png" />
+<p>Note that the coloring of the slice is set to &#8220;Result&#8221;, which were the
+logarithmic intensity values we calculated above. You can edit the color map
+for the &#8220;Result&#8221; array through the <strong>Edit</strong> button shown here:</p>
+<img alt="../_images/ParaviewSlicePane2.png" src="../_images/ParaviewSlicePane2.png" />
+</div>
+<div class="section" id="line-profile">
+<h3>Line Profile<a class="headerlink" href="#line-profile" title="Permalink to this headline">¶</a></h3>
+<p><img alt="line" src="../_images/ParaviewLineButton.png" /></p>
+<p>This filter generates line profiles through the 3D (or 2D) data set. Let&#8217;s find
+out what the intensity profile along the L-direction through the center of our
+feature looks like. Again, we select the <strong>Calculator1</strong> object and apply the
+<strong>Plot Over Line</strong> filter to it. In the properties pane, we&#8217;ll define the end
+points according to our needs (apparently, the data is very slightly misaligne
+and we need to fudge the zero-point along the X-axis a little bit), and set the
+<strong>Resolution</strong> to 400 points along the line segment:</p>
+<img alt="../_images/ParaviewLinePane.png" src="../_images/ParaviewLinePane.png" />
+<p>Here is the preview of what where the line profile will be drawn:</p>
+<img alt="../_images/ParaviewLine.png" src="../_images/ParaviewLine.png" />
+<p>After hitting <strong>Apply</strong>, a new chart with the line profile appears in the
+ParaView window. It shows the line profile for both the linear intensity array
+&#8220;<a href="#id5"><span class="problematic" id="id6">Scalars_</span></a>&#8221;, and the logarithmic array &#8220;Result&#8221;. These lines can be modified in
+the properties pane:</p>
+<img alt="../_images/ParaviewLinePane2.png" src="../_images/ParaviewLinePane2.png" />
+<p>And the result looks like this:</p>
+<img alt="../_images/ParaviewLine2.png" src="../_images/ParaviewLine2.png" />
+</div>
+</div>
+<div class="section" id="adding-coordinate-axes-to-the-plot">
+<h2>Adding coordinate axes to the plot<a class="headerlink" href="#adding-coordinate-axes-to-the-plot" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to add axes to the plot as well. Each object can have its own
+set of axes. Go to the <strong>Properties</strong> tab, and somewhere near the bottom you
+should see the following (or something similar):</p>
+<img alt="../_images/ParaviewShowAxes1.png" src="../_images/ParaviewShowAxes1.png" />
+<p>Enable the checkbox and hit <strong>Edit</strong> to change the axes properties:</p>
+<img alt="../_images/ParaviewShowAxes2.png" src="../_images/ParaviewShowAxes2.png" />
+<p>After making the desired adjustments, your data window will now look something
+like this:</p>
+<img alt="../_images/ParaviewShowAxes3.png" src="../_images/ParaviewShowAxes3.png" />
+</div>
+<div class="section" id="exporting-data-from-slices-lines-etc">
+<h2>Exporting data from Slices, Lines, etc.<a class="headerlink" href="#exporting-data-from-slices-lines-etc" title="Permalink to this headline">¶</a></h2>
+<p>After carefully selecting the right planes in ParaView, some of which may be
+oblique with respect to your cartesian coordinate grid, you may want to plot or
+process this data using a different software package. It is possible to export
+the data associated with many of the ParaView filter objects as a comma
+separated values (.csv) file. Select the corresponding object in the <strong>Pipeline
+Browser</strong> and click on the <strong>Save Data</strong> button <img alt="saveData" src="../_images/ParaviewSaveDataButton.png" /> or go through the
+menu <em>File -&gt; Save Data</em>. Chose a filename and save the file. This works well
+for slices and line cuts alike. Careful, though, with 3D data objects, as the
+.csv files are stored in plain ASCII and can become very large for large data
+sets!</p>
+<p>For our tutorial, we will save the data from <strong>Slice1</strong> into a .csv file called
+&#8220;slice_data.csv&#8221;.</p>
+<img alt="../_images/ParaviewSaveData.png" src="../_images/ParaviewSaveData.png" />
+<div class="section" id="plotting-slice-data-in-other-programs">
+<h3>Plotting slice data in other programs<a class="headerlink" href="#plotting-slice-data-in-other-programs" title="Permalink to this headline">¶</a></h3>
+<p>The slice data exported in .csv format can now be processed with external
+software. Below are two examples for Matlab and Python&#8217;s matplotlib. The
+challenging part is to convert the data given for each slice point back to
+something that the software can actually display. Usually this involves a
+triangulation step, as shown in the examples below.</p>
+<div class="section" id="matlab">
+<h4>Matlab<a class="headerlink" href="#matlab" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-matlab"><div class="highlight"><pre><span class="c">% five data columns: Intensity, log(Intensity), H, K, L</span>
+<span class="n">M</span> <span class="p">=</span> <span class="n">csvread</span><span class="p">(</span><span class="s">&#39;slice_data.csv&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="c">% Delaunay triangulation to determine the data set connectivity</span>
+<span class="n">dt</span> <span class="p">=</span> <span class="n">delaunay</span><span class="p">(</span><span class="n">M</span><span class="p">(:,</span><span class="mi">3</span><span class="p">),</span> <span class="n">M</span><span class="p">(:,</span><span class="mi">5</span><span class="p">));</span>
+<span class="n">vertices</span> <span class="p">=</span> <span class="p">[</span><span class="n">M</span><span class="p">(:,</span><span class="mi">3</span><span class="p">),</span> <span class="n">M</span><span class="p">(:,</span><span class="mi">5</span><span class="p">)];</span>
+
+<span class="c">% plot the resulting patch data from the Delaunay triangulation</span>
+<span class="n">patch</span><span class="p">(</span><span class="s">&#39;Faces&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="s">&#39;Vertices&#39;</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="s">&#39;FaceVertexCData&#39;</span><span class="p">,</span> <span class="n">M</span><span class="p">(:,</span><span class="mi">2</span><span class="p">),</span> <span class="c">...</span>
+    <span class="s">&#39;FaceColor&#39;</span><span class="p">,</span><span class="s">&#39;interp&#39;</span><span class="p">,</span><span class="s">&#39;EdgeColor&#39;</span><span class="p">,</span> <span class="s">&#39;none&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;L&#39;</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This should result in the following plot:</p>
+<img alt="../_images/ParaviewMatlabPlot.png" src="../_images/ParaviewMatlabPlot.png" />
+</div>
+<div class="section" id="python-matplotlib">
+<h4>Python matplotlib<a class="headerlink" href="#python-matplotlib" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.tri</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="c"># load the data set with five columns: Intensity, log(Intensity), H, K, L</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s">&#39;slice_data.csv&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+
+<span class="c"># Delaunay triangulation to determine the data set connectivity</span>
+<span class="n">triang</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">tri</span><span class="o">.</span><span class="n">Triangulation</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span><span class="mi">4</span><span class="p">])</span>
+
+<span class="c"># plot the slice</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tripcolor</span><span class="p">(</span><span class="n">triang</span><span class="p">,</span> <span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">shading</span><span class="o">=</span><span class="s">&#39;gouraud&#39;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;K&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The plot looks something like this in the end:</p>
+<img alt="../_images/ParaviewMatplotlibPlot.png" src="../_images/ParaviewMatplotlibPlot.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../Installation/linuxInstall.html" title="Installation of rsMap3D on Linux Host"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ProcessingWithRSMap3D.html" title="Processing Data with rsMap3D"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Software Services Group, Advanced Photon Source.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
