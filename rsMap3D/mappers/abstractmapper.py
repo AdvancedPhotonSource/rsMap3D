@@ -83,12 +83,15 @@ class AbstractGridMapper(object):
         data_array = numpy_support.numpy_to_vtk(INT)
         
         image_data = vtk.vtkImageData()
-        image_data.SetNumberOfScalarComponents(1)
         image_data.SetOrigin(qx0,qy0,qz0)
         image_data.SetSpacing(dqx,dqy,dqz)
         image_data.SetExtent(0, self.nx-1,0, self.ny-1,0, self.nz-1)
-        image_data.SetScalarTypeToDouble()
-        
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            image_data.SetNumberOfScalarComponents(1)
+            image_data.SetScalarTypeToDouble()
+        else:
+            image_data.AllocateScalars(vtk.VTK_DOUBLE, 1)
+               
         pd = image_data.GetPointData()
         
         pd.SetScalars(data_array)
@@ -101,7 +104,11 @@ class AbstractGridMapper(object):
         else:
             writer.SetFileName(self.outputFileName)
             
-        writer.SetInput(image_data)
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            writer.SetInputData(image_data)
+        else:
+            writer.SetInput(image_data)
+            
         writer.Write()
 
     @abc.abstractmethod
