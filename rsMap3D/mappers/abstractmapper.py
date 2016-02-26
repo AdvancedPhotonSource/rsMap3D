@@ -105,9 +105,9 @@ class AbstractGridMapper(object):
             writer.SetFileName(self.outputFileName)
             
         if vtk.VTK_MAJOR_VERSION <= 5:
-            writer.SetInputData(image_data)
-        else:
             writer.SetInput(image_data)
+        else:
+            writer.SetInputData(image_data)
             
         writer.Write()
 
