@@ -18,7 +18,7 @@
 -->
     <!-- Define the detector circles as a series of axes. -->
 <!--    <detectorCircles numCircles="1">
-       <circleAxis number="1" specMotorName="X2mtheta" directionAxis="z-"/>
+       <circleAxis number="1" specMotorName="2-theta" directionAxis="z-"/>
     </detectorCircles>
 -->
     <!-- define referemce directions -->
