@@ -1,0 +1,255 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation of rsMap3D on Windows Host &mdash; rsMap3D Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="shortcut icon" href="../_static/rsMap3D.ico"/>
+    <link rel="top" title="rsMap3D Documentation" href="../index.html" />
+    <link rel="prev" title="Installation of rsMap3D on Mac/OSX Host" href="macInstall.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="macInstall.html" title="Installation of rsMap3D on Mac/OSX Host"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rsMap3D.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation of rsMap3D on Windows Host</a><ul>
+<li><a class="reference internal" href="#installation-and-setup-of-canopy">Installation and setup of Canopy</a></li>
+<li><a class="reference internal" href="#installing-xrayutilities">Installing xrayutilities</a></li>
+<li><a class="reference internal" href="#installing-pyspec">Installing pySpec</a></li>
+<li><a class="reference internal" href="#installing-rsmap3d">Installing rsMap3D</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="macInstall.html"
+                        title="previous chapter">Installation of rsMap3D on Mac/OSX Host</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Installation/windowsInstall.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation-of-rsmap3d-on-windows-host">
+<h1>Installation of rsMap3D on Windows Host<a class="headerlink" href="#installation-of-rsmap3d-on-windows-host" title="Permalink to this headline">¶</a></h1>
+<p>These installation instructions assume the use of the Enthought Canopy Python
+distribution.  We use Canopy for these instructions as it is the default
+Python environment used by the Advanced Photon Source at this time.  For these
+instructions, Canopy 1.4.0 and the packages provided by Canopy were used as
+much as possible.  The description written here was put together using a fresh
+Canopy install in order to provide as much information as possible for the
+beginning user.</p>
+<p>In order to install run rsmMap3D the user will need to install Canopy, use the
+package manager to install/check the install of a number of other python
+packages and then install:</p>
+<ul class="simple">
+<li>xrayutilities from <a class="reference external" href="http://sourceforge.net/projects/xrayutilities">http://sourceforge.net/projects/xrayutilities</a></li>
+<li>pyspec from <a class="reference external" href="https://github.com/stuwilkins/pyspec">https://github.com/stuwilkins/pyspec</a></li>
+<li>And then download the source for rsMap3D from <a class="reference external" href="https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/">https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/</a></li>
+</ul>
+<div class="section" id="installation-and-setup-of-canopy">
+<h2>Installation and setup of Canopy<a class="headerlink" href="#installation-and-setup-of-canopy" title="Permalink to this headline">¶</a></h2>
+<p>Enthought Canopy is a commercial bundling of Python.  It is available from
+<a class="reference external" href="https://www.enthought.com/">https://www.enthought.com/</a>
+In order to install Canopy (the &#8220;free version&#8221; will not work) the user will
+need to register for an account with Enthought.  The Argonne has a
+subscription for Enthought Python.  Argonne staff can register with their ANL
+e-mails and will get access to the full version.  Academic licenses are also
+available.  Academic users can request an academic license.  Note that the
+Canopy Free version will not work on it&#8217;s own since rsMap3D requires VTK and
+this is not included with the Free version.  Once you have an account, you
+can go to the Canopy web site, select Get Canopy and you should see something
+like the following.</p>
+<img alt="../_images/Enthought_Download_Page.png" src="../_images/Enthought_Download_Page.png" />
+<p>With an authorized login, you should see the orange box near the to prompting
+you to download.  Go to the Enthought page and download the Canopy distribution
+(canopy-1.4.0-win-64.msi as of this writing).  To install Canopy, double click
+on this file.  You will see a window that looks like this.</p>
+<img alt="../_images/Canopy_installer_window.png" src="../_images/Canopy_installer_window.png" />
+<p>Clicking next you will be asked to accept the license agreement.  You will
+then be prompted to install on a per user basis (although see notes on the
+image above).  This will allow installation with only user privilege.  Once
+the installation is finished, launch Canopy.</p>
+<p>It will take a few minutes to set up the environment the first time.   At the
+end of this initialization you will be prompted if you want to make Canopy
+your default Python environment.  Answering yes here will add items to your
+login scripts to place Canopy and its associated python in your path.  This
+will allow you to simply type python instead of needing to specify the path or
+adding this manually.  After initial setup Canopy will present you with a
+window like the following.  You will need to log in using the Enthought account
+used to download above.</p>
+<dl class="docutils">
+<dt>Note also that after launching canopy, a user version of the python executable</dt>
+<dd>can be found at:</dd>
+</dl>
+<p>~/Enthought/Canopy_64bit/User/bin/python</p>
+<img alt="../_images/Canopy_main.png" src="../_images/Canopy_main.png" />
+<p>Once logged in, press the Package Manager button.  This will allow you to
+explore the installed packages and to install a number of other packages
+maintained by Enthought.  An example of this is shown below.</p>
+<img alt="../_images/Canopy_package_manager.png" src="../_images/Canopy_package_manager.png" />
+<p>Note that entering a package name in the upper left will search for a package.
+For rsMap3D we need to make sure that the following packages are installed:
+numpy, vtk, pytables and PyQt4.  With Canopy 1.4.0 we see that</p>
+<ul class="simple">
+<li>numpy  1.8.0-1 is already installed</li>
+<li>PyQt 4.10.3-1 is available for installation</li>
+<li>vtk 5.10.1-1 is available for installation</li>
+<li>pytables 2.4.0-5 is available for installation</li>
+<li>mingw 4.8.1-2 Is available for install.  Used in these directions for C/C++ compiler.</li>
+</ul>
+<p>Make sure to install these packages now.  Note that we will also need
+xrayutilities and pyspec (described below) but the version of these tools is
+older than the version being used to develop rsMap3D so we will download and
+install versions of these.</p>
+</div>
+<div class="section" id="installing-xrayutilities">
+<h2>Installing xrayutilities<a class="headerlink" href="#installing-xrayutilities" title="Permalink to this headline">¶</a></h2>
+<p>Xrayutilities is a package written by Dominik Kriegner and Eugen Wintersberger.
+We are presently using version 1.0.6 of xrayutilities.  This package can be
+downloaded as a tar.gz file from <a class="reference external" href="http://sourceforge.net/projects/xrayutilities/">http://sourceforge.net/projects/xrayutilities/</a>.</p>
+<p>To unbundle the package you will need a program that can extract tar.gz files
+in windows.  Several are available (Cygwin, 7-zip, etc.). You will need to
+choose one of these tools or extract the files on a linux/mac computer using
+tar.  These instructions assume extracting into:</p>
+<p>Users/&#8217;username&#8217;/xrayutilities-1.0.6 (xrayutilities-1.0.6 is the top directory in the tar).</p>
+<p>This package includes a setup.py file to help with the install.   You will
+need to configure distutils to use the installed mingw compiler (above).  To
+do this create a file in C:Users&#8217;username&#8217;  called pydistutils.cfg (Make
+sure that it does not end up with hidden .txt extension).  Inside this file
+add the lines:</p>
+<div class="highlight-none"><div class="highlight"><pre>[build]
+compiler=mingw64
+</pre></div>
+</div>
+<p>To install xrayutilities select</p>
+<p>&#8216;All programs&#8217;-&gt;&#8217;Enthought Canopy (64-bit)&#8217;-&gt;&#8217;Canopy 64-bit command prompt&#8217;.</p>
+<p>Without This will give a command prompt that is already to use python:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd C:\Users\&#39;username&#39;\xrayutilities-1.0.6
+python setup.py --without-openmp install
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-pyspec">
+<h2>Installing pySpec<a class="headerlink" href="#installing-pyspec" title="Permalink to this headline">¶</a></h2>
+<p>pySpec is a python package written by Stuart Wilkins.  We have been downloading
+the latest version of pyspec from the repository on github.  To use git on
+Windows, we installed Tourtise Git (<a class="reference external" href="http://code.google.com/p/tortoisegit/">http://code.google.com/p/tortoisegit/</a>) and
+Git ForWindows (<a class="reference external" href="http://msysgit.github.io/">http://msysgit.github.io/</a>). To download into /local/pyspec:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd /local
+git clone https://github.com/stuwilkins/pyspec
+</pre></div>
+</div>
+<p>Like xrayutilities, pyspec comes with a setup.py file to help with the
+installation.  To install pyspec run:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd /local/pyspec
+~/Enthought/Canopy_64bit/User/bin/python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-rsmap3d">
+<h2>Installing rsMap3D<a class="headerlink" href="#installing-rsmap3d" title="Permalink to this headline">¶</a></h2>
+<p>Unlike the last two packages rsMap3D does not have a setup.py.  It is currently
+installed in a directory, This directory is set in the PYTHONPATH and the
+application is run.</p>
+<p>Tortise Git adds menu options on the left click in explorer.  Right click on
+C:\Users\&#8217;username&#8217; and select &#8216;Git Clone...&#8217;  In the window that appears enter
+<a class="reference external" href="http://github/stuwilkins/pyspec">http://github/stuwilkins/pyspec</a> as shown below.</p>
+<p>We can now set the python path and run the application.</p>
+<div class="highlight-none"><div class="highlight"><pre>setenv PYTHONPATH /local/rsmap3d
+~/Enthought/Canopy_64bit/User/bin/python -m rsMap3D.rsmEdit.
+</pre></div>
+</div>
+<p>You will then see a window like the following:</p>
+<img alt="../_images/rsMap3DonLaunch2.png" src="../_images/rsMap3DonLaunch2.png" />
+<p>You are now ready to start using rsMap3D.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="macInstall.html" title="Installation of rsMap3D on Mac/OSX Host"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Software Services Group, Advanced Photon Source.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

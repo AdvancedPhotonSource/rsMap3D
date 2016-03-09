@@ -1,0 +1,257 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Processing Data with rsMap3D &mdash; rsMap3D Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="shortcut icon" href="../_static/rsMap3D.ico"/>
+    <link rel="top" title="rsMap3D Documentation" href="../index.html" />
+    <link rel="next" title="View 3D volume data files in ParaView" href="ViewingWithParaView.html" />
+    <link rel="prev" title="Welcome to rsMap3D’s documentation!" href="../index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ViewingWithParaView.html" title="View 3D volume data files in ParaView"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to rsMap3D’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rsMap3D.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Processing Data with rsMap3D</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#running-rsmap3d">Running rsMap3D</a><ul>
+<li><a class="reference internal" href="#file-tab">File Tab</a></li>
+<li><a class="reference internal" href="#data-range-tab">Data Range Tab</a></li>
+<li><a class="reference internal" href="#scans-tab">Scans tab</a></li>
+<li><a class="reference internal" href="#process-data-tab">Process Data Tab</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#viewing-output-data">Viewing Output data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to rsMap3D&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ViewingWithParaView.html"
+                        title="next chapter">View 3D volume data files in ParaView</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Tutorial/ProcessingWithRSMap3D.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="processing-data-with-rsmap3d">
+<h1>Processing Data with rsMap3D<a class="headerlink" href="#processing-data-with-rsmap3d" title="Permalink to this headline">¶</a></h1>
+<p>Software Services Group</p>
+<p>Advanced Photon Source</p>
+<p>Argonne National Laboratory</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>rsMap3D is an application for producing 3D reciprocal space maps from x-ray
+diffraction data.  This application allows the user to select input files,
+view a 3D representation of the data volume sampled during a set of
+measurements, select a subset of the data, and processes the data
+into a 3D map.</p>
+<p>rsMap3D is written in python and relies on a number of external python
+modules.  These modules include:</p>
+<ul class="simple">
+<li>numpy</li>
+<li>PyQt4</li>
+<li>vtk</li>
+<li>pyspec</li>
+<li>xrayutilities</li>
+</ul>
+<p>Many of these modules are installed in many prepackaged distributions of
+python.  Others, such as pyspec and xrayutilities, may need manual
+installation.  A separate manual has been developed for installing rsMap3D.</p>
+</div>
+<div class="section" id="running-rsmap3d">
+<h2>Running rsMap3D<a class="headerlink" href="#running-rsmap3d" title="Permalink to this headline">¶</a></h2>
+<p>Once rsMap3D is installed, it can be run by issuing the following command:</p>
+<div class="highlight-sh"><div class="highlight"><pre>python -m rsMap3D.rsmEdit
+</pre></div>
+</div>
+<p>After launching you should see a screen that looks like this:</p>
+<img alt="../_images/rsMap3DonLaunch.png" src="../_images/rsMap3DonLaunch.png" />
+<p>The black box on the left is a 3D display which will display the extent of
+data volumes for all scans or a subset of selected scans, depending on the tab
+selected in the right box.  The right box is used for entering input files,
+selection of scans, and processing the data.  On launch, the only tab active is
+the File tab. The functionality of all tabs is described in the following sections.</p>
+<div class="section" id="file-tab">
+<h3>File Tab<a class="headerlink" href="#file-tab" title="Permalink to this headline">¶</a></h3>
+<p>This tab allows entry of input  files for processing.  The current
+version allows processing of spec data files with a couple of configuration
+files.  The parameters on this page are:</p>
+<ul class="simple">
+<li>Project file - This is the spec data file, including the full path.</li>
+<li>Instrument Config File -  This is an XML file to describe parameters such as diffractometer circles, beam direction, etc.</li>
+<li>Detector Config File -  This is an XML file for describing the detector parameters such as size, number of pixels, center, etc.</li>
+<li>Image correction: Options include &#8220;None&#8221; to simply use the raw images, &#8220;Bad Pixel File&#8221; to exclude abberant or dead pixels from the analysis, or &#8220;Flat Field Correction&#8221; to apply the proper sensitivity correction to each pixel in the detector images.</li>
+<li>Number of pixels to average - this parameter allows averaging of pixels in the x and y direction.</li>
+<li>Detector ROI - Describes a region of interest on the detector to be used in processing.</li>
+<li>Scan numbers - This allows entry of a subset of scans to process.  This field is optional.  If left blank, all available scans will be processed. Data can be entered as a &#8220;string range&#8221;, e.g. <code class="docutils literal"><span class="pre">1-3,5</span></code>, <code class="docutils literal"><span class="pre">[4,5,8,10]</span></code>, <code class="docutils literal"><span class="pre">2-10:2</span></code></li>
+<li>Output Type - The user can select between <strong>qx, qy, qz Map</strong> or <strong>Stereographic projection</strong></li>
+<li>HKL output - This option is only enabled for <strong>qx, qy, qz Map</strong> and will transform the data to HKL</li>
+<li>Load - Once proper files are set in the entries, this button will become active.  Pressing this will start loading information about detector angles for each scan.  This information is used in the initial presentation of the data volume used.</li>
+<li>Cancel - Allow the user to cancel in the middle of loading the data.</li>
+</ul>
+<p>Once data is loaded, the other tabs will be enabled, as shown below.  Note
+that the box on the left now shows a representation of the data volume covered
+by the selected data.</p>
+<img alt="../_images/rsMap3DafterLoading.png" src="../_images/rsMap3DafterLoading.png" />
+</div>
+<div class="section" id="data-range-tab">
+<h3>Data Range Tab<a class="headerlink" href="#data-range-tab" title="Permalink to this headline">¶</a></h3>
+<img alt="../_images/rsMap3DDataRange.png" src="../_images/rsMap3DDataRange.png" />
+<p>This tab displays the overall range of data selected for processing.  These
+values can be changed.  The new values for these limits will not take effect
+until the apply button is pressed.  The values can be reset to the last
+applied values by pressing reset.  When apply is pressed, any image in the
+available scans which fall completely outside of the new limits will be
+deselected for processing.  This will cause a new image to be drawn on the
+left showing the new set of selected images.  For instance, this image shows
+two components, a dome piece and a stick going through the top (right side of
+the image) of the dome.  These pieces come from a series of phi scans at
+different chi/phi values (the dome) and a series of theta/two theta scans (the
+stick).  By changing Z max to 4.9 we can see that most of the stick piece above
+the dome is missing from the image as the associated images have been
+deselected.  Note that this does not completely eliminate the stick as there
+are more bits of it inside the dome.</p>
+</div>
+<div class="section" id="scans-tab">
+<h3>Scans tab<a class="headerlink" href="#scans-tab" title="Permalink to this headline">¶</a></h3>
+<img alt="../_images/rsMap3DInitialScansTab.png" src="../_images/rsMap3DInitialScansTab.png" />
+<p>This tab shows selected information about each image in a selected scan in
+tabular form and displays the data extent for a selected scan in the box on
+the left.  Note that when this is first selected, no scans are selected and
+the image still shows the extent for all images.  When a scan is selected, the
+table is filled with information on each image and the images for that scan
+are shown.</p>
+<img alt="../_images/rsMap3DScansTabwSelection.png" src="../_images/rsMap3DScansTabwSelection.png" />
+<p>The ring displayed in the image to the right shows the data volume collected
+in one particular scan.  This is a phi scan with 1107 images.  This ring forms
+the bottom section of the dome piece of the scan.</p>
+<p>Note that it is possible to select/deselect each image using the checkbox in
+the first column or all images in the scan can be selected/deselected using
+the buttons at the top of the table.  The effect of this is shown in the image
+below.  Note that only selected images will be processed in the next phase.</p>
+<img alt="../_images/rsMap3DScansTabImagesGone.png" src="../_images/rsMap3DScansTabImagesGone.png" />
+<p>Here a number of images have been deselected (more than the two shown) and a
+chunk of the ring is missing.  This section of the ring will not be processed
+later.  Note that the ability to manually deselect individual images this way
+is somewhat impractical on a large scale but could be quite useful for a few
+bad images.</p>
+</div>
+<div class="section" id="process-data-tab">
+<h3>Process Data Tab<a class="headerlink" href="#process-data-tab" title="Permalink to this headline">¶</a></h3>
+<img alt="../_images/rsMap3DProcessData.png" src="../_images/rsMap3DProcessData.png" />
+<p>This tab allows entry of some final parameters and the output file name.  The
+input field here allow changing the number of grid points to include in the
+output data in each of the three dimensions.  An output file, currently a vti
+file, associated with the Visualization Toolkit VTK is specified here.  To
+produce the output, click the run button.  Note that it may take several
+minutes for processing to finish.</p>
+</div>
+</div>
+<div class="section" id="viewing-output-data">
+<h2>Viewing Output data<a class="headerlink" href="#viewing-output-data" title="Permalink to this headline">¶</a></h2>
+<p>rsMap3D is not intended as an application that will view 3D maps of processed
+data.  There are other applications that will handle looking at the output
+files.  We have been using Paraview (<a class="reference external" href="http://www.paraview.org/">http://www.paraview.org/</a>) as a viewer for
+the output files. See <a href="#id1"><span class="problematic" id="id2">`View 3D volume data files in ParaView`_</span></a> .</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ViewingWithParaView.html" title="View 3D volume data files in ParaView"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to rsMap3D’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rsMap3D</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Software Services Group, Advanced Photon Source.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
