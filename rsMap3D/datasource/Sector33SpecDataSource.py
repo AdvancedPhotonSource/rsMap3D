@@ -3,7 +3,7 @@
  See LICENSE file.
 '''
 import os
-from pyspec import spec
+from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
     InstConfigException, DetectorConfigException, ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
@@ -20,6 +20,9 @@ import xrayutilities as xu
 import time
 import traceback
 import Image
+import sys,traceback
+
+
 
 IMAGE_DIR_MERGE_STR = "images/%s"
 SCAN_NUMBER_MERGE_STR = "S%03d"
@@ -274,7 +277,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
     def getReferenceValues(self, scan):
         '''
         '''
-        angles = self.getGeoAngles(self.sd[scan], self.getReferenceNames())
+        angles = self.getGeoAngles(self.sd.scans[str(scan)], self.getReferenceNames())
         return angles
 
     def getScanAngles(self, scan, angleNames):
@@ -285,12 +288,16 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         :param scan: scan from which to retrieve the angles
         :params angleNames: a list of names for the angles to be returned
         """
-        geoAngles = np.zeros((scan.data.shape[0], len(angleNames)))
+        geoAngles = np.zeros((len(scan.data[scan.data.keys()[0]]), len(angleNames)))
         for i, name in enumerate(angleNames):
-            v = scan.scandata.get(name)
+            v = scan.data.get(name)
+            p = scan.positioner.get(name)
+
             if v != None:
-                if v.size == 1:
-                    v = np.ones(scan.data.shape[0]) * v
+                if len(v) == 1:
+                    v = np.ones(len(scan.data[scan.data.keys()[0]])) * v
+            elif p != None:
+                v = np.ones(len(scan.data[scan.data.keys()[0]])) * p
             else:
                 raise InstConfigException("Could not find angle " + name + \
                                           " in scan parameters")
@@ -298,6 +305,23 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         return geoAngles
         
+    def getUBMatrix(self, scan):
+        """
+        Read UB matrix from the #G3 line from the spec file. 
+        """
+        try:
+            g3 = scan.G["G3"].strip().split()
+            g3 = np.array(map(float, g3))
+            ub = g3.reshape(-1,3)
+            print ub
+            return ub
+        except:
+            print("Unable to read UB Matrix from G3")
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            
+            
     def hotpixelkill(self, areaData):
         """
         function to remove hot pixels from CCD frames
@@ -400,9 +424,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
         # Load scan information from the spec file
         try:
-            self.sd = spec.SpecDataFile(self.specFile)
+            self.sd = SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
-            maxScan = max(self.sd.findex.keys())
+            maxScan = int(self.sd.getMaxScanNumber())
+            print maxScan
             if self.scans  == None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
@@ -426,17 +451,17 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 else:
                     if (os.path.exists(os.path.join(imagePath, \
                                             SCAN_NUMBER_MERGE_STR % scan))):
-                        curScan = self.sd[scan]
+                        curScan = self.sd.scans[str(scan)]
                         self.availableScans.append(scan)
                         angles = self.getGeoAngles(curScan, self.angleNames)
                         if self.mapHKL==True:
-                            self.ubMatrix[scan] = curScan.UB
+                            self.ubMatrix[scan] = self.getUBMatrix(curScan)
                             if self.ubMatrix[scan] == None:
                                 raise Sector33SpecFileException("UB matrix " + \
                                                                 "not found.")
                         else:
                             self.ubMatrix[scan] = None
-                        self.incidentEnergy[scan] =curScan.energy
+                        self.incidentEnergy[scan] = 12398.4 /float(curScan.G['G4'].split()[3])
                         _start_time = time.time()
                         self.imageBounds[scan] = \
                             self.findImageQs(angles, \
@@ -566,7 +591,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         for scannr in scans:
             if self.haltMap:
                 raise ProcessCanceledException("Process Canceled")
-            scan = self.sd[scannr]
+            scan = self.sd.scans[str(scannr)]
             angles = self.getGeoAngles(scan, angleNames)
             scanAngle1 = {}
             scanAngle2 = {}
@@ -574,7 +599,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
             if monitorName != None:
-                monitor_data = scan.scandata.get(monitorName)
+                monitor_data = scan.data.get(monitorName)
                 if monitor_data == None:
                     raise IOError("Did not find Monitor source '" + \
                                   monitorName + \
@@ -582,7 +607,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                   "monitorName is correct in the " + \
                                   "instrument Config file")
             if filterName != None:
-                filter_data = scan.scandata.get(filterName)
+                filter_data = scan.data.get(filterName)
                 if filter_data == None:
                     raise IOError("Did not find filter source '" + \
                                   filterName + \
@@ -596,7 +621,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             if mask_was_none:
                 mask = [True] * len(self.getImageToBeUsed()[scannr])            
             
-            for ind in xrange(scan.data.shape[0]):
+            for ind in xrange(len(scan.data[scan.data.keys()[0]])):
                 if imageToBeUsed[scannr][ind] and mask[ind]:    
                     # read tif image
                     im = Image.open(self.imageFileTmp % (scannr, scannr, ind))
@@ -644,7 +669,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-        if self.getUBMatrix(scans[0]) == None:
+        if self.ubMatrix[scans[0]] == None:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
                             roi=self.getDetectorROI(), 
                             Nav=self.getNumPixelsToAverage())
@@ -652,7 +677,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                             roi=self.getDetectorROI(), 
                             Nav=self.getNumPixelsToAverage(), \
-                            UB = self.getUBMatrix(scans[0]))
+                            UB = self.ubMatrix[scans[0]])
             
 
         # apply selected transform
