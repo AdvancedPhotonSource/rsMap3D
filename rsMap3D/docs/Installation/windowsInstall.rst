@@ -1,141 +1,118 @@
 Installation of rsMap3D on Windows Host
 =======================================
-These installation instructions assume the use of the Enthought Canopy Python 
-distribution.  We use Canopy for these instructions as it is the default 
-Python environment used by the Advanced Photon Source at this time.  For these 
-instructions, Canopy 1.4.0 and the packages provided by Canopy were used as 
-much as possible.  The description written here was put together using a fresh 
-Canopy install in order to provide as much information as possible for the 
-beginning user.
+These installation instructions assume the use of the Anaconda Python 
+distribution from Continuum Analytics.  We use Canopy for these instructions as 
+it is the default Python environment used by the Advanced Photon Source at this 
+time.  For these instructions, Anaconda 2.5.0 and the packages provided by 
+Anaconda were used as much as possible.  The description written here was put 
+together using a fresh Anaconda install in order to provide as much information 
+as possible for the beginning user.
 
-In order to install run rsmMap3D the user will need to install Canopy, use the 
-package manager to install/check the install of a number of other python 
-packages and then install:
+In order to install run rsmMap3D the user will need to install Anaconda, and 
+install/check the install of a number of other python packages and then install:
 
-*	xrayutilities from http://sourceforge.net/projects/xrayutilities
-*	pyspec from https://github.com/stuwilkins/pyspec
-*	And then download the source for rsMap3D from https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/
+*	`xrayutilities <http://sourceforge.net/projects/xrayutilities>`_
+*	`spec2nexus <http://spec2nexus.readthedocs.org/en/latest/>`_
+*	And then download the source for `rsMap3D <https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/>`_
 
-Installation and setup of Canopy
---------------------------------
-Enthought Canopy is a commercial bundling of Python.  It is available from 
-https://www.enthought.com/
-In order to install Canopy (the "free version" will not work) the user will 
-need to register for an account with Enthought.  The Argonne has a 
-subscription for Enthought Python.  Argonne staff can register with their ANL 
-e-mails and will get access to the full version.  Academic licenses are also 
-available.  Academic users can request an academic license.  Note that the 
-Canopy Free version will not work on it's own since rsMap3D requires VTK and 
-this is not included with the Free version.  Once you have an account, you 
-can go to the Canopy web site, select Get Canopy and you should see something 
-like the following.
+Installation and setup of Anaconda
+----------------------------------
+`Anaconda <https://www.continuum.io/downloads>`_ is a completly free bundling 
+of Python by Continuum Analytics.  Note that although Continuum Analytics does 
+provide Anaconda at no cost, it does provide `some additional levels of support 
+<https://www.continuum.io/support-plan>`_ for a fee
+.
+To install Anaconda Python, go to the download site mentioned above you should 
+see a web page with a section that looks like
 
-.. image:: Images/Enthought_Download_Page.png
+.. image:: Images/anaconda_download_win.png
+     :scale: 30 %
 
-With an authorized login, you should see the orange box near the to prompting 
-you to download.  Go to the Enthought page and download the Canopy distribution 
-(canopy-1.4.0-win-64.msi as of this writing).  To install Canopy, double click 
-on this file.  You will see a window that looks like this.
+These instructions assume that you will install the Python 2.7, 64-bit 
+graphical installer.  Launching this installer should present a window like:
 
-.. image:: Images/Canopy_installer_window.png
+.. image:: Images/anaconda_setup_win.png
+	:scale: 50 %
 
 Clicking next you will be asked to accept the license agreement.  You will 
-then be prompted to install on a per user basis (although see notes on the 
-image above).  This will allow installation with only user privilege.  Once 
-the installation is finished, launch Canopy.
+then be prompted to select an installation type see image below.  Anaconda 
+allows installation on a per user basis ("Just Me") or for all users 
+(requires admin privilege).  
 
-It will take a few minutes to set up the environment the first time.   At the 
-end of this initialization you will be prompted if you want to make Canopy 
-your default Python environment.  Answering yes here will add items to your 
-login scripts to place Canopy and its associated python in your path.  This 
-will allow you to simply type python instead of needing to specify the path or 
-adding this manually.  After initial setup Canopy will present you with a 
-window like the following.  You will need to log in using the Enthought account 
-used to download above.
 
-Note also that after launching canopy, a user version of the python executable
- can be found at:
+.. image:: Images/anaconda_install_type_win.png
+	:scale: 50 %
 
-~/Enthought/Canopy_64bit/User/bin/python
+This installation assumes selection of "Just Me" 
+which requires only normal user privilege.  Before final installation the user 
+will be prompted for installation location and permission to modify the path to 
+include path to installed executables.  It is recommended to accept the 
+defaults here.  It will take some time to complete 
+the installation since Anaconda provides many common packages by default.  
 
-.. image:: Images/Canopy_main.png
 
-Once logged in, press the Package Manager button.  This will allow you to 
-explore the installed packages and to install a number of other packages 
-maintained by Enthought.  An example of this is shown below.
-
-.. image:: Images/Canopy_package_manager.png
-
-Note that entering a package name in the upper left will search for a package.  
 For rsMap3D we need to make sure that the following packages are installed: 
-numpy, vtk, pytables and PyQt4.  With Canopy 1.4.0 we see that
+numpy, vtk, pytables and PyQt4.  Installation can be verified by launching an 
+Anaconda prompt from Start->All Programs->Anaconda2 (64-bit).  We can verify 
+package installation with 
 
-* numpy  1.8.0-1 is already installed
-* PyQt 4.10.3-1 is available for installation 
-* vtk 5.10.1-1 is available for installation
-* pytables 2.4.0-5 is available for installation
-* mingw 4.8.1-2 Is available for install.  Used in these directions for C/C++ compiler.
+.. code-block:: none
+
+   conda search <packagename> at the prompt.
+
+At this time, Anaconda 2.5.0 is being used and the following packages are 
+available and those not installed by default can be installed with the command
+
+.. code-block:: none
+
+   conda install <packagename>
+
+Required packages
+
+* numpy  1.10.4 is already installed
+* pyqt 4.11.4 is already for installation 
+* vtk 6.3.0 is available for installation
+* pytables 3.2.2 is installed
+* h5py 2.5.0 is installed
+* pil 1.1.7 is available to install
 
 Make sure to install these packages now.  Note that we will also need 
-xrayutilities and pyspec (described below) but the version of these tools is 
-older than the version being used to develop rsMap3D so we will download and 
-install versions of these.
+xrayutilities and spec2nexus (described below). 
 
 Installing xrayutilities
 ------------------------
 Xrayutilities is a package written by Dominik Kriegner and Eugen Wintersberger. 
-We are presently using version 1.0.6 of xrayutilities.  This package can be 
-downloaded as a tar.gz file from http://sourceforge.net/projects/xrayutilities/.
+We are presently using version 1.2.1 of xrayutilities.  Although the source 
+code for this package can be downloaded and built as a `tar.gz
+<http://sourceforge.net/projects/xrayutilities/>`_ although a precompiled 
+distribution for windows is provided as a `wheel file
+<https://confluence.aps.anl.gov/display/RSM/Binary+Distributions+of+Python+Packages>`_.
+This wheel is recommended since this file was compile using the Microsoft 
+Visual Studio 2008 compiler (the same used for compiling Anaconda Python).  
 
-To unbundle the package you will need a program that can extract tar.gz files 
-in windows.  Several are available (Cygwin, 7-zip, etc.). You will need to 
-choose one of these tools or extract the files on a linux/mac computer using 
-tar.  These instructions assume extracting into:
- 
-Users/'username'/xrayutilities-1.0.6 (xrayutilities-1.0.6 is the top directory in the tar).
 
-This package includes a setup.py file to help with the install.   You will 
-need to configure distutils to use the installed mingw compiler (above).  To 
-do this create a file in C:\Users\'username'  called pydistutils.cfg (Make 
-sure that it does not end up with hidden .txt extension).  Inside this file 
-add the lines:
-
+This wheel file can be installed with 
 
 .. code-block:: none
 
-    [build]
-    compiler=mingw64
+   pip install xrayutilities-<long version info>.whl
 
-To install xrayutilities select  
 
-'All programs'->'Enthought Canopy (64-bit)'->'Canopy 64-bit command prompt'.  
 
-Without This will give a command prompt that is already to use python:
 
-.. code-block:: none
-
-   cd C:\Users\'username'\xrayutilities-1.0.6
-   python setup.py --without-openmp install
-
-Installing pySpec 
------------------
-pySpec is a python package written by Stuart Wilkins.  We have been downloading 
-the latest version of pyspec from the repository on github.  To use git on 
-Windows, we installed Tourtise Git (http://code.google.com/p/tortoisegit/) and 
-Git ForWindows (http://msysgit.github.io/). To download into /local/pyspec:
+Installing spec2nexus 
+---------------------
+spec2nexus is a python package written by Pete Jemian at the APS.  This package
+provides a subpackage that enables parsing spec files in python.  This package
+has been used in places to read spec files  as input for the rsMap3D.  Note 
+that rsMap3D requires at least version 2016.216.0.  Although the installation
+instructions suggest this can be installed with the conda installer, this 
+method currently installs an older version.  To install the correct version 
+use:
 
 .. code-block:: none
 
-   cd /local
-   git clone https://github.com/stuwilkins/pyspec
-
-Like xrayutilities, pyspec comes with a setup.py file to help with the 
-installation.  To install pyspec run:
-
-.. code-block:: none
-
-   cd /local/pyspec
-   ~/Enthought/Canopy_64bit/User/bin/python setup.py install
+   pip install spec2nexus
    
 Installing rsMap3D
 ------------------
@@ -145,7 +122,7 @@ application is run.
 
 Tortise Git adds menu options on the left click in explorer.  Right click on 
 C:\\Users\\'username' and select 'Git Clone...'  In the window that appears enter 
-http://github/stuwilkins/pyspec as shown below.
+https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/.
  
 We can now set the python path and run the application.  
 
