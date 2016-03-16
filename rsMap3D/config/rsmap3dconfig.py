@@ -58,11 +58,8 @@ class RSMap3DConfig():
                                " maxImageMemory does not set a number correctly")
 
 def main():
-    print "Hello"
     config = RSMap3DConfig()
-    print "Hello 2"
     config.createConfigFile()
-    print "Hello 3"
 
 if __name__ == "__main__":
     main()
