@@ -24,4 +24,6 @@ setup(name='rsMap3D',
       install_requires = ['spec2nexus',
                  'pillow',
                  ],
+      license = 'See LICENSE File',
+      platforms = 'any'
       )
