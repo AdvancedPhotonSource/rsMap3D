@@ -18,9 +18,11 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
 import numpy as np
 import xrayutilities as xu
 import time
-import traceback
-import Image
 import sys,traceback
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 
 
 
