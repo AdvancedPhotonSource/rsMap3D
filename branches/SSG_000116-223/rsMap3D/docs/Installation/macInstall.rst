@@ -1,148 +1,144 @@
 Installation of rsMap3D on Mac/OSX Host
 ========================================
 
-These installation instructions assume the use of the Enthought Canopy Python 
-distribution.  We use Canopy for these instructions as it is the default Python 
-environment used at this time.  For these instructions Canopy 1.4.0 and the 
-packages provided by Canopy were used as much as possible.  The description 
-written here was put together using a fresh Canopy install in order to provide 
-as much information as possible for the beginning user.
+These installation instructions assume the use of the Anaconda Python 
+distribution from Continuum Analytics.  We use Canopy for these instructions as 
+it is the default Python environment used by the Advanced Photon Source at this 
+time.  For these instructions, Anaconda 2.5.0 and the packages provided by 
+Anaconda were used as much as possible.  The description written here was put 
+together using a fresh Anaconda install in order to provide as much information 
+as possible for the beginning user.
 
-In order to install run rsmMap3D the user will need to install Canopy, use the 
-package manager to install/check the install of a number of other python 
-packages and then install:
+In order to install run rsmMap3D the user will need to install Anaconda, and 
+install/check the install of a number of other python packages and then install:
 
-* xrayutilities from http://sourceforge.net/projects/xrayutilities
-* pyspec from https://github.com/stuwilkins/pyspec
-* And then download the source for rsMap3D from https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/
+*	`xrayutilities <http://sourceforge.net/projects/xrayutilities>`_
+*	`spec2nexus <http://spec2nexus.readthedocs.org/en/latest/>`_
+*	And then download the source for `rsMap3D <https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/>`_
+
 
 Installation and setup of Canopy
 --------------------------------
-Enthought Canopy is a commercial bundling of Python.  It is available from 
+`Anaconda <https://www.continuum.io/downloads>`_ is a completly free bundling 
+of Python by Continuum Analytics.  Note that although Continuum Analytics does 
+provide Anaconda at no cost, it does provide `some additional levels of support 
+<https://www.continuum.io/support-plan>`_ for a fee
+.
+To install Anaconda Python, go to the download site mentioned above you should 
+see a web page with a section that looks like
 
-https://www.enthought.com/
+.. image:: Images/anaconda_download_mac.png
+     :scale: 30 %
 
-In order to install Canopy (the "free version" will not work) the user will 
-need to register for an account with Enthought.  The Argonne has a subscription 
-for Enthought Python.  Argonne staff can register with their ANL e-mails and 
-will get access to the full version.  Academic licenses are also available.  
-Academic users can request an academic license.  Note that the Canopy Free 
-version will not work on it's own since rsMap3D requires VTK and this is not 
-included with the Free version.  Once you have an account, you can go to the 
-Canopy web site, select Get Canopy and you should see something like the 
-following.
+These instructions assume that you will install the Python 2.7, 64-bit 
+graphical installer.  Launching this installer should present a window like:
 
-.. image:: Images/Enthought_Download_Page.png
+.. image:: Images/anaconda_setup_mac.png
+	:scale: 50 %
 
-With an authorized login, you should see the orange box near the to prompting 
-you to download.  Go to the Enthought page and download the Canopy 
-distribution (canopy-1.4.0-osx-64.dmg as of this writing).  Double clicking 
-this file will bring up a small installer window as shown below.  
+Clicking next you will be asked to accept the license agreement.  You will 
+then be prompted to select an installation type see image below.  Anaconda 
+allows installation on a per user basis ("Install for me only") or for all users 
+(requires admin privilege).  
 
-.. image:: Images/Mac_canopy_installer.png
 
-This window indicates that you should drag the Canopy icon into the 
-Applications icon on this window.  Dragging to the Applications icon in this 
-screen will attempt to install Canopy in the system's applications directory.  
-To do this, you will need root access to the machine.  You can install to the 
-user's application directory (which does not require root) by opening a Finder 
-window and selecting the user's Application directory.  Then simply drag the 
-Canopy icon into the User's Application folder in the Finder window.
+.. image:: Images/anaconda_install_dest_mac.png
+	:scale: 50 %
 
-Once the installer is done, it will prompt the user to make Canopy the default 
-version of python.  If this is acceptable, then answer yes.  This will greatly 
-simplify running the Canopy python.  Once canopy is installed, launch canopy to 
-ensure that all necessary packages are installed.  To do this you will need to 
-log in with your Enthought account. 
+This installation assumes selection of "Install for me only" 
+which requires only normal user privilege.  In this case anaconda will be 
+installed in the user's home directory by default.  Before final installation 
+the user will be prompted for installation type (see image).  This allows 
+customization of installed packages and location.  It is recommended to accept 
+the defaults here.  Accepting defaults should add python executables to the
+user's PATH environment variable.  It will take some time to complete 
+the installation since Anaconda provides many common packages by default.  
 
-.. image:: Images/Canopy_main.png
+.. image:: Images/anaconda_install_type_mac.png
+	:scale: 50 %
 
-Once logged in, press the Package Manager button.  This will allow you to 
-explore the installed packages and to install a number of other packages 
-maintained by Enthought.  An example of this is shown below.
 
-.. image:: Images/Canopy_package_manager.png
-
-Note that entering a package name in the upper left will search for a package.  
 For rsMap3D we need to make sure that the following packages are installed: 
-numpy, vtk, pytables and PyQt4.  With Canopy 1.4.0 we see that
+numpy, vtk, pytables and PyQt4.  Installation can be verified by launching 
+Terminal (Applications->Utilities->Terminal) and running 
 
-* numpy  1.8.0-1 is already installed
-* PyQt4 4.10.3-1 is available for installation 
-* Vtk 5.10.1-1 is available for installation
-* Pytables 2.4.0-5 is available for installation
+.. code-block:: none
+
+   conda search <packagename> at the prompt.
+
+At this time, Anaconda 2.5.0 is being used and the following packages are 
+available and those not installed by default can be installed with the command
+
+.. code-block:: none
+
+   conda install <packagename>
+
+Required packages
+
+* numpy  1.10.4 is already installed
+* pyqt 4.11.4 is already for installation 
+* vtk 6.3.0 is available for installation
+* pytables 3.2.2 is installed
+* h5py 2.5.0 is installed
+* pillow 3.1.0 is installed (or pil)
 
 Make sure to install these packages now.  Note that we will also need 
-xrayutilities and pyspec but the version of these tools is older than the 
-version being used to develop rsMap3D so we will download and install versions 
-of these.
+xrayutilities and spec2nexus (described below). 
 
 Installing xrayutilities
 ------------------------
 Xrayutilities is a package written by Dominik Kriegner and Eugen Wintersberger.  
-We are presently using version 1.0.6 of xrayutilities.  This package can be 
+We are presently using version 1.2.1 of xrayutilities.  This package can be 
 downloaded as a tar.gz file from http://sourceforge.net/projects/xrayutilities/.
 
-To unbundle the package in the user's home directory (i.e ~/xrayutilities-1.0.6):
+To unbundle the package in the user's home directory (i.e ~/xrayutilities-1.2.1):
 
 .. code-block:: none
 
   cd ~
-  tar -xzvf 'path to file'/xrayutilities-1.0.6.tar.gz
+  tar -xzvf 'path to file'/xrayutilities-1.2.1.tar.gz
 
 This package includes a setup.py file to help with the install.   To install 
 xrayutilities run:
 
 .. code-block:: none
 
-  cd ~/xrayutilities-1.0.6
+  cd ~/xrayutilities-1.2.1
   python setup.py --without-openmp install       
 
-(Note that if you failed to make Canopy's python the system default it is in 
-~/Library/Enthought/Canopy_64bit/User/bin)
 
-Installing pySpec 
--------------------
-pySpec is a python package written by Stuart Wilkins.  We have been downloading 
-the latest version of pyspec from the repository on github.  To download into 
-the user's home directory (i.e. ~/pyspec):
-
-.. code-block:: none
-
- cd ~
- git clone https://github.com/stuwilkins/pyspec
- 
-Like xrayutilities, pyspec comes with a setup.py file to help with the 
-installation.  To install pyspec run:
+Installing spec2nexus 
+---------------------
+spec2nexus is a python package written by Pete Jemian at the APS.  This package
+provides a subpackage that enables parsing spec files in python.  This package
+has been used in places to read spec files  as input for the rsMap3D.  Note 
+that rsMap3D requires at least version 2016.216.0.  Although the installation
+instructions suggest this can be installed with the conda installer, this 
+method currently installs an older version.  To install the correct version 
+use:
 
 .. code-block:: none
 
- cd ~/pyspec
- python setup.py install
-
-(Note that if you failed to make Canopy's python the system default it is in ~/Library/Enthought/Canopy_64bit/User/bin)
-
+   pip install spec2nexus
+   
 Installing rsMap3D
 -------------------
 
-Unlike the last two packages rsMap3D does not have a setup.py.  It is currently 
-installed in a directory, this directory is set in the PYTHONPATH and the 
-application is run.
+rsMap3D is now available as a package on the `Python Package Index <>`_.  This
+allows installation of rsMap3D using pip
 
-To install this package in the user's home directory ~/rsmap3d:
+.. code block none
 
-.. code-block:: none
-
- cd ~
- svn co https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/ rsmap3d.
-
-We can now set the python path and run the application.  
+   pip install rsMap3D
+ 
+A windows .bat file is installed in the path defined by the python installation
+(the Scripts subdirectory for the Anaconda distribution).  The application can 
+be launched by running 
 
 .. code-block:: none
 
-export  PYTHONPATH=/Users/'username'/rsmap3d
-python --m rsMap3D.rsmEdit.
-
+ python -m rsMap3D.rsmEdit
+ 
 You will then see a window like the following:
 
 .. image:: Images/rsMap3DonLaunch2.png
