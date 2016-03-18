@@ -5,7 +5,7 @@
 from setuptools import setup
 
 setup(name='rsMap3D',
-      version='1.0.0',
+      version='1.0.2',
       description='Python Program to map xray diffraction data into ' + \
                     'reciprocal space map',
       author = 'John Hammonds, Christian Schleputz',
@@ -25,5 +25,12 @@ setup(name='rsMap3D',
                  'pillow',
                  ],
       license = 'See LICENSE File',
-      platforms = 'any'
+      platforms = 'any',
+      scripts = ['Scripts/rsMap3D',
+                 'Scripts/rsMap3D.bat'],
+      data_files = [('docs', ['docs/index.rst', 
+                              'docs/make.bat', 
+                              'docs/Makefile', 
+                              'docs/conf.py']),
+                    ('docs/Installation', ['docs/Installation/linuxInstall.rst'])]
       )
