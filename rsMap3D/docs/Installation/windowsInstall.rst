@@ -74,7 +74,7 @@ Required packages
 * vtk 6.3.0 is available for installation
 * pytables 3.2.2 is installed
 * h5py 2.5.0 is installed
-* pil 1.1.7 is available to install
+* pillow 3.1.0 is installed (or pil)
 
 Make sure to install these packages now.  Note that we will also need 
 xrayutilities and spec2nexus (described below). 
@@ -116,21 +116,21 @@ use:
    
 Installing rsMap3D
 ------------------
-Unlike the last two packages rsMap3D does not have a setup.py.  It is currently 
-installed in a directory, This directory is set in the PYTHONPATH and the 
-application is run.
+rsMap3D is now available as a package on the `Python Package Index <>`_.  This
+allows installation of rsMap3D using pip
 
-Tortise Git adds menu options on the left click in explorer.  Right click on 
-C:\\Users\\'username' and select 'Git Clone...'  In the window that appears enter 
-https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/.
+.. code block none
+
+   pip install rsMap3D
  
-We can now set the python path and run the application.  
+A windows .bat file is installed in the path defined by the python installation
+(the Scripts subdirectory for the Anaconda distribution).  The application can 
+be launched by running 
 
 .. code-block:: none
 
- setenv PYTHONPATH /local/rsmap3d
- ~/Enthought/Canopy_64bit/User/bin/python -m rsMap3D.rsmEdit.
-
+ rsMap3D.bat
+ 
 You will then see a window like the following:
 
 .. image:: Images/rsMap3DonLaunch2.png
