@@ -36,6 +36,7 @@ class AbstractFileView(qtGui.QDialog):
         self.controlLayout = qtGui.QGridLayout()       
         row =0
         self.progressBar = qtGui.QProgressBar()
+        self.progressBar.setTextVisible(True)
         self.controlLayout.addWidget(self.progressBar, row, 1)
         
         row += 1
