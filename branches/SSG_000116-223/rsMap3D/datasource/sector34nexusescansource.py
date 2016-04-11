@@ -8,6 +8,7 @@ from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 import h5py
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
+from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.DetectorGeometry.detectorgeometryforescan \
     import DetectorGeometryForEScan
 import math
@@ -48,20 +49,49 @@ class Sector34NexusEscanSource(AbstractDataSource):
         self.incidentEnergy = {}
         self.progressUpdater = None
         self.progress = 0
+        self.progressInc = 1.0 *100.0
         self.progressMax = 1
         self.cancelLoad = False
         
         
 
     def findImageQs(self):
-        (qx,qy, qz) = self.qsForDetector()
-        idx = range(len(qx))
-        xmin = [np.min(qx[i]) for i in idx]
-        xmax = [np.max(qx[i]) for i in idx]
-        ymin = [np.min(qy[i]) for i in idx]
-        ymax = [np.max(qy[i]) for i in idx]
-        zmin = [np.min(qz[i]) for i in idx]
-        zmax = [np.max(qz[i]) for i in idx]
+        rsMap3DCongfig = RSMap3DConfig()
+        maxImageMem = rsMap3DCongfig.getMaxImageMemory()
+        imageSize = self.getDetectorDimensions()[0] * \
+                self.getDetectorDimensions()[1]
+        
+        numImages = len(self.availableFiles)
+        if imageSize *4 * numImages <=maxImageMem:
+            (qx,qy, qz) = self.qsForDetector()
+            idx = range(len(qx))
+            xmin = [np.min(qx[i]) for i in idx]
+            xmax = [np.max(qx[i]) for i in idx]
+            ymin = [np.min(qy[i]) for i in idx]
+            ymax = [np.max(qy[i]) for i in idx]
+            zmin = [np.min(qz[i]) for i in idx]
+            zmax = [np.max(qz[i]) for i in idx]
+        else:
+            xmin = []
+            xmax = []
+            ymin = []
+            ymax = []
+            zmin = []
+            zmax = []
+            nPasses = imageSize * 4 *numImages/maxImageMem
+            for thisPass in range(nPasses):
+                firstImage = thisPass *numImages/nPasses
+                lastImage = (thisPass+1)* numImages/nPasses;
+                (qx,qy,qz) = self.qsForDetector(startFile = firstImage, 
+                                                endFile = lastImage)
+                idx = range(len(qx))
+                [xmin.append(np.min(qx[i])) for i in idx]
+                [xmax.append(np.max(qx[i])) for i in idx]
+                [ymin.append(np.min(qy[i])) for i in idx]
+                [ymax.append(np.max(qy[i])) for i in idx]
+                [zmin.append(np.min(qz[i])) for i in idx]
+                [zmax.append(np.max(qz[i])) for i in idx]
+            
         return (xmin, xmax, ymin, ymax, zmin, zmax)
                      
     def findScanQs(self, xmin, xmax, ymin, ymax, zmin, zmax):
@@ -141,17 +171,21 @@ class Sector34NexusEscanSource(AbstractDataSource):
 
         
         if self.files == None:
+            print("Getting file list")
             fileFilter = str(os.path.join(self.projectDir, string.rsplit(self.projectName, '_',1)[0])) + \
                          "_[0-9]*" + \
                          self.projectExtension
                          
             fileList = glob.glob(fileFilter)
+            print("Done Getting File List")
         if fileList == []:
                 raise RSMap3DException("No files Found matching " + fileFilter)
         self.files = range(1,len(fileList)+1)
 
         if self.progressUpdater <> None:
+            self.progressMax = len(self.files) *100.0
             self.progressUpdater(self.progress, self.progressMax)
+
         for afile in self.files:
             if (self.cancelLoad):
                 self.cancelLoad = False
@@ -178,9 +212,34 @@ class Sector34NexusEscanSource(AbstractDataSource):
                         hdfFile.close()
                     except Exception:
                         print "Trouble Opening File" + filename
-        #print self.incidentEnergy
+                if self.progressUpdater <> None:
+                    self.progressUpdater(self.progress, self.progressMax)
+                    self.progress += self.progressInc
+            if afile == 1:
+                print("Starting to get Energy independant Information")
+                xIndexArray = range(self.detectorROI[0], self.detectorROI[1] +1)
+                yIndexArray = range(self.detectorROI[2], self.detectorROI[3] +1)
+                arraySize = [len(xIndexArray), len(yIndexArray)]
+              
+                self.qpx =np.zeros(arraySize)
+                self.qpy =np.zeros(arraySize)
+                self.qpz =np.zeros(arraySize)
+                for row in yIndexArray:
+                    for column in xIndexArray:
+                        startX = self.detectorROI[0]
+                        startY = self.detectorROI[2]
+                        qForPixel = self.pixel2q(column, row, None)
+                        self.qpx[row-startX, column-startY] = qForPixel[0]
+                        self.qpy[row-startX, column-startY] = qForPixel[1]
+                        self.qpz[row-startX, column-startY] = qForPixel[2]
+                print("Ending Energy independant Information")
+
+        #reset progress bar for second pass
+        if self.progressUpdater <> None:
+            self.progress = 0.0
+            self.progressUpdater(self.progress, self.progressMax)
+
         self.imageBounds[1] = self.findImageQs()
-        #print "ImageBounds: " + str(self.imageBounds)
         self.availableScans.append(1)
             
     def pixel2XYZ(self, pixelX, pixelY):
@@ -210,83 +269,89 @@ class Sector34NexusEscanSource(AbstractDataSource):
             kout /= koutnorm 
         
         qhat = kout-ki
-#         qhatnorm = np.linalg.norm(qhat)
-#         if qhatnorm != 0:
-#             qhat /= qhatnorm
-        #print "qhat " + str(qhat)
         return qhat
     
-    def qsForDetector(self):            
-        #print self.detectorROI
+    def qsForDetector(self, startFile=0, endFile=0):     
+        #if startFile and endFile are nonzero and Valid
+        #then give qs only between speicified file else
+        # if both zero give for all, if not vaild, throw
+        # an exception
+        if((startFile == 0) and (endFile == 0) ) :
+            processFiles = self.availableFiles
+        elif ((startFile >=0) and (startFile <= len(self.availableFiles))) and \
+               ((endFile >=0) and (endFile <= len(self.availableFiles))) and \
+                (startFile <= endFile):
+            processFiles = self.availableFiles[startFile:endFile]
+        else: 
+            raise ValueError("startFile and EndFile must be valid file " +
+                             "indexes. StartFile = " + str(startFile) + 
+                             "endFile = " + str(endFile))
         xIndexArray =  range(self.detectorROI[0], self.detectorROI[1]+1)
         yIndexArray =  range(self.detectorROI[2], self.detectorROI[3]+1)
-        qx = np.zeros([len(self.availableFiles), \
-                       len(xIndexArray), \
-                       len(yIndexArray)])
-        qy = np.zeros([len(self.availableFiles), \
-                       len(xIndexArray), \
-                       len(yIndexArray)])
-        qz = np.zeros([len(self.availableFiles), \
-                       len(xIndexArray), \
-                       len(yIndexArray)])
-        qpx = np.zeros([len(yIndexArray), \
-                       len(xIndexArray)])
-        qpy = np.zeros([len(yIndexArray), \
-                       len(xIndexArray)])
-        qpz = np.zeros([len(yIndexArray), \
-                       len(xIndexArray)])
-        #print xIndexArray, yIndexArray
-        for row in yIndexArray:
-            for column in xIndexArray:
-                startx = self.detectorROI[0]
-                starty = self.detectorROI[2]
-                qForPixel = self.pixel2q(column, row,None)
-                qpx[row-starty][column-startx] = qForPixel[0]
-                qpy[row-starty][column-startx] = qForPixel[1]
-                qpz[row-starty][column-startx] = qForPixel[2]
-        for afile in self.availableFiles:
+        numFiles = len(processFiles)
+        sizeXArray = len(xIndexArray)
+        sizeYArray = len(yIndexArray)
+        arrSize = [numFiles, sizeXArray, sizeYArray]
+        qx = np.zeros(arrSize)
+        qy = np.zeros(arrSize)
+        qz = np.zeros(arrSize)
+        arrSize = [len(yIndexArray), \
+                       len(xIndexArray)]
+        for afile in processFiles:
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
+            self.progress += self.progressInc
             twoPiOverLamda = 2*np.pi * self.incidentEnergy[afile] / 1.23985
-            qx[afile-1,:,:] = qpx * twoPiOverLamda 
-            qy[afile-1,:,:] = qpy * twoPiOverLamda 
-            qz[afile-1,:,:] = qpz * twoPiOverLamda 
-#        print(qx)
-#        print(qy)
-#        print(qz)
+            qx[afile-processFiles[0],:,:] = self.qpx * twoPiOverLamda 
+            qy[afile-processFiles[0],:,:] = self.qpy * twoPiOverLamda 
+            qz[afile-processFiles[0],:,:] = self.qpz * twoPiOverLamda 
         return qx, qy, qz
 
     def rawmap(self,scans, angdelta=[0,0,0,0,0],
             adframes=None, mask = None):
-        qx, qy, qz = self.qsForDetector()
+
+        if mask == None:
+            maskWasNone = True
+        else:
+            maskWasNone = False
+        
+        if maskWasNone == True:
+            firstScan = 0
+            lastScan = 0
+        else:
+            a = np.array(mask)
+            trueLoc = np.argwhere(a)
+            firstScan = trueLoc[0]
+            lastScan = trueLoc[-1]
+        qx, qy, qz = self.qsForDetector(startFile=firstScan, endFile=lastScan)
         intensity = np.array([])
         arrayInitializedForScan = False
         offset=0
         foundIndex = 0
         self.availableFiles.sort()
-        #print "availableFiles:" + str(self.availableFiles)
-        for afile in self.availableFiles:
-            filename = os.path.join(self.projectDir, \
-                           string.rsplit(self.projectName, '_', 1)[0]) + \
-                           '_' + \
-                           str(afile) + \
-                           self.projectExtension
-            hdfFile = h5py.File(filename, "r")
-            img = \
-                hdfFile[H5_IMAGE].value
-            #print ("Image: " + str(img))
-            if not arrayInitializedForScan:
-                if not intensity.shape[0]:
-                    intensity = np.zeros((len(self.availableFiles),) + img.shape)
-                    arrayInitializedForScan = True
-                else: 
-                    offset = intensity.shape[0]
-                    intensity = np.concatenate(
-                        (intensity,
-                        (np.zeros((np.count_nonzero(len(self.availableFiles)),) + img.shape))),
-                        axis=0)
-                    arrayInitializedForScan = True
-            intensity[foundIndex+offset,:,:] = img
-            foundIndex += 1
-            
-            hdfFile.close()
-        
+        for afile in self.availableFiles[firstScan:lastScan]:
+            if mask[afile - 1]:
+                filename = os.path.join(self.projectDir, \
+                               string.rsplit(self.projectName, '_', 1)[0]) + \
+                               '_' + \
+                               str(afile) + \
+                               self.projectExtension
+                hdfFile = h5py.File(filename, "r")
+                img = \
+                    hdfFile[H5_IMAGE].value
+                if not arrayInitializedForScan:
+                    if not intensity.shape[0]:
+                        intensity = np.zeros((len(self.availableFiles[firstScan:lastScan]),) + img.shape)
+                        arrayInitializedForScan = True
+                    else: 
+                        offset = intensity.shape[0]
+                        intensity = np.concatenate(
+                            (intensity,
+                            (np.zeros((np.count_nonzero(len(self.availableFiles[firstScan:lastScan])),) + img.shape))),
+                            axis=0)
+                        arrayInitializedForScan = True
+                intensity[foundIndex+offset,:,:] = img
+                foundIndex += 1
+                
+                hdfFile.close()
         return qx, qy, qz, intensity
