@@ -218,20 +218,14 @@ class Sector34NexusEscanSource(AbstractDataSource):
                     self.progressUpdater(self.progress, self.progressMax)
                     self.progress += self.progressInc
             if afile == 1:
-                print("Starting to get Energy independant Information")
+                #Starting to get Energy independant Information
                 xIndexArray = range(self.detectorROI[0], self.detectorROI[1] +1)
                 yIndexArray = range(self.detectorROI[2], self.detectorROI[3] +1)
 
                 indexMesh = np.meshgrid(xIndexArray, yIndexArray)
                 qpxyz = self.pixel2q_2(indexMesh, None)
                 self.qpx, self.qpy, self.qpz = qpxyz[:,:,0], qpxyz[:,:,1], qpxyz[:,:,2]
-                print "self.qpx"
-                print self.qpx
-                print "self.qpy"
-                print self.qpy
-                print "self.qpz"
-                print self.qpz                      
-                print("Ending Energy independant Information")
+                #Ending Energy independant Information
 
         #reset progress bar for second pass
         if self.progressUpdater <> None:
@@ -331,36 +325,14 @@ class Sector34NexusEscanSource(AbstractDataSource):
             raise ValueError("startFile and EndFile must be valid file " +
                              "indexes. StartFile = " + str(startFile) + 
                              "endFile = " + str(endFile))
-        xIndexArray =  range(self.detectorROI[0], self.detectorROI[1]+1)
-        yIndexArray =  range(self.detectorROI[2], self.detectorROI[3]+1)
-        numFiles = len(processFiles)
-        sizeXArray = len(xIndexArray)
-        sizeYArray = len(yIndexArray)
-        arrSize = [numFiles, sizeXArray, sizeYArray]
-#         qx = np.zeros(arrSize)
-#         qy = np.zeros(arrSize)
-#         qz = np.zeros(arrSize)
-#         qx = []
-#         qy = []
-#         qz = []
         twoPiOverLambda = []
-        arrSize = [len(yIndexArray), \
-                       len(xIndexArray)]
         for afile in processFiles:
             if self.progressUpdater <> None:
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc 
             twoPiOverLambda.append(2*np.pi * self.incidentEnergy[afile] / 1.23985)
             
-#             qx[afile-processFiles[0],:,:] = np.multiply(self.qpx, twoPiOverLamda) 
-#             qy[afile-processFiles[0],:,:] = np.multiply(self.qpy, twoPiOverLamda) 
-#             qz[afile-processFiles[0],:,:] = np.multiply(self.qpz, twoPiOverLamda) 
-#             qx.append(np.multiply(self.qpx, twoPiOverLamda)) 
-#             qy.append(np.multiply(self.qpy, twoPiOverLamda)) 
-#             qz.append(np.multiply(self.qpz, twoPiOverLamda)) 
         qx = np.multiply.outer(twoPiOverLambda, self.qpx)
-        print "qx.shape"
-        print qx.shape
         qy = np.multiply.outer(twoPiOverLambda, self.qpy)
         qz = np.multiply.outer(twoPiOverLambda, self.qpz)
         return qx, qy, qz
