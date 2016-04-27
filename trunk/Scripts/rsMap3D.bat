@@ -1,0 +1,1 @@
+python -m rsMap3D.rsmEdit
