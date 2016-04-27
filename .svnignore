@@ -1,4 +1,0 @@
-# To set the svn ignore property on the repository do the following:
-#   svn propset svn:ignore -R -F .svnignore .
-#
-*.pyc
