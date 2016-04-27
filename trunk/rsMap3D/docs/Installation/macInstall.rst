@@ -17,7 +17,7 @@ install/check the install of a number of other python packages and then install:
 *	And then download the source for `rsMap3D <https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/>`_
 
 
-Installation and setup of Canopy
+Installation and setup of Anaconda
 --------------------------------
 `Anaconda <https://www.continuum.io/downloads>`_ is a completly free bundling 
 of Python by Continuum Analytics.  Note that although Continuum Analytics does 
