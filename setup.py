@@ -2,10 +2,10 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='rsMap3D',
-      version='1.0.3',
+      version='1.0.5',
       description='Python Program to map xray diffraction data into ' + \
                     'reciprocal space map',
       author = 'John Hammonds, Christian Schleputz',
@@ -28,9 +28,4 @@ setup(name='rsMap3D',
       platforms = 'any',
       scripts = ['Scripts/rsMap3D',
                  'Scripts/rsMap3D.bat'],
-      data_files = [('docs', ['docs/index.rst', 
-                              'docs/make.bat', 
-                              'docs/Makefile', 
-                              'docs/conf.py']),
-                    ('docs/Installation', ['docs/Installation/linuxInstall.rst'])]
       )
