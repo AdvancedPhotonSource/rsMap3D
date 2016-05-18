@@ -9,14 +9,14 @@ import PyQt4.QtCore as qtCore
 from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
-from rsMap3D.gui.input.abstractspecxmldrivenfileform import AbstractSpecXMLDrivenFileForm
+from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
 XPCS_FILE_FILTER = "*.imm"
 
 
-class XPCSSpecScanFileForm(AbstractSpecXMLDrivenFileForm):
+class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     
     DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"

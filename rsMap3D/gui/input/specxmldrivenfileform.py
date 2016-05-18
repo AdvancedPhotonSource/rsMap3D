@@ -22,14 +22,14 @@ from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader import DetectorGe
 from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
 
 
-class AbstractSpecXMLDrivenFileForm(AbstractImagePerFileView):
+class SpecXMLDrivenFileForm(AbstractImagePerFileView):
 
     DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
 
     def __init__(self, parent=None):
-        super(AbstractSpecXMLDrivenFileForm, self).__init__(parent)
+        super(SpecXMLDrivenFileForm, self).__init__(parent)
         
         self.roixmin = 1
         self.roixmax = 680
