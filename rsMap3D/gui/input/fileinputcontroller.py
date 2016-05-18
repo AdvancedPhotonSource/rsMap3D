@@ -18,6 +18,7 @@ from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
 import traceback
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
+from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
 
 class FileInputController(qtGui.QDialog):
     '''
@@ -33,12 +34,14 @@ class FileInputController(qtGui.QDialog):
         self.layout = qtGui.QVBoxLayout()
         self.S33SPECXML = "Sector 33 Spec/XML Setup"
         self.S34HDFXML = "Sector 34 HDF/XML Setup"
+        self.XPCSSPECXML = "XPCS SPEC/XML Setup"
 
         controlLayout = qtGui.QHBoxLayout()
         label = qtGui.QLabel("Input from:")
         self.formSelection = qtGui.QComboBox()
         self.formSelection.addItem(self.S33SPECXML)
         self.formSelection.addItem(self.S34HDFXML)
+        self.formSelection.addItem(self.XPCSSPECXML)
         controlLayout.addWidget(label)
         controlLayout.addWidget(self.formSelection)
         self.layout.addLayout(controlLayout)
@@ -142,22 +145,20 @@ class FileInputController(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
         
     def _selectedTypeChanged(self, typeStr):
+        self._disconnectSignals()
+        self.formLayout.removeWidget(self.fileFormWidget)
+        self.fileFormWidget.deleteLater()
+
         if typeStr == self.S33SPECXML:
-            self._disconnectSignals()
-            self.formLayout.removeWidget(self.fileFormWidget)
-            self.fileFormWidget.deleteLater()
             self.fileFormWidget = FileForm()
-            self.formLayout.addWidget(self.fileFormWidget)
-            self._connectSignals()
-            self.update()
         elif typeStr == self.S34HDFXML:
-            self._disconnectSignals()
-            self.formLayout.removeWidget(self.fileFormWidget)
-            self.fileFormWidget.deleteLater()
             self.fileFormWidget = S34HDFEScanFileForm()
-            self.formLayout.addWidget(self.fileFormWidget)
-            self._connectSignals()
-            self.update()
+        elif typeStr == self.XPCSSPECXML:
+            self.fileFormWidget = XPCSSpecScanFileForm()
+
+        self.formLayout.addWidget(self.fileFormWidget)
+        self._connectSignals()
+        self.update()
             
     def setLoadOK(self):
         self.fileFormWidget.setLoadOK()
