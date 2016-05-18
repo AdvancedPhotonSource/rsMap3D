@@ -6,7 +6,7 @@ import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
 from rsMap3D.gui.qtsignalstrings import LIST_ITEM_CLICKED_SIGNAL, \
-    CLICKED_SIGNAL, TABLE_ITEM_CHANGED_SIGNAL
+    CLICKED_SIGNAL, TABLE_ITEM_CHANGED_SIGNAL, STATE_CHANGED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, RENDER_BOUNDS_SIGNAL,\
     CLEAR_RENDER_WINDOW_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL
 from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
@@ -70,6 +70,10 @@ class ScanForm(qtGui.QDialog):
         self.connect(self.deselectAll, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self.deselectAllAction)
+
+        self.availableScanTypes = qtGui.QWidget()
+        self.availableScanTypes.setLayout(qtGui.QVBoxLayout())
+        
         row = 0
         qrange.addWidget(xLabel, row,0)
         qrange.addWidget(xminLabel, row,1)
@@ -91,6 +95,7 @@ class ScanForm(qtGui.QDialog):
         row += 1
         qrange.addWidget(self.selectAll, row,0)
         qrange.addWidget(self.deselectAll, row,1)
+        qrange.addWidget(self.availableScanTypes, row, 2)
         
         rightBox.addLayout(qrange)
         self.detail = qtGui.QTableWidget()
@@ -100,8 +105,17 @@ class ScanForm(qtGui.QDialog):
                 
         self.connect(self.scanList, qtCore.SIGNAL(LIST_ITEM_CLICKED_SIGNAL), 
                 self._scanSelected)
-         
+        
         self.setLayout(layout);
+        
+    def addAvailableScanTypes(self):
+        layout = self.availableScanTypes.layout()
+        for scanType in self.dataSource.getAvailableScanTypes():
+            typeCheckBox = qtGui.QCheckBox(scanType)
+            typeCheckBox.setChecked(True)
+            self.connect(typeCheckBox, qtCore.SIGNAL(STATE_CHANGED_SIGNAL),
+                         self.availableScanTypesChanged)
+            layout.addWidget(typeCheckBox)
         
     def addValueToTable(self, value, row, column, coloredBrush):
         '''
@@ -117,7 +131,17 @@ class ScanForm(qtGui.QDialog):
         item.setForeground(coloredBrush)
         item.setFlags(item.flags() & (~qtCore.Qt.ItemIsEditable))
         self.detail.setItem(row, column, item)
-        
+    
+    def availableScanTypesChanged(self, state):
+        scanTypes = self.availableScanTypes.children()
+        for scanType in scanTypes:
+            if isinstance(scanType, qtGui.QWidget):
+                self.dataSource.setScanTypeUsed(scanType.text(), 
+                                                scanType.isChecked())
+        for scan in self.dataSource.getAvailableScans():
+            self.showAngles(scan)
+            self.showQs(scan)
+    
     def checkItemChanged(self, item):
         '''
         Change whether a row is selected or not and register if the associated
@@ -160,6 +184,7 @@ class ScanForm(qtGui.QDialog):
         '''
         self.dataSource = dataSource
         self.scanList.clear()
+        self.removeAvailableScanTypes()
         for curScan in self.dataSource.getAvailableScans():
             item = qtGui.QListWidgetItem()
             item.setText(str(curScan))
@@ -172,9 +197,22 @@ class ScanForm(qtGui.QDialog):
         labels.extend(['Min qx', 'Max qx', 'Min qy', \
                        'Max qy', 'Min qz', 'Max qz'])
         self.detail.setHorizontalHeaderLabels(labels)
+        self.addAvailableScanTypes()
         self.emit(qtCore.SIGNAL(DONE_LOADING_SIGNAL))
         
    
+    def removeAvailableScanTypes(self):
+        scanTypes = self.availableScanTypes.children()
+        layout = self.availableScanTypes.layout()
+        for scanType in scanTypes:
+            if isinstance(scanType, qtGui.QWidget):
+                self.disconnect(scanType, 
+                                qtCore.SIGNAL(STATE_CHANGED_SIGNAL),
+                                self.availableScanTypesChanged)
+                layout.removeWidget(scanType)
+                scanType.setParent(None)
+        layout.update()
+        
     def renderOverallQs(self):
         '''
         Render bounds for all selected images from all available scans 
