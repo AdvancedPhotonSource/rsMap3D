@@ -14,12 +14,12 @@ from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
-from rsMap3D.gui.input.abstractspecxmldrivenfileform import AbstractSpecXMLDrivenFileForm
+from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     EDIT_FINISHED_SIGNAL, TEXT_CHANGED_SIGNAL
 
 
-class FileForm(AbstractSpecXMLDrivenFileForm):
+class FileForm(SpecXMLDrivenFileForm):
     '''
     This class presents information for selecting input files
     '''
