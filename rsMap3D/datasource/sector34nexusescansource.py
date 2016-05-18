@@ -52,6 +52,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         self.progressInc = 1.0 *100.0
         self.progressMax = 1
         self.cancelLoad = False
+
         
         
 

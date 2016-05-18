@@ -5,16 +5,12 @@
 import os
 from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
-    InstConfigException, DetectorConfigException, ScanDataMissingException
+        ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
-from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
-    import AbstractXrayutilitiesDataSource
-import rsMap3D.datasource.InstForXrayutilitiesReader as InstReader
-import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
-    as DetectorReader
+from rsMap3D.datasource.specxmldrivendatasource import SpecXMLDrivenDataSource
 import numpy as np
 import xrayutilities as xu
 import time
@@ -30,7 +26,7 @@ IMAGE_DIR_MERGE_STR = "images/%s"
 SCAN_NUMBER_MERGE_STR = "S%03d"
 TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
 
-class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
+class Sector33SpecDataSource(SpecXMLDrivenDataSource):
     '''
     Class to load data from spec file and configuration xml files from 
     for the way that data is collected at sector 33.
@@ -56,20 +52,12 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
 
         :rtype: Sector33SpecDataSource
         '''
-        super(Sector33SpecDataSource, self).__init__(**kwargs)
-        self.projectDir = str(projectDir)
-        self.projectName = str(projectName)
-        self.projectExt = str(projectExtension)
-        self.instConfigFile = str(instConfigFile)
-        self.detConfigFile = str(detConfigFile)
-        self.progress = 0
-        self.progressInc = 1
-        self.progressMax = 1
-        self.haltMap = False
-        try:
-            self.scans = kwargs['scanList']
-        except KeyError:
-            self.scans = None
+        super(Sector33SpecDataSource, self).__init__(projectDir, 
+                                                     projectName, 
+                                                     projectExtension,
+                                                     instConfigFile, 
+                                                     detConfigFile, 
+                                                     **kwargs)
         
     def _calc_eulerian_from_kappa(self, primaryAngles=None, \
                                   referenceAngles = None):
@@ -116,113 +104,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         
         return eta, chi, phi
 
-    def findImageQs(self, angles, ub, en):
-        '''
-        Find the minimum/maximum q boundaries associated with each scan given 
-        the angles, energy and UB matrix.
-        :param angles: A list of angles used for Q calculations
-        :param ub: sample UB matrix
-        :param en: Incident Endergy
-        '''
-        qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
-                                          self.getDetectorCircleDirections(), 
-                                          self.getPrimaryBeamDirection())
-        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), 
-                       self.getSampleSurfaceNormalDirection(), 
-                       en=en, 
-                       qconv=qconv)
-
-        cch = self.getDetectorCenterChannel() 
-        nav = self.getNumPixelsToAverage()
-        roi = self.getDetectorROI()
-        detDims = self.getDetectorDimensions()
-        hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), 
-                             self.getDetectorPixelDirection2(), 
-                             cch1=cch[0], 
-                             cch2=cch[1], 
-                             Nch1=detDims[0], 
-                             Nch2=detDims[1], 
-                             pwidth1=self.detectorPixelWidth[0], 
-                             pwidth2=self.detectorPixelWidth[1], 
-                             distance = self.distanceToDetector,
-                             Nav=self.getNumPixelsToAverage(), 
-                             roi=self.getDetectorROI())
-
-        rsMap3DConfig = RSMap3DConfig()
-        maxImageMem = rsMap3DConfig.getMaxImageMemory()
-        imageSize = self.getDetectorDimensions()[0] * \
-                    self.getDetectorDimensions()[1]
-        numImages = len(angles)
-        if imageSize*4*numImages <= maxImageMem:
-            self.progressMax = len( self.scans) * 100
-            self.progressInc = 1.0 * 100.0
-            if self.progressUpdater <> None:
-                self.progressUpdater(self.progress, self.progressMax)
-            self.progress += self.progressInc        
-            angleList = []
-            for i in range(len(angles[0])):
-                angleList.append(angles[:,i])
-            if ub == None:
-                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                         roi=roi, \
-                                         Nav=nav)
-            else:
-                qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                         roi=roi, \
-                                         Nav=nav, \
-                                         UB = ub)
-                
-            qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
-            
-            idx = range(len(qxTrans))
-            xmin = [np.min(qxTrans[i]) for i in idx] 
-            xmax = [np.max(qxTrans[i]) for i in idx] 
-            ymin = [np.min(qyTrans[i]) for i in idx] 
-            ymax = [np.max(qyTrans[i]) for i in idx] 
-            zmin = [np.min(qzTrans[i]) for i in idx] 
-            zmax = [np.max(qzTrans[i]) for i in idx] 
-        else:
-            nPasses = imageSize*4*numImages/ maxImageMem + 1
-            xmin = []
-            xmax = []
-            ymin = []
-            ymax = []
-            zmin = []
-            zmax = []
-            for thisPass in range(nPasses):
-                self.progressMax = len( self.scans) * 100.0
-                self.progressInc = 1.0 / nPasses * 100.0
-                if self.progressUpdater <> None:
-                    self.progressUpdater(self.progress, self.progressMax)
-                self.progress += self.progressInc        
-                firstImageInPass = thisPass*numImages/nPasses
-                lastImageInPass = (thisPass+1)*numImages/nPasses
-                angleList = []
-                for i in range(len(angles[0])):
-                    angleList.append(angles[firstImageInPass:lastImageInPass,i])
-                if ub == None:
-                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                             roi=roi, \
-                                             Nav=nav)
-                else:
-                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                                             roi=roi, \
-                                             Nav=nav, \
-                                             UB = ub)
-                    
-                qxTrans, qyTrans, qzTrans = self.transform.do3DTransform(qx, qy, qz)
-                
-                idx = range(len(qxTrans))
-                [xmin.append(np.min(qxTrans[i])) for i in idx] 
-                [xmax.append(np.max(qxTrans[i])) for i in idx] 
-                [ymin.append(np.min(qyTrans[i])) for i in idx] 
-                [ymax.append(np.max(qyTrans[i])) for i in idx] 
-                [zmin.append(np.min(qzTrans[i])) for i in idx] 
-                [zmax.append(np.max(qzTrans[i])) for i in idx] 
-                
-            
-        return (xmin, xmax, ymin, ymax, zmin, zmax)
-
     def fixGeoAngles(self, scan, angles):
         '''
         Fix the angles using a user selected function.
@@ -268,45 +149,6 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                        str(tb))
         return geoAngles
     
-    def getReferenceNames(self):
-        '''
-        '''
-        names = []
-        names.extend(self.getSampleAngleNames())
-        names.extend(self.getDetectorAngleNames())
-        return names
-    
-    def getReferenceValues(self, scan):
-        '''
-        '''
-        angles = self.getGeoAngles(self.sd.scans[str(scan)], self.getReferenceNames())
-        return angles
-
-    def getScanAngles(self, scan, angleNames):
-        """
-        This function returns all of the geometry angles for the
-        for the scan as a N-by-num_geo array, where N is the number of scan
-        points and num_geo is the number of geometry motors.
-        :param scan: scan from which to retrieve the angles
-        :params angleNames: a list of names for the angles to be returned
-        """
-        geoAngles = np.zeros((len(scan.data[scan.data.keys()[0]]), len(angleNames)))
-        for i, name in enumerate(angleNames):
-            v = scan.data.get(name)
-            p = scan.positioner.get(name)
-
-            if v != None:
-                if len(v) == 1:
-                    v = np.ones(len(scan.data[scan.data.keys()[0]])) * v
-            elif p != None:
-                v = np.ones(len(scan.data[scan.data.keys()[0]])) * p
-            else:
-                raise InstConfigException("Could not find angle " + name + \
-                                          " in scan parameters")
-            geoAngles[:,i] = v
-        
-        return geoAngles
-        
     def getUBMatrix(self, scan):
         """
         Read UB matrix from the #G3 line from the spec file. 
@@ -347,67 +189,10 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
         :param mapHKL: boolean to mark if the data should be mapped to HKL
         '''
         # Load up the instrument configuration file
-        try:
-            self.instConfig = \
-                InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-            self.sampleCirclesDirections = \
-                self.instConfig.getSampleCircleDirections()
-            self.detectorCircleDirections = \
-                self.instConfig.getDetectorCircleDirections()
-            self.primaryBeamDirection = \
-                self.instConfig.getPrimaryBeamDirection()
-            self.sampleInplaneReferenceDirection = \
-                self.instConfig.getInplaneReferenceDirection()
-            self.sampleSurfaceNormalDirection = \
-                self.instConfig.getSampleSurfaceNormalDirection()
-            self.sampleAngleNames = self.instConfig.getSampleCircleNames()
-            self.detectorAngleNames = self.instConfig.getDetectorCircleNames()
-            self.monitorName = self.instConfig.getMonitorName()
-            self.monitorScaleFactor = self.instConfig.getMonitorScaleFactor()
-            self.filterName = self.instConfig.getFilterName()
-            self.filterScaleFactor = self.instConfig.getFilterScaleFactor()
-            self.angleNames = self.instConfig.getSampleCircleNames() + \
-                self.instConfig.getDetectorCircleNames()
-            self.projectionDirection = self.instConfig.getProjectionDirection()
-        except InstConfigException as ex:
-            raise ex
-        except RSMap3DException as ex:
-            print ("---Error Reading instrument config")
-            raise ex
-        except Exception as ex:
-            print "Unhandle Exception loading instrument config" + str(ex)
-            raise ex
+        self.loadInstrumentXMLConfig()
         #Load up the detector configuration file
-        try:
-            detConfig = \
-                DetectorReader.DetectorGeometryForXrayutilitiesReader(
-                                                      self.detConfigFile)
-            detector = detConfig.getDetectorById("Pilatus")
-            self.detectorCenterChannel = \
-                detConfig.getCenterChannelPixel(detector)
-            self.detectorDimensions = detConfig.getNpixels(detector)
-            detectorSize = detConfig.getSize(detector)
-            self.detectorPixelWidth = \
-                [detectorSize[0]/self.detectorDimensions[0],\
-                 detectorSize[1]/self.detectorDimensions[1]]
-            self.distanceToDetector = detConfig.getDistance(detector) 
-            if self.numPixelsToAverage == None:
-                self.numPixelsToAverage = [1,1]
-            if self.detectorROI == None:
-                self.detectorROI = [0, self.detectorDimensions[0],  
-                                    0, self.detectorDimensions[1]]
-            self.detectorPixelDirection1 = \
-                detConfig.getPixelDirection1(detector)
-            self.detectorPixelDirection2 = \
-                detConfig.getPixelDirection2(detector)
-        except DetectorConfigException as ex:
-            raise ex
-        except RSMap3DException as ex:
-            print ("---Error Reading detector config")
-            raise ex
-        except Exception as ex:
-            print ("---Unhandled Exception in loading detector config")
-            raise ex
+        self.loadDetectorXMLConfig()
+
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
         imageDir = os.path.join(self.projectDir, \
@@ -440,6 +225,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
             self.availableScans = []
             self.incidentEnergy = {}
             self.ubMatrix = {}
+            self.scanType = {}
             self.progress = 0
             self.progressInc = 1
             # Zero the progress bar at the beginning.
@@ -455,6 +241,8 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                             SCAN_NUMBER_MERGE_STR % scan))):
                         curScan = self.sd.scans[str(scan)]
                         self.availableScans.append(scan)
+                        self.scanType[scan] = \
+                            self.sd.scans[str(scan)].scanCmd.split()[0]
                         angles = self.getGeoAngles(curScan, self.angleNames)
                         if self.mapHKL==True:
                             self.ubMatrix[scan] = self.getUBMatrix(curScan)
@@ -489,6 +277,7 @@ class Sector33SpecDataSource(AbstractXrayutilitiesDataSource):
                                            os.path.join(self.projectDir, 
                                         IMAGE_DIR_MERGE_STR % self.projectName))
 
+        self.availableScanTypes = set(self.scanType.values())
 
         
     
