@@ -23,6 +23,8 @@ class AbstractDataSource(object):
         self.availableScans = []
         self.imageBounds = {}
         self.imageToBeUsed = {}
+        self.availableScanTypes = []
+
         self.detectorDimensions = None
         self.rangeBounds = None
         
@@ -32,6 +34,12 @@ class AbstractDataSource(object):
         make sure that scans are available in the directory structure
         '''
         return self.availableScans
+    
+    def getAvailableScanTypes(self):
+        """
+        Return the set of available scan types
+        """
+        return self.availableScanTypes
     
     def getDetectorDimensions(self):
         '''
