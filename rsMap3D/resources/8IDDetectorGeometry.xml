@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<detectorGeometryForXrayutilities xmlns="https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils">
+    <dateWritten></dateWritten>
+    <timeWritten></timeWritten>
+	
+    <Detectors>
+	   <Detector>
+            <pixelDirection1>x-</pixelDirection1>
+            <pixelDirection2>z+</pixelDirection2>
+            <centerChannelPixel>650 670</centerChannelPixel>
+            <Npixels>1300 1340</Npixels>
+            <size unit="mm">26 26.8</size>
+            <distance unit="mm">1000</distance>
+            <ID>Princeton</ID>
+            <note></note>
+        </Detector>
+    </Detectors>
+</detectorGeometryForXrayutilities>
