@@ -30,6 +30,14 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         self.projectExt = str(projectExtension)
         self.instConfigFile = str(instConfigFile)
         self.detConfigFile = str(detConfigFile)
+        detConfig = \
+                DetectorReader.DetectorGeometryForXrayutilitiesReader(
+                                                      self.detConfigFile)
+        firstDetector = detConfig.getDetectors().findall(detConfig.DETECTOR)[0]
+        firstDetectorID = firstDetector.find(detConfig.DETECTOR_ID).text 
+        
+        self.currentDetector = \
+            detConfig.getDetectorById(firstDetectorID)
         self.progress = 0
         self.progressInc = 1
         self.progressMax = 1
@@ -200,7 +208,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             detConfig = \
                 DetectorReader.DetectorGeometryForXrayutilitiesReader(
                                                       self.detConfigFile)
-            detector = detConfig.getDetectorById("Pilatus")
+            detector = detConfig.getDetectorById(self.currentDetector)
             self.detectorCenterChannel = \
                 detConfig.getCenterChannelPixel(detector)
             self.detectorDimensions = detConfig.getNpixels(detector)
@@ -258,6 +266,10 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         except Exception as ex:
             print "Unhandle Exception loading instrument config" + str(ex)
             raise ex
+        
+    
+    def setCurrentDetector(self, currentDetector):
+        self.currentDetector = currentDetector
         
     def setScanTypeUsed(self, scanType, used):
         for scan in self.availableScans:
