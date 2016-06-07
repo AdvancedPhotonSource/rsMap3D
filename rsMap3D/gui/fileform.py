@@ -137,10 +137,10 @@ class FileForm(SpecXMLDrivenFileForm):
         row = dataLayout.rowCount()
         self._createInstConfig(dataLayout, row)
         
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createDetConfig(dataLayout, row)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         self.fieldCorrectionGroup = qtGui.QButtonGroup(self)
         self.noFieldRadio = qtGui.QRadioButton(self.NONE_RADIO_NAME)
         self.badPixelRadio = qtGui.QRadioButton(self.BAD_PIXEL_RADIO_NAME)
@@ -172,16 +172,16 @@ class FileForm(SpecXMLDrivenFileForm):
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.pixAvgTxt, row, 1)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createDetectorROIInput(dataLayout, row)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createScanNumberInput(dataLayout, row)
         
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createOutputType(dataLayout, row)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         label = qtGui.QLabel("HKL output")
         dataLayout.addWidget(label, row, 0)
         self.hklCheckbox = qtGui.QCheckBox()
@@ -285,6 +285,7 @@ class FileForm(SpecXMLDrivenFileForm):
                                       self.getFlatFieldFileName() \
                                   )
         self.dataSource.setProgressUpdater(self.updateProgress)
+        self.dataSource.setCurrentDetector(self.currentDetector)
         self.dataSource.loadSource(mapHKL = self.getMapAsHKL())
         return self.dataSource
         
