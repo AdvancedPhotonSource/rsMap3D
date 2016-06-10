@@ -16,7 +16,7 @@ PRIMARY_BEAM_DIRECTION = NAMESPACE + 'primaryBeamDirection'
 PROJECTION_DIRECTION = NAMESPACE + 'projectionDirection'
 REFERENCE_ANGLE = NAMESPACE + 'referenceAngle'
 SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'   
-SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'   
+SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'
 SAMPLE_ANGLE_MAP_FUNCTION = NAMESPACE + 'sampleAngleMapFunction'   
 #Attribute Names
 AXIS_NUMBER = 'number'
