@@ -110,7 +110,7 @@ class FileInputController(qtGui.QDialog):
         elif self.fileFormWidget.getOutputType() == self.fileFormWidget.POLE_MAP_STR:
             self.transform = \
                 PoleMapTransform3D(projectionDirection=\
-                                   self.fileForm.getProjectionDirection())
+                                   self.fileFormWidget.getProjectionDirection())
         else:
             self.transform = None
             

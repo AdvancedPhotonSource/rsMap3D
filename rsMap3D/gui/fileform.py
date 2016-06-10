@@ -261,7 +261,7 @@ class FileForm(SpecXMLDrivenFileForm):
         elif self.getOutputType() == self.POLE_MAP_STR:
             self.transform = \
                 PoleMapTransform3D(projectionDirection=\
-                                   self.fileForm.getProjectionDirection())
+                                   self.getProjectionDirection())
         else:
             self.transform = None
             
