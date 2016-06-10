@@ -95,6 +95,10 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         #self.outTypeChooser.addItem(self.POLE_MAP_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outTypeChooser, row, 1)
+        
+#         row = dataLayout.rowCount() + 1
+#         self._createHKLOutput(dataLayout, row)
+
 
         dataBox.setLayout(dataLayout)
         

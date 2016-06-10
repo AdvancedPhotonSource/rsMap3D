@@ -35,7 +35,8 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         self.roixmax = 680
         self.roiymin = 1
         self.roiymax = 480
-
+        self.currentDetector = ""
+        
         self.fileDialogTitle = SELECT_SPEC_FILE_TITLE
         self.fileDialogFilter = SPEC_FILE_FILTER
 
@@ -54,12 +55,21 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         layout.addWidget(self.detConfigTxt, row, 1)
         layout.addWidget(self.detConfigFileButton, row, 2)
 
+        row += 1
+        label = qtGui.QLabel("Select Detector")
+        self.detSelect = qtGui.QComboBox()
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.detSelect, row, 1)
+        
         self.connect(self.detConfigFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self._browseForDetFile)
         self.connect(self.detConfigTxt, \
                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
                      self._detConfigChanged)
+        self.connect(self.detSelect,
+                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
+                     self._currentDetectorChanged)
 
     def _createInstConfig(self, layout, row):
         label = qtGui.QLabel("Instrument Config File:");
@@ -81,12 +91,20 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         self.updateROITxt()
         rxROI = qtCore.QRegExp(self.DET_ROI_REGEXP_1)
         self.detROITxt.setValidator(qtGui.QRegExpValidator(rxROI,self.detROITxt))
+        
         layout.addWidget(label, row, 0)
         layout.addWidget(self.detROITxt, row, 1)
         self.connect(self.detROITxt,
                      qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
                      self._detROITxtChanged)
     
+    def _createHKLOutput(self, layout, row):
+        label = qtGui.QLabel("HKL output")
+        layout.addWidget(label, row, 0)
+        self.hklCheckbox = qtGui.QCheckBox()
+        layout.addWidget(self.hklCheckbox, row, 1)
+
+        
     def _createOutputType(self, layout, row):
         label = qtGui.QLabel("Output Type")
         self.outTypeChooser = qtGui.QComboBox()
@@ -106,6 +124,11 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         self.scanNumsTxt.setValidator(qtGui.QRegExpValidator(rx,self.scanNumsTxt))
         layout.addWidget(label, row, 0)
         layout.addWidget(self.scanNumsTxt, row, 1)
+        
+    def _currentDetectorChanged(self, currentDetector):
+        print currentDetector
+        self.currentDetector = currentDetector
+        self.updateROIandNumAvg()
         
     def _browseForDetFile(self):
         '''
@@ -150,6 +173,7 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
            self.detConfigTxt.text() == "":
             self.checkOkToLoad()
             try:
+                self.updateDetectorList()
                 self.updateROIandNumAvg()
             except DetectorConfigException:
                 message = qtGui.QMessageBox()
@@ -229,8 +253,8 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         '''
         '''
 #        Not sure if we need this JPH
-#        return self.hklCheckbox.isChecked()
-        return False
+        return self.hklCheckbox.isChecked()
+#        return False
     
     def getOutputType(self):
         '''
@@ -285,6 +309,19 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
             self.hklCheckbox.setCheckState(False)
             
 
+    def updateDetectorList(self):
+        oldNumDet = self.detSelect.count()
+        for index in reversed(range(oldNumDet)):
+            self.detSelect.removeItem(index)
+            
+        detConfig = \
+            DetectorGeometryForXrayutilitiesReader(self.detConfigTxt.text())
+        detectors = detConfig.getDetectors()
+        for detector in detectors:
+            self.detSelect.addItem(detConfig.getDetectorID(detector))
+            
+        self.detSelect.itemText(0)
+        
     def updateProjectionDirection(self):
         '''
         update the stored value for the projection direction
@@ -300,7 +337,7 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         '''
         detConfig = \
             DetectorGeometryForXrayutilitiesReader(self.detConfigTxt.text())
-        detector = detConfig.getDetectorById("Pilatus")
+        detector = detConfig.getDetectorById(self.currentDetector)
         detSize = detConfig.getNpixels(detector)
         xmax = detSize[0]
         ymax = detSize[1]

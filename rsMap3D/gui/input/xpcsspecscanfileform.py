@@ -6,10 +6,16 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
-from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
+try:
+    from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
+except ImportError as ex:
+    raise ex
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR
+from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
+import os
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
@@ -27,6 +33,22 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
 
         self.imageFileDialogFilter = XPCS_FILE_FILTER
         
+    def _browseForXPCSFile(self):
+        if self.xpcsDataFileTxt.text() == EMPTY_STR:
+            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+                                                   XPCS_FILE_DIALOG_TITLE, \
+                                                   filter=XPCS_FILE_FILTER)
+        else:
+            fileDirectory = os.path.dirname(str(self.xpcsDataFileTxt.text()))
+            fileName = qtGui.QFileDialog.getOpenFileName(None,\
+                                                   XPCS_FILE_FILTER, \
+                                                   directory = fileDirectory,
+                                                   filter=XPCS_FILE_FILTER)
+            
+        if fileName != EMPTY_STR:
+            self.xpcsDataFileTxt.setText(fileName)
+            self.xpcsDataFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+    
     def _createDataBox(self):
         dataBox = super(XPCSSpecScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
@@ -34,19 +56,36 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         row = dataLayout.rowCount()
         self._createInstConfig(dataLayout, row)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createDetConfig(dataLayout, row)
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createDetectorROIInput(dataLayout, row)
         
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createScanNumberInput(dataLayout, row)
             
-        row += 1
+        row = dataLayout.rowCount() + 1
         self._createOutputType(dataLayout, row)
-        # Add Signals between widgets
 
+        row = dataLayout.rowCount() + 1
+        self._createHKLOutput(dataLayout, row)
+
+        row = dataLayout.rowCount() + 1
+        label = qtGui.QLabel("XPCS Data:")
+        self.xpcsDataFileTxt = qtGui.QLineEdit()
+        self.xpcsBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.xpcsDataFileTxt, row, 1)
+        dataLayout.addWidget(self.xpcsBrowseButton, row, 2)
+        
+        self.connect(self.xpcsBrowseButton,
+                     qtCore.SIGNAL(CLICKED_SIGNAL),
+                     self._browseForXPCSFile)
+        self.connect(self.xpcsDataFileTxt,
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
+                     self._xpcsFileNameChanged)
+        
         dataBox.setLayout(dataLayout)
         return dataBox
 
@@ -66,9 +105,29 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
                                    str(self.getProjectExtension()), \
                                    str(self.getInstConfigName()), \
                                    str(self.getDetConfigName()), \
-                                   scanList = self.getScanList()
+                                   str(self.getImmFileName()), \
+                                   scanList = self.getScanList(), \
+                                   transform = self.transform, \
                                   )
         self.dataSource.setProgressUpdater(self.updateProgress)
+        self.dataSource.setCurrentDetector(self.currentDetector)
         self.dataSource.loadSource(mapHKL = self.getMapAsHKL())
         return self.dataSource
         
+
+    def getImmFileName(self):
+        '''
+        Return the IMM file name with XPCS images
+        '''
+        return str(self.xpcsDataFileTxt.text())
+    
+    def _xpcsFileNameChanged(self):
+        if os.path.isfile(self.xpcsDataFileTxt.text()) or \
+            self.xpcsDataFileTxt.text() == EMPTY_STR:
+            self.checkOkToLoad()
+        else:
+            message = qtGui.QMessageBox()
+            message.warning(self, \
+                             WARNING_STR
+                             , \
+                             "The IMM file entered is invalid")

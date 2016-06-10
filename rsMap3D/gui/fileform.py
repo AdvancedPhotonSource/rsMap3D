@@ -182,10 +182,7 @@ class FileForm(SpecXMLDrivenFileForm):
         self._createOutputType(dataLayout, row)
 
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("HKL output")
-        dataLayout.addWidget(label, row, 0)
-        self.hklCheckbox = qtGui.QCheckBox()
-        dataLayout.addWidget(self.hklCheckbox, row, 1)
+        self._createHKLOutput(dataLayout, row)
 
         # Add Signals between widgets
         self.connect(self.fieldCorrectionGroup,\
