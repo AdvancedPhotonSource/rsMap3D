@@ -119,13 +119,8 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 
         if needToCorrect:
             refAngles = self.getScanAngles(scan, refAngleNames)
-            print "refAngles"
-            print refAngles
             primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
-            print "primaryAngles"
-            print primaryAngles
             functionName = self.instConfig.getSampleAngleMappingFunctionName()
-            
             #Call a defined method to calculate angles from the reference angles.
             method = getattr(self, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
