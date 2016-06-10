@@ -1,0 +1,8 @@
+Version 1.0.8 of xrayutilities was tested on Windows 7 with:
+      xrayutilities-1.2.1-cp27-cp27m-win_amd64.whl found at 
+      https://confluence.aps.anl.gov/display/RSM/Binary+Distributions+of+Python+Packages
+      
+      spec2nexus 2016.0601.0 installed via pip install from pypi.
+      
+      For Mac and Linux, it is best to use the same versions from pypi install 
+      with pip install
