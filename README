@@ -1,4 +1,5 @@
 Version 1.0.8 of xrayutilities was tested on Windows 7 with:
+      6/10/2016
       xrayutilities-1.2.1-cp27-cp27m-win_amd64.whl found at 
       https://confluence.aps.anl.gov/display/RSM/Binary+Distributions+of+Python+Packages
       
@@ -6,3 +7,13 @@ Version 1.0.8 of xrayutilities was tested on Windows 7 with:
       
       For Mac and Linux, it is best to use the same versions from pypi install 
       with pip install
+      
+      Fixed an issue with calculating angles when doing sixc geometry and 
+      scanning a real angle.  The code was acting like it needed to compute from
+      pseudo angle scan.
+      
+Version 1.0.9 testes with same versions as above:
+      Fixed an issue with pole figure maps.  Had a couple of bugs left from
+      recent refactoring.
+      
+  
