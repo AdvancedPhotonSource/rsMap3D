@@ -2,6 +2,7 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
+USE_XPCS = False
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.fileform import FileForm
@@ -18,7 +19,11 @@ from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
 import traceback
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
-from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
+try:
+    from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
+    USE_XPCS = True
+except:
+    USE_XPCS = False
 
 class FileInputController(qtGui.QDialog):
     '''
@@ -41,7 +46,8 @@ class FileInputController(qtGui.QDialog):
         self.formSelection = qtGui.QComboBox()
         self.formSelection.addItem(self.S33SPECXML)
         self.formSelection.addItem(self.S34HDFXML)
-        self.formSelection.addItem(self.XPCSSPECXML)
+        if (USE_XPCS):
+            self.formSelection.addItem(self.XPCSSPECXML)
         controlLayout.addWidget(label)
         controlLayout.addWidget(self.formSelection)
         self.layout.addLayout(controlLayout)
@@ -153,7 +159,7 @@ class FileInputController(qtGui.QDialog):
             self.fileFormWidget = FileForm()
         elif typeStr == self.S34HDFXML:
             self.fileFormWidget = S34HDFEScanFileForm()
-        elif typeStr == self.XPCSSPECXML:
+        elif typeStr == self.XPCSSPECXML and USE_XPCS:
             self.fileFormWidget = XPCSSpecScanFileForm()
 
         self.formLayout.addWidget(self.fileFormWidget)
