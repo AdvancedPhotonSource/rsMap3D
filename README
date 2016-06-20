@@ -16,4 +16,8 @@ Version 1.0.9 testes with same versions as above:
       Fixed an issue with pole figure maps.  Had a couple of bugs left from
       recent refactoring.
       
-  
+Version 1.0.10 
+      Test with  same xrayutilites
+      Add code to Sector33SpecDataSource to handle runs that have been aborted.
+      To work with spec files that have beamline specific entries, not handled by 
+      a plugin must have spec2nexus version 2016.0615.1. 
