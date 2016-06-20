@@ -239,29 +239,32 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 else:
                     if (os.path.exists(os.path.join(imagePath, \
                                             SCAN_NUMBER_MERGE_STR % scan))):
-                        curScan = self.sd.scans[str(scan)]
-                        self.availableScans.append(scan)
-                        self.scanType[scan] = \
-                            self.sd.scans[str(scan)].scanCmd.split()[0]
-                        angles = self.getGeoAngles(curScan, self.angleNames)
-                        if self.mapHKL==True:
-                            self.ubMatrix[scan] = self.getUBMatrix(curScan)
-                            if self.ubMatrix[scan] == None:
-                                raise Sector33SpecFileException("UB matrix " + \
-                                                                "not found.")
-                        else:
-                            self.ubMatrix[scan] = None
-                        self.incidentEnergy[scan] = 12398.4 /float(curScan.G['G4'].split()[3])
-                        _start_time = time.time()
-                        self.imageBounds[scan] = \
-                            self.findImageQs(angles, \
-                                             self.ubMatrix[scan], \
-                                             self.incidentEnergy[scan])
-                        if self.progressUpdater <> None:
-                            self.progressUpdater(self.progress, self.progressMax)
-                        print (('Elapsed time for Finding qs for scan %d: ' +
-                               '%.3f seconds') % \
-                               (scan, (time.time() - _start_time)))
+                        try:
+                            curScan = self.sd.scans[str(scan)]
+                            self.scanType[scan] = \
+                                self.sd.scans[str(scan)].scanCmd.split()[0]
+                            angles = self.getGeoAngles(curScan, self.angleNames)
+                            self.availableScans.append(scan)
+                            if self.mapHKL==True:
+                                self.ubMatrix[scan] = self.getUBMatrix(curScan)
+                                if self.ubMatrix[scan] == None:
+                                    raise Sector33SpecFileException("UB matrix " + \
+                                                                    "not found.")
+                            else:
+                                self.ubMatrix[scan] = None
+                            self.incidentEnergy[scan] = 12398.4 /float(curScan.G['G4'].split()[3])
+                            _start_time = time.time()
+                            self.imageBounds[scan] = \
+                                self.findImageQs(angles, \
+                                                 self.ubMatrix[scan], \
+                                                 self.incidentEnergy[scan])
+                            if self.progressUpdater <> None:
+                                self.progressUpdater(self.progress, self.progressMax)
+                            print (('Elapsed time for Finding qs for scan %d: ' +
+                                   '%.3f seconds') % \
+                                   (scan, (time.time() - _start_time)))
+                        except ScanDataMissingException:
+                            print "Scan " + str(scan) + " has no data"
                     #Make sure to show 100% completion
             if self.progressUpdater <> None:
                 self.progressUpdater(self.progressMax, self.progressMax)
