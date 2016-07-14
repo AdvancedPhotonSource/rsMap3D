@@ -206,7 +206,7 @@ class InstForXrayutilitiesReader():
                 raise InstConfigException("Error reading value for " + \
                                  "'calcOnScannedRef' from Instrument " + \
                                  "Config : " + \
-                                 function.attrib[CALC_ON_SCANNED_REF])
+                                 str(function.attrib[CALC_ON_SCANNED_REF]))
                 
                 
     def getSampleAngleMappingFunctionName(self):
