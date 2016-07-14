@@ -63,7 +63,7 @@ class DetectorGeometryBase(object):
             if detId.text == identifier:
                 return detector
         raise DetectorConfigException("Detector " + 
-                                      identifier + 
+                                      str(identifier) + 
                                       " not found in detector config file")
 
     def getDetectorID(self, detector):
