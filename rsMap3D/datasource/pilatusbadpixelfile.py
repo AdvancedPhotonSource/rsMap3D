@@ -59,7 +59,7 @@ class PilatusBadPixelFile(object):
                                         " badX1,badY1 replacementX1,replacementY1\n" + \
                                         str(ex))
 
-        print self.badPixels
+        #print self.badPixels
         
     def getNumPixels(self):
         '''
