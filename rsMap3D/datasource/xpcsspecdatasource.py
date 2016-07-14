@@ -11,6 +11,7 @@ except ImportError as ex:
 
 import time
 import os
+import glob
 from spec2nexus.spec import SpecDataFile
 import xrayutilities as xu
 import numpy as np
@@ -22,6 +23,9 @@ from rsMap3D.datasource.Sector33SpecDataSource import IMAGE_DIR_MERGE_STR,\
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 from rsMap3D.datasource.specxmldrivendatasource import SpecXMLDrivenDataSource
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
+
+IMAGES_STR = "images"
+IMM_STR = "*.imm"
 
 class XPCSSpecDataSource(SpecXMLDrivenDataSource):
     def __init__(self,
@@ -92,6 +96,8 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             self.incidentEnergy = {}
             self.ubMatrix = {}
             self.scanType = {}
+            self.scanDataFile = {}
+            self.immDataFileName = {}
             self.progress = 0
             self.progressInc = 1
             # Zero the progress bar at the beginning.
@@ -111,6 +117,38 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                         self.availableScans.append(scan)
                         self.scanType[scan] = \
                             self.sd.scans[str(scan)].scanCmd.split()[0]
+                        print self.scanType[scan]
+                        if self.scanType[scan] == 'xpcsscan':
+                            print dir(self.sd)
+                            d = curScan.data
+                            h = curScan.header
+                            dataFile = curScan.XPCS['batch_name'][0]
+                            self.immDataFileName[scan] = dataFile
+                            print curScan.XPCS
+                            if not (dataFile in self.scanDataFile.keys()):
+                                self.scanDataFile[dataFile] = {}
+                                numImagesInScan = self.imagesInScan(scan)
+                                self.scanDataFile[dataFile][scan] = \
+                                    range(0, numImagesInScan)
+                                self.scanDataFile[dataFile]['maxIndexImage'] = \
+                                    numImagesInScan
+                                print "scanDataFile for " + \
+                                    str(dataFile) + " at scan " + str(scan) + \
+                                    " " + str(self.scanDataFile[dataFile][scan]) 
+                            else:
+                                startingImage = \
+                                    self.scanDataFile[dataFile]['maxIndexImage']
+                                numImagesInScan = self.imagesInScan(scan)
+                                self.scanDataFile[dataFile][scan] = \
+                                    range(startingImage, \
+                                          startingImage + numImagesInScan)
+                                self.scanDataFile[dataFile]['maxIndexImage'] = \
+                                    startingImage + numImagesInScan
+                                print "scanDataFile for " + str(dataFile) + \
+                                    " at scan " + str(scan) + " " + \
+                                    str(self.scanDataFile[dataFile][scan] )
+                                
+                            print dataFile
                         if self.mapHKL==True:
                             self.ubMatrix[scan] = self.getUBMatrix(curScan)
                             if self.ubMatrix[scan] == None:
@@ -147,22 +185,6 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
 #                                            os.path.join(self.projectDir, 
 #                                         IMAGE_DIR_MERGE_STR % self.projectName))
         #Load config information from the imm file
-        try:
-            imagesToSkip = self.imagesBeforeScan(self.scans[0])
-            fp = open(str(self.immDataFile), "rb")
-            numImages = getNumberOfImages(fp)
-            fp.close()
-            startIndex, dlen = GetStartPositions(str(self.immDataFile),
-                                                  numImages)
-            fp = open(str(self.immDataFile), "rb")
-            header = readHeader(fp, startIndex[imagesToSkip])
-            fp.close()
-            self.detectorROI = [header['row_beg'], header['row_end'],
-                                header['col_beg'], header['col_end']]
-            print ("DetectorROI " + str(self.detectorROI))
-        except IOError as e:
-            raise IOError("Trouble opening IMM file " + str(self.immDataFile) +
-                          "\n " + str(e) )
         self.availableScanTypes = set(self.scanType.values())
         
     def rawmap(self, scans, mask=None):
@@ -232,28 +254,35 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
     
         imageToBeUsed = self.getImageToBeUsed()
         #get startIndex and length for each image in the immFile
-        try:
-            fp = open(self.immDataFile, "rb")
-            numImages = getNumberOfImages(fp)
-            fp.close()
-            imageStartIndex, dlen = GetStartPositions(self.immDataFile, \
-                                                      numImages)
-            
-        except IOError:
-            logging.error("probelm opening IMM file")
-
+        imageDir = os.path.join(self.projectDir, IMAGES_STR) 
         for scannr in scans:
+            immDataFile = self.immDataFileName[scannr]
+            dataDir = os.path.join(imageDir, immDataFile)
+            fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0]).replace('\\','\\\\').replace('/','\\\\')
+            imageStartIndex = []
+            dlen = []
+            try:
+                fp = open(fullFileName, "rb")
+                numImages = getNumberOfImages(fp)
+                fp.close()
+                imageStartIndex, dlen = GetStartPositions(fullFileName, \
+                                                          numImages)
+                fp = open(fullFileName, "rb")
+                header = readHeader(fp, imageStartIndex[self.scanDataFile[immDataFile][scannr][0]])
+                self.detectorROI = [header['row_beg'], header['row_end'],
+                     header['col_beg'], header['col_end']]
+            except IOError as ex:
+                logging.error("probelm opening IMM file to get the start indexes" +
+                              str(ex))
             if self.haltMap:
                 raise ProcessCanceledException("Process Canceled")
             scan = self.sd.scans[str(scannr)]
             angles = self.getGeoAngles(scan, angleNames)
-            print "angles " + str(angles)
             scanAngle1 = {}
             scanAngle2 = {}
             for i in xrange(len(angleNames)):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
-            print "scanAngle1: " + str(scanAngle1)
             arrayInitializedForScan = False
             foundIndex = 0
             if mask_was_none:
@@ -263,29 +292,19 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 self.imagesBeforeScan(scannr)
             imagesInScan = \
                 self.imagesInScan(scannr)
-            print "imagesToSkip " + str(imagesToSkip)
-            print "imagesInScan " + str(imagesInScan)
-            images = OpenMultiImm(self.immDataFile, \
-                                  imagesToSkip+1, 
-                                  imagesInScan,
+            indexesToProcess = (np.where(mask == True))[0]
+            startIndex = indexesToProcess[0]
+            numberToProcess = len(indexesToProcess)
+               
+            images = OpenMultiImm(fullFileName, \
+                                  imagesToSkip + startIndex,
+                                  numberToProcess,
                                   imageStartIndex,
                                   dlen)
-            print scan.data.keys()
-            print "images.shape " + str(images.shape)
-            print "scan.data.keys()[0]] " + str(scan.data.keys()[0])
-            print "scan.data[scan.data.keys()[0]] " + str(scan.data[scan.data.keys()[0]])
-            for ind in xrange(len(scan.data[scan.data.keys()[0]])):
+            for ind in indexesToProcess:
                 if imageToBeUsed[scannr][ind] and mask[ind]:
-                    img = images[ind,:,:]
-                    print ('img.shape ' + str(img.shape))
-                    print ('detectorROI ' + str(self.detectorROI))
-                    print ('pixelsToAverage' + str(self.getNumPixelsToAverage()))
-#                     img2 = xu.blockAverage2D(img,
-#                                              self.getNumPixelsToAverage()[0],
-#                                              self.getNumPixelsToAverage()[1],
-#                                              roi= self.getDetectorROI())
+                    img = images[ind-startIndex,:,:]
                     img2 = img
-                    print ('img2.shape ' + str(img2.shape))
 
                     #initialize data Array
                     if not arrayInitializedForScan:
@@ -293,22 +312,17 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                            for i in range(len(imageToBeUsed[scannr]))]
                         if not intensity.shape[0]:
                             offset = 0
-                            print( "Creating Intensity img2.shape " + str(img2.shape))
-                            print ("imagesToProcess " + str(imagesToProcess))
                             intensity = np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape)
-                            print ("Intensity just created Shape" + str(intensity.shape))
                             arrayInitializedForScan = True
                         else:
                             offset = intensity.shape[0]
                             intensity = np.concatenate((intensity,
                                                 (np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape))), 
                                                 axis = 0)
-                            print ("Intensity expanded Shape" + str(intensity.shape))
                     #add data to intensity array
                     intensity[foundIndex + offset,:,:] = img2
                     for i in xrange(len(angleNames)):
                         scanAngle2[i].append(scanAngle1[i][ind])
-                    print "scanAngle2 at ind " + str(scanAngle2) + ("ind = %d"% ind)
                         
                     foundIndex += 1
             
@@ -322,7 +336,6 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-        print ("angleList" + str(angleList))
             
         if self.ubMatrix[scans[0]] == None:
             qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
