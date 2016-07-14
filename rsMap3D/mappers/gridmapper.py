@@ -7,6 +7,7 @@ import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 import numpy as np
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
+from xrayutilities.exception import InputError
 
 
 class QGridMapper(AbstractGridMapper):
@@ -67,10 +68,17 @@ class QGridMapper(AbstractGridMapper):
                         qx, qy, qz, intensity = \
                             self.dataSource.rawmap((scan,), **kwargs)
                         # convert data to rectangular grid in reciprocal space
-                        gridder(qx, qy, qz, intensity)
+                        try:
+                            gridder(qx, qy, qz, intensity)
                     
-                        progress += 1.0/nPasses* 100.0
-                        if self.progressUpdater <> None:
-                            self.progressUpdater(progress)
-            
+                            progress += 1.0/nPasses* 100.0
+                            if self.progressUpdater <> None:
+                                self.progressUpdater(progress)
+                        except InputError as ex:
+                            print "Wrong Input to gridder"
+                            print "qx Size: " + str( qx.shape)
+                            print "qy Size: " + str( qx.shape)
+                            print "qz Size: " + str( qx.shape)
+                            print "intensity Size: " + str(intensity.shape)
+                            raise InputError(ex)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
