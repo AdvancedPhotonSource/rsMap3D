@@ -19,6 +19,7 @@ SAMPLE_CIRCLES = NAMESPACE + 'sampleCircles'
 SAMPLE_SURFACE_NORMAL_DIRECTION = NAMESPACE + 'sampleSurfaceNormalDirection'
 SAMPLE_ANGLE_MAP_FUNCTION = NAMESPACE + 'sampleAngleMapFunction'   
 #Attribute Names
+ALWAYS_FIX = 'alwaysFix'
 AXIS_NUMBER = 'number'
 DIRECTION_AXIS = 'directionAxis'
 NAME = 'name'
@@ -258,11 +259,27 @@ class InstForXrayutilitiesReader():
         angles.sort()
         return angles
     
+    def getSampleAngleMappingReferenceAngleAttrib(self, \
+                                                number=None, \
+                                                attribName=None):
+        attribValue = None
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise InstConfigException("No Mapping function defined in " +\
+                                      "instrument config file")
+        refAngles = function.findall(REFERENCE_ANGLE)
+        for angle in refAngles:
+            if angle.attrib[SPEC_MOTOR_NAME] == str(number):
+                attribValue = angle.attrib[attribName]
+        if (attribValue == None):
+            raise(AttributeError("Angle " + str(number) +
+                                 " does not have a value for " +
+                                 str(attribName)))
+        return attribValue
 
     def getSampleAngleMappingReferenceAngles(self):
         '''
-        :return: the name of a function to be used in mapping 
-        '''
+          '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         if function == None:
             raise InstConfigException("No Mapping function defined in " + \
@@ -276,10 +293,23 @@ class InstForXrayutilitiesReader():
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
                 angle.attrib[SPEC_MOTOR_NAME]
-        for i in  range(len(angles)):
-            angleList.append(angles[i+1])
+        print angles
+        for i in  angles.keys():
+            angleList.append(angles[i])
         return angleList
 
+    def getSampleAngleMappingAlwaysFix(self):
+        function =  self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        
+        if function == None:
+            raise InstConfigException("No Mapping function defined in " + \
+                             "instrument config file")
+        alwaysFix = function.attrib[ALWAYS_FIX]
+        if alwaysFix == None:
+            return False
+        else:
+            return bool(alwaysFix)
+        
     def getSampleCircleDirections(self):
         '''
         :return: The sample circle directions
