@@ -15,6 +15,7 @@ import numpy as np
 import xrayutilities as xu
 import time
 import sys,traceback
+from rsMap3D.datasource.InstForXrayutilitiesReader import SAMPLE_ANGLE_MAP_FUNCTION
 try:
     from PIL import Image
 except ImportError:
@@ -59,7 +60,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                                      detConfigFile, 
                                                      **kwargs)
         
-    def _calc_eulerian_from_kappa(self, primaryAngles=None, \
+    def _calc_eulerian_from_kappa(self, primaryAngles=None, 
                                   referenceAngles = None):
         """
         Calculate the eulerian sample angles from the kappa stage angles.
@@ -104,20 +105,48 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         
         return eta, chi, phi
 
+    def _calc_replace_angle_values(self , primaryAngles=None,
+                                   referenceAngles=None):
+        '''
+        Fix a situation were some constant angle values have been 
+        recorded incorrectly and need to be fixed.
+        :param primaryAngles:  list of sample axis numbers to be handled by 
+        the conversion
+        :param referenceAngles: list of reference angles to be used in angle 
+        conversion
+        '''
+        print "Running " + __name__
+        angles = []
+        print "referenceAngles " + str(referenceAngles)
+        mappingAngles = self.instConfig.getSampleAngleMappingReferenceAngles()
+        
+        print mappingAngles
+        for ii in range(len(referenceAngles)):
+            replaceVal = \
+                float(self.instConfig.getSampleAngleMappingReferenceAngleAttrib( \
+                                              number= str(mappingAngles[ii]), \
+                                              attribName='replaceValue'))
+            print "primary Angles" + str(referenceAngles)
+            angles.append(replaceVal* np.ones(len(referenceAngles[:,ii]),))
+            print "Angles" + str( angles)
+        return angles
+        
     def fixGeoAngles(self, scan, angles):
         '''
-        Fix the angles using a user selected function.
+         Fix the angles using a user selected function.
         :param scan: scan to set the angles for
         :param angles: Array of angles to set for this scan  
         '''
-
+        print "starting " + __name__
         needToCorrect = False
         refAngleNames = self.instConfig.getSampleAngleMappingReferenceAngles()
         for refAngleName in refAngleNames:
-            if refAngleName in scan.L:
+            alwaysFix = self.instConfig.getSampleAngleMappingAlwaysFix()
+            if refAngleName in scan.L or alwaysFix:
                 needToCorrect = True
                 
         if needToCorrect:
+            print __name__ + ": Fixing angles"
             refAngles = self.getScanAngles(scan, refAngleNames)
             primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
             functionName = self.instConfig.getSampleAngleMappingFunctionName()
@@ -125,6 +154,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             method = getattr(self, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
                                    referenceAngles=refAngles)
+            print "fixedAngles" + fixedAngles
             for i in range(len(primaryAngles)):
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
         
