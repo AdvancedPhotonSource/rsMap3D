@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Sample instrument definition file for RSM program for sector 33 -->
+<instForXrayutils xmlns="https://subversion.xray.aps.anl.gov/RSM/instForXrayutils">
+    <dateWritten>Wed, Mar 5, 2014</dateWritten>
+    <timeWritten>14:36:13.5 (-6)</timeWritten>
+
+    <!-- Define the sample circles as a series of axes.
+         number - is an index to define which circle.  1 is the outermost
+             circle working towards the innermost
+         specAngleName - is the name of the motor in spec file
+         the value (z-, y+, etc.) are the rotation axis/direction 
+             for the circle -->
+    <sampleCircles numCircles="3">
+       <circleAxis number="1" specMotorName="ThetaN" directionAxis="z-"/>
+       <circleAxis number="2" specMotorName="Chi" directionAxis="y+"/>
+       <circleAxis number="3" specMotorName="Phi" directionAxis="z-"/>
+    </sampleCircles>
+
+    <!-- Define the detector circles as a series of axes. -->
+    <detectorCircles numCircles="1">
+       <circleAxis number="1" specMotorName="TwothetaN" directionAxis="z-"/>
+    </detectorCircles>
+
+    <sampleAngleMapFunction name="_calc_replace_angle_values" 
+                            alwaysFix='1'>
+        <referenceAngle number="2" specMotorName="Chi"  replaceValue="45.0"/>
+        <referenceAngle number="3" specMotorName="Phi" replaceValue="32.0"/>
+    </sampleAngleMapFunction>
+
+    <!-- define referemce directions -->
+    <primaryBeamDirection>
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </primaryBeamDirection>
+    <inplaneReferenceDirection>
+    
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </inplaneReferenceDirection>
+    <sampleSurfaceNormalDirection>
+        <axis number="1">1</axis>
+        <axis number="2">0</axis>
+        <axis number="3">0</axis>
+    </sampleSurfaceNormalDirection>
+<!--    <monitorName scaleFactor="20000">I0</monitorName>
+    <filterName scaleFactor="1000000">trans</filterName> -->
+    <projectionDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">1</axis>
+    </projectionDirection>
+</instForXrayutils>
