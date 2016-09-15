@@ -10,8 +10,9 @@ import vtk
 from vtk.util import numpy_support
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
+from rsMap3D.mappers.output.vtigridoutput import VTIGridOutput
 
-VTI_OUTFILE_MERGE_STR = "%s_S%d.vti"
+
 
 class AbstractGridMapper(object):
     __metaclass__ = abc.ABCMeta
@@ -42,6 +43,7 @@ class AbstractGridMapper(object):
         self.nz = nz
         self.haltMap = False
         self.progressUpdater = None
+        self.gridOutputter = VTIGridOutput()
         if transform == None:
             self.transform = UnityTransform3D()
         else:
@@ -67,49 +69,55 @@ class AbstractGridMapper(object):
         print 'qy: ', qy.min(), ' .... ', qy.max()
         print 'qz: ', qz.min(), ' .... ', qz.max()
         
+        self.gridOutputter.setData(qx, qy, qz, gint)
+        self.gridOutputter.setFileInfo((self.dataSource.projectName, 
+                                        self.dataSource.availableScans[0],
+                                        self.nx, self.ny, self.nz,
+                                        self.outputFileName))
+        self.gridOutputter.write()
         # prepare data for export to VTK image file
         #INT = xu.maplog(gint, 5.0, 0)
-        INT = gint
-        qx0 = qx.min()
-        dqx  = (qx.max()-qx.min())/self.nx
-        
-        qy0 = qy.min()
-        dqy  = (qy.max()-qy.min())/self.ny
-        
-        qz0 = qz.min()
-        dqz = (qz.max()-qz.min())/self.nz
-        
-        INT = np.transpose(INT).reshape((INT.size))
-        data_array = numpy_support.numpy_to_vtk(INT)
-        
-        image_data = vtk.vtkImageData()
-        image_data.SetOrigin(qx0,qy0,qz0)
-        image_data.SetSpacing(dqx,dqy,dqz)
-        image_data.SetExtent(0, self.nx-1,0, self.ny-1,0, self.nz-1)
-        if vtk.VTK_MAJOR_VERSION <= 5:
-            image_data.SetNumberOfScalarComponents(1)
-            image_data.SetScalarTypeToDouble()
-        else:
-            image_data.AllocateScalars(vtk.VTK_DOUBLE, 1)
-               
-        pd = image_data.GetPointData()
-        
-        pd.SetScalars(data_array)
-
-        # export data to file
-        writer= vtk.vtkXMLImageDataWriter()
-        if self.outputFileName == "":
-            writer.SetFileName(VTI_OUTFILE_MERGE_STR % (self.dataSource.projectName, \
-                                        self.dataSource.availableScans[0]))
-        else:
-            writer.SetFileName(self.outputFileName)
-            
-        if vtk.VTK_MAJOR_VERSION <= 5:
-            writer.SetInput(image_data)
-        else:
-            writer.SetInputData(image_data)
-            
-        writer.Write()
+#         INT = gint
+#         qx0 = qx.min()
+#         dqx  = (qx.max()-qx.min())/self.nx
+#         
+#         qy0 = qy.min()
+#         dqy  = (qy.max()-qy.min())/self.ny
+#         
+#         qz0 = qz.min()
+#         dqz = (qz.max()-qz.min())/self.nz
+#         
+#         INT = np.transpose(INT).reshape((INT.size))
+#         data_array = numpy_support.numpy_to_vtk(INT)
+#         
+#         image_data = vtk.vtkImageData()
+#         image_data.SetOrigin(qx0,qy0,qz0)
+#         image_data.SetSpacing(dqx,dqy,dqz)
+#         image_data.SetExtent(0, self.nx-1,0, self.ny-1,0, self.nz-1)
+#         if vtk.VTK_MAJOR_VERSION <= 5:
+#             image_data.SetNumberOfScalarComponents(1)
+#             image_data.SetScalarTypeToDouble()
+#         else:
+#             image_data.AllocateScalars(vtk.VTK_DOUBLE, 1)
+#                
+#         pd = image_data.GetPointData()
+#         
+#         pd.SetScalars(data_array)
+# 
+#         # export data to file
+#         writer= vtk.vtkXMLImageDataWriter()
+#         if self.outputFileName == "":
+#             writer.SetFileName(VTI_OUTFILE_MERGE_STR % (self.dataSource.projectName, \
+#                                         self.dataSource.availableScans[0]))
+#         else:
+#             writer.SetFileName(self.outputFileName)
+#             
+#         if vtk.VTK_MAJOR_VERSION <= 5:
+#             writer.SetInput(image_data)
+#         else:
+#             writer.SetInputData(image_data)
+#             
+#         writer.Write()
 
     @abc.abstractmethod
     def processMap(self, **kwargs):
