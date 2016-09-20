@@ -19,8 +19,11 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
     '''
     classdocs
     '''
-
-
+    FORM_TITLE = "Sector 34 HDF/XML Setup"
+    @staticmethod
+    def createInstance(parent=None):
+        return S34HDFEScanFileForm(parent)
+        
     def __init__(self, parent=None):
         '''
         Constructor

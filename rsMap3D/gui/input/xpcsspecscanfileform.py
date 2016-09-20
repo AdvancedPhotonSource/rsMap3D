@@ -23,11 +23,18 @@ XPCS_FILE_FILTER = "*.imm"
 
 
 class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
+    '''
+    '''
+    FORM_TITLE = "XPCS SPEC/XML Setup"
     
     DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
 
+    @staticmethod
+    def createInstance(parent=None):
+        return XPCSSpecScanFileForm(parent)
+    
     def __init__(self, parent=None):
         super(XPCSSpecScanFileForm, self).__init__(parent)
 

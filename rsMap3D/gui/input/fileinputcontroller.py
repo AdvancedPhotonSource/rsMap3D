@@ -37,17 +37,20 @@ class FileInputController(qtGui.QDialog):
         '''
         super(FileInputController, self).__init__(parent)
         self.layout = qtGui.QVBoxLayout()
-        self.S33SPECXML = "Sector 33 Spec/XML Setup"
-        self.S34HDFXML = "Sector 34 HDF/XML Setup"
-        self.XPCSSPECXML = "XPCS SPEC/XML Setup"
-
+        #Build a list of fileForms
+        self.fileForms = []
+        self.fileForms.append(FileForm)
+        self.fileForms.append(S34HDFEScanFileForm)
+        if USE_XPCS:
+            self.fileForms.append(XPCSSpecScanFileForm)
+            
         controlLayout = qtGui.QHBoxLayout()
         label = qtGui.QLabel("Input from:")
+        #populate selection list with available forms.
         self.formSelection = qtGui.QComboBox()
-        self.formSelection.addItem(self.S33SPECXML)
-        self.formSelection.addItem(self.S34HDFXML)
-        if (USE_XPCS):
-            self.formSelection.addItem(self.XPCSSPECXML)
+        for form in self.fileForms:
+            self.formSelection.addItem(form.FORM_TITLE)
+            
         controlLayout.addWidget(label)
         controlLayout.addWidget(self.formSelection)
         self.layout.addLayout(controlLayout)
@@ -155,12 +158,12 @@ class FileInputController(qtGui.QDialog):
         self.formLayout.removeWidget(self.fileFormWidget)
         self.fileFormWidget.deleteLater()
 
-        if typeStr == self.S33SPECXML:
-            self.fileFormWidget = FileForm()
-        elif typeStr == self.S34HDFXML:
-            self.fileFormWidget = S34HDFEScanFileForm()
-        elif typeStr == self.XPCSSPECXML and USE_XPCS:
-            self.fileFormWidget = XPCSSpecScanFileForm()
+        if typeStr == FileForm.FORM_TITLE:
+            self.fileFormWidget = FileForm.createInstance()
+        elif typeStr == S34HDFEScanFileForm.FORM_TITLE:
+            self.fileFormWidget = S34HDFEScanFileForm.createInstance()
+        elif typeStr == XPCSSpecScanFileForm.FORM_TITLE and USE_XPCS:
+            self.fileFormWidget = XPCSSpecScanFileForm.createInstance()
 
         self.formLayout.addWidget(self.fileFormWidget)
         self._connectSignals()

@@ -18,11 +18,13 @@ from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     EDIT_FINISHED_SIGNAL, TEXT_CHANGED_SIGNAL
 
-
 class FileForm(SpecXMLDrivenFileForm):
     '''
     This class presents information for selecting input files
     '''
+
+    FORM_TITLE = "Sector 33 Spec/XML Setup"
+
     #UPDATE_PROGRESS_SIGNAL = "updateProgress"
     # Regular expressions for string validation
     PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
@@ -33,6 +35,10 @@ class FileForm(SpecXMLDrivenFileForm):
     BAD_PIXEL_RADIO_NAME = "Bad Pixel File"
     FLAT_FIELD_RADIO_NAME = "Flat Field Correction"
     
+    @staticmethod
+    def createInstance(parent=None):
+        return FileForm(parent)
+        
     def __init__(self,parent=None):
         '''
         Constructor - Layout Widgets on the page and link actions
