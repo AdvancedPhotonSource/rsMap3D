@@ -2,15 +2,22 @@
  Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from rsMap3D.mappers.output.abstactgridoutput import AbstractGridOutput
+from rsMap3D.mappers.output.abstactgridwriter import AbstractGridWriter
 import numpy as np
 from vtk.util import numpy_support
 import vtk
-VTI_OUTFILE_MERGE_STR = "%s_S%d.vti"
+VTI_WRITER_MERGE_STR = "%s_S%d.vti"
 
-class VTIGridOutput(AbstractGridOutput):
+class VTIGridWriter(AbstractGridWriter):
     
     def setFileInfo(self, fileInfo):
+        """
+        Set information needed to create the file output.  
+        This information is ultimately packed into a tuple
+        or list which is used to define a number of parameters.
+        [projectName, availableScans, nx, ny, nz (number of points in the 3 dimensions) 
+        and the output file name
+        """
         if ((fileInfo == None) or (len(fileInfo) == 0)):
             raise ValueError(self.whatFunction() +
                             "passed no filename information " +
@@ -66,8 +73,9 @@ class VTIGridOutput(AbstractGridOutput):
         
         # Export data to file
         writer= vtk.vtkXMLImageDataWriter()
+        
         if self.outputFileName == "":
-            writer.SetFileName(VTI_OUTFILE_MERGE_STR % 
+            writer.SetFileName(VTI_WRITER_MERGE_STR % 
                                (self.fileInfo[0], \
                                 self.fileInfo[1]))
         else:

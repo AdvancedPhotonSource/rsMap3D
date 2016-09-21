@@ -6,7 +6,7 @@ import abc
 from abc import abstractmethod
 import inspect
 
-class AbstractGridOutput(object):
+class AbstractGridWriter(object):
     __metaclass__ = abc.ABCMeta
     '''
     This class is an abstract class to handle the output(writting) format 
