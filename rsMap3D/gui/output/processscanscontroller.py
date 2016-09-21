@@ -15,6 +15,7 @@ from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL, \
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 import traceback
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
+from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
 
 class ProcessScansController(qtGui.QDialog):
     '''
@@ -101,7 +102,8 @@ class ProcessScansController(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
             self.outputFormWidget.runMapper(self.parent.getDataSource(),
-                                        self.parent.getTransform())
+                                        self.parent.getTransform(),
+                                        gridWriter=VTIGridWriter())
         except ProcessCanceledException:
             self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         except RSMap3DException as e:

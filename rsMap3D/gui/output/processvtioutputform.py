@@ -12,6 +12,7 @@ from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
     CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
+from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
 
 class ProcessVTIOutputForm(AbstractOutputView):
     FORM_TITLE = "VTI Grid Output"
@@ -170,7 +171,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         '''
         self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
         
-    def runMapper(self, dataSource, transform):
+    def runMapper(self, dataSource, transform, gridWriter=None):
         '''
         Run the selected mapper
         '''
@@ -186,7 +187,9 @@ class ProcessVTIOutputForm(AbstractOutputView):
             self.mapper = QGridMapper(dataSource, \
                                      self.outputFileName, \
                                      nx=nx, ny=ny, nz=nz,
-                                     transform = transform)
+                                     transform = transform,
+                                     gridWriter = gridWriter)
+            self.mapper.setGridWriter(VTIGridWriter())
             self.mapper.setProgressUpdater(self.updateProgress)
             self.mapper.doMap()
         else:
