@@ -1,3 +1,7 @@
+rsMap3D is a python program for transforming a set of images collected as part of an 
+x-ray scattering experiment into a 3D reciprocal space map.  
+
+
 Version 1.0.8 of xrayutilities was tested on Windows 7 with:
       6/10/2016
       xrayutilities-1.2.1-cp27-cp27m-win_amd64.whl found at 
