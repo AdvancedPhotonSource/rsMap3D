@@ -3,7 +3,7 @@
  See LICENSE file.
 '''
 try:
-    from pyimm.immheader import readHeader, offsetToNextHeader, getNumberOfImages
+    from pyimm.immheader import readHeader, getNumberOfImages
     from pyimm.GetImmStartIndex import GetStartPositions
     from pyimm.OpenMultiImm import OpenMultiImm
 except ImportError as ex:
@@ -60,9 +60,8 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
 
     def imagesBeforeScan(self, scanNo):
         numImages = 0
-        for scanno in xrange(1, scanNo):
-            scan = self.sd.scans[str(scanno)]
-            numImages += len(scan.data_lines)
+        scan = self.sd.scans[str(scanNo)]
+        numImages = int(scan.data["img_n"][0])
             
         return numImages
             
@@ -259,6 +258,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             immDataFile = self.immDataFileName[scannr]
             dataDir = os.path.join(imageDir, immDataFile)
             fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0]).replace('\\','\\\\').replace('/','\\\\')
+            fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0])
             imageStartIndex = []
             dlen = []
             try:
@@ -272,8 +272,10 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 self.detectorROI = [header['row_beg'], header['row_end'],
                      header['col_beg'], header['col_end']]
             except IOError as ex:
-                logging.error("probelm opening IMM file to get the start indexes" +
+                logging.error("Problem opening IMM file to get the start indexes" +
                               str(ex))
+            finally: 
+                fp.close()
             if self.haltMap:
                 raise ProcessCanceledException("Process Canceled")
             scan = self.sd.scans[str(scannr)]
@@ -292,12 +294,13 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 self.imagesBeforeScan(scannr)
             imagesInScan = \
                 self.imagesInScan(scannr)
-            indexesToProcess = (np.where(mask == True))[0]
+            mask1 = np.array(mask)
+            indexesToProcess = (np.where(mask1 == True))[0]
             startIndex = indexesToProcess[0]
             numberToProcess = len(indexesToProcess)
                
             images = OpenMultiImm(fullFileName, \
-                                  imagesToSkip + startIndex,
+                                  imagesToSkip + startIndex - 1,
                                   numberToProcess,
                                   imageStartIndex,
                                   dlen)
