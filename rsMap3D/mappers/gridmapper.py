@@ -26,18 +26,10 @@ class QGridMapper(AbstractGridMapper):
         gridder = xu.Gridder3D(self.nx, self.ny, self.nz)
         gridder.KeepData(True)
         rangeBounds = self.dataSource.getRangeBounds()
-#        try:
-            # repository version or xrayutilities > 1.0.6
         gridder.dataRange(rangeBounds[0], rangeBounds[1], 
                           rangeBounds[2], rangeBounds[3], 
                           rangeBounds[4], rangeBounds[5], 
                           True)
-#        except:
-#             # xrayutilities 1.0.6 and below
-#             gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
-#                               (rangeBounds[2], rangeBounds[3]), 
-#                               (rangeBounds[4], rangeBounds[5]), 
-#                               True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         progress = 0
