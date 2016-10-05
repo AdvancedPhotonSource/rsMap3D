@@ -18,7 +18,7 @@ import traceback
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 # Input forms Looking for a way to set these up.
-from rsMap3D.gui.input.fileform import FileForm
+from rsMap3D.gui.input.s33specscanfileform import S33SpecScanFileForm
 from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
 try:
     from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
@@ -40,7 +40,7 @@ class FileInputController(qtGui.QDialog):
         self.layout = qtGui.QVBoxLayout()
         #Build a list of fileForms
         self.fileForms = []
-        self.fileForms.append(FileForm)
+        self.fileForms.append(S33SpecScanFileForm)
         self.fileForms.append(S34HDFEScanFileForm)
         if USE_XPCS:
             self.fileForms.append(XPCSSpecScanFileForm)
@@ -57,7 +57,7 @@ class FileInputController(qtGui.QDialog):
         self.layout.addLayout(controlLayout)
         
         self.formLayout = qtGui.QHBoxLayout()
-        self.fileFormWidget = FileForm()
+        self.fileFormWidget = S33SpecScanFileForm()
         self.formLayout.addWidget(self.fileFormWidget)
         self.layout.addLayout(self.formLayout)
         self.setLayout(self.layout)
@@ -159,8 +159,8 @@ class FileInputController(qtGui.QDialog):
         self.formLayout.removeWidget(self.fileFormWidget)
         self.fileFormWidget.deleteLater()
 
-        if typeStr == FileForm.FORM_TITLE:
-            self.fileFormWidget = FileForm.createInstance()
+        if typeStr == S33SpecScanFileForm.FORM_TITLE:
+            self.fileFormWidget = S33SpecScanFileForm.createInstance()
         elif typeStr == S34HDFEScanFileForm.FORM_TITLE:
             self.fileFormWidget = S34HDFEScanFileForm.createInstance()
         elif typeStr == XPCSSpecScanFileForm.FORM_TITLE and USE_XPCS:

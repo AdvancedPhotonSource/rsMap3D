@@ -18,7 +18,7 @@ from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     EDIT_FINISHED_SIGNAL, TEXT_CHANGED_SIGNAL
 
-class FileForm(SpecXMLDrivenFileForm):
+class S33SpecScanFileForm(SpecXMLDrivenFileForm):
     '''
     This class presents information for selecting input files
     '''
@@ -37,13 +37,13 @@ class FileForm(SpecXMLDrivenFileForm):
     
     @staticmethod
     def createInstance(parent=None):
-        return FileForm(parent)
+        return S33SpecScanFileForm(parent)
         
     def __init__(self,parent=None):
         '''
         Constructor - Layout Widgets on the page and link actions
         '''
-        super(FileForm, self).__init__(parent)
+        super(S33SpecScanFileForm, self).__init__(parent)
 
         #Initialize parameters
         self.projectionDirection = [0,0,1]
@@ -131,14 +131,14 @@ class FileForm(SpecXMLDrivenFileForm):
         '''
         Create Layout holding controls widgets
         '''
-        controlBox = super(FileForm, self)._createControlBox()
+        controlBox = super(S33SpecScanFileForm, self)._createControlBox()
         return controlBox
     
     def _createDataBox(self):
         '''
         Create widgets for collecting data
         '''
-        dataBox = super(FileForm, self)._createDataBox()
+        dataBox = super(S33SpecScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
         self._createInstConfig(dataLayout, row)
