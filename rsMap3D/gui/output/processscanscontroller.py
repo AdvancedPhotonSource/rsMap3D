@@ -9,7 +9,7 @@ from rsMap3D.gui.qtsignalstrings import CURRENT_INDEX_CHANGED_SIGNAL
 from PyQt4.Qt import QComboBox
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL, \
-    PROCESS_SIGNAL, CANCEL_PROCESS_SIGNAL,\
+    PROCESS_SIGNAL, CANCEL_PROCESS_SIGNAL, \
     BLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_CANCEL_OK_SIGNAL,\
     UNBLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_RUN_OK_SIGNAL
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
