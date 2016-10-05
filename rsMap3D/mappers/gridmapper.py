@@ -26,18 +26,18 @@ class QGridMapper(AbstractGridMapper):
         gridder = xu.Gridder3D(self.nx, self.ny, self.nz)
         gridder.KeepData(True)
         rangeBounds = self.dataSource.getRangeBounds()
-        try:
-            # xrayutilities 1.0.6 and below
-            gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
-                              (rangeBounds[2], rangeBounds[3]), 
-                              (rangeBounds[4], rangeBounds[5]), 
-                              True)
-        except:
+#        try:
             # repository version or xrayutilities > 1.0.6
-            gridder.dataRange(rangeBounds[0], rangeBounds[1], 
-                              rangeBounds[2], rangeBounds[3], 
-                              rangeBounds[4], rangeBounds[5], 
-                              True)
+        gridder.dataRange(rangeBounds[0], rangeBounds[1], 
+                          rangeBounds[2], rangeBounds[3], 
+                          rangeBounds[4], rangeBounds[5], 
+                          True)
+#        except:
+#             # xrayutilities 1.0.6 and below
+#             gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
+#                               (rangeBounds[2], rangeBounds[3]), 
+#                               (rangeBounds[4], rangeBounds[5]), 
+#                               True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         progress = 0
@@ -49,6 +49,7 @@ class QGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
+                    print "imageToBeUsed :" + str(imageToBeUsed)
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
                     
                     # convert data to rectangular grid in reciprocal space
@@ -77,8 +78,8 @@ class QGridMapper(AbstractGridMapper):
                         except InputError as ex:
                             print "Wrong Input to gridder"
                             print "qx Size: " + str( qx.shape)
-                            print "qy Size: " + str( qx.shape)
-                            print "qz Size: " + str( qx.shape)
+                            print "qy Size: " + str( qy.shape)
+                            print "qz Size: " + str( qz.shape)
                             print "intensity Size: " + str(intensity.shape)
                             raise InputError(ex)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
