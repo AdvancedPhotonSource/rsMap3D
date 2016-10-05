@@ -341,10 +341,8 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         detSize = detConfig.getNpixels(detector)
         xmax = detSize[0]
         ymax = detSize[1]
-        if xmax < self.roixmax:
-            self.roixmax = xmax
-        if ymax < self.roiymax:
-            self.roiymax = ymax
+        self.roixmax = xmax
+        self.roiymax = ymax
         self.updateROITxt()
 
     def updateROITxt(self):
