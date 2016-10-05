@@ -188,8 +188,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                                      self.outputFileName, \
                                      nx=nx, ny=ny, nz=nz,
                                      transform = transform,
-                                     gridWriter = gridWriter)
-            self.mapper.setGridWriter(VTIGridWriter())
+                                     gridWriter = VTIGridWriter())
             self.mapper.setProgressUpdater(self.updateProgress)
             self.mapper.doMap()
         else:
