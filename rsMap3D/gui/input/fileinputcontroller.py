@@ -9,7 +9,7 @@ from rsMap3D.gui.qtsignalstrings import CURRENT_INDEX_CHANGED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
     SET_SCAN_LOAD_CANCEL_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
     BLOCK_TABS_FOR_LOAD_SIGNAL, FILE_ERROR_SIGNAL,\
-    LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL
+    LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, INPUT_FORM_CHANGED
 from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
@@ -51,13 +51,15 @@ class FileInputController(qtGui.QDialog):
         self.formSelection = qtGui.QComboBox()
         for form in self.fileForms:
             self.formSelection.addItem(form.FORM_TITLE)
-            
+        self.formSelection.setCurrentIndex(0)   
         controlLayout.addWidget(label)
         controlLayout.addWidget(self.formSelection)
+        
         self.layout.addLayout(controlLayout)
         
         self.formLayout = qtGui.QHBoxLayout()
-        self.fileFormWidget = S33SpecScanFileForm()
+        self.fileFormWidget = self.fileForms[0].createInstance()
+        print dir(self.fileFormWidget)
         self.formLayout.addWidget(self.fileFormWidget)
         self.layout.addLayout(self.formLayout)
         self.setLayout(self.layout)
@@ -104,6 +106,12 @@ class FileInputController(qtGui.QDialog):
                      qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
                      self.fileFormWidget.setCancelOK)
         
+    def getOutputForms(self):
+        '''
+        return the output forms associated with the current file form.
+        '''
+        return self.fileFormWidget.getOutputForms()
+    
     def loadScanFile(self):
         '''
         Set up to load the scan file
@@ -159,15 +167,17 @@ class FileInputController(qtGui.QDialog):
         self.formLayout.removeWidget(self.fileFormWidget)
         self.fileFormWidget.deleteLater()
 
-        if typeStr == S33SpecScanFileForm.FORM_TITLE:
-            self.fileFormWidget = S33SpecScanFileForm.createInstance()
-        elif typeStr == S34HDFEScanFileForm.FORM_TITLE:
-            self.fileFormWidget = S34HDFEScanFileForm.createInstance()
-        elif typeStr == XPCSSpecScanFileForm.FORM_TITLE and USE_XPCS:
-            self.fileFormWidget = XPCSSpecScanFileForm.createInstance()
+        for form in self.fileForms:
+            if typeStr == form.FORM_TITLE:
+                self.fileFormWidget = form.createInstance()
+#         elif typeStr == S34HDFEScanFileForm.FORM_TITLE:
+#             self.fileFormWidget = S34HDFEScanFileForm.createInstance()
+#         elif typeStr == XPCSSpecScanFileForm.FORM_TITLE and USE_XPCS:
+#             self.fileFormWidget = XPCSSpecScanFileForm.createInstance()
 
         self.formLayout.addWidget(self.fileFormWidget)
         self._connectSignals()
+        self.emit(qtCore.SIGNAL(INPUT_FORM_CHANGED))
         self.update()
             
     def setLoadOK(self):

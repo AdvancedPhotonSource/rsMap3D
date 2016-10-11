@@ -14,6 +14,7 @@ import os.path
 from rsMap3D.datasource.sector34nexusescansource import Sector34NexusEscanSource
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
+from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 
 class S34HDFEScanFileForm(AbstractImagePerFileView):
     '''
@@ -159,17 +160,22 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         self.dataSource.loadSource()
         return self.dataSource
     
+    def getDetConfigName(self):
+        '''
+        Return the selected Detector Configuration file
+        '''
+        return self.detConfigTxt.text()
+
     def getOutputType(self):
         '''
         Get the output type to be used.
         '''
         return self.outTypeChooser.currentText()
     
-    def getDetConfigName(self):
-        '''
-        Return the selected Detector Configuration file
-        '''
-        return self.detConfigTxt.text()
+    def getOutputForms(self):
+        outputForms = []
+        outputForms.append(ProcessVTIOutputForm)
+        return outputForms
 
     def _outputTypeChanged(self, typeStr):
         '''

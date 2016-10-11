@@ -17,6 +17,8 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
     EDIT_FINISHED_SIGNAL, TEXT_CHANGED_SIGNAL
+from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
+from rsMap3D.gui.output.processimagestackform import ProcessImageStackForm
 
 class S33SpecScanFileForm(SpecXMLDrivenFileForm):
     '''
@@ -303,6 +305,12 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         else:
             return str(self.flatFieldFileTxt.text())
         
+    def getOutputForms(self):
+        outputForms = []
+        outputForms.append(ProcessVTIOutputForm)
+        outputForms.append(ProcessImageStackForm)
+        return outputForms
+    
     def getPixelsToAverage(self):
         '''
         :return: the pixels to average as a list

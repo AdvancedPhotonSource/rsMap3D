@@ -5,6 +5,7 @@
 
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 
 try:
     from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
@@ -128,6 +129,11 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         '''
         return str(self.xpcsDataFileTxt.text())
     
+    def getOutputForms(self):
+        outputForms = []
+        outputForms.append(ProcessVTIOutputForm)
+        return outputForms
+
     def _xpcsFileNameChanged(self):
         if os.path.isfile(self.xpcsDataFileTxt.text()) or \
             self.xpcsDataFileTxt.text() == EMPTY_STR:
