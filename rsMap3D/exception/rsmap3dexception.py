@@ -61,3 +61,29 @@ class ScanDataMissingException(RSMap3DException):
         '''
         super(ScanDataMissingException, self).__init__(message)
 
+class ProcessWriterException(RSMap3DException):
+    '''
+    Exception class to be raised if the process of loading scan information
+    shows that the data is missing
+    '''
+    def __init__(self, message):
+        '''
+        Constructor
+        :param message: Message string to pass along when the exception is 
+        raised.
+        '''
+        super(ProcessWriterException, self).__init__(message)
+
+class RunMapperException(RSMap3DException):
+    '''
+    Exception class to be raised if the process of loading scan information
+    shows that the data is missing
+    '''
+    def __init__(self, message):
+        '''
+        Constructor
+        :param message: Message string to pass along when the exception is 
+        raised.
+        '''
+        super(RunMapperException, self).__init__(message)
+
