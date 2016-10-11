@@ -8,8 +8,10 @@ from rsMap3D.gui.input.abstractfileview import AbstractFileView
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, EMPTY_STR
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
 import os.path
+import abc
 
 class AbstractImagePerFileView(AbstractFileView):
+
     '''
     classdocs
     '''
@@ -86,6 +88,15 @@ class AbstractImagePerFileView(AbstractFileView):
 
         return dataBox
     
+    
+    @abc.abstractmethod
+    def getOutputForms(self):
+        ''' 
+        Return a list of appropriate output forms for use in the process 
+        scan controller
+        '''
+        outputForms = []
+        return outputForms
     
     def getProjectDir(self):
         '''
