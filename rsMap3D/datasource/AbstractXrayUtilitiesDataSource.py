@@ -3,7 +3,6 @@
  See LICENSE file.
 '''
 import abc
-import numpy as np
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 
