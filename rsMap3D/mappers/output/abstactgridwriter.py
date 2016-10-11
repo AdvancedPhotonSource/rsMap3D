@@ -3,7 +3,6 @@
  See LICENSE file.
 '''
 import abc
-from abc import abstractmethod
 import inspect
 
 class AbstractGridWriter(object):
@@ -26,7 +25,7 @@ class AbstractGridWriter(object):
         self.gridData = gridData
         self.fileInfo = []
         
-    @abstractmethod
+    @abc.abstractmethod
     def setFileInfo(self, fileInfo):
         """Set information necessary for creating filenames for
         output files that will be created
@@ -35,7 +34,7 @@ class AbstractGridWriter(object):
         """
         return
         
-    @abstractmethod
+    @abc.abstractmethod
     def write(self):
         """ Write the output data.  It is necessary to set the data 
         and set the output file info before riting the files"""

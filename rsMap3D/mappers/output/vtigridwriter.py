@@ -9,7 +9,7 @@ import vtk
 VTI_WRITER_MERGE_STR = "%s_S%d.vti"
 
 class VTIGridWriter(AbstractGridWriter):
-    
+    FILE_EXTENSION = ".vti"
     def setFileInfo(self, fileInfo):
         """
         Set information needed to create the file output.  
