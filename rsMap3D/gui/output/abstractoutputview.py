@@ -7,13 +7,20 @@ import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.rsm3dcommonstrings import RUN_STR, CANCEL_STR
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL
-from rsMap3D.gui.rsmap3dsignals import UPDATE_PROGRESS_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import UPDATE_PROGRESS_SIGNAL, PROCESS_SIGNAL,\
+    CANCEL_PROCESS_SIGNAL
 
 
 class AbstractOutputView (qtGui.QDialog):
     
     def __init__(self, parent=None):
         super(AbstractOutputView,self).__init__(parent)
+        
+    def _cancelProcess(self):
+        '''
+        Emit a signal to trigger the cancellation of processing.
+        '''
+        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
         
         
     def _createControlBox(self):
@@ -52,6 +59,13 @@ class AbstractOutputView (qtGui.QDialog):
         dataBox.setLayout(dataLayout)
         return dataBox
     
+    def _process(self):
+        '''
+        Emit a signal to trigger the start of processing.
+        '''
+        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
+        
+        
     def setProgress(self, value):
         '''
         Set the value in the progress bar

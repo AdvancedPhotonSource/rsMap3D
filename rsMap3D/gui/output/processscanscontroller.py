@@ -11,7 +11,8 @@ from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL, \
     PROCESS_SIGNAL, CANCEL_PROCESS_SIGNAL, \
     BLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_CANCEL_OK_SIGNAL,\
-    UNBLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_RUN_OK_SIGNAL
+    UNBLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_RUN_OK_SIGNAL,\
+    OUTPUT_FORM_CHANGED
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 import traceback
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
@@ -30,7 +31,7 @@ class ProcessScansController(qtGui.QDialog):
         self.parent = parent
         self.Mapper = None
         self.layout = qtGui.QVBoxLayout()
-        
+        self.outputForms = []
         # Build a list of forms return Combo box for the selections and 
         # list of names
         self.outputFormSelection, self.outputForms = self.buildFormList()
@@ -54,16 +55,15 @@ class ProcessScansController(qtGui.QDialog):
         self._connectSignals()
 
     def buildFormList(self):
-        outputForms = []
-        outputForms.append(ProcessVTIOutputForm)
-        
+        del self.outputForms[:]
+        self.outputForms = self.parent.getOutputForms()
         outputFormSelection = QComboBox()
-        for form in outputForms:
+        for form in self.outputForms:
             outputFormSelection.addItem(form.FORM_TITLE)
-        return outputFormSelection, outputForms
+        return outputFormSelection, self.outputForms
         
     def _connectSignals(self):
-        self.connect(self.outputFormWidget, 
+        self.connect(self.outputFormSelection, 
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
                      self._selectedTypeChanged)
         self.connect(self.outputFormWidget,
@@ -78,6 +78,9 @@ class ProcessScansController(qtGui.QDialog):
         self.connect(self, \
                      qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL), \
                      self.setCancelOK)
+        self.connect(self.outputFormWidget,
+                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL),
+                     self._processFormError)
         
         
     def _disconnectSignals(self):
@@ -96,8 +99,15 @@ class ProcessScansController(qtGui.QDialog):
         self.disconnect(self, \
                      qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL), \
                      self.setCancelOK)
+        self.disconnect(self.outputFormWidget,
+                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL),
+                     self._processFormError)
+        
+    def _processFormError(self, message):
+        print ("ProcessScanController._processFormError " + message)
         
     def runMapper(self):
+        print("Entering processScanController.runMapper")
         self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL))
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
@@ -116,11 +126,13 @@ class ProcessScansController(qtGui.QDialog):
             return
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
         self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
+        print("Leaving processScanController.runMapper")
         
     def _selectedTypeChanged(self, typeStr):
-        self.disconnectSignals()
+        print("ProcessScanController::_SelectedType Channged updating widget)")
+        self._disconnectSignals()
         self.formLayout.removeWidget(self.outputFormWidget)
-        self.fileFormWidget.deleteLater()
+        self.outputFormWidget.deleteLater()
         
         for form in self.outputForms:
             if typeStr == form.FORM_TITLE:
@@ -128,6 +140,7 @@ class ProcessScansController(qtGui.QDialog):
                 
         self.formLayout.addWidget(self.outputFormWidget)
         self._connectSignals()
+        self.emit(qtCore.SIGNAL(OUTPUT_FORM_CHANGED))
         self.update()
         
     def setCancelOK(self):
@@ -141,7 +154,7 @@ class ProcessScansController(qtGui.QDialog):
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
-        print dir(self.parent.getDataSource())
+        #print dir(self.parent.getDataSource())
         self.outputFormWidget.setProgressLimits(0, 
                                 len(self.parent.getDataSource().getAvailableScans())*100)
         self.outputFormWidget.setProgress(0)
@@ -158,7 +171,9 @@ class ProcessScansController(qtGui.QDialog):
         '''
         self.outputFormWidget._stopMapper()
         
-        
+    def updateOutputForms(self, newForms):
+        del self.outputForms[:]
+        self.outputForms = newForms
         
 class ProcessScanThread(qtCore.QThread):
     '''

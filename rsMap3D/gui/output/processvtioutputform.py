@@ -4,17 +4,16 @@
 '''
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
-from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
-from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
-    WARNING_STR, SAVE_FILE_STR, VTI_FILTER_STR
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, WARNING_STR, \
+    SAVE_FILE_STR, VTI_FILTER_STR
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
-from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
-    CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_ERROR_SIGNAL
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
+from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
 
-class ProcessVTIOutputForm(AbstractOutputView):
+class ProcessVTIOutputForm(AbstractGridOutputForm):
     FORM_TITLE = "VTI Grid Output"
     
     @staticmethod
@@ -67,59 +66,28 @@ class ProcessVTIOutputForm(AbstractOutputView):
                              WARNING_STR, \
                              "The specified file is not writable")
             
-    def _cancelProcess(self):
-        '''
-        Emit a signal to trigger the cancellation of processing.
-        '''
-        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
-        
 
     def _createDataBox(self):
         '''
         Create Widgets to collect output info
         '''
         dataBox = super(ProcessVTIOutputForm, self)._createDataBox()
-        dataLayout = dataBox.layout()
-        row = dataLayout.rowCount()
-        
-        label = qtGui.QLabel("Grid Dimensions")
-        dataLayout.addWidget(label, row,0)
+        layout = dataBox.layout()
+
+        row = layout.rowCount()
         row += 1
-        label = qtGui.QLabel(X_STR)
-        dataLayout.addWidget(label, row,0)
-        self.xDimTxt = qtGui.QLineEdit()
-        self.xDimTxt.setText("200")
-        self.xDimValidator = qtGui.QIntValidator()
-        self.xDimTxt.setValidator(self.xDimValidator)
-        dataLayout.addWidget(self.xDimTxt, row,1)
-        
-        row += 1
-        label = qtGui.QLabel(Y_STR)
-        dataLayout.addWidget(label, row,0)
-        self.yDimTxt = qtGui.QLineEdit()
-        self.yDimTxt.setText("200")
-        self.yDimValidator = qtGui.QIntValidator()
-        self.yDimTxt.setValidator(self.yDimValidator)
-        dataLayout.addWidget(self.yDimTxt, row,1)
-        
-        row += 1
-        label = qtGui.QLabel(Z_STR)
-        dataLayout.addWidget(label, row,0)
-        self.zDimTxt = qtGui.QLineEdit()
-        self.zDimTxt.setText("200")
-        self.zDimValidator = qtGui.QIntValidator()
-        self.zDimTxt.setValidator(self.zDimValidator)
-        dataLayout.addWidget(self.zDimTxt, row,1)
-        
+        self._createGridDimensionInput(layout, row)        
+
+        row = layout.rowCount()
         row += 1
         label = qtGui.QLabel("Output File")
-        dataLayout.addWidget(label, row,0)
+        layout.addWidget(label, row,0)
         self.outputFileName = ""
         self.outFileTxt = qtGui.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
-        dataLayout.addWidget(self.outFileTxt, row,1)
+        layout.addWidget(self.outFileTxt, row,1)
         self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
-        dataLayout.addWidget(self.outputFileButton, row, 2)
+        layout.addWidget(self.outputFileButton, row, 2)
 
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), 
@@ -165,12 +133,6 @@ class ProcessVTIOutputForm(AbstractOutputView):
                              WARNING_STR, \
                              "The specified file is not writable")
 
-    def _process(self):
-        '''
-        Emit a signal to trigger the start of processing.
-        '''
-        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
-        
     def runMapper(self, dataSource, transform, gridWriter=None):
         '''
         Run the selected mapper
@@ -197,10 +159,3 @@ class ProcessVTIOutputForm(AbstractOutputView):
                          str(os.path.dirname(self.outputFileName)) + \
                          "\nis not writable")
 
-    def _stopMapper(self):
-        '''
-        Halt the mapping _process
-        '''
-        self.mapper.stopMap()
-        
-        
