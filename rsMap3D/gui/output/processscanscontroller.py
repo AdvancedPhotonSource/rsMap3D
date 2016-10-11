@@ -169,7 +169,7 @@ class ProcessScansController(qtGui.QDialog):
         '''
         Tell the processScans tab to stop the mapper.
         '''
-        self.outputFormWidget._stopMapper()
+        self.outputFormWidget.stopMapper()
         
     def updateOutputForms(self, newForms):
         del self.outputForms[:]
