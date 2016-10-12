@@ -17,16 +17,26 @@ from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
 
 
 class AbstractGridOutputForm(AbstractOutputView):
+    '''
+    A mid level abstract class for output of grid data.  This adds inputs for the output grid
+    dimensions.  Subclasses will need to add to _createDataBox in order to provide application 
+    level inputs
+    '''
     FORM_TITLE = "AbstractOutputForm"
     
     def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
         super(AbstractGridOutputForm, self).__init__(parent)
         self.gridWriter = VTIGridWriter()
         self.outputFileName = ""
         
     def _createDataBox(self):
         '''
-        Create Widgets to collect output info
+        Create Widgets to collect output info.  This class adds parameters for the size of 
+        the output grid.  Subclasses will override this method (Super'ing the method) to add 
+        application specific inputs.
         '''
         dataBox = super(AbstractGridOutputForm, self)._createDataBox()
         layout = dataBox.layout()
@@ -38,7 +48,9 @@ class AbstractGridOutputForm(AbstractOutputView):
         return dataBox
     
     def _createGridDimensionInput(self, layout, row):
-
+        '''
+        provide parameters for output grid size
+        '''
         label = qtGui.QLabel("Grid Dimensions")
         layout.addWidget(label, row,0)
         row += 1
@@ -80,7 +92,9 @@ class AbstractGridOutputForm(AbstractOutputView):
     
     def runMapper(self, dataSource, transform):
         '''
-        Run the selected mapper
+        Run the selected mapper.  Writer specific class should be specified
+        in the application specific subclass.  A list of forms is provided in 
+        dataSource classes.
         '''
         print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE)
         self.dataSource = dataSource
