@@ -22,7 +22,6 @@ class ProcessImageStackForm(AbstractGridOutputForm):
     
     def __init__(self,parent=None):
         super(ProcessImageStackForm, self).__init__(parent)
-        self.mapper = None
         self.gridWriter = ImageStackWriter()
         layout = qtGui.QVBoxLayout()
         self.dataBox = self._createDataBox()
@@ -65,12 +64,12 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                                 "The specified directory is not writable")
                 
     def _createDataBox(self):
-        dataBox = AbstractGridOutputForm._createDataBox(self)
+        dataBox = super(ProcessImageStackForm, self)._createDataBox()
         layout = dataBox.layout()
         
-        row = layout.rowCount()
-        row += 1
-        self._createGridDimensionInput(layout, row)
+#         row = layout.rowCount()
+#         row += 1
+#         self._createGridDimensionInput(layout, row)
 
         row = layout.rowCount()
         row += 1

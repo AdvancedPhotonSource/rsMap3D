@@ -74,9 +74,9 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
         dataBox = super(ProcessVTIOutputForm, self)._createDataBox()
         layout = dataBox.layout()
 
-        row = layout.rowCount()
-        row += 1
-        self._createGridDimensionInput(layout, row)        
+#         row = layout.rowCount()
+#         row += 1
+#         self._createGridDimensionInput(layout, row)        
 
         row = layout.rowCount()
         row += 1
