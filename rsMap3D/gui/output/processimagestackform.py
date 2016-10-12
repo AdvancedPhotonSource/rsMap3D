@@ -14,13 +14,23 @@ import os
 from rsMap3D.mappers.output.imagestackwriter import ImageStackWriter
 
 class ProcessImageStackForm(AbstractGridOutputForm):
+    '''
+    Process grid data and output a stack of TIFF images.
+    '''
     FORM_TITLE = "Image Stack Output"
     
     @staticmethod
     def createInstance(parent=None):
+        '''
+        A static method to create an instance of this class.  The UI selects which processor method to use 
+        from a menu so this method allows creating an instance without knowing what to create ahead of time. 
+        '''
         return ProcessImageStackForm(parent)
     
     def __init__(self,parent=None):
+        '''
+        Constructor.  Typically instances should be created by createInstance method.
+        '''
         super(ProcessImageStackForm, self).__init__(parent)
         self.gridWriter = ImageStackWriter()
         layout = qtGui.QVBoxLayout()
@@ -67,10 +77,6 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         dataBox = super(ProcessImageStackForm, self)._createDataBox()
         layout = dataBox.layout()
         
-#         row = layout.rowCount()
-#         row += 1
-#         self._createGridDimensionInput(layout, row)
-
         row = layout.rowCount()
         row += 1
 
@@ -124,6 +130,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
     
     def _editFinishedOutputDir(self):
         '''
+        Process output directory name as inputs are completed.
         '''
         dirName = str(self.outputDirTxt.text())
         imageFilePrefix = str(self.imageFilePrefixTxt.text())
@@ -156,9 +163,15 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                 self.imageFilePrefix = imageFilePrefix
                 
     def getOutputFileName(self):
+        '''
+        Override from base class.  In this case return a join of two of the inputs.  This is used to 
+        provide info during runMapper method.
+        '''
         return os.path.join(self.outputDirName, self.imageFilePrefix)
     
                 
     def updateSliceAxis(self, index):
-        print index
+        '''
+        record changes as the axis for slicing is changed
+        '''
         self.gridWriter.setSliceIndex(index)
