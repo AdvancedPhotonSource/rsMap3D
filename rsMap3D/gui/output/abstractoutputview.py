@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2014, UChicago Argonne, LLC
+ Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
 
@@ -12,9 +12,16 @@ from rsMap3D.gui.rsmap3dsignals import UPDATE_PROGRESS_SIGNAL, PROCESS_SIGNAL,\
 
 
 class AbstractOutputView (qtGui.QDialog):
-    
+    '''
+    Abstract class to create a base form for providing input for processing the
+    output of reciprocal space map
+    '''
     def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
         super(AbstractOutputView,self).__init__(parent)
+        self.dataBox = None
         
     def _cancelProcess(self):
         '''
@@ -25,22 +32,33 @@ class AbstractOutputView (qtGui.QDialog):
         
     def _createControlBox(self):
         '''
-        Create box wih the GUI controls Run & Cancel
+        Create box with the GUI controls Run & Cancel
+        This provides:
+            - A progress bar to track processing
+            - A run button to start processing
+            - A cancel button to halt processing
+            Signals from the controls emit signals for container classes that 
+            control the overall processing
         '''
         controlBox = qtGui.QGroupBox()
         controlLayout = qtGui.QGridLayout()
+        
+        # Add progress bar
         row = 0
         self.progressBar = qtGui.QProgressBar()
+        self.progressBar.setTextVisible(True)
         controlLayout.addWidget(self.progressBar,row, 1)
 
+        # Add run button
         self.runButton = qtGui.QPushButton(RUN_STR)
         controlLayout.addWidget(self.runButton, row, 3)
 
+        # Add cancel button
         self.cancelButton = qtGui.QPushButton(CANCEL_STR)
         self.cancelButton.setDisabled(True)
-
         controlLayout.addWidget(self.cancelButton, row, 4)
 
+        # Connect signals to the controls
         self.connect(self.runButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), \
                      self._process)
@@ -50,10 +68,15 @@ class AbstractOutputView (qtGui.QDialog):
         self.connect(self, \
                      qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
+        # Finalize the layout
         controlBox.setLayout(controlLayout)
         return controlBox
     
     def _createDataBox(self):
+        '''
+        Add an empty container for input of processing parameters.  Since this
+        class is mostly abstract, this is empty and needs an override
+        '''
         dataBox = qtGui.QGroupBox()
         dataLayout = qtGui.QGridLayout()
         dataBox.setLayout(dataLayout)
