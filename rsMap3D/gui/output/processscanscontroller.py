@@ -112,8 +112,7 @@ class ProcessScansController(qtGui.QDialog):
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
             self.outputFormWidget.runMapper(self.parent.getDataSource(),
-                                        self.parent.getTransform(),
-                                        gridWriter=VTIGridWriter())
+                                        self.parent.getTransform())
         except ProcessCanceledException:
             self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
         except RSMap3DException as e:
