@@ -24,6 +24,19 @@ class AbstractGridOutputForm(AbstractOutputView):
         self.gridWriter = VTIGridWriter()
         self.outputFileName = ""
         
+    def _createDataBox(self):
+        '''
+        Create Widgets to collect output info
+        '''
+        dataBox = super(AbstractGridOutputForm, self)._createDataBox()
+        layout = dataBox.layout()
+
+        row = layout.rowCount()
+        row += 1
+        self._createGridDimensionInput(layout, row)        
+
+        return dataBox
+    
     def _createGridDimensionInput(self, layout, row):
 
         label = qtGui.QLabel("Grid Dimensions")
@@ -65,7 +78,7 @@ class AbstractGridOutputForm(AbstractOutputView):
         '''
         return self.outputFileName
     
-    def runMapper(self, dataSource, transform, gridWriter=None):
+    def runMapper(self, dataSource, transform):
         '''
         Run the selected mapper
         '''
