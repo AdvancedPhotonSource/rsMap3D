@@ -139,6 +139,9 @@ class AbstractDataSource(object):
                     inUse.append(False)
             self.imageToBeUsed[scan] = inUse
             
+    def resetHaltMap(self):
+        self.haltMap = False
+    
     def setProgressUpdater(self, updater):
         '''
         set an updater that will affect a progress bar to indicate progress on

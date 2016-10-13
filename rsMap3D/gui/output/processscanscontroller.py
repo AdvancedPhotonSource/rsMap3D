@@ -107,6 +107,9 @@ class ProcessScansController(qtGui.QDialog):
         print ("ProcessScanController._processFormError " + message)
         
     def runMapper(self):
+#         import pydevd
+#         pydevd.connected = True
+#         pydevd.settrace(suspend=False)
         print("Entering processScanController.runMapper")
         self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL))
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
@@ -115,6 +118,7 @@ class ProcessScansController(qtGui.QDialog):
                                         self.parent.getTransform())
         except ProcessCanceledException:
             self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
+            self.parent.getDataSource().resetHaltMap()
         except RSMap3DException as e:
             self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                       str(e) + "\n" + str(traceback.format_exc()))
