@@ -14,10 +14,17 @@ from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
 from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
 
 class ProcessVTIOutputForm(AbstractGridOutputForm):
+    '''
+    Process Grid data into a .vti file.  This class uses VTIGridWriter class.  
+    '''
     FORM_TITLE = "VTI Grid Output"
     
     @staticmethod
     def createInstance(parent=None):
+        '''
+        A static method to create an instance of this class.  The UI selects which processor method to use 
+        from a menu so this method allows creating an instance without knowing what to create ahead of time. 
+        '''
         return ProcessVTIOutputForm()
     
     def __init__(self, parent=None):
@@ -132,30 +139,4 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
-
-    def runMapper(self, dataSource, transform, gridWriter=None):
-        '''
-        Run the selected mapper
-        '''
-        self.dataSource = dataSource
-        nx = int(self.xDimTxt.text())
-        ny = int(self.yDimTxt.text())
-        nz = int(self.zDimTxt.text())
-        if self.outputFileName == "":
-            self.outputFileName = os.path.join(dataSource.projectDir,  \
-                                               "%s.vti" %dataSource.projectName)
-            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
-        if os.access(os.path.dirname(self.outputFileName), os.W_OK):
-            self.mapper = QGridMapper(dataSource, \
-                                     self.outputFileName, \
-                                     nx=nx, ny=ny, nz=nz,
-                                     transform = transform,
-                                     gridWriter = VTIGridWriter())
-            self.mapper.setProgressUpdater(self.updateProgress)
-            self.mapper.doMap()
-        else:
-            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                         "The specified directory \n" + \
-                         str(os.path.dirname(self.outputFileName)) + \
-                         "\nis not writable")
 
