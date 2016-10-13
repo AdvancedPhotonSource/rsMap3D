@@ -19,7 +19,7 @@ from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, \
     SET_PROCESS_RUN_OK_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
     SET_SCAN_LOAD_CANCEL_SIGNAL,\
     LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL,\
-    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL
+    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL, INPUT_FORM_CHANGED
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 
@@ -104,6 +104,9 @@ class MainDialog(qtGui.QMainWindow):
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL),
                      self.dataExtentView.renderBounds)
+        self.connect(self.fileForm, \
+                     qtCore.SIGNAL(INPUT_FORM_CHANGED),
+                     self.updateOutputForms)
         
     def _blockTabsForLoad(self):
         '''
@@ -131,7 +134,10 @@ class MainDialog(qtGui.QMainWindow):
         
     def getDataSource(self):
         return self.fileForm.dataSource
-        
+    
+    def getOutputForms(self):
+        return self.fileForm.getOutputForms()    
+
     def getTransform(self):
         return self.fileForm.transform
         
@@ -213,6 +219,10 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.dataTabIndex, True)
         self.tabs.setTabEnabled(self.scanTabIndex, True)
         self.tabs.setTabEnabled(self.fileTabIndex, True)
+        
+    def updateOutputForms(self):
+        newOutputForms = self.fileForm.getOutputForms()
+        self.processScans.updateOutputForms(newOutputForms)
         
 def ctrlCHandler(signal, frame):
     qtGui.QApplication.closeAllWindows()
