@@ -22,12 +22,24 @@ from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, \
     CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL, INPUT_FORM_CHANGED
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
-
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
+from os.path import expanduser, join
+    
+    
 class MainDialog(qtGui.QMainWindow):
     '''
     Main dialog for rsMap3D.  This class also serves as the over action 
     controller for the application
     '''
+    logging.getLogger(LOGGER_NAME)
+    userDir = expanduser("~")
+    logConfig = join(userDir,".rsMap3D.logConfig")
+
+#    logging.config.dictConfig("rsMap.logConfig")
+
+    logging.basicConfig(level=logging.INFO, format=LOGGER_FORMAT)
+    
     def __init__(self,parent=None):
         '''
         '''
