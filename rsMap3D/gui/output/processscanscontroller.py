@@ -7,7 +7,6 @@ import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.qtsignalstrings import CURRENT_INDEX_CHANGED_SIGNAL
 from PyQt4.Qt import QComboBox
-from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL, \
     PROCESS_SIGNAL, CANCEL_PROCESS_SIGNAL, \
     BLOCK_TABS_FOR_PROCESS_SIGNAL, SET_PROCESS_CANCEL_OK_SIGNAL,\
@@ -16,8 +15,8 @@ from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL, \
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 import traceback
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
-from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
-
+import logging
+   
 class ProcessScansController(qtGui.QDialog):
     '''
     '''
@@ -104,13 +103,10 @@ class ProcessScansController(qtGui.QDialog):
                      self._processFormError)
         
     def _processFormError(self, message):
-        print ("ProcessScanController._processFormError " + message)
+        logging.error ("ProcessScanController._processFormError " + message)
         
     def runMapper(self):
-#         import pydevd
-#         pydevd.connected = True
-#         pydevd.settrace(suspend=False)
-        print("Entering processScanController.runMapper")
+        logging.debug("Entering processScanController.runMapper")
         self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL))
         self.emit(qtCore.SIGNAL(SET_PROCESS_CANCEL_OK_SIGNAL))
         try:
@@ -129,16 +125,19 @@ class ProcessScansController(qtGui.QDialog):
             return
         self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
         self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL))
-        print("Leaving processScanController.runMapper")
+        logging.debug("Leaving processScanController.runMapper")
         
     def _selectedTypeChanged(self, typeStr):
-        print("ProcessScanController::_SelectedType Channged updating widget)")
+        logging.debug("ProcessScanController::_SelectedType " +
+          "Changed updating widget to " 
+          + str(typeStr))
         self._disconnectSignals()
         self.formLayout.removeWidget(self.outputFormWidget)
         self.outputFormWidget.deleteLater()
         
         for form in self.outputForms:
             if typeStr == form.FORM_TITLE:
+                logging.debug("typeStr:" +str(typeStr) + " class " + form.__name__)
                 self.outputFormWidget = form.createInstance()
                 
         self.formLayout.addWidget(self.outputFormWidget)
@@ -157,7 +156,6 @@ class ProcessScansController(qtGui.QDialog):
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
-        #print dir(self.parent.getDataSource())
         self.outputFormWidget.setProgressLimits(0, 
                                 len(self.parent.getDataSource().getAvailableScans())*100)
         self.outputFormWidget.setProgress(0)
@@ -177,6 +175,14 @@ class ProcessScansController(qtGui.QDialog):
     def updateOutputForms(self, newForms):
         del self.outputForms[:]
         self.outputForms = newForms
+        self.outputFormSelection.clear()
+        
+        for form in self.outputForms:
+            self.outputFormSelection.addItem(form.FORM_TITLE)
+        logging.debug ("Setting output form to " + str(self.outputForms[0].FORM_TITLE))
+        self._selectedTypeChanged(self.outputForms[0].FORM_TITLE)
+        self.update()
+        
         
 class ProcessScanThread(qtCore.QThread):
     '''
