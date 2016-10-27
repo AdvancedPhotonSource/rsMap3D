@@ -25,3 +25,21 @@ Version 1.0.10
       Add code to Sector33SpecDataSource to handle runs that have been aborted.
       To work with spec files that have beamline specific entries, not handled by 
       a plugin must have spec2nexus version 2016.0615.1. 
+
+Version 1.0.13   -  2016/10/27
+      The structure of input and output controls, and on the back end DataSource 
+      classes and Mapper classes have been reworked to allow output of data to 
+      different formats.  In particular, the input Forms hold information on what 
+      type of output is allowed/needed for that kind of data.  Up till this point,
+      only output to VTI files was allowed.  A stock list of input forms is still 
+      provided.  A pull-down combo box allows switching between input forms,  As
+      a different form is selected, a list of allowed output forms is created and 
+      placed on the "Process Data" tab.  The default form is set active.  Each output 
+      form can then also specify a list of "Writers" to be used for selecting the format
+      of the output data.  At this point vti (the only choice till now), a stack of TIFF 
+      images, slicing through the 3D volume, and for XPCS data, a CSV file containing the 
+      qx, qy, qz values for the single position used to collect time series data in an 
+      XPCS scan.
+      Energy scan data from sector 34 is working, but at present writes only VTI files.
+      The Sector 33 scan format is working for sector 7, & 30.  Still working along with
+      these beamlines to do some post processing.
