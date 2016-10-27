@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2014, UChicago Argonne, LLC
+Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 USE_XPCS = False
@@ -23,7 +23,10 @@ from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
 try:
     from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
     USE_XPCS = True
-except:
+
+except Exception as ex:
+    print ex
+    traceback.print_exc()
     USE_XPCS = False
 
 class FileInputController(qtGui.QDialog):
@@ -59,7 +62,7 @@ class FileInputController(qtGui.QDialog):
         
         self.formLayout = qtGui.QHBoxLayout()
         self.fileFormWidget = self.fileForms[0].createInstance()
-        print dir(self.fileFormWidget)
+        #print dir(self.fileFormWidget)
         self.formLayout.addWidget(self.fileFormWidget)
         self.layout.addLayout(self.formLayout)
         self.setLayout(self.layout)
@@ -207,4 +210,3 @@ class LoadScanThread(qtCore.QThread):
     def run(self):
         print("LoadScanThread Running")
         self.controller.loadScanFile()
-        
