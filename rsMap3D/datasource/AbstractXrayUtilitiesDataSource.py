@@ -5,6 +5,7 @@
 import abc
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
+import numpy as np
 
 class AbstractXrayutilitiesDataSource(AbstractDataSource):
     __metaclass__ = abc.ABCMeta
@@ -15,7 +16,7 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
     def __init__(self, transform=None, 
                  scanList=None, 
                  roi=None, 
-                 pixelsToAverage=None,
+                 pixelsToAverage=[1,1],
                  badPixelFile=None,
                  flatFieldFile=None):
         '''
