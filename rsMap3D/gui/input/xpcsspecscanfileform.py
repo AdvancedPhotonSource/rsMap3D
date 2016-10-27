@@ -6,6 +6,7 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
+from rsMap3D.gui.output.processxpcsgridlocationform import ProcessXpcsGridLocationForm
 
 try:
     from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
@@ -131,6 +132,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     
     def getOutputForms(self):
         outputForms = []
+        outputForms.append(ProcessXpcsGridLocationForm)
         outputForms.append(ProcessVTIOutputForm)
         return outputForms
 
