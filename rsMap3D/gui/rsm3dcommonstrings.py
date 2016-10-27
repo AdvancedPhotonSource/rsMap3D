@@ -42,3 +42,5 @@ YMIN_INDEX = 2
 YMAX_INDEX = 3
 ZMIN_INDEX = 4
 ZMAX_INDEX = 5
+LOGGER_NAME = "rsMapLogger"
+LOGGER_FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
