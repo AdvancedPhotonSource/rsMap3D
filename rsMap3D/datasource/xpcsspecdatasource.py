@@ -118,7 +118,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                             self.sd.scans[str(scan)].scanCmd.split()[0]
                         print self.scanType[scan]
                         if self.scanType[scan] == 'xpcsscan':
-                            print dir(self.sd)
+                            #print dir(self.sd)
                             d = curScan.data
                             h = curScan.header
                             dataFile = curScan.XPCS['batch_name'][0]
@@ -356,4 +356,91 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             
         
         return qxTrans, qyTrans, qzTrans, intensity
-                
+
+    def rawmapSingle(self, scan):
+        intensity = np.array([])
+                # fourc goniometer in fourc coordinates
+        # convention for coordinate system:
+        # x: upwards;
+        # y: along the incident beam;
+        # z: "outboard" (makes coordinate system right-handed).
+        # QConversion will set up the goniometer geometry.
+        # So the first argument describes the sample rotations, the second the
+        # detector rotations and the third the primary beam direction.
+        qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), \
+                                    self.getDetectorCircleDirections(), \
+                                    self.getPrimaryBeamDirection())
+    
+        # define experimental class for angle conversion
+        #
+        # ipdir: inplane reference direction (ipdir points into the primary beam
+        #        direction at zero angles)
+        # ndir:  surface normal of your sample (ndir points in a direction
+        #        perpendicular to the primary beam and the innermost detector
+        #        rotation axis)
+        en = self.getIncidentEnergy()
+        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), \
+                       self.getSampleSurfaceNormalDirection(), \
+                       en=en[self.getAvailableScans()[0]], \
+                       qconv=qconv)
+
+        if (self.getDetectorPixelWidth() != None ) and \
+            (self.getDistanceToDetector() != None):
+            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
+                self.getDetectorPixelDirection2(), \
+                cch1=self.getDetectorCenterChannel()[0], \
+                cch2=self.getDetectorCenterChannel()[1], \
+                Nch1=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[0], \
+                pwidth1=self.getDetectorPixelWidth()[0], \
+                pwidth2=self.getDetectorPixelWidth()[1], \
+                distance=self.getDistanceToDetector(), \
+                Nav=self.getNumPixelsToAverage(), \
+                roi=self.getDetectorROI()) 
+        else:
+            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
+                self.getDetectorPixelDirection2(), \
+                cch1=self.getDetectorCenterChannel()[0], \
+                cch2=self.getDetectorCenterChannel()[1], \
+                Nch1=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[0], \
+                chpdeg1=self.getDetectorChannelsPerDegree()[0], \
+                chpdeg2=self.getDetectorChannelsPerDegree()[1], \
+                Nav=self.getNumPixelsToAverage(), 
+                roi=self.getDetectorROI()) 
+
+        # Setup list of angles to produce transform
+        angleNames = self.getAngles()
+        scanAngle = {}
+        for i in xrange(len(angleNames)):
+            scanAngle[i] = np.array([])
+        print scan
+        angles = self.getGeoAngles(self.sd.scans[str(scan)], angleNames)
+        angles = np.array([angles[0],])
+        print angles
+        
+        for i in xrange(len(angleNames)):
+            scanAngle[i] = np.concatenate((scanAngle[i], np.array(angles[:,i])), \
+                            axis=0)
+        # transform scan angles to reciprocal space coordinates for all detector
+        # pixels
+        angleList = []
+        for i in xrange(len(angleNames)):
+            angleList.append(scanAngle[i])
+
+        if self.ubMatrix[scan] == None:
+            qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
+                                           roi = self.getDetectorROI(),
+                                           Nav=self.getNumPixelsToAverage())
+        else:
+            qx, qy, qz = hxrd.Ang2Q.area( *angleList, \
+                                          roi=self.getDetectorROI(), \
+                                          Nav=self.getNumPixelsToAverage(),
+                                          UB=self.ubMatrix[scan])
+            
+        # apply selected transform
+        qxTrans, qyTrans, qzTrans = \
+            self.transform.do3DTransform(qx, qy, qz)
+            
+           
+        return qxTrans, qyTrans, qzTrans
