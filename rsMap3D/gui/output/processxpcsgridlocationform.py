@@ -1,0 +1,171 @@
+'''
+ Copyright (c) 2016, UChicago Argonne, LLC
+ See LICENSE file.
+'''
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
+from rsMap3D.gui.rsm3dcommonstrings import SAVE_FILE_STR, WARNING_STR,\
+    BROWSE_STR
+import os
+from rsMap3D.gui.qtsignalstrings import EDIT_FINISHED_SIGNAL, CLICKED_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL
+from rsMap3D.mappers.xpcsgridlocationmapper import XPCSGridLocationMapper
+from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
+from rsMap3D.mappers.output.xpcsgridlocationwriter import XPCSGridLocationWriter
+
+
+class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
+    '''
+    Process and output only the grid locations (qx,qy,qz or H, K, L)
+    for the detector.  For XPCS runs, only one location of the 
+    detector so the output is three blocks, the size of the detector 
+    for each of the grid axes. 
+    '''
+    FORM_TITLE= "XPCS Grid Locations"
+    XPCS_GRID_LOCS_FILTER = "*.csv"
+    
+    @staticmethod
+    def createInstance(parent=None):
+        '''
+        A static method to create an instance of this class.  The UI selects which processor method to use 
+        from a menu so this method allows creating an instance without knowing what to create ahead of time. 
+        '''
+        return ProcessXpcsGridLocationForm()
+    
+    def __init__(self, parent=None):
+        super(ProcessXpcsGridLocationForm, self).__init__(parent)
+        self.mapper = None
+        layout = qtGui.QVBoxLayout()
+        self.dataBox = self._createDataBox()
+        controlBox = self._createControlBox()
+        
+        layout.addWidget(self.dataBox)
+        layout.addWidget(controlBox)
+        self.setLayout(layout)
+        self.outFilter = self.XPCS_GRID_LOCS_FILTER
+        self.gridWriter = XPCSGridLocationWriter()
+        
+    def _browseForOutputFile(self):
+        '''
+        Launch file browser to select the output file.  Checks are done to make
+        sure the selected directory exists and that the selected file is 
+        writable
+        '''
+        if self.outFileTxt.text() == "":
+            fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
+                                               SAVE_FILE_STR, \
+                                               filter=self.outFilter))
+        else:
+            inFileName = str(self.outFileTxt.text())
+            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
+                                               SAVE_FILE_STR, 
+                                               filter=self.outFilter, \
+                                               directory = inFileName))
+        if fileName != "":
+            if os.path.exists(os.path.dirname(str(fileName))):
+                self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
+                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            else:
+                message = qtGui.QMessageBox()
+                message.warning(self, \
+                             WARNING_STR, \
+                             "The specified directory does not exist")
+                self.outFileTxt.setText(fileName)
+                self.outputFileName = fileName
+                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            if not os.access(os.path.dirname(fileName), os.W_OK):
+                message = qtGui.QMessageBox()
+                message.warning(self, \
+                             WARNING_STR, \
+                             "The specified file is not writable")
+            
+    def _createDataBox(self):
+        dataBox = super(ProcessXpcsGridLocationForm,self)._createDataBox()
+        layout = dataBox.layout()
+        
+        row = layout.rowCount()
+        row += 1
+        label = qtGui.QLabel("Output File")
+        layout.addWidget(label, row,0)
+        self.outputFileName = ""
+        self.outFileTxt = qtGui.QLineEdit()
+        self.outFileTxt.setText(self.outputFileName)
+        layout.addWidget(self.outFileTxt, row,1)
+        self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
+        layout.addWidget(self.outputFileButton, row, 2)
+
+        self.connect(self.outputFileButton, \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), 
+                     self._browseForOutputFile)
+        self.connect(self.outputFileButton, \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
+                     self._editFinishedOutputFile)
+        self.connect(self.outFileTxt, \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
+                     self._editFinishedOutputFile)
+        self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
+                     self.outFileTxt.setText)
+
+        return dataBox
+    
+    def _editFinishedOutputFile(self):
+        '''
+        When editing is finished the a check is done to make sure that the 
+        directory exists and the file is writable
+        '''
+        fileName = str(self.outFileTxt.text())
+        if fileName != "":
+            if os.path.exists(os.path.dirname(fileName)):
+                self.outputFileName = fileName
+            else:
+                if os.path.dirname(fileName) == "":
+                    curDir = os.path.realpath(os.path.curdir)
+                    fileName = str(os.path.join(curDir, fileName))
+                else:
+                    message = qtGui.QMessageBox()
+                    message.warning(self, \
+                                 WARNING_STR, \
+                                 "The specified directory \n" + \
+                                 str(os.path.dirname(fileName)) + \
+                                 "\ndoes not exist")
+                
+#               self.outputFileName = fileName
+                self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), fileName)
+                
+            if not os.access(os.path.dirname(fileName), os.W_OK):
+                message = qtGui.QMessageBox()
+                message.warning(self, \
+                             WARNING_STR, \
+                             "The specified file is not writable")
+
+    def runMapper(self, dataSource, transform):
+        self.dataSource = dataSource
+        self.transform = transform
+        
+        nx = int(self.xDimTxt.text())
+        ny = int(self.yDimTxt.text())
+        nz = int(self.zDimTxt.text())
+        
+        self.outputFileName = self.getOutputFileName()
+
+        if self.outputFileName == "":
+            self.outputFileName = os.path.join(dataSource.projectDir,  \
+                "%s%s" %(dataSource.projectName,self.gridWriter.FILE_EXTENSION) )
+            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
+    
+        if os.access(os.path.dirname(self.outputFileName), os.W_OK):
+            self.mapper = XPCSGridLocationMapper(dataSource,
+                                              self.outputFileName,
+                                              nx=nx, ny=ny, nz=nz,
+                                              transform = transform,
+                                              gridWriter = self.gridWriter)
+            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.doMap()
+
+    def stopMapper(self):
+        '''
+        Halt the mapping _process
+        '''
+        self.mapper.stopMap()
+    
