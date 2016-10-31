@@ -43,3 +43,12 @@ Version 1.0.13   -  2016/10/27
       Energy scan data from sector 34 is working, but at present writes only VTI files.
       The Sector 33 scan format is working for sector 7, & 30.  Still working along with
       these beamlines to do some post processing.
+      
+Version 1.0.14   -  2016/10/27
+      Needed to fix list of packages in setup.py did a re-release.      
+
+Version 1.0.15   -  2016/10/27
+      Needed to fix list of packages in setup.py did a re-release.
+      
+Version 1.0.16   -  2016/10/31
+      Needed to fix handling method when pyimm is not found.ZZ
