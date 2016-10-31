@@ -2,7 +2,7 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-
+import logging
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
@@ -11,7 +11,8 @@ from rsMap3D.gui.output.processxpcsgridlocationform import ProcessXpcsGridLocati
 try:
     from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
 except ImportError as ex:
-    raise ex
+    logging.info("Need to install pypimm in order to use rsMap3D to use XPCS data.")
+    #raise ex
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
