@@ -67,12 +67,15 @@ class AbstractGridMapper(object):
         print 'qz: ', qz.min(), ' .... ', qz.max()
         
         self.gridWriter.setData(qx, qy, qz, gint)
-        self.gridWriter.setFileInfo((self.dataSource.projectName, 
-                                        self.dataSource.availableScans[0],
-                                        self.nx, self.ny, self.nz,
-                                        self.outputFileName))
+        self.gridWriter.setFileInfo(self.getFileInfo())
         self.gridWriter.write()
 
+    def getFileInfo(self):
+        return (self.dataSource.projectName, 
+                self.dataSource.availableScans[0],
+                self.nx, self.ny, self.nz,
+                self.outputFileName)
+        
     @abc.abstractmethod
     def processMap(self, **kwargs):
         """

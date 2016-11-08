@@ -12,6 +12,32 @@ from xrayutilities.exception import InputError
 
 class QGridMapper(AbstractGridMapper):
     '''
+    Override parent class to add in output type
+    '''
+    def __init__(self, dataSource, \
+                 outputFileName, \
+                 outputType, \
+                 nx=200, ny=201, nz=202, \
+                 transform = None, \
+                 gridWriter = None):
+        super(QGridMapper, self).__init__(dataSource, \
+                 outputFileName, \
+                 nx=200, ny=201, nz=202, \
+                 transform = None, \
+                 gridWriter = None)
+        self.outputType = outputType
+        
+    def getFileInfo(self):
+        '''
+        Override parent class to add in output type
+        '''
+        return (self.dataSource.projectName, 
+                self.dataSource.availableScans[0],
+                self.nx, self.ny, self.nz,
+                self.outputFileName,
+                self.outputType)
+    
+    '''
     This map provides an x, y, z grid of the data.
     '''
     def processMap(self, **kwargs):
@@ -26,10 +52,18 @@ class QGridMapper(AbstractGridMapper):
         gridder = xu.Gridder3D(self.nx, self.ny, self.nz)
         gridder.KeepData(True)
         rangeBounds = self.dataSource.getRangeBounds()
-        gridder.dataRange(rangeBounds[0], rangeBounds[1], 
-                          rangeBounds[2], rangeBounds[3], 
-                          rangeBounds[4], rangeBounds[5], 
-                          True)
+        try:
+            # xrayutilities 1.0.6 and below
+            gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
+                              (rangeBounds[2], rangeBounds[3]), 
+                              (rangeBounds[4], rangeBounds[5]), 
+                              True)
+        except:
+            # repository version or xrayutilities > 1.0.6
+            gridder.dataRange(rangeBounds[0], rangeBounds[1], 
+                              rangeBounds[2], rangeBounds[3], 
+                              rangeBounds[4], rangeBounds[5], 
+                              True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         progress = 0
@@ -41,7 +75,6 @@ class QGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
-                    print "imageToBeUsed :" + str(imageToBeUsed)
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
                     
                     # convert data to rectangular grid in reciprocal space
@@ -70,8 +103,10 @@ class QGridMapper(AbstractGridMapper):
                         except InputError as ex:
                             print "Wrong Input to gridder"
                             print "qx Size: " + str( qx.shape)
-                            print "qy Size: " + str( qy.shape)
-                            print "qz Size: " + str( qz.shape)
+                            print "qy Size: " + str( qx.shape)
+                            print "qz Size: " + str( qx.shape)
                             print "intensity Size: " + str(intensity.shape)
                             raise InputError(ex)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
+    
+    

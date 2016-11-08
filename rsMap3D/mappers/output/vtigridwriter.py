@@ -6,10 +6,11 @@ from rsMap3D.mappers.output.abstactgridwriter import AbstractGridWriter
 import numpy as np
 from vtk.util import numpy_support
 import vtk
+from rsMap3D.gui.rsm3dcommonstrings import ASCII_OUTPUT
 VTI_WRITER_MERGE_STR = "%s_S%d.vti"
 
 class VTIGridWriter(AbstractGridWriter):
-    FILE_EXTENSION = ".vti"
+    
     def setFileInfo(self, fileInfo):
         """
         Set information needed to create the file output.  
@@ -26,20 +27,21 @@ class VTIGridWriter(AbstractGridWriter):
                             "constructed if filename is blank\n 2. User " +
                             "filename, and number of pixels for output in " + 
                             "x/y/z directions and output file name")
-        elif (len( fileInfo) != 6):
+        elif (len( fileInfo) != 7):
             raise ValueError(self.whatFunction() +
                             "passed no filename information " +
                             "requires a tuple with six members:\n"
                             "1. project filename so that a filename can be " +
                             "constructed if filename is blank\n 2. User " +
                             "filename, and number of pixels for output in " + 
-                            "x/y/z directions and outputFileName")
+                            "x/y/z directions, outputFileName and out file type")
         self.fileInfo.append(fileInfo[0])
         self.fileInfo.append(fileInfo[1])
         self.nx = fileInfo[2]
         self.ny = fileInfo[3]
         self.nz = fileInfo[4]
         self.outputFileName = fileInfo[5]
+        self.outType = fileInfo[6]
         
         
         
@@ -73,7 +75,9 @@ class VTIGridWriter(AbstractGridWriter):
         
         # Export data to file
         writer= vtk.vtkXMLImageDataWriter()
-        
+        if self.outType == ASCII_OUTPUT:
+            writer.SetDataModeToAscii()
+            
         if self.outputFileName == "":
             writer.SetFileName(VTI_WRITER_MERGE_STR % 
                                (self.fileInfo[0], \

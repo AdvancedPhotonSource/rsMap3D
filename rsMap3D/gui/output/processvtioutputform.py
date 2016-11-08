@@ -4,27 +4,23 @@
 '''
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, WARNING_STR, \
-    SAVE_FILE_STR, VTI_FILTER_STR
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
-from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_ERROR_SIGNAL
+from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
+from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
+    WARNING_STR, SAVE_FILE_STR, VTI_FILTER_STR, BINARY_OUTPUT, ASCII_OUTPUT
+from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
+    CURRENT_INDEX_CHANGED_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
+    CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
-from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
+from PyQt4.Qt import QComboBox
 
-class ProcessVTIOutputForm(AbstractGridOutputForm):
-    '''
-    Process Grid data into a .vti file.  This class uses VTIGridWriter class.  
-    '''
+class ProcessVTIOutputForm(AbstractOutputView):
     FORM_TITLE = "VTI Grid Output"
     
     @staticmethod
     def createInstance(parent=None):
-        '''
-        A static method to create an instance of this class.  The UI selects which processor method to use 
-        from a menu so this method allows creating an instance without knowing what to create ahead of time. 
-        '''
         return ProcessVTIOutputForm()
     
     def __init__(self, parent=None):
@@ -37,6 +33,7 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
         layout.addWidget(self.dataBox)
         layout.addWidget(controlBox)
         self.setLayout(layout)
+        self.outputType = BINARY_OUTPUT
         
     def _browseForOutputFile(self):
         '''
@@ -73,29 +70,68 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
                              WARNING_STR, \
                              "The specified file is not writable")
             
+    def _cancelProcess(self):
+        '''
+        Emit a signal to trigger the cancellation of processing.
+        '''
+        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
+        
 
     def _createDataBox(self):
         '''
         Create Widgets to collect output info
         '''
         dataBox = super(ProcessVTIOutputForm, self)._createDataBox()
-        layout = dataBox.layout()
-
-#         row = layout.rowCount()
-#         row += 1
-#         self._createGridDimensionInput(layout, row)        
-
-        row = layout.rowCount()
+        dataLayout = dataBox.layout()
+        row = dataLayout.rowCount()
+        
+        label = qtGui.QLabel("Grid Dimensions")
+        dataLayout.addWidget(label, row,0)
+        row += 1
+        label = qtGui.QLabel(X_STR)
+        dataLayout.addWidget(label, row,0)
+        self.xDimTxt = qtGui.QLineEdit()
+        self.xDimTxt.setText("200")
+        self.xDimValidator = qtGui.QIntValidator()
+        self.xDimTxt.setValidator(self.xDimValidator)
+        dataLayout.addWidget(self.xDimTxt, row,1)
+        
+        row += 1
+        label = qtGui.QLabel(Y_STR)
+        dataLayout.addWidget(label, row,0)
+        self.yDimTxt = qtGui.QLineEdit()
+        self.yDimTxt.setText("200")
+        self.yDimValidator = qtGui.QIntValidator()
+        self.yDimTxt.setValidator(self.yDimValidator)
+        dataLayout.addWidget(self.yDimTxt, row,1)
+        
+        row += 1
+        label = qtGui.QLabel(Z_STR)
+        dataLayout.addWidget(label, row,0)
+        self.zDimTxt = qtGui.QLineEdit()
+        self.zDimTxt.setText("200")
+        self.zDimValidator = qtGui.QIntValidator()
+        self.zDimTxt.setValidator(self.zDimValidator)
+        dataLayout.addWidget(self.zDimTxt, row,1)
+        
         row += 1
         label = qtGui.QLabel("Output File")
-        layout.addWidget(label, row,0)
+        dataLayout.addWidget(label, row,0)
         self.outputFileName = ""
         self.outFileTxt = qtGui.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
-        layout.addWidget(self.outFileTxt, row,1)
+        dataLayout.addWidget(self.outFileTxt, row,1)
         self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
-        layout.addWidget(self.outputFileButton, row, 2)
+        dataLayout.addWidget(self.outputFileButton, row, 2)
 
+        row += 1
+        label = qtGui.QLabel("Output Type")
+        dataLayout.addWidget(label, row, 0)
+        self.outputTypeSelect = QComboBox()
+        self.outputTypeSelect.addItem(BINARY_OUTPUT)
+        self.outputTypeSelect.addItem(ASCII_OUTPUT)
+        dataLayout.addWidget(self.outputTypeSelect, row, 2)
+        
         self.connect(self.outputFileButton, \
                      qtCore.SIGNAL(CLICKED_SIGNAL), 
                      self._browseForOutputFile)
@@ -107,6 +143,9 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
                      self._editFinishedOutputFile)
         self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
                      self.outFileTxt.setText)
+        self.connect(self.outputTypeSelect, \
+                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
+                     self._selectedTypeChanged)
         
         return dataBox
         
@@ -140,3 +179,48 @@ class ProcessVTIOutputForm(AbstractGridOutputForm):
                              WARNING_STR, \
                              "The specified file is not writable")
 
+    def _process(self):
+        '''
+        Emit a signal to trigger the start of processing.
+        '''
+        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
+        
+    def runMapper(self, dataSource, transform, gridWriter=None):
+        '''
+        Run the selected mapper
+        '''
+        self.dataSource = dataSource
+        nx = int(self.xDimTxt.text())
+        ny = int(self.yDimTxt.text())
+        nz = int(self.zDimTxt.text())
+        outType = self.outputType
+        if self.outputFileName == "":
+            self.outputFileName = os.path.join(dataSource.projectDir,  \
+                                               "%s.vti" %dataSource.projectName)
+            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
+        if os.access(os.path.dirname(self.outputFileName), os.W_OK):
+            self.mapper = QGridMapper(dataSource, \
+                                     self.outputFileName, \
+                                     outType, \
+                                     nx=nx, ny=ny, nz=nz, \
+                                     transform = transform, \
+                                     gridWriter = gridWriter)
+            self.mapper.setGridWriter(VTIGridWriter())
+            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.doMap()
+        else:
+            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
+                         "The specified directory \n" + \
+                         str(os.path.dirname(self.outputFileName)) + \
+                         "\nis not writable")
+
+    def _selectedTypeChanged(self, typeStr):
+        self.outputType = str(typeStr)
+        
+    def _stopMapper(self):
+        '''
+        Halt the mapping _process
+        '''
+        self.mapper.stopMap()
+        
+        
