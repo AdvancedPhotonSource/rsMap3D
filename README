@@ -57,3 +57,6 @@ Version 1.0.17	- Changes to allow output of ascii vti file.
 
 Version 1.0.18	- 2016-11-8 
        Readd missing string constant in common strings file.
+       
+Version 1.0.19	- 2016-11-8 
+       Readd missing string logger constants in common strings file.
