@@ -54,3 +54,6 @@ Version 1.0.16   -  2016/10/31
       Needed to fix handling method when pyimm is not found.ZZ
       
 Version 1.0.17	- Changes to allow output of ascii vti file.
+
+Version 1.0.17	- 2016-11-8 
+       Readd missing string constant in common strings file.
