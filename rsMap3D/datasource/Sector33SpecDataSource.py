@@ -154,7 +154,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             method = getattr(self, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
                                    referenceAngles=refAngles)
-            print "fixedAngles" + fixedAngles
+            #print "fixedAngles" + str(fixedAngles)
             for i in range(len(primaryAngles)):
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
         
