@@ -52,10 +52,8 @@ class AbstractImagePerFileView(AbstractFileView):
         '''
         if os.path.isfile(self.projNameTxt.text()):
             retVal = True
-            self.loadButton.setEnabled(retVal)
         else:
             retVal = False
-            self.loadButton.setDisabled(not retVal)
         return retVal
     
     def _createControlBox(self):
