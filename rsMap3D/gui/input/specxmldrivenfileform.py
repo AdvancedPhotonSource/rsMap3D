@@ -37,6 +37,7 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView):
         self.roiymax = 480
         self.currentDetector = ""
         
+        self.projectionDirection = None
         self.fileDialogTitle = SELECT_SPEC_FILE_TITLE
         self.fileDialogFilter = SPEC_FILE_FILTER
 
