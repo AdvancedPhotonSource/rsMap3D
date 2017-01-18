@@ -5,7 +5,7 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL
-from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOAD_STR
+from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOAD_STR, OK_TO_LOAD
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
     UPDATE_PROGRESS_SIGNAL
 
@@ -56,6 +56,9 @@ class AbstractFileView(qtGui.QDialog):
         self.connect(self, \
                      qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
                      self.setProgress)
+        self.connect(self,\
+                     qtCore.SIGNAL(OK_TO_LOAD), \
+                     self.processOkToLoad)
 
         controlBox.setLayout(self.controlLayout)
         return controlBox
@@ -77,6 +80,12 @@ class AbstractFileView(qtGui.QDialog):
         '''
         self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
 
+    def processOkToLoad(self, okToLoad):
+        if okToLoad:
+            self.loadButton.setEnabled(True)
+        else:
+            self.loadButton.setDisabled(True)
+            
     def setProgress(self, value, maxValue):
         '''
         Set the value to be displayed in the progress bar.
