@@ -293,7 +293,7 @@ class InstForXrayutilitiesReader():
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
                 angle.attrib[SPEC_MOTOR_NAME]
-        print angles
+        #print angles
         for i in  angles.keys():
             angleList.append(angles[i])
         return angleList
@@ -304,11 +304,14 @@ class InstForXrayutilitiesReader():
         if function == None:
             raise InstConfigException("No Mapping function defined in " + \
                              "instrument config file")
-        alwaysFix = function.attrib[ALWAYS_FIX]
-        if alwaysFix == None:
-            return False
-        else:
-            return bool(alwaysFix)
+        alwaysFix = None
+        try:
+            alwaysFix = function.attrib[ALWAYS_FIX]
+            if alwaysFix == None:
+                return False
+        except KeyError:
+            alwaysFix = False
+        return bool(alwaysFix)
         
     def getSampleCircleDirections(self):
         '''
