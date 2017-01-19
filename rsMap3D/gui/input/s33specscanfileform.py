@@ -10,7 +10,7 @@ import PyQt4.QtCore as qtCore
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
     BAD_PIXEL_FILE_FILTER, SELECT_BAD_PIXEL_TITLE, SELECT_FLAT_FIELD_TITLE,\
-    TIFF_FILE_FILTER
+    TIFF_FILE_FILTER, OK_TO_LOAD
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
@@ -127,6 +127,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         else:
             retVal = False
             self.loadButton.setDisabled(not retVal)
+        self.emit(qtCore.SIGNAL(OK_TO_LOAD), retVal)
         return retVal
     
     def _createControlBox(self):
