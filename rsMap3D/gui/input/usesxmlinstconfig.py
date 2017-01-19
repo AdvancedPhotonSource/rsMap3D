@@ -1,0 +1,109 @@
+'''
+ Copyright (c) 2017, UChicago Argonne, LLC
+ See LICENSE file.
+'''
+
+import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
+from rsMap3D.gui.input.abstractfileview import AbstractFileView
+from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR,\
+    SELECT_INSTRUMENT_CONFIG_TITLE, INSTRUMENT_CONFIG_FILE_FILTER, BROWSE_STR,\
+    WARNING_STR
+from rsMap3D.gui.qtsignalstrings import EDIT_FINISHED_SIGNAL, CLICKED_SIGNAL
+import os
+from rsMap3D.exception.rsmap3dexception import InstConfigException
+from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
+
+class UsesXMLInstConfig(AbstractFileView):
+    def __init__(self, parent=None):
+        '''
+        constructor
+        '''
+        super(UsesXMLInstConfig, self).__init__(parent)
+        
+    def _browseForInstFile(self):
+        '''
+        Launch file selection dialog for instrument file.
+        '''
+        if self.instConfigTxt.text() == EMPTY_STR:
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
+                                        SELECT_INSTRUMENT_CONFIG_TITLE, 
+                                        filter=INSTRUMENT_CONFIG_FILE_FILTER)
+        else:
+            fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
+            fileName = qtGui.QFileDialog.getOpenFileName(None, 
+                                        SELECT_INSTRUMENT_CONFIG_TITLE, 
+                                        filter=INSTRUMENT_CONFIG_FILE_FILTER, \
+                                        directory = fileDirectory)
+        if fileName != EMPTY_STR:
+            self.instConfigTxt.setText(fileName)
+            self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+
+    def _createInstConfig(self, layout, row):
+        print ("Create inst Config")
+        
+        label = qtGui.QLabel("Instrument Config File:");
+        self.instConfigTxt = qtGui.QLineEdit()
+        self.instConfigFileButton = qtGui.QPushButton(BROWSE_STR)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(self.instConfigTxt, row, 1)
+        layout.addWidget(self.instConfigFileButton, row, 2)
+        self.connect(self.instConfigFileButton, \
+                     qtCore.SIGNAL(CLICKED_SIGNAL), \
+                     self._browseForInstFile)
+        self.connect(self.instConfigTxt, \
+                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
+                     self._instConfigChanged)
+
+    def getInstConfigName(self):
+        '''
+        Return the Instrument config file name
+        '''
+        return self.instConfigTxt.text()
+
+    def _instConfigChanged(self):
+        '''
+        When the inst config file name changes check to make sure we have a 
+        valid file (if not empty) and the check to see if it is OK to enable
+        the Load button.  Also, grab the projection direction from the file.
+        '''
+        if self.instFileExists() or \
+           self.instConfigTxt.text() == EMPTY_STR:
+            self.checkOkToLoad()
+            try:
+                # if you can get projection direction inst config is likely 
+                # a well formed instConfigFile
+                self.updateProjectionDirection()
+            except InstConfigException :
+                message = qtGui.QMessageBox()
+                message.warning(self, \
+                                WARNING_STR, \
+                                 "Trouble getting the projection direction " + \
+                                 "from the instrument config file.")
+        else:
+            message = qtGui.QMessageBox()
+            message.warning(self, \
+                            WARNING_STR, \
+                             "The filename entered for the instrument " + \
+                             "configuration is invalid")
+        
+    def instFileExists(self):
+        return os.path.isfile(self.instConfigTxt.text())
+    
+    def isInstFileOK(self):
+        instFileExists = self.instFileExists()
+        try:
+            self.updateProjectionDirection()
+        except InstConfigException:
+            # If this fails the file is not likely a well formed inst config
+            return False
+        return instFileExists()
+    
+    def updateProjectionDirection(self):
+        '''
+        update the stored value for the projection direction
+        '''
+        instConfig = \
+            InstForXrayutilitiesReader(self.instConfigTxt.text())
+        self.projectionDirection = instConfig.getProjectionDirection()
+        
