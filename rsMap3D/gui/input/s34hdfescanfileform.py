@@ -7,7 +7,7 @@ import PyQt4.QtCore as qtCore
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR,\
      SELECT_DETECTOR_CONFIG_TITLE, DETECTOR_CONFIG_FILE_FILTER, WARNING_STR,\
-    SELECT_HDF_FILE_TITLE, HDF_FILE_FILTER
+    SELECT_HDF_FILE_TITLE, HDF_FILE_FILTER, OK_TO_LOAD
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
     CURRENT_INDEX_CHANGED_SIGNAL
 import os.path
@@ -73,6 +73,8 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         else:
             retVal = False
             self.loadButton.setDisabled(not retVal)
+        self.emit(qtCore.SIGNAL(OK_TO_LOAD), retVal)
+
         return retVal
     
     def _createDataBox(self):
@@ -80,6 +82,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         Create widgets for collecting data
         '''
         super(S34HDFEScanFileForm, self)._createDataBox()
+        print("create S34 dataBox")
         dataBox = super(S34HDFEScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
