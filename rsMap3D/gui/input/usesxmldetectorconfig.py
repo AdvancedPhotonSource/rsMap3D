@@ -99,15 +99,16 @@ class UsesXMLDetectorConfig(AbstractFileView):
         if self.detFileExists() or \
            self.detConfigTxt.text() == "":
             self.checkOkToLoad()
-            try:
-                self.updateDetectorList()
-                self.updateROIandNumAvg()
-            except DetectorConfigException:
-                message = qtGui.QMessageBox()
-                message.warning(self, \
-                                 WARNING_STR,\
-                                 "Trouble getting ROI or Num average " + \
-                                 "from the detector config file")
+            if self.detConfigTxt.text() != "":
+                try:
+                    self.updateDetectorList()
+                    self.updateROIandNumAvg()
+                except DetectorConfigException:
+                    message = qtGui.QMessageBox()
+                    message.warning(self, \
+                                     WARNING_STR,\
+                                     "Trouble getting ROI or Num average " + \
+                                     "from the detector config file")
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
