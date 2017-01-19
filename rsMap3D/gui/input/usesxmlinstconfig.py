@@ -4,13 +4,12 @@
 '''
 
 import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import os
+
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR,\
     SELECT_INSTRUMENT_CONFIG_TITLE, INSTRUMENT_CONFIG_FILE_FILTER, BROWSE_STR,\
     WARNING_STR
-from rsMap3D.gui.qtsignalstrings import EDIT_FINISHED_SIGNAL, CLICKED_SIGNAL
-import os
 from rsMap3D.exception.rsmap3dexception import InstConfigException
 from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
 
@@ -20,6 +19,7 @@ class UsesXMLInstConfig(AbstractFileView):
         constructor
         '''
         super(UsesXMLInstConfig, self).__init__(parent)
+        self.projectionDirection = None
         
     def _browseForInstFile(self):
         '''
@@ -37,10 +37,10 @@ class UsesXMLInstConfig(AbstractFileView):
                                         directory = fileDirectory)
         if fileName != EMPTY_STR:
             self.instConfigTxt.setText(fileName)
-            self.instConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            # use new style to emit edit finished signal
+            self.instConfigTxt.editingFinished.emit()
 
     def _createInstConfig(self, layout, row):
-        print ("Create inst Config")
         
         label = qtGui.QLabel("Instrument Config File:");
         self.instConfigTxt = qtGui.QLineEdit()
@@ -48,12 +48,9 @@ class UsesXMLInstConfig(AbstractFileView):
         layout.addWidget(label, row, 0)
         layout.addWidget(self.instConfigTxt, row, 1)
         layout.addWidget(self.instConfigFileButton, row, 2)
-        self.connect(self.instConfigFileButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseForInstFile)
-        self.connect(self.instConfigTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._instConfigChanged)
+        # switched to using new style signals
+        self.instConfigFileButton.clicked.connect(self._browseForInstFile)
+        self.instConfigTxt.editingFinished.connect(self._instConfigChanged)
 
     def getInstConfigName(self):
         '''
@@ -70,16 +67,17 @@ class UsesXMLInstConfig(AbstractFileView):
         if self.instFileExists() or \
            self.instConfigTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
-            try:
-                # if you can get projection direction inst config is likely 
-                # a well formed instConfigFile
-                self.updateProjectionDirection()
-            except InstConfigException :
-                message = qtGui.QMessageBox()
-                message.warning(self, \
-                                WARNING_STR, \
-                                 "Trouble getting the projection direction " + \
-                                 "from the instrument config file.")
+            if self.instConfigTxt.text() != EMPTY_STR:
+                try:
+                    # if you can get projection direction inst config is likely 
+                    # a well formed instConfigFile
+                    self.updateProjectionDirection()
+                except InstConfigException :
+                    message = qtGui.QMessageBox()
+                    message.warning(self, \
+                                    WARNING_STR, \
+                                     "Trouble getting the projection direction " + \
+                                     "from the instrument config file.")
         else:
             message = qtGui.QMessageBox()
             message.warning(self, \
@@ -88,6 +86,7 @@ class UsesXMLInstConfig(AbstractFileView):
                              "configuration is invalid")
         
     def instFileExists(self):
+        
         return os.path.isfile(self.instConfigTxt.text())
     
     def isInstFileOK(self):
