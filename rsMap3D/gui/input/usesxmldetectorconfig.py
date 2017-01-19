@@ -12,11 +12,16 @@ from rsMap3D.gui.rsm3dcommonstrings import COMMA_STR, EMPTY_STR,\
     QLINEEDIT_COLOR_STYLE, WARNING_STR, BROWSE_STR, DETECTOR_CONFIG_FILE_FILTER,\
     SELECT_DETECTOR_CONFIG_TITLE, BLACK, RED
 import os
-from rsMap3D.gui.qtsignalstrings import TEXT_CHANGED_SIGNAL,\
-    CURRENT_INDEX_CHANGED_SIGNAL, EDIT_FINISHED_SIGNAL, CLICKED_SIGNAL
-from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
 
 class UsesXMLDetectorConfig(AbstractFileView):
+    '''
+    class to provide functionality provided by the XML detector configuration 
+    file.  Designed for use along with other view classes.  Use multiple inheritance
+    such as "class myView(specXmlDrivenFileForm, usesXMLDetectorConfig):
+    then add the gui blocks in _createDataBox to add fike selection stuff. 
+    This provides gui that allows file selection, then detector selection since
+    multiple detectors can be defined in a file and then ROI selection.
+    '''
     DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
 
@@ -48,10 +53,13 @@ class UsesXMLDetectorConfig(AbstractFileView):
                                          directory = fileDirectory)
         if fileName != EMPTY_STR:
             self.detConfigTxt.setText(fileName)
-            self.detConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.detConfigTxt.editingFinished.emit()
 
     def _createDetConfig(self, layout, row):
-        print ("Create inst Config")
+        '''
+        Add in gui elements for selecting a detector config file and then
+        selecting from the list of detectors provided.
+        '''
         label = qtGui.QLabel("Detector Config File:");
         self.detConfigTxt = qtGui.QLineEdit()
         self.detConfigFileButton = qtGui.QPushButton(BROWSE_STR)
@@ -65,17 +73,16 @@ class UsesXMLDetectorConfig(AbstractFileView):
         layout.addWidget(label, row, 0)
         layout.addWidget(self.detSelect, row, 1)
         
-        self.connect(self.detConfigFileButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseForDetFile)
-        self.connect(self.detConfigTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._detConfigChanged)
-        self.connect(self.detSelect,
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
-                     self._currentDetectorChanged)
+        # use new style to emit edit finished signal
+        self.detConfigFileButton.clicked.connect(self._browseForDetFile)
+        self.detConfigTxt.editingFinished.connect(self._detConfigChanged)
+        self.detSelect.currentIndexChanged[str].connect(self._currentDetectorChanged)
+        
 
     def _createDetectorROIInput(self, layout, row):
+        '''
+        Adds gui elements for entering the ROI
+        '''
         label = qtGui.QLabel("Detector ROI:");
         self.detROITxt = qtGui.QLineEdit()
         self.updateROITxt()
@@ -84,9 +91,9 @@ class UsesXMLDetectorConfig(AbstractFileView):
         
         layout.addWidget(label, row, 0)
         layout.addWidget(self.detROITxt, row, 1)
-        self.connect(self.detROITxt,
-                     qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
-                     self._detROITxtChanged)
+        
+        # use new style to emit edit finished signal
+        self.detROITxt.textChanged.connect(self._detROITxtChanged)
     
     def _currentDetectorChanged(self, currentDetector):
         print currentDetector
@@ -197,6 +204,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
             self.detSelect.addItem(detConfig.getDetectorID(detector))
             
         self.detSelect.itemText(0)
+        self.detSelect.currentIndexChanged[str].emit(self.detSelect.itemText(0))
         
     def updateROIandNumAvg(self):
         '''
