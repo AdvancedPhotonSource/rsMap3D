@@ -25,6 +25,11 @@ class UsesXMLDetectorConfig(AbstractFileView):
     DET_ROI_REGEXP_1 =  "^(\d*,*)+$"
     DET_ROI_REGEXP_2 =  "^(\d)+,(\d)+,(\d)+,(\d)+$"
 
+    #UPDATE_PROGRESS_SIGNAL = "updateProgress"
+    # Regular expressions for string validation
+    PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
+    PIX_AVG_REGEXP_2 =  "^((\d)+,*){2}$"
+
     def __init__(self, parent=None):
         '''
         constructor
@@ -79,7 +84,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
         self.detSelect.currentIndexChanged[str].connect(self._currentDetectorChanged)
         
 
-    def _createDetectorROIInput(self, layout, row):
+    def _createDetectorROIInput(self, layout, row, silent=False):
         '''
         Adds gui elements for entering the ROI
         '''
@@ -89,12 +94,22 @@ class UsesXMLDetectorConfig(AbstractFileView):
         rxROI = qtCore.QRegExp(self.DET_ROI_REGEXP_1)
         self.detROITxt.setValidator(qtGui.QRegExpValidator(rxROI,self.detROITxt))
         
-        layout.addWidget(label, row, 0)
-        layout.addWidget(self.detROITxt, row, 1)
+        if (silent==False):
+            layout.addWidget(label, row, 0)
+            layout.addWidget(self.detROITxt, row, 1)
         
         # use new style to emit edit finished signal
         self.detROITxt.textChanged.connect(self._detROITxtChanged)
     
+    def _createNumberOfPixelsToAverage(self, layout, row, silent=False):
+        label = qtGui.QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = qtGui.QLineEdit("1,1")
+        rxAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_1)
+        self.pixAvgTxt.setValidator(qtGui.QRegExpValidator(rxAvg,self.pixAvgTxt))
+        if (silent == False):
+            layout.addWidget(label, row, 0)
+            layout.addWidget(self.pixAvgTxt, row, 1)
+
     def _currentDetectorChanged(self, currentDetector):
         print currentDetector
         self.currentDetector = currentDetector
@@ -109,8 +124,9 @@ class UsesXMLDetectorConfig(AbstractFileView):
             if self.detConfigTxt.text() != "":
                 try:
                     self.updateDetectorList()
-                    self.updateROIandNumAvg()
-                except DetectorConfigException:
+                    #self.updateROIandNumAvg()
+                except DetectorConfigException as ex:
+                    print ex
                     message = qtGui.QMessageBox()
                     message.warning(self, \
                                      WARNING_STR,\
