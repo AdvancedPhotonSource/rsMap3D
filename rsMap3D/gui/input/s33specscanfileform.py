@@ -6,7 +6,6 @@ import os
 
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
-from PyQt4.QtCore import pyqtSlot
 
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
@@ -54,7 +53,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self.noFieldRadio.setChecked(True)
         self._fieldCorrectionTypeChanged(*(self.noFieldRadio,))
         
-    @pyqtSlot()
+    @qtCore.pyqtSlot()
     def _badPixelFileChanged(self):
         '''
         Do some verification when the bad pixel file changes
@@ -70,7 +69,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                              "file is invalid")
             
                 
-    @pyqtSlot()
+    @qtCore.pyqtSlot()
     def _browseBadPixelFileName(self):
         '''
         Launch file browser for bad pixel file
@@ -89,7 +88,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
             self.badPixelFileTxt.setText(fileName)
             self.badPixelFileTxt.editingFinished.emit()
 
-    @pyqtSlot()
+    @qtCore.pyqtSlot()
     def _browseFlatFieldFileName(self):
         '''
         Launch file browser for Flat field file
@@ -214,7 +213,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         dataBox.setLayout(dataLayout)
         return dataBox
     
-    @pyqtSlot(QAbstractButton)
+    @qtCore.pyqtSlot(QAbstractButton)
     def _fieldCorrectionTypeChanged(self, *fieldCorrType):
         '''
         React when the field type radio buttons change.  Disable/Enable other 
@@ -237,7 +236,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
             self.flatFieldFileBrowseButton.setDisabled(False)
         self.checkOkToLoad()
             
-    @pyqtSlot()           
+    @qtCore.pyqtSlot()           
     def _flatFieldFileChanged(self):
         '''
         Do some verification when the flat field file changes

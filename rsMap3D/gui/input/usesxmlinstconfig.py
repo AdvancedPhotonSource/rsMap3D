@@ -4,6 +4,7 @@
 '''
 
 import PyQt4.QtGui as qtGui
+import PyQt4.QtCore as qtCore
 import os
 
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
@@ -21,6 +22,7 @@ class UsesXMLInstConfig(AbstractFileView):
         super(UsesXMLInstConfig, self).__init__(parent)
         self.projectionDirection = None
         
+    @qtCore.pyqtSlot()
     def _browseForInstFile(self):
         '''
         Launch file selection dialog for instrument file.
@@ -58,6 +60,7 @@ class UsesXMLInstConfig(AbstractFileView):
         '''
         return self.instConfigTxt.text()
 
+    @qtCore.pyqtSlot()
     def _instConfigChanged(self):
         '''
         When the inst config file name changes check to make sure we have a 

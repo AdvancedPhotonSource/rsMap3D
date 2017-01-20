@@ -3,7 +3,7 @@
  See LICENSE file.
 '''
 import PyQt4.QtGui as qtGui
-from PyQt4.QtCore import pyqtSlot
+import PyQt4.QtCore as qtCore
 
 import os.path
 import abc
@@ -25,7 +25,7 @@ class AbstractImagePerFileView(AbstractFileView):
         self.fileDialogTitle = "Dummy File Dialog"
         self.fileDialogFilter = ""
         
-    @pyqtSlot()
+    @qtCore.pyqtSlot()
     def _browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
@@ -111,7 +111,7 @@ class AbstractImagePerFileView(AbstractFileView):
         '''
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
-    @pyqtSlot()
+    @qtCore.pyqtSlot()
     def _projectDirChanged(self):
         '''
         When the project name changes, check to see if it is valid file and 

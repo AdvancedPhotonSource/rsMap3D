@@ -2,8 +2,10 @@
  Copyright (c) 2017, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import os
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader import DetectorGeometryForXrayutilitiesReader
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
@@ -11,7 +13,6 @@ from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
 from rsMap3D.gui.rsm3dcommonstrings import COMMA_STR, EMPTY_STR,\
     QLINEEDIT_COLOR_STYLE, WARNING_STR, BROWSE_STR, DETECTOR_CONFIG_FILE_FILTER,\
     SELECT_DETECTOR_CONFIG_TITLE, BLACK, RED
-import os
 
 class UsesXMLDetectorConfig(AbstractFileView):
     '''
@@ -42,6 +43,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
         self.roiymax = 480
         self.currentDetector = ""
 
+    @qtCore.pyqtSlot()
     def _browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
@@ -110,11 +112,13 @@ class UsesXMLDetectorConfig(AbstractFileView):
             layout.addWidget(label, row, 0)
             layout.addWidget(self.pixAvgTxt, row, 1)
 
+    @qtCore.pyqtSlot(str)
     def _currentDetectorChanged(self, currentDetector):
         print currentDetector
         self.currentDetector = currentDetector
         self.updateROIandNumAvg()
         
+    @qtCore.pyqtSlot()
     def _detConfigChanged(self):
         '''
         '''
@@ -154,6 +158,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
                 return False
         return detFileExists
         
+    @qtCore.pyqtSlot(str)
     def _detROITxtChanged(self, text):
         '''
         Check to make sure the text for detector roi is valid and indicate 

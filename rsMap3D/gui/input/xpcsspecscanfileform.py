@@ -3,8 +3,11 @@
  See LICENSE file.
 '''
 import logging
+import os
+
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.output.processxpcsgridlocationform import ProcessXpcsGridLocationForm
 
@@ -16,9 +19,8 @@ except ImportError as ex:
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
-import os
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR,\
+    OK_TO_LOAD
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
@@ -57,8 +59,14 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
             
         if fileName != EMPTY_STR:
             self.xpcsDataFileTxt.setText(fileName)
-            self.xpcsDataFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.xpcsDataFileTxt.editingFinished.emit()
     
+    def checkOKToLoad(self):
+        superOk = super(XPCSSpecScanFileForm, self).checkOkToLoad()
+        xpcsFileOk = self.isXpcsFileOK()
+         
+        self.okToLoad.emit( superOk & xpcsFileOk)
+        
     def _createDataBox(self):
         dataBox = super(XPCSSpecScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
@@ -89,12 +97,8 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         dataLayout.addWidget(self.xpcsDataFileTxt, row, 1)
         dataLayout.addWidget(self.xpcsBrowseButton, row, 2)
         
-        self.connect(self.xpcsBrowseButton,
-                     qtCore.SIGNAL(CLICKED_SIGNAL),
-                     self._browseForXPCSFile)
-        self.connect(self.xpcsDataFileTxt,
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
-                     self._xpcsFileNameChanged)
+        self.xpcsBrowseButton.clicked.connect(self._browseForXPCSFile)
+        self.xpcsDataFileTxt.editingFinished.connect(self._xpcsFileNameChanged)
         
         dataBox.setLayout(dataLayout)
         return dataBox
@@ -137,9 +141,13 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         outputForms.append(ProcessVTIOutputForm)
         return outputForms
 
+    def isXpcsFileNameOK(self):
+        return os.path.isfile(self.xpcsDataFileTxt.text()) or \
+            (self.xpcsDataFileTxt.text() == EMPTY_STR)
+            
+    @qtCore.pyqtSlot()
     def _xpcsFileNameChanged(self):
-        if os.path.isfile(self.xpcsDataFileTxt.text()) or \
-            self.xpcsDataFileTxt.text() == EMPTY_STR:
+        if self.isXpcsFileNameOK():
             self.checkOkToLoad()
         else:
             message = qtGui.QMessageBox()

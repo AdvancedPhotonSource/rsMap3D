@@ -2,15 +2,14 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import os.path
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR,\
      SELECT_DETECTOR_CONFIG_TITLE, DETECTOR_CONFIG_FILE_FILTER, WARNING_STR,\
-    SELECT_HDF_FILE_TITLE, HDF_FILE_FILTER, OK_TO_LOAD
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
-    CURRENT_INDEX_CHANGED_SIGNAL
-import os.path
+    SELECT_HDF_FILE_TITLE, HDF_FILE_FILTER
 from rsMap3D.datasource.sector34nexusescansource import Sector34NexusEscanSource
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
@@ -21,6 +20,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
     classdocs
     '''
     FORM_TITLE = "Sector 34 HDF/XML Setup"
+    
     @staticmethod
     def createInstance(parent=None):
         return S34HDFEScanFileForm(parent)
@@ -41,6 +41,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         self.layout.addWidget(controlBox)
         self.setLayout(self.layout);
 
+    @qtCore.pyqtSlot()
     def _browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
@@ -57,7 +58,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
                                          directory = fileDirectory)
         if fileName != EMPTY_STR:
             self.detConfigTxt.setText(fileName)
-            self.detConfigTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.detConfigTxt.editingFinished.emit()
 
     def checkOkToLoad(self):
         '''
@@ -73,7 +74,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         else:
             retVal = False
             self.loadButton.setDisabled(not retVal)
-        self.emit(qtCore.SIGNAL(OK_TO_LOAD), retVal)
+        self.okToLoad.emit(retVal)
 
         return retVal
     
@@ -82,12 +83,11 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         Create widgets for collecting data
         '''
         super(S34HDFEScanFileForm, self)._createDataBox()
-        print("create S34 dataBox")
+        #print("create S34 dataBox")
         dataBox = super(S34HDFEScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
-        row = dataLayout.rowCount()
 
-        row += 1
+        row = dataLayout.rowCount() + 1
         label = qtGui.QLabel("Detector Config File:");
         self.detConfigTxt = qtGui.QLineEdit()
         self.detConfigFileButton = qtGui.QPushButton(BROWSE_STR)
@@ -95,7 +95,13 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         dataLayout.addWidget(self.detConfigTxt, row, 1)
         dataLayout.addWidget(self.detConfigFileButton, row, 2)
 
-        row += 1
+#         row = dataLayout.rowCount() + 1
+#         self._createDetectorROIInput(dataLayout, row, silent=True)
+# 
+#         row = dataLayout.rowCount() + 1
+#         self._createNumberOfPixelsToAverage(dataLayout, row, silent=True)
+
+        row = dataLayout.rowCount() + 1
         label = qtGui.QLabel("Output Type")
         self.outTypeChooser = qtGui.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
@@ -110,18 +116,14 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         dataBox.setLayout(dataLayout)
         
         # Add Signals between widgets
-        self.connect(self.detConfigFileButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseForDetFile)
-        self.connect(self.detConfigTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._detConfigChanged)
-        self.connect(self.outTypeChooser, \
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
-                     self._outputTypeChanged)
+        self.detConfigFileButton.clicked.connect(self._browseForDetFile)
+        self.detConfigTxt.editingFinished.connect(self._detConfigChanged)
+        self.outTypeChooser.currentIndexChanged[str].\
+            connect(self._outputTypeChanged)
         
         return dataBox
 
+    @qtCore.pyqtSlot()
     def _detConfigChanged(self):
         '''
         '''
@@ -144,7 +146,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
                              "configuration is invalid")
         
     def getDataSource(self):
-        print "S34 getDataSource"
+        #print "S34 getDataSource"
         if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.getOutputType() == self.POLE_MAP_STR:
@@ -180,6 +182,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         outputForms.append(ProcessVTIOutputForm)
         return outputForms
 
+    @qtCore.pyqtSlot(str)
     def _outputTypeChanged(self, typeStr):
         '''
         If the output is selected to be a simple grid map type then allow
