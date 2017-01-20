@@ -2,6 +2,7 @@
 Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
+from rsMap3D.gui.input import s1highenergydiffractionform
 USE_XPCS = False
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
@@ -20,6 +21,7 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 # Input forms Looking for a way to set these up.
 from rsMap3D.gui.input.s33specscanfileform import S33SpecScanFileForm
 from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
+#from rsMap3D.gui.input.s1highenergydiffractionform import S1HighEnergyDiffractionForm
 try:
     from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
     USE_XPCS = True
@@ -45,6 +47,7 @@ class FileInputController(qtGui.QDialog):
         self.fileForms = []
         self.fileForms.append(S33SpecScanFileForm)
         self.fileForms.append(S34HDFEScanFileForm)
+#        self.fileForms.append(S1HighEnergyDiffractionForm)
         if USE_XPCS:
             self.fileForms.append(XPCSSpecScanFileForm)
             
@@ -79,12 +82,8 @@ class FileInputController(qtGui.QDialog):
         self.connect(self.formSelection, \
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self._selectedTypeChanged)
-        self.connect(self.fileFormWidget, \
-                     qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
-                     self._spawnLoadThread)
-        self.connect(self.fileFormWidget, \
-                     qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
-                     self._cancelLoadThread)
+        self.fileFormWidget.loadFile.connect(self._spawnLoadThread)
+        self.fileFormWidget.cancelLoadFile.connect(self._cancelLoadThread)
         self.connect(self, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
                      self.fileFormWidget.setLoadOK)
@@ -96,12 +95,8 @@ class FileInputController(qtGui.QDialog):
         self.disconnect(self.formSelection, \
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self._selectedTypeChanged)
-        self.disconnect(self.fileFormWidget, \
-                     qtCore.SIGNAL(LOAD_FILE_SIGNAL), \
-                     self._spawnLoadThread)
-        self.disconnect(self.fileFormWidget, \
-                     qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL), \
-                     self._cancelLoadThread)
+        self.fileForm.loadFile.disconnect(self._spawnLoadThread)
+        self.fileForm.cancelLoadFile.disconnect(self._cancelLoadThread)
         self.disconnect(self, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
                      self.fileFormWidget.setLoadOK)
@@ -173,10 +168,6 @@ class FileInputController(qtGui.QDialog):
         for form in self.fileForms:
             if typeStr == form.FORM_TITLE:
                 self.fileFormWidget = form.createInstance()
-#         elif typeStr == S34HDFEScanFileForm.FORM_TITLE:
-#             self.fileFormWidget = S34HDFEScanFileForm.createInstance()
-#         elif typeStr == XPCSSpecScanFileForm.FORM_TITLE and USE_XPCS:
-#             self.fileFormWidget = XPCSSpecScanFileForm.createInstance()
 
         self.formLayout.addWidget(self.fileFormWidget)
         self._connectSignals()
@@ -194,6 +185,7 @@ class FileInputController(qtGui.QDialog):
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
+        print ("_spanLoadThread")
         self.fileFormWidget.setCancelOK()
         self.loadThread = LoadScanThread(self, parent=None)
         self.loadThread.start()

@@ -3,15 +3,15 @@
  See LICENSE file.
 '''
 import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
-from rsMap3D.gui.input.abstractfileview import AbstractFileView
-from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, EMPTY_STR
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
+from PyQt4.QtCore import pyqtSlot
+
 import os.path
 import abc
 
-class AbstractImagePerFileView(AbstractFileView):
+from rsMap3D.gui.input.abstractfileview import AbstractFileView
+from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, EMPTY_STR
 
+class AbstractImagePerFileView(AbstractFileView):
     '''
     classdocs
     '''
@@ -25,6 +25,7 @@ class AbstractImagePerFileView(AbstractFileView):
         self.fileDialogTitle = "Dummy File Dialog"
         self.fileDialogFilter = ""
         
+    @pyqtSlot()
     def _browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
@@ -42,7 +43,7 @@ class AbstractImagePerFileView(AbstractFileView):
             
         if fileName != EMPTY_STR:
             self.projNameTxt.setText(fileName)
-            self.projNameTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.projNameTxt.editingFinished.emit()
 
     def checkOkToLoad(self):
         '''
@@ -77,12 +78,8 @@ class AbstractImagePerFileView(AbstractFileView):
         dataLayout.addWidget(self.projectDirButton, row, 2)
 
         # Add Signals between widgets
-        self.connect(self.projectDirButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseForProjectDir)
-        self.connect(self.projNameTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._projectDirChanged)
+        self.projectDirButton.clicked.connect(self._browseForProjectDir)
+        self.projNameTxt.editingFinished.connect(self._projectDirChanged)
 
         return dataBox
     
@@ -114,6 +111,7 @@ class AbstractImagePerFileView(AbstractFileView):
         '''
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
+    @pyqtSlot()
     def _projectDirChanged(self):
         '''
         When the project name changes, check to see if it is valid file and 

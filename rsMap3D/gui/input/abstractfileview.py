@@ -3,8 +3,8 @@
  See LICENSE file.
 '''
 import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL
+from PyQt4.QtCore import pyqtSignal, pyqtSlot
+
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOAD_STR, OK_TO_LOAD
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
     UPDATE_PROGRESS_SIGNAL
@@ -16,6 +16,13 @@ class AbstractFileView(qtGui.QDialog):
     POLE_MAP_STR = "Stereographic Projection"
     SIMPLE_GRID_MAP_STR = "qx,qy,qz Map"
 
+    #Set up Signals that are created in this class
+    cancelLoadFile = pyqtSignal(name=CANCEL_LOAD_FILE_SIGNAL)
+    loadFile = pyqtSignal(name=LOAD_FILE_SIGNAL)
+    okToLoad = pyqtSignal(bool, name=OK_TO_LOAD)
+    updateProgressSignal = pyqtSignal(float, float, \
+                                      name=UPDATE_PROGRESS_SIGNAL)
+    
 
     def __init__(self, parent=None):
         '''
@@ -24,9 +31,10 @@ class AbstractFileView(qtGui.QDialog):
         super(AbstractFileView, self).__init__(parent)
         self.layout = qtGui.QVBoxLayout()
 
+    @pyqtSlot()
     def _cancelLoadFile(self):
         ''' Send signal to cancel a file load'''
-        self.emit(qtCore.SIGNAL(CANCEL_LOAD_FILE_SIGNAL))
+        self.cancelLoadFile.emit()
         
     def _createControlBox(self):
         '''
@@ -47,18 +55,10 @@ class AbstractFileView(qtGui.QDialog):
         self.cancelButton.setDisabled(True)
         self.controlLayout.addWidget(self.cancelButton, row, 2)
 
-        self.connect(self.loadButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._loadFile)
-        self.connect(self.cancelButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._cancelLoadFile)
-        self.connect(self, \
-                     qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
-                     self.setProgress)
-        self.connect(self,\
-                     qtCore.SIGNAL(OK_TO_LOAD), \
-                     self.processOkToLoad)
+        self.loadButton.clicked.connect(self._loadFile)
+        self.cancelButton.clicked.connect(self._cancelLoadFile)
+        self.updateProgressSignal.connect(self.setProgress)
+        self.okToLoad.connect(self.processOkToLoad)
 
         controlBox.setLayout(self.controlLayout)
         return controlBox
@@ -72,20 +72,23 @@ class AbstractFileView(qtGui.QDialog):
 
         dataBox.setLayout(dataLayout)
         return dataBox
-        
     
+    @pyqtSlot()
     def _loadFile(self):
         '''
         Emit a signal to start loading data
         '''
-        self.emit(qtCore.SIGNAL(LOAD_FILE_SIGNAL))
+        print "_loadFile emitting loadFile signal"
+        self.loadFile.emit()
 
+    @pyqtSlot(bool)
     def processOkToLoad(self, okToLoad):
         if okToLoad:
             self.loadButton.setEnabled(True)
         else:
             self.loadButton.setDisabled(True)
             
+    @pyqtSlot(float, float)
     def setProgress(self, value, maxValue):
         '''
         Set the value to be displayed in the progress bar.
@@ -105,7 +108,7 @@ class AbstractFileView(qtGui.QDialog):
         '''
         Emit a signal to update the progress bar
         '''
-        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value, maxValue)
+        self.updateProgressSignal.emit(value, maxValue)
         
     def setCancelOK(self):
         '''
