@@ -78,7 +78,6 @@ class AbstractFileView(qtGui.QDialog):
         '''
         Emit a signal to start loading data
         '''
-        print "_loadFile emitting loadFile signal"
         self.loadFile.emit()
 
     @pyqtSlot(bool)
