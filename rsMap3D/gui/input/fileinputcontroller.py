@@ -2,7 +2,7 @@
 Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from rsMap3D.gui.input import s1highenergydiffractionform
+#from rsMap3D.gui.input import s1highenergydiffractionform
 USE_XPCS = False
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
