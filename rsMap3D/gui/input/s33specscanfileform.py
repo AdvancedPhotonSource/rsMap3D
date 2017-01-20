@@ -6,19 +6,19 @@ import os
 
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+from PyQt4.QtCore import pyqtSlot
 
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
     BAD_PIXEL_FILE_FILTER, SELECT_BAD_PIXEL_TITLE, SELECT_FLAT_FIELD_TITLE,\
-    TIFF_FILE_FILTER, OK_TO_LOAD
+    TIFF_FILE_FILTER
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
-from rsMap3D.gui.qtsignalstrings import BUTTON_CLICKED_SIGNAL, CLICKED_SIGNAL, \
-    EDIT_FINISHED_SIGNAL, TEXT_CHANGED_SIGNAL
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.output.processimagestackform import ProcessImageStackForm
+from PyQt4.QtGui import QAbstractButton
 
 class S33SpecScanFileForm(SpecXMLDrivenFileForm):
     '''
@@ -54,6 +54,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self.noFieldRadio.setChecked(True)
         self._fieldCorrectionTypeChanged(*(self.noFieldRadio,))
         
+    @pyqtSlot()
     def _badPixelFileChanged(self):
         '''
         Do some verification when the bad pixel file changes
@@ -69,6 +70,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                              "file is invalid")
             
                 
+    @pyqtSlot()
     def _browseBadPixelFileName(self):
         '''
         Launch file browser for bad pixel file
@@ -85,9 +87,9 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                                                directory = fileDirectory)
         if fileName != EMPTY_STR:
             self.badPixelFileTxt.setText(fileName)
-            self.badPixelFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.badPixelFileTxt.editingFinished.emit()
 
-    
+    @pyqtSlot()
     def _browseFlatFieldFileName(self):
         '''
         Launch file browser for Flat field file
@@ -104,7 +106,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                                                directory = fileDirectory)
         if fileName != EMPTY_STR:
             self.flatFieldFileTxt.setText(fileName)
-            self.flatFieldFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+            self.flatFieldFileTxt.editingFinished.emit()
     
     def checkOkToLoad(self):
         '''
@@ -112,6 +114,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         and the detector config.  If we do enable load button.  If not disable
         the load button
         '''
+        retVal = False
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
             os.path.isfile(self.detConfigTxt.text()) and \
@@ -127,7 +130,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         else:
             retVal = False
             self.loadButton.setDisabled(not retVal)
-        self.emit(qtCore.SIGNAL(OK_TO_LOAD), retVal)
+        self.okToLoad.emit(retVal)
         return retVal
     
     def _createControlBox(self):
@@ -194,28 +197,24 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self._createHKLOutput(dataLayout, row)
 
         # Add Signals between widgets
-        self.connect(self.fieldCorrectionGroup,\
-                     qtCore.SIGNAL(BUTTON_CLICKED_SIGNAL), \
-                     self._fieldCorrectionTypeChanged)
-        self.connect(self.badPixelFileTxt,
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
-                     self._badPixelFileChanged)
-        self.connect(self.flatFieldFileTxt,
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL),
-                     self._flatFieldFileChanged)
-        self.connect(self.badPixelFileBrowseButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseBadPixelFileName)
-        self.connect(self.flatFieldFileBrowseButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._browseFlatFieldFileName)
-        self.connect(self.pixAvgTxt,
-                     qtCore.SIGNAL(TEXT_CHANGED_SIGNAL),
-                     self._pixAvgTxtChanged)
+        self.fieldCorrectionGroup.buttonClicked\
+            .connect(self._fieldCorrectionTypeChanged)
+
+        self.badPixelFileTxt.editingFinished.connect(self._badPixelFileChanged)
+        self.badPixelFileBrowseButton.clicked\
+            .connect(self._browseBadPixelFileName)
+
+        self.flatFieldFileTxt.editingFinished\
+            .connect(self._flatFieldFileChanged)
+        self.flatFieldFileBrowseButton.clicked.\
+            connect(self._browseFlatFieldFileName)
+        
+        self.pixAvgTxt.textChanged.connect(self._pixAvgTxtChanged)
         
         dataBox.setLayout(dataLayout)
         return dataBox
     
+    @pyqtSlot(QAbstractButton)
     def _fieldCorrectionTypeChanged(self, *fieldCorrType):
         '''
         React when the field type radio buttons change.  Disable/Enable other 
@@ -238,7 +237,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
             self.flatFieldFileBrowseButton.setDisabled(False)
         self.checkOkToLoad()
             
-            
+    @pyqtSlot()           
     def _flatFieldFileChanged(self):
         '''
         Do some verification when the flat field file changes
