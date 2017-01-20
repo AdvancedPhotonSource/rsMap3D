@@ -95,8 +95,8 @@ class FileInputController(qtGui.QDialog):
         self.disconnect(self.formSelection, \
                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
                      self._selectedTypeChanged)
-        self.fileForm.loadFile.disconnect(self._spawnLoadThread)
-        self.fileForm.cancelLoadFile.disconnect(self._cancelLoadThread)
+        self.fileFormWidget.loadFile.disconnect(self._spawnLoadThread)
+        self.fileFormWidget.cancelLoadFile.disconnect(self._cancelLoadThread)
         self.disconnect(self, \
                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
                      self.fileFormWidget.setLoadOK)
@@ -185,7 +185,6 @@ class FileInputController(qtGui.QDialog):
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
-        print ("_spanLoadThread")
         self.fileFormWidget.setCancelOK()
         self.loadThread = LoadScanThread(self, parent=None)
         self.loadThread.start()
@@ -200,5 +199,4 @@ class LoadScanThread(qtCore.QThread):
         self.controller = controller
         
     def run(self):
-        print("LoadScanThread Running")
         self.controller.loadScanFile()
