@@ -65,48 +65,35 @@ class MainDialog(qtGui.QMainWindow):
         self.setCentralWidget(self.tabs)
 
         #Connect signals
-        self.connect(self.scanForm, \
-                     qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
-                     self._setupRanges)
-        self.connect(self.dataRange, \
-                     qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), \
-                     self._setScanRanges)
-        self.connect(self.tabs, \
-                     qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
-                     self._tabChanged)
-        self.connect(self, \
-                     qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-                     self._showFileError)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-                     self._showFileError)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                     self._showProcessError)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
-                     self._blockTabsForLoad)
-        self.connect(self, \
-                     qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
-                     self._blockTabsForLoad)
+#         self.connect(self, \
+#                      qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
+#                      self._blockTabsForLoad)
         self.connect(self, \
                      qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL), \
                      self._unblockTabsForLoad)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self._blockTabsForProcess)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self._unblockTabsForProcess)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
-                     self.fileForm.setLoadOK)
-        self.connect(self, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
-                     self.fileForm.setCancelOK)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL), \
-                     self._loadDataSourceToScanForm)
+#         self.connect(self, \
+#                      qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
+#                      self._showFileError)
+        self.connect(self.tabs, \
+                     qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
+                     self._tabChanged)
+        self.fileForm.fileError[str].connect(self._showFileError)
+        self.fileForm.blockTabsForLoad.connect(self._blockTabsForLoad)
+#         self.connect(self.fileForm, \
+#                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
+#                      self.fileForm.setLoadOK)
+#         self.connect(self, \
+#                      qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
+#                      self.fileForm.setCancelOK)
+        self.fileForm.loadDataSourceToScanForm.\
+            connect(self._loadDataSourceToScanForm)
+        self.fileForm.inputFormChanged.connect(self.updateOutputForms)
+        self.connect(self.dataRange, \
+                     qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), \
+                     self._setScanRanges)
+        self.connect(self.scanForm, \
+                     qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
+                     self._setupRanges)
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL),
                      self.dataExtentView.showRangeBounds)
@@ -116,9 +103,15 @@ class MainDialog(qtGui.QMainWindow):
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL),
                      self.dataExtentView.renderBounds)
-        self.connect(self.fileForm, \
-                     qtCore.SIGNAL(INPUT_FORM_CHANGED),
-                     self.updateOutputForms)
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
+                     self._showProcessError)
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL), \
+                     self._blockTabsForProcess)
+        self.connect(self.processScans, \
+                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL), \
+                     self._unblockTabsForProcess)
         
     def _blockTabsForLoad(self):
         '''
@@ -147,12 +140,14 @@ class MainDialog(qtGui.QMainWindow):
     def getDataSource(self):
         return self.fileForm.dataSource
     
+    @qtCore.pyqtSlot()
     def getOutputForms(self):
         return self.fileForm.getOutputForms()    
 
     def getTransform(self):
         return self.fileForm.transform
         
+    @qtCore.pyqtSlot()
     def _loadDataSourceToScanForm(self):
         '''
         When scan is done loading, load the data to the scan form.
@@ -185,6 +180,7 @@ class MainDialog(qtGui.QMainWindow):
         self.fileForm.dataSource.setRangeBounds(ranges)
         self.scanForm.renderOverallQs()
 
+    @qtCore.pyqtSlot(str)
     def _showFileError(self, error):
         '''
         Show any errors from file loading in a message dialog.  When done, 

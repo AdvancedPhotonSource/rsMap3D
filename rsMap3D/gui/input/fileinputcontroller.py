@@ -35,8 +35,15 @@ class FileInputController(qtGui.QDialog):
     '''
     classdocs
     '''
-
-
+    #define qtSignals to be used here
+    setScanLoadOK = qtCore.pyqtSignal()
+    setScanLoadCancelOK = qtCore.pyqtSignal()
+    fileErrorSignal = qtCore.pyqtSignal(str, name=FILE_ERROR_SIGNAL)
+    blockTabsForLoad = qtCore.pyqtSignal(name=BLOCK_TABS_FOR_LOAD_SIGNAL)
+    loadDataSourceToScanForm = qtCore.pyqtSignal(
+                name = LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL)
+    inputFormChanged = qtCore.pyqtSignal(name = INPUT_FORM_CHANGED)
+    
     def __init__(self, parent=None):
         '''
         Constructor
@@ -79,30 +86,20 @@ class FileInputController(qtGui.QDialog):
         self.fileFormWidget.dataSource.signalCancelLoadSource()
         
     def _connectSignals(self):
-        self.connect(self.formSelection, \
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
-                     self._selectedTypeChanged)
+        self.formSelection.currentIndexChanged[str].\
+            connect(self._selectedTypeChanged)
         self.fileFormWidget.loadFile.connect(self._spawnLoadThread)
         self.fileFormWidget.cancelLoadFile.connect(self._cancelLoadThread)
-        self.connect(self, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
-                     self.fileFormWidget.setLoadOK)
-        self.connect(self, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
-                     self.fileFormWidget.setCancelOK)
+        self.setScanLoadOK.connect(self.fileFormWidget.setLoadOK)
+        self.setScanLoadCancelOK.connect(self.fileFormWidget.setCancelOK)
         
     def _disconnectSignals(self):
-        self.disconnect(self.formSelection, \
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
-                     self._selectedTypeChanged)
+        self.formSelection.currentIndexChanged[str].\
+            disconnect(self._selectedTypeChanged)
         self.fileFormWidget.loadFile.disconnect(self._spawnLoadThread)
         self.fileFormWidget.cancelLoadFile.disconnect(self._cancelLoadThread)
-        self.disconnect(self, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
-                     self.fileFormWidget.setLoadOK)
-        self.disconnect(self, \
-                     qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
-                     self.fileFormWidget.setCancelOK)
+        self.setScanLoadOK.disconnect(self.fileFormWidget.setLoadOK)
+        self.setScanLoadCancelOK.disconnect(self.fileFormWidget.setCancelOK)
         
     def getOutputForms(self):
         '''
@@ -114,7 +111,7 @@ class FileInputController(qtGui.QDialog):
         '''
         Set up to load the scan file
         '''
-        self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
+        self.blockTabsForLoad.emit()
         if self.fileFormWidget.getOutputType() == self.fileFormWidget.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.fileFormWidget.getOutputType() == self.fileFormWidget.POLE_MAP_STR:
@@ -129,37 +126,37 @@ class FileInputController(qtGui.QDialog):
             self.dataSource = \
                 self.fileFormWidget.getDataSource()
         except LoadCanceledException as e:
-            self.emit(qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL))
-            self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
+            self.blockTabsForLoad.emit()
+            self.setScanLoadOK.emit()
             #self.fileForm.setLoadOK()
             return
         except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return
         except DetectorConfigException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return
         except InstConfigException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return
         except Transform3DException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return 
         except ScanDataMissingException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return
         except RSMap3DException as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), str(e))
+            self.fileError.emit(str(e))
             return
         except Exception as e:
-            self.emit(qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-                      str(e)  + "\n" + str(traceback.format_exc()))
+            self.fileError.emit(str(e)  + "\n" + str(traceback.format_exc()))
             return
         
             
-        self.emit(qtCore.SIGNAL(LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL))
-        self.emit(qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL))
+        self.loadDataSourceToScanForm.emit()
+        self.setScanLoadOK.emit()
         
+    @qtCore.pyqtSlot(str)
     def _selectedTypeChanged(self, typeStr):
         self._disconnectSignals()
         self.formLayout.removeWidget(self.fileFormWidget)
@@ -171,14 +168,14 @@ class FileInputController(qtGui.QDialog):
 
         self.formLayout.addWidget(self.fileFormWidget)
         self._connectSignals()
-        self.emit(qtCore.SIGNAL(INPUT_FORM_CHANGED))
+        self.inputFormChanged.emit()
         self.update()
             
-    def setLoadOK(self):
-        self.fileFormWidget.setLoadOK()
-    
-    def setCancelOK(self):
-        self.fileFormWidget.setCancelOK()
+#     def setLoadOK(self):
+#         self.fileFormWidget.setLoadOK()
+#     
+#     def setCancelOK(self):
+#         self.fileFormWidget.setCancelOK()
     
     def _spawnLoadThread(self):
         '''

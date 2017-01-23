@@ -109,6 +109,7 @@ class AbstractFileView(qtGui.QDialog):
         '''
         self.updateProgressSignal.emit(value, maxValue)
         
+    @qtCore.pyqtSlot()
     def setCancelOK(self):
         '''
         If Cancel is OK the load button is disabled and the cancel button is 
@@ -118,6 +119,7 @@ class AbstractFileView(qtGui.QDialog):
         self.cancelButton.setDisabled(False)
         self.dataBox.setDisabled(True)
 
+    @qtCore.pyqtSlot()
     def setLoadOK(self):
         '''
         If Load is OK the load button is enabled and the cancel button is 
