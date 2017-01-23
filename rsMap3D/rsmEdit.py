@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2014, UChicago Argonne, LLC
+ Copyright (c) 2014,2017 UChicago Argonne, LLC
  See LICENSE file.
 '''
 import signal
@@ -12,13 +12,10 @@ from rsMap3D.gui.dataextentview import DataExtentView
 
 import sys
 from rsMap3D.gui.qtsignalstrings import CURRENT_TAB_CHANGED
-from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, \
-    PROCESS_ERROR_SIGNAL,\
+from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL,\
     UNBLOCK_TABS_FOR_LOAD_SIGNAL,\
     BLOCK_TABS_FOR_PROCESS_SIGNAL, UNBLOCK_TABS_FOR_PROCESS_SIGNAL,\
-    SET_PROCESS_RUN_OK_SIGNAL, \
-    SHOW_RANGE_BOUNDS_SIGNAL,\
-    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL
+    SET_PROCESS_RUN_OK_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
@@ -88,18 +85,13 @@ class MainDialog(qtGui.QMainWindow):
             connect(self._loadDataSourceToScanForm)
         self.fileForm.inputFormChanged.connect(self.updateOutputForms)
         self.dataRange.rangeChanged.connect(self._setScanRanges)
-        self.connect(self.scanForm, \
-                     qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
-                     self._setupRanges)
-        self.connect(self.scanForm, \
-                     qtCore.SIGNAL(SHOW_RANGE_BOUNDS_SIGNAL),
-                     self.dataExtentView.showRangeBounds)
-        self.connect(self.scanForm, \
-                     qtCore.SIGNAL(CLEAR_RENDER_WINDOW_SIGNAL),
-                     self.dataExtentView.clearRenderWindow)
-        self.connect(self.scanForm, \
-                     qtCore.SIGNAL(RENDER_BOUNDS_SIGNAL),
-                     self.dataExtentView.renderBounds)
+        self.scanForm.doneLoading.connect(self._setupRanges)
+        self.scanForm.showRangeBounds[object].connect( \
+            self.dataExtentView.showRangeBounds)
+        self.scanForm.clearRenderWindow.connect(
+            self.dataExtentView.clearRenderWindow)
+        self.scanForm.renderBoundsSignal[object].connect(
+            self.dataExtentView.renderBounds)
         self.connect(self.processScans, \
                      qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
                      self._showProcessError)
@@ -152,13 +144,15 @@ class MainDialog(qtGui.QMainWindow):
         self.scanForm.loadScanFile(self.fileForm.dataSource)        
         
         
+    @qtCore.pyqtSlot()
     def _setupRanges(self):
         '''
         Get the overall data extent from the data source and set these values
         in the dataRange tab.  
         '''
         overallXmin, overallXmax, overallYmin, overallYmax, \
-               overallZmin, overallZmax = self.fileForm.dataSource.getOverallRanges()
+               overallZmin, \
+               overallZmax = self.fileForm.dataSource.getOverallRanges()
         self.dataRange.setRanges(overallXmin, \
                                  overallXmax, \
                                  overallYmin, \

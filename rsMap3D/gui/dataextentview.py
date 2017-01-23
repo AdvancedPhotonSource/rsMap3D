@@ -1,5 +1,5 @@
 '''
- Copyright (c) 2014, UChicago Argonne, LLC
+ Copyright (c) 2014, 2017 UChicago Argonne, LLC
  See LICENSE file.
 '''
 
@@ -47,6 +47,7 @@ class DataExtentView(qtGui.QFrame):
         self.renWin.GetInteractor().Initialize()
         self.renWin.Render()
         
+    @qtCore.pyqtSlot()
     def clearRenderWindow(self):
         '''
         Delete all previous objects that were displayed.
@@ -60,6 +61,7 @@ class DataExtentView(qtGui.QFrame):
         '''
         return self.vtkMain
 
+    @qtCore.pyqtSlot(object)
     def renderBounds(self, bounds):
         '''
         Render a box with boundaries from the given input
@@ -77,6 +79,7 @@ class DataExtentView(qtGui.QFrame):
         return cube
     
     
+    @qtCore.pyqtSlot(object)
     def showRangeBounds(self, rangeBounds):
         '''
         Display axes showing the range boundaries
