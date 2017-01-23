@@ -43,7 +43,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
         self.roiymax = 480
         self.currentDetector = ""
 
-    @qtCore.pyqtSlot()
+#    @qtCore.pyqtSlot()
     def _browseForDetFile(self):
         '''
         Launch file selection dialog for Detector file.
@@ -112,13 +112,13 @@ class UsesXMLDetectorConfig(AbstractFileView):
             layout.addWidget(label, row, 0)
             layout.addWidget(self.pixAvgTxt, row, 1)
 
-    @qtCore.pyqtSlot(str)
+#    @qtCore.pyqtSlot(str)
     def _currentDetectorChanged(self, currentDetector):
         print currentDetector
         self.currentDetector = currentDetector
         self.updateROIandNumAvg()
         
-    @qtCore.pyqtSlot()
+#    @qtCore.pyqtSlot()
     def _detConfigChanged(self):
         '''
         '''
@@ -158,7 +158,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
                 return False
         return detFileExists
         
-    @qtCore.pyqtSlot(str)
+#    @qtCore.pyqtSlot(str)
     def _detROITxtChanged(self, text):
         '''
         Check to make sure the text for detector roi is valid and indicate 
