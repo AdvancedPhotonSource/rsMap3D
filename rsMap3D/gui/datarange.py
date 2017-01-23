@@ -6,7 +6,6 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import RANGE_CHANGED_SIGNAL
 from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, NEGATIVE_INFINITY,\
     WARNING_STR, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, ZMIN_INDEX,\
@@ -17,6 +16,9 @@ class DataRange(qtGui.QDialog):
     This class displays the overall data range for all selected images in
     the available scans.
     '''
+
+    rangeChanged = qtCore.pyqtSignal(name=RANGE_CHANGED_SIGNAL)
+    
     def __init__(self, parent=None):                
         '''
         '''
@@ -79,24 +81,18 @@ class DataRange(qtGui.QDialog):
         layout.addWidget(self.zmaxText, 2,4)
         layout.addLayout(buttonLayout, 3,4)
 
-        self.connect(self.resetButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._resetRange)
-        self.connect(self.applyButton, qtCore.SIGNAL(CLICKED_SIGNAL), self._applyRange)
-        self.connect(self.xminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._xValChanged)
-        self.connect(self.xmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._xValChanged)
-        self.connect(self.yminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._yValChanged)
-        self.connect(self.ymaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._yValChanged)
-        self.connect(self.zminText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._zValChanged)
-        self.connect(self.zmaxText, qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-            self._zValChanged)
-        self.connect(self, qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), 
-            self._checkOkToApply)
+        self.resetButton.clicked.connect(self._resetRange)
+        self.applyButton.clicked.connect(self._applyRange)
+        self.xminText.editingFinished.connect(self._xValChanged)
+        self.xmaxText.editingFinished.connect(self._xValChanged)
+        self.yminText.editingFinished.connect(self._yValChanged)
+        self.ymaxText.editingFinished.connect(self._yValChanged)
+        self.zminText.editingFinished.connect(self._zValChanged)
+        self.zmaxText.editingFinished.connect(self._zValChanged)
+        self.rangeChanged.connect(self._checkOkToApply)
         self.setLayout(layout)
         
+    @qtCore.pyqtSlot()
     def _applyRange(self):
         '''
         Apply changes by recording them as current values and signaling that 
@@ -108,8 +104,9 @@ class DataRange(qtGui.QDialog):
                        float(self.ymaxText.text()),
                        float(self.zminText.text()),
                        float(self.zmaxText.text()))
-        self.emit(qtCore.SIGNAL(RANGE_CHANGED_SIGNAL))
+        self.rangeChanged.emit()
         
+    @qtCore.pyqtSlot()
     def _checkOkToApply(self):
         '''
         If x, y and z pairs are OK and if the value has changed enable apply. 
@@ -169,6 +166,7 @@ class DataRange(qtGui.QDialog):
         self.zValsOk = True
         self.valsChanged = False
         
+    @qtCore.pyqtSlot()
     def _resetRange(self):
         '''
         Reset the ranges to the last set of applied values.
@@ -202,6 +200,7 @@ class DataRange(qtGui.QDialog):
         self.valsChanged = False
         self._checkOkToApply()
         
+    @qtCore.pyqtSlot()
     def _xValChanged(self):
         '''
         Trigger that the xmin or xmax value has changed
@@ -218,6 +217,7 @@ class DataRange(qtGui.QDialog):
         
 
     
+    @qtCore.pyqtSlot()
     def _yValChanged(self):
         '''
         Trigger that the ymin or ymax value has changed
@@ -232,6 +232,7 @@ class DataRange(qtGui.QDialog):
         self.valsChanged = True
         self._checkOkToApply()
     
+    @qtCore.pyqtSlot()
     def _zValChanged(self):
         '''
         Trigger that the zmin value has changed

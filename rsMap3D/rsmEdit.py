@@ -13,13 +13,12 @@ from rsMap3D.gui.dataextentview import DataExtentView
 import sys
 from rsMap3D.gui.qtsignalstrings import CURRENT_TAB_CHANGED
 from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, \
-    RANGE_CHANGED_SIGNAL, FILE_ERROR_SIGNAL, PROCESS_ERROR_SIGNAL,\
-    BLOCK_TABS_FOR_LOAD_SIGNAL, UNBLOCK_TABS_FOR_LOAD_SIGNAL,\
+    PROCESS_ERROR_SIGNAL,\
+    UNBLOCK_TABS_FOR_LOAD_SIGNAL,\
     BLOCK_TABS_FOR_PROCESS_SIGNAL, UNBLOCK_TABS_FOR_PROCESS_SIGNAL,\
-    SET_PROCESS_RUN_OK_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
-    SET_SCAN_LOAD_CANCEL_SIGNAL,\
-    LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL,\
-    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL, INPUT_FORM_CHANGED
+    SET_PROCESS_RUN_OK_SIGNAL, \
+    SHOW_RANGE_BOUNDS_SIGNAL,\
+    CLEAR_RENDER_WINDOW_SIGNAL, RENDER_BOUNDS_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
@@ -88,9 +87,7 @@ class MainDialog(qtGui.QMainWindow):
         self.fileForm.loadDataSourceToScanForm.\
             connect(self._loadDataSourceToScanForm)
         self.fileForm.inputFormChanged.connect(self.updateOutputForms)
-        self.connect(self.dataRange, \
-                     qtCore.SIGNAL(RANGE_CHANGED_SIGNAL), \
-                     self._setScanRanges)
+        self.dataRange.rangeChanged.connect(self._setScanRanges)
         self.connect(self.scanForm, \
                      qtCore.SIGNAL(DONE_LOADING_SIGNAL), \
                      self._setupRanges)
