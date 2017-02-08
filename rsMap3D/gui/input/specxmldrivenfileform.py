@@ -12,7 +12,6 @@ from rsMap3D.gui.input.usesxmldetectorconfig import UsesXMLDetectorConfig
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR,\
     SPEC_FILE_FILTER,\
     SELECT_SPEC_FILE_TITLE
-from rsMap3D.gui.qtsignalstrings import CURRENT_INDEX_CHANGED_SIGNAL
 from rsMap3D.utils.srange import srange
 
 

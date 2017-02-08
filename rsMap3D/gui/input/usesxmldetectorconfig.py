@@ -122,8 +122,11 @@ class UsesXMLDetectorConfig(AbstractFileView):
     def _detConfigChanged(self):
         '''
         '''
+
+        print("DetConfigChanged")
         if self.detFileExists() or \
            self.detConfigTxt.text() == "":
+            print ("Got Here")
             self.checkOkToLoad()
             if self.detConfigTxt.text() != "":
                 try:

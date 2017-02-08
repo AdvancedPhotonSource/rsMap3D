@@ -19,8 +19,7 @@ except ImportError as ex:
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR,\
-    OK_TO_LOAD
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
@@ -61,11 +60,14 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
             self.xpcsDataFileTxt.setText(fileName)
             self.xpcsDataFileTxt.editingFinished.emit()
     
-    def checkOKToLoad(self):
+    def checkOkToLoad(self):
+        print ("CheckOKToLoad in xpcs spec scan Fileform")
         superOk = super(XPCSSpecScanFileForm, self).checkOkToLoad()
-        xpcsFileOk = self.isXpcsFileOK()
+        xpcsFileOk = self.isXpcsFileNameOK()
          
-        self.okToLoad.emit( superOk & xpcsFileOk)
+#         self.okToLoad.emit( superOk & xpcsFileOk)
+        self.okToLoad.emit( superOk)
+        return superOk
         
     def _createDataBox(self):
         dataBox = super(XPCSSpecScanFileForm, self)._createDataBox()
@@ -119,7 +121,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
                                    str(self.getProjectExtension()), \
                                    str(self.getInstConfigName()), \
                                    str(self.getDetConfigName()), \
-                                   str(self.getImmFileName()), \
+#                                    str(self.getImmFileName()), \
                                    scanList = self.getScanList(), \
                                    transform = self.transform, \
                                   )

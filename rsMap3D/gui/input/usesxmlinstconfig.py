@@ -67,8 +67,10 @@ class UsesXMLInstConfig(AbstractFileView):
         valid file (if not empty) and the check to see if it is OK to enable
         the Load button.  Also, grab the projection direction from the file.
         '''
+        print("_instConfigChanged")
         if self.instFileExists() or \
            self.instConfigTxt.text() == EMPTY_STR:
+            print ("Got Here")
             self.checkOkToLoad()
             if self.instConfigTxt.text() != EMPTY_STR:
                 try:

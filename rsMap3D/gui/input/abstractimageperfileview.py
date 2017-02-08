@@ -45,12 +45,14 @@ class AbstractImagePerFileView(AbstractFileView):
             self.projNameTxt.setText(fileName)
             self.projNameTxt.editingFinished.emit()
 
+    @qtCore.pyqtSlot()
     def checkOkToLoad(self):
         '''
         Make sure we have valid file names for project, instrument config, 
         and the detector config.  If we do enable load button.  If not disable
         the load button
         '''
+        print("AbstractImagePerFileViewCheckOKtoLoad")
         if os.path.isfile(self.projNameTxt.text()):
             retVal = True
         else:

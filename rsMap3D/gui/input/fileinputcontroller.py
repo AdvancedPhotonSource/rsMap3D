@@ -6,7 +6,6 @@ Copyright (c) 2014, UChicago Argonne, LLC
 USE_XPCS = False
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
-from rsMap3D.gui.qtsignalstrings import CURRENT_INDEX_CHANGED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
     SET_SCAN_LOAD_CANCEL_SIGNAL, SET_SCAN_LOAD_OK_SIGNAL,\
     BLOCK_TABS_FOR_LOAD_SIGNAL, FILE_ERROR_SIGNAL,\
