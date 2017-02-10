@@ -6,6 +6,9 @@ import signal
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
  
+from  PyQt4.QtCore import pyqtSignal as Signal
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.datarange import DataRange
 from rsMap3D.gui.dataextentview import DataExtentView
@@ -21,20 +24,25 @@ from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
 from os.path import expanduser, join
+from logging import DEBUG
     
+#logging.basicConfig()
+logging.basicConfig(format=LOGGER_FORMAT)
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(DEBUG)
+userDir = expanduser("~")
+#logConfig = join(userDir,".rsMap3D.logConfig")
+
+#    logging.config.dictConfig("rsMap.logConfig")
     
 class MainDialog(qtGui.QMainWindow):
     '''
     Main dialog for rsMap3D.  This class also serves as the over action 
     controller for the application
     '''
-    logging.getLogger(LOGGER_NAME)
-    userDir = expanduser("~")
-    logConfig = join(userDir,".rsMap3D.logConfig")
-
-#    logging.config.dictConfig("rsMap.logConfig")
-
-    logging.basicConfig(level=logging.INFO, format=LOGGER_FORMAT)
+    #define signals to be used here
+    unblockTabsForLoad = Signal(name=UNBLOCK_TABS_FOR_LOAD_SIGNAL)
+                               
     
     def __init__(self,parent=None):
         '''
@@ -64,15 +72,11 @@ class MainDialog(qtGui.QMainWindow):
 #         self.connect(self, \
 #                      qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
 #                      self._blockTabsForLoad)
-        self.connect(self, \
-                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL), \
-                     self._unblockTabsForLoad)
+        self.unblockTabsForLoad.connect(self._unblockTabsForLoad)
 #         self.connect(self, \
 #                      qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
 #                      self._showFileError)
-        self.connect(self.tabs, \
-                     qtCore.SIGNAL(CURRENT_TAB_CHANGED), 
-                     self._tabChanged)
+        self.tabs.currentChanged[int].connect(self._tabChanged)
         self.fileForm.fileError[str].connect(self._showFileError)
         self.fileForm.blockTabsForLoad.connect(self._blockTabsForLoad)
 #         self.connect(self.fileForm, \
@@ -92,15 +96,10 @@ class MainDialog(qtGui.QMainWindow):
             self.dataExtentView.clearRenderWindow)
         self.scanForm.renderBoundsSignal[object].connect(
             self.dataExtentView.renderBounds)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                     self._showProcessError)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(BLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self._blockTabsForProcess)
-        self.connect(self.processScans, \
-                     qtCore.SIGNAL(UNBLOCK_TABS_FOR_PROCESS_SIGNAL), \
-                     self._unblockTabsForProcess)
+#         self.processScans.processError[str].connect(self._showProcessError)
+        self.processScans.blockTabsForProcess.connect(self._blockTabsForProcess)
+        self.processScans.unblockTabsForProcess.connect( \
+            self._unblockTabsForProcess)
         
     def _blockTabsForLoad(self):
         '''
@@ -110,6 +109,7 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.scanTabIndex, False)
         self.tabs.setTabEnabled(self.processTabIndex, False)
         
+    @Slot()
     def _blockTabsForProcess(self):
         '''
         disable tabs while processing
@@ -160,7 +160,7 @@ class MainDialog(qtGui.QMainWindow):
                                  overallZmin, \
                                  overallZmax)
         self._setScanRanges()
-        self.emit(qtCore.SIGNAL(UNBLOCK_TABS_FOR_LOAD_SIGNAL))
+        self.unblockTabsForLoad.emit()
         
     def _setScanRanges(self):
         '''
@@ -184,18 +184,20 @@ class MainDialog(qtGui.QMainWindow):
                              str(error))
         self.fileForm.setLoadOK()
               
-    def _showProcessError(self, error):
-        '''
-        Show any errors from file processing in a message dialog.  When done, 
-        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
-        inactive
-        '''
-        message = qtGui.QMessageBox()
-        message.warning(self, \
-                            "Processing Scan File Warning", \
-                             str(error))
-        self.emit(qtCore.SIGNAL(SET_PROCESS_RUN_OK_SIGNAL))
+#     @Slot(str)
+#     def _showProcessError(self, error):
+#         '''
+#         Show any errors from file processing in a message dialog.  When done, 
+#         toggle Load and Cancel buttons in file tab to Load Active/Cancel 
+#         inactive
+#         '''
+#         message = qtGui.QMessageBox()
+#         message.warning(self, \
+#                             "Processing Scan File Warning", \
+#                              str(error))
+#         self.processScans.setProcessRunOK.emit()
               
+    @Slot(int)
     def _tabChanged(self, index):
         '''
         When changing to the data range tab, display all qs from all scans.
@@ -211,6 +213,7 @@ class MainDialog(qtGui.QMainWindow):
         self.tabs.setTabEnabled(self.scanTabIndex, True)
         self.tabs.setTabEnabled(self.processTabIndex, True)
         
+    @Slot()
     def _unblockTabsForProcess(self):
         '''
         enable tabs when done processing
