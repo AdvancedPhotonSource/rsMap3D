@@ -4,13 +4,16 @@
 '''
 import unittest
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
+import os
 
-PROJECT_DIR = "../../resources/spec"
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.join(THIS_DIR, "../../resources/spec")
 PROJECT_NAME = "CB_140303A_1"
 PROJECT_EXT = ".spec"
-INST_CONFIG_1 = "../../resources/33BM-instForXrayutilities.xml"
-DET_CONFIG = "../../resources/33bmDetectorGeometry.xml"
-
+INST_CONFIG_1 = os.path.join(THIS_DIR, 
+                             "../../resources/33BM-instForXrayutilities.xml")
+DET_CONFIG = os.path.join(THIS_DIR, "../../resources/33bmDetectorGeometry.xml")
+CURRENT_DETECTOR = "Pilatus"
 
 class Test(unittest.TestCase):
 
@@ -21,6 +24,7 @@ class Test(unittest.TestCase):
                                                  PROJECT_EXT, \
                                                  INST_CONFIG_1, \
                                                  DET_CONFIG) 
+        self.dataSource.setCurrentDetector(CURRENT_DETECTOR)
         self.dataSource.loadSource()
 
 

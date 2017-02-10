@@ -5,13 +5,18 @@ Created on May 28, 2014
 '''
 import unittest
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
+import os
 
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test(unittest.TestCase):
 
 
+
     def setUp(self):
-        self.a = PilatusBadPixelFile("../../resources/badpixels.txt")
+        fileName = os.path.join(THIS_DIR,
+                               "../../resources/badpixels.txt") 
+        self.a = PilatusBadPixelFile(fileName)
         #
 
 

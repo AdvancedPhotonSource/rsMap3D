@@ -7,7 +7,10 @@ import unittest
 from rsMap3D.datasource.DetectorGeometry.detectorgeometrybase import DetectorGeometryBase
 from rsMap3D.datasource.DetectorGeometry.detectorgeometryforescan import DetectorGeometryForEScan
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException
-FILE_BASE_DIR = '../../../resources/34-id-escan/'
+import os
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+FILE_BASE_DIR = os.path.join(THIS_DIR, '../../../resources/34-id-escan/')
 DETECTOR_NAME1 ='PE1621 723-3335'
 DETECTOR_NAME2 ='PE0820 763-1807'
 DETECTOR_NAME3 ='PE0820 763-1850'

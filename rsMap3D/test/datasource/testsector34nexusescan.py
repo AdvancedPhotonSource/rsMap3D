@@ -3,10 +3,13 @@ Created on Sep 5, 2014
 
 @author: hammonds
 '''
+import os
 import unittest
 from rsMap3D.datasource.sector34nexusescansource import Sector34NexusEscanSource
 
-FILE_BASE_DIR = '../../resources/34-id-escan/'
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+FILE_BASE_DIR = os.path.join(THIS_DIR,'../../resources/34-id-escan/')
 DETECTOR_CONFIG_FILE = FILE_BASE_DIR + 'geoN_for_Ptdots.xml'
 
 class Test(unittest.TestCase):
@@ -33,10 +36,12 @@ class Test(unittest.TestCase):
 #         pass
 
     def testComparePixel2XYZ(self):
-        self.projectDir = "../..resources/24-id-escan-compare"
+        self.projectDir = os.path.join(THIS_DIR, 
+                                       "../..resources/34-id-escan-compare")
         self.projectName = ""
         self.projectExtension = ".h5"
-        self.detConfigFile = "../../resources/34-id-escan-compare/geoN_2016-02-17_18-11-38.xml"
+        self.detConfigFile = os.path.join(THIS_DIR,
+          "../../resources/34-id-escan-compare/geoN_2016-02-17_18-11-38.xml")
         self.datasource = Sector34NexusEscanSource(self.projectDir, \
                                               self.projectName, \
                                               self.projectExtension, \

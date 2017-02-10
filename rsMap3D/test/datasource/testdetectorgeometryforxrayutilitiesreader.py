@@ -6,8 +6,10 @@ Created on Apr 24, 2014
 import unittest
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader import DetectorGeometryForXrayutilitiesReader
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException
+import os
 
-FILE_BASE_DIR = '../../resources/'
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+FILE_BASE_DIR = os.path.join(THIS_DIR, '../../resources/')
 BAD_FILE_DIR = FILE_BASE_DIR + 'problemFilesForTesting/'
 BAD_FILE_NO_DETECTOR_LIST = BAD_FILE_DIR + 'detectorGeometryNoDetectorList.xml'
 BAD_FILE_NO_DETECTOR = BAD_FILE_DIR + 'detectorGeometryNoDetector.xml'
