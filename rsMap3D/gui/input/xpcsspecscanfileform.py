@@ -4,7 +4,8 @@
 '''
 import logging
 import os
-
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -14,12 +15,13 @@ from rsMap3D.gui.output.processxpcsgridlocationform import ProcessXpcsGridLocati
 try:
     from rsMap3D.datasource.xpcsspecdatasource import XPCSSpecDataSource
 except ImportError as ex:
-    logging.info("Need to install pypimm in order to use rsMap3D to use XPCS data.")
+    logger.info("Need to install pypimm in order to use rsMap3D to use XPCS data.")
     #raise ex
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR,\
+    LOGGER_NAME
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
