@@ -208,7 +208,7 @@ class ScanForm(qtGui.QDialog):
         layout = self.availableScanTypes.layout()
         for scanType in scanTypes:
             if isinstance(scanType, qtGui.QWidget):
-                self.scanType.stateChanged[int].disconnect(
+                scanType.stateChanged[int].disconnect(
                                 self.availableScanTypesChanged)
                 layout.removeWidget(scanType)
                 scanType.setParent(None)
