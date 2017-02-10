@@ -2,19 +2,21 @@
  Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
+import os
+
 import PyQt4.QtCore as qtCore
 import PyQt4.QtGui as qtGui
 
+from  PyQt4.QtCore import pyqtSignal as Signal
+
 import abc
-from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR
-from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL,\
-    PROCESS_ERROR_SIGNAL
-import os
+
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
+from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR
+from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
 
-
+INITIAL_DIM = 200
 
 class AbstractGridOutputForm(AbstractOutputView):
     '''
@@ -57,7 +59,7 @@ class AbstractGridOutputForm(AbstractOutputView):
         label = qtGui.QLabel(X_STR)
         layout.addWidget(label, row,0)
         self.xDimTxt = qtGui.QLineEdit()
-        self.xDimTxt.setText("200")
+        self.xDimTxt.setText(str(INITIAL_DIM))
         self.xDimValidator = qtGui.QIntValidator()
         self.xDimTxt.setValidator(self.xDimValidator)
         layout.addWidget(self.xDimTxt, row,1)
@@ -66,7 +68,7 @@ class AbstractGridOutputForm(AbstractOutputView):
         label = qtGui.QLabel(Y_STR)
         layout.addWidget(label, row,0)
         self.yDimTxt = qtGui.QLineEdit()
-        self.yDimTxt.setText("200")
+        self.yDimTxt.setText(str(INITIAL_DIM))
         self.yDimValidator = qtGui.QIntValidator()
         self.yDimTxt.setValidator(self.yDimValidator)
         layout.addWidget(self.yDimTxt, row,1)
@@ -75,7 +77,7 @@ class AbstractGridOutputForm(AbstractOutputView):
         label = qtGui.QLabel(Z_STR)
         layout.addWidget(label, row,0)
         self.zDimTxt = qtGui.QLineEdit()
-        self.zDimTxt.setText("200")
+        self.zDimTxt.setText(str(INITIAL_DIM))
         self.zDimValidator = qtGui.QIntValidator()
         self.zDimTxt.setValidator(self.zDimValidator)
         layout.addWidget(self.zDimTxt, row,1)
@@ -96,7 +98,8 @@ class AbstractGridOutputForm(AbstractOutputView):
         in the application specific subclass.  A list of forms is provided in 
         dataSource classes.
         '''
-        print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE)
+        print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE +
+            str(self.gridWriter))
         self.dataSource = dataSource
         nx = int(self.xDimTxt.text())
         ny = int(self.yDimTxt.text())
@@ -105,20 +108,20 @@ class AbstractGridOutputForm(AbstractOutputView):
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
                 "%s%s" %(dataSource.projectName,self.gridWriter.FILE_EXTENSION) )
-            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
+            self.setFileName.emit(self.outputFileName)
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             self.mapper = QGridMapper(dataSource, \
                                      self.outputFileName, \
+                                     self.outputType,\
                                      nx=nx, ny=ny, nz=nz,
                                      transform = transform,
                                      gridWriter = self.gridWriter)
-            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()
         else:
-            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                         "The specified directory \n" + \
-                         str(os.path.dirname(self.outputFileName)) + \
-                         "\nis not writable")
+            self.processError.emit("The specified directory \n" + \
+                                   str(os.path.dirname(self.outputFileName)) + \
+                                   "\nis not writable")
         print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE)
 
     def stopMapper(self):

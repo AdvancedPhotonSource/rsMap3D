@@ -3,14 +3,12 @@
  See LICENSE file.
 '''
 import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
 from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
     WARNING_STR, SAVE_FILE_STR, VTI_FILTER_STR, BINARY_OUTPUT, ASCII_OUTPUT
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
-    CURRENT_INDEX_CHANGED_SIGNAL
-from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL, PROCESS_SIGNAL,\
-    CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
@@ -35,6 +33,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         self.setLayout(layout)
         self.outputType = BINARY_OUTPUT
         
+    @Slot()
     def _browseForOutputFile(self):
         '''
         Launch file browser to select the output file.  Checks are done to make
@@ -55,7 +54,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outFileTxt.editingFinished.emit()
             else:
                 message = qtGui.QMessageBox()
                 message.warning(self, \
@@ -63,18 +62,19 @@ class ProcessVTIOutputForm(AbstractOutputView):
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outFileTxt.editingFinished.emit()
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = qtGui.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
             
-    def _cancelProcess(self):
-        '''
-        Emit a signal to trigger the cancellation of processing.
-        '''
-        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
+#     @Slot()
+#     def _cancelProcess(self):
+#         '''
+#         Emit a signal to trigger the cancellation of processing.
+#         '''
+#         self.cancel.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
         
 
     def _createDataBox(self):
@@ -132,23 +132,18 @@ class ProcessVTIOutputForm(AbstractOutputView):
         self.outputTypeSelect.addItem(ASCII_OUTPUT)
         dataLayout.addWidget(self.outputTypeSelect, row, 2)
         
-        self.connect(self.outputFileButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), 
-                     self._browseForOutputFile)
-        self.connect(self.outputFileButton, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-                     self._editFinishedOutputFile)
-        self.connect(self.outFileTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._editFinishedOutputFile)
-        self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
-                     self.outFileTxt.setText)
-        self.connect(self.outputTypeSelect, \
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
-                     self._selectedTypeChanged)
+        self.outputFileButton.clicked.connect(self._browseForOutputFile)
+#         self.connect(self.outputFileButton, \
+#                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
+#                      self._editFinishedOutputFile)
+        self.outFileTxt.editingFinished.connect(self._editFinishedOutputFile)
+        self.setFileName[str].connect( self.outFileTxt.setText)
+        self.outputTypeSelect.currentIndexChanged[str]. \
+            connect(self._selectedTypeChanged)
         
         return dataBox
         
+    @Slot()
     def _editFinishedOutputFile(self):
         '''
         When editing is finished the a check is done to make sure that the 
@@ -171,7 +166,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                                  "\ndoes not exist")
                 
 #               self.outputFileName = fileName
-                self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), fileName)
+                self.setFileName.emit(fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = qtGui.QMessageBox()
@@ -179,11 +174,12 @@ class ProcessVTIOutputForm(AbstractOutputView):
                              WARNING_STR, \
                              "The specified file is not writable")
 
-    def _process(self):
-        '''
-        Emit a signal to trigger the start of processing.
-        '''
-        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
+#     @Slot()
+#     def _process(self):
+#         '''
+#         Emit a signal to trigger the start of processing.
+#         '''
+#         self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
         
     def runMapper(self, dataSource, transform, gridWriter=None):
         '''
@@ -197,7 +193,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
                                                "%s.vti" %dataSource.projectName)
-            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
+            self.setFileName.emit(self.outputFileName)
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             self.mapper = QGridMapper(dataSource, \
                                      self.outputFileName, \
@@ -206,14 +202,14 @@ class ProcessVTIOutputForm(AbstractOutputView):
                                      transform = transform, \
                                      gridWriter = gridWriter)
             self.mapper.setGridWriter(VTIGridWriter())
-            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()
         else:
-            self.emit(qtCore.SIGNAL(PROCESS_ERROR_SIGNAL), \
-                         "The specified directory \n" + \
-                         str(os.path.dirname(self.outputFileName)) + \
-                         "\nis not writable")
+            self.processError.emit("The specified directory \n" + \
+                                   str(os.path.dirname(self.outputFileName)) + \
+                                   "\nis not writable")
 
+    @Slot(str)
     def _selectedTypeChanged(self, typeStr):
         self.outputType = str(typeStr)
         

@@ -4,6 +4,10 @@
 '''
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
+
+from  PyQt4.QtCore import pyqtSignal as Signal
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 from rsMap3D.gui.rsm3dcommonstrings import SAVE_FILE_STR, WARNING_STR,\
     BROWSE_STR
 import os
@@ -45,6 +49,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         self.outFilter = self.XPCS_GRID_LOCS_FILTER
         self.gridWriter = XPCSGridLocationWriter()
         
+    @Slot()
     def _browseForOutputFile(self):
         '''
         Launch file browser to select the output file.  Checks are done to make
@@ -65,7 +70,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outFileTxt.editingFinished.emit()
             else:
                 message = qtGui.QMessageBox()
                 message.warning(self, \
@@ -73,7 +78,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                              "The specified directory does not exist")
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outFileTxt.editingFinished.emit()
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = qtGui.QMessageBox()
                 message.warning(self, \
@@ -95,20 +100,16 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
         layout.addWidget(self.outputFileButton, row, 2)
 
-        self.connect(self.outputFileButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), 
-                     self._browseForOutputFile)
-        self.connect(self.outputFileButton, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-                     self._editFinishedOutputFile)
-        self.connect(self.outFileTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._editFinishedOutputFile)
-        self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
-                     self.outFileTxt.setText)
+        self.outputFileButton.clicked.connect(self._browseForOutputFile)
+#         self.connect(self.outputFileButton, \
+#                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
+#                      self._editFinishedOutputFile)
+        self.outFileTxt.editingFinished.connect(self._editFinishedOutputFile)
+        self.setFileName[str].connect(self.outFileTxt.setText)
 
         return dataBox
     
+    @Slot()
     def _editFinishedOutputFile(self):
         '''
         When editing is finished the a check is done to make sure that the 
@@ -131,7 +132,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                                  "\ndoes not exist")
                 
 #               self.outputFileName = fileName
-                self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), fileName)
+                self.setFileName.emit(fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
                 message = qtGui.QMessageBox()
@@ -152,7 +153,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
                 "%s%s" %(dataSource.projectName,self.gridWriter.FILE_EXTENSION) )
-            self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), self.outputFileName)
+            self.setFileName.emit(self.outputFileName)
     
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             self.mapper = XPCSGridLocationMapper(dataSource,
@@ -160,7 +161,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                                               nx=nx, ny=ny, nz=nz,
                                               transform = transform,
                                               gridWriter = self.gridWriter)
-            self.mapper.setProgressUpdater(self.updateProgress)
+            self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()
 
     def stopMapper(self):

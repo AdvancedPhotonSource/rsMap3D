@@ -5,11 +5,11 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, SAVE_DIR_STR, WARNING_STR
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL,\
-    CURRENT_INDEX_CHANGED_SIGNAL
-from rsMap3D.gui.rsmap3dsignals import SET_FILE_NAME_SIGNAL
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, SAVE_DIR_STR, WARNING_STR,\
+    BINARY_OUTPUT
 import os
 from rsMap3D.mappers.output.imagestackwriter import ImageStackWriter
 
@@ -26,7 +26,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         from a menu so this method allows creating an instance without knowing what to create ahead of time. 
         '''
         return ProcessImageStackForm(parent)
-    
+
     def __init__(self,parent=None):
         '''
         Constructor.  Typically instances should be created by createInstance method.
@@ -40,7 +40,9 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         layout.addWidget(self.dataBox)
         layout.addWidget(controlBox)
         self.setLayout(layout)
+        self.outputType = BINARY_OUTPUT
         
+    @Slot()
     def _browseForOutputDirectory(self):
         '''
         Launch file browser to find location to write image files.
@@ -58,7 +60,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
             if os.path.exists(str(dirName)):
                 self.outputDirTxt.setText(dirName)
                 self.outputDirName = dirName
-                self.outputDirTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outputDirTxt.editingFinished.emit()
             else:
                 message = qtGui.QMessageBox()
                 message.warning(self, 
@@ -66,7 +68,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                                 "The specified directory does not exist")
                 self.outputDirTxt.setText(dirName)
                 self.outputDirName = dirName
-                self.outputDirTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
+                self.outputDirTxt.editingFinished.emit()
             if not os.access(dirName, os.W_OK):
                 message = qtGui.QMessageBox()
                 message.warning(self,
@@ -106,28 +108,21 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         self.axisSelector.setCurrentIndex(self.gridWriter.getSliceIndex())
         layout.addWidget(self.axisSelector)
         
-        
-        self.connect(self.outputDirButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), 
-                     self._browseForOutputDirectory)
-        self.connect(self.outputDirButton, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
-                     self._editFinishedOutputDir)
-        self.connect(self.outputDirTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._editFinishedOutputDir)
-        self.connect(self, qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), 
-                     self.outputDirTxt.setText)
-        self.connect(self.imageFilePrefixTxt, \
-                     qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), \
-                     self._editFinishedOutputDir)
-        self.connect(self.axisSelector,
-                     qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL),
-                     self.updateSliceAxis)
+        #Connect signals for this class        
+        self.outputDirButton.clicked.connect(self._browseForOutputDirectory)
+#         self.connect(self.outputDirButton, \
+#                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
+#                      self._editFinishedOutputDir)
+        self.outputDirTxt.editingFinished.connect(self._editFinishedOutputDir)
+        self.setFileName[str].connect(self.outputDirTxt.setText)
+        self.imageFilePrefixTxt.editingFinished.connect(
+            self._editFinishedOutputDir)
+        self.axisSelector.currentIndexChanged[int].connect(self.updateSliceAxis)
 
         
         return dataBox
     
+    @Slot()
     def _editFinishedOutputDir(self):
         '''
         Process output directory name as inputs are completed.
@@ -170,6 +165,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         return os.path.join(self.outputDirName, self.imageFilePrefix)
     
                 
+    @Slot(int)
     def updateSliceAxis(self, index):
         '''
         record changes as the axis for slicing is changed

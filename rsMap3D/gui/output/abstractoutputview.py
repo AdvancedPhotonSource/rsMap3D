@@ -1,14 +1,16 @@
 '''
- Copyright (c) 2016, UChicago Argonne, LLC
+ Copyright (c) 2016, 2017 UChicago Argonne, LLC
  See LICENSE file.
 '''
 
 import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+
+from  PyQt4.QtCore import pyqtSignal as Signal
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 from rsMap3D.gui.rsm3dcommonstrings import RUN_STR, CANCEL_STR
-from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL
 from rsMap3D.gui.rsmap3dsignals import UPDATE_PROGRESS_SIGNAL, PROCESS_SIGNAL,\
-    CANCEL_PROCESS_SIGNAL
+    CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL, SET_FILE_NAME_SIGNAL
 
 
 class AbstractOutputView (qtGui.QDialog):
@@ -16,6 +18,13 @@ class AbstractOutputView (qtGui.QDialog):
     Abstract class to create a base form for providing input for processing the
     output of reciprocal space map
     '''
+    #define signals to be sent from this class
+    process = Signal(name=PROCESS_SIGNAL)
+    cancel = Signal(name=CANCEL_PROCESS_SIGNAL)
+    updateProgress = Signal(float, name=UPDATE_PROGRESS_SIGNAL)
+    setFileName = Signal(str, name=SET_FILE_NAME_SIGNAL)
+#     processError = Signal(str, name = PROCESS_ERROR_SIGNAL)
+        
     def __init__(self, parent=None):
         '''
         Constructor
@@ -23,11 +32,12 @@ class AbstractOutputView (qtGui.QDialog):
         super(AbstractOutputView,self).__init__(parent)
         self.dataBox = None
         
+    @Slot()
     def _cancelProcess(self):
         '''
         Emit a signal to trigger the cancellation of processing.
         '''
-        self.emit(qtCore.SIGNAL(CANCEL_PROCESS_SIGNAL))
+        self.cancel.emit()
         
         
     def _createControlBox(self):
@@ -47,6 +57,7 @@ class AbstractOutputView (qtGui.QDialog):
         row = 0
         self.progressBar = qtGui.QProgressBar()
         self.progressBar.setTextVisible(True)
+        self.progressBar.setValue(0)
         controlLayout.addWidget(self.progressBar,row, 1)
 
         # Add run button
@@ -59,15 +70,10 @@ class AbstractOutputView (qtGui.QDialog):
         controlLayout.addWidget(self.cancelButton, row, 4)
 
         # Connect signals to the controls
-        self.connect(self.runButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._process)
-        self.connect(self.cancelButton, \
-                     qtCore.SIGNAL(CLICKED_SIGNAL), \
-                     self._cancelProcess)
-        self.connect(self, \
-                     qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), \
-                     self.setProgress)
+        self.runButton.clicked.connect(self._process)
+        self.cancelButton.clicked.connect(self._cancelProcess)
+        self.updateProgress.connect(self.setProgress)
+#         self.processError[str].connect(self._showProcessError)
         # Finalize the layout
         controlBox.setLayout(controlLayout)
         return controlBox
@@ -82,13 +88,27 @@ class AbstractOutputView (qtGui.QDialog):
         dataBox.setLayout(dataLayout)
         return dataBox
     
+    @Slot()
     def _process(self):
         '''
         Emit a signal to trigger the start of processing.
+            '''
+        self.process.emit()
+        
+    @Slot(str)
+    def _showProcessError(self, error):
         '''
-        self.emit(qtCore.SIGNAL(PROCESS_SIGNAL))
-        
-        
+        Show any errors from file processing in a message dialog.  When done, 
+        toggle Load and Cancel buttons in file tab to Load Active/Cancel 
+        inactive
+        '''
+        message = qtGui.QMessageBox()
+        message.warning(self, \
+                            "Processing Scan File Warning", \
+                             str(error))
+        self.processScans.setProcessRunOK.emit()
+              
+    @Slot(float)    
     def setProgress(self, value):
         '''
         Set the value in the progress bar
@@ -111,8 +131,9 @@ class AbstractOutputView (qtGui.QDialog):
         :param progressMin: Minimum value to store in the progress bar
         :param progressMax: Maximum value to store in the progress bar
         '''
-        self.progressBar.setMinimum(progressMin)
-        self.progressBar.setMaximum(progressMax)
+        self.progressBar.setRange(progressMin, progressMax)
+#         self.progressBar.setMinimum(progressMin)
+#         self.progressBar.setMaximum(progressMax)
         
     def setRunOK(self):
         '''
@@ -123,9 +144,10 @@ class AbstractOutputView (qtGui.QDialog):
         self.cancelButton.setDisabled(True)
         self.dataBox.setDisabled(False)
 
-    def updateProgress(self, value):
+    
+    def _updateProgress(self, value):
         '''
         Send signal to update the progress bar.
         :param value: value to be put on the progress bar.
         '''
-        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value)
+        self.updateProgress[float].emit( value)
