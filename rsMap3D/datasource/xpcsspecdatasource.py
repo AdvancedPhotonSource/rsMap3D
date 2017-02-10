@@ -16,6 +16,8 @@ from spec2nexus.spec import SpecDataFile
 import xrayutilities as xu
 import numpy as np
 import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME)
 
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException
 from rsMap3D.datasource.Sector33SpecDataSource import IMAGE_DIR_MERGE_STR,\
@@ -34,7 +36,6 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                  projectExtension,
                  instConfigFile,
                  detConfigFile,
-                 immDataFile,
                  **kwargs):
         
         super(XPCSSpecDataSource, self).__init__(projectDir,
@@ -43,7 +44,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                                  instConfigFile,
                                                  detConfigFile,
                                                  **kwargs)
-        self.immDataFile = immDataFile
+#         self.immDataFile = immDataFile
         self.cancelLoad = False
 
     
