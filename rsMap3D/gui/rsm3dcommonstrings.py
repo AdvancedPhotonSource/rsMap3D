@@ -39,7 +39,7 @@ MAX_STR = "max"
 BINARY_OUTPUT = "Binary"
 ASCII_OUTPUT = "ASCII"
 LOGGER_NAME = "rsMap3D.log"
-LOGGER_FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
+LOGGER_FORMAT = '%(asctime)-15s  %(message)s'
 
 XMIN_INDEX = 0
 XMAX_INDEX = 1
