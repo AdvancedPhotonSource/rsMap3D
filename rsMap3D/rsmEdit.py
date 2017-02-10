@@ -14,16 +14,12 @@ from rsMap3D.gui.datarange import DataRange
 from rsMap3D.gui.dataextentview import DataExtentView
 
 import sys
-from rsMap3D.gui.qtsignalstrings import CURRENT_TAB_CHANGED
-from rsMap3D.gui.rsmap3dsignals import PROCESS_ERROR_SIGNAL,\
-    UNBLOCK_TABS_FOR_LOAD_SIGNAL,\
-    BLOCK_TABS_FOR_PROCESS_SIGNAL, UNBLOCK_TABS_FOR_PROCESS_SIGNAL,\
-    SET_PROCESS_RUN_OK_SIGNAL
+from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
-from os.path import expanduser, join
+from os.path import expanduser
 from logging import DEBUG
     
 #logging.basicConfig()
