@@ -38,8 +38,8 @@ MIN_STR = "min"
 MAX_STR = "max"
 BINARY_OUTPUT = "Binary"
 ASCII_OUTPUT = "ASCII"
-LOGGER_NAME = "rsMap3D.log"
-LOGGER_FORMAT = '%(asctime)-15s  %(message)s'
+LOGGER_NAME = "rsMap3D"
+LOGGER_FORMAT = '%(asctime)-15s - %(name)s - %(levelname)s - %(message)s'
 
 XMIN_INDEX = 0
 XMAX_INDEX = 1
