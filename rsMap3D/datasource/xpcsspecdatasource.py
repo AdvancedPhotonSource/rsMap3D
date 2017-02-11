@@ -17,7 +17,7 @@ import xrayutilities as xu
 import numpy as np
 import logging
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME + 'datasource.xpcsdatasource')
 
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException
 from rsMap3D.datasource.Sector33SpecDataSource import IMAGE_DIR_MERGE_STR,\
