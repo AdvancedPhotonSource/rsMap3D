@@ -2,10 +2,10 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import logging
 import os
+import logging
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME + '.gui.input.xpcsspecscanfileform')
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -20,8 +20,7 @@ except ImportError as ex:
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
-from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR,\
-    LOGGER_NAME
+from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR, WARNING_STR
 
 
 XPCS_FILE_DIALOG_TITLE = "XPCS File Input"
