@@ -5,6 +5,8 @@
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
+from  PyQt4.QtCore import pyqtSlot as Slot
+
 import os.path
 import abc
 
@@ -25,7 +27,8 @@ class AbstractImagePerFileView(AbstractFileView):
         self.fileDialogTitle = "Dummy File Dialog"
         self.fileDialogFilter = ""
         
-    @qtCore.pyqtSlot()
+
+    @Slot()
     def _browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
@@ -45,7 +48,7 @@ class AbstractImagePerFileView(AbstractFileView):
             self.projNameTxt.setText(fileName)
             self.projNameTxt.editingFinished.emit()
 
-    @qtCore.pyqtSlot()
+    @Slot()
     def checkOkToLoad(self):
         '''
         Make sure we have valid file names for project, instrument config, 
@@ -113,7 +116,7 @@ class AbstractImagePerFileView(AbstractFileView):
         '''
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
-    @qtCore.pyqtSlot()
+    @Slot()
     def _projectDirChanged(self):
         '''
         When the project name changes, check to see if it is valid file and 
