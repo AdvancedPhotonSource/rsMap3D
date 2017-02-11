@@ -3,6 +3,10 @@
  See LICENSE file.
 '''
 import os
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME + '.gui.input.usesxmldetectorconfig')
+
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -123,10 +127,9 @@ class UsesXMLDetectorConfig(AbstractFileView):
         '''
         '''
 
-        print("DetConfigChanged")
+        logger.debug("Entering _detConfigChanged")
         if self.detFileExists() or \
            self.detConfigTxt.text() == "":
-            print ("Got Here")
             self.checkOkToLoad()
             if self.detConfigTxt.text() != "":
                 try:

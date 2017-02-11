@@ -2,6 +2,9 @@
  Copyright (c) 2017, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME + '.gui.input.usesxmlinstconfig')
 
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
@@ -67,10 +70,9 @@ class UsesXMLInstConfig(AbstractFileView):
         valid file (if not empty) and the check to see if it is OK to enable
         the Load button.  Also, grab the projection direction from the file.
         '''
-        print("_instConfigChanged")
+        logger.debug("Entering _instConfigChanged")
         if self.instFileExists() or \
            self.instConfigTxt.text() == EMPTY_STR:
-            print ("Got Here")
             self.checkOkToLoad()
             if self.instConfigTxt.text() != EMPTY_STR:
                 try:
