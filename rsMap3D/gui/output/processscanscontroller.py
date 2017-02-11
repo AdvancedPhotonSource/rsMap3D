@@ -18,7 +18,7 @@ import traceback
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 import logging
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME + '.processscancontroller')
 class ProcessScansController(qtGui.QDialog):
     '''
     '''
