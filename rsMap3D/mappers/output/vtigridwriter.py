@@ -49,7 +49,7 @@ class VTIGridWriter(AbstractGridWriter):
         qx0 = self.qx.min()
         dqx = (self.qx.max()-qx0)/self.nx
         qy0 = self.qy.min()
-        dqy = (self.qx.max()-qy0)/self.ny
+        dqy = (self.qy.max()-qy0)/self.ny
         qz0 = self.qz.min()
         dqz = (self.qz.max()-qz0)/self.nz
         
