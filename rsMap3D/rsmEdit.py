@@ -27,8 +27,6 @@ import os
 logger = logging.getLogger(LOGGER_NAME)
 userDir = os.path.expanduser("~")
 logFile = os.path.join(userDir, LOGGER_NAME + '.log')
-print ("LogfileName " + str(logFile))
-#fh = logging.FileHandler(logFile,maxBytes=10*1024*1024)
 fh = logging.FileHandler(logFile, delay=0)
 fh.setLevel(logging.WARNING)
 ch = logging.StreamHandler()
