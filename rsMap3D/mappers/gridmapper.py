@@ -24,7 +24,7 @@ class QGridMapper(AbstractGridMapper):
                  outputFileName, \
                  nx=200, ny=201, nz=202, \
                  transform = None, \
-                 gridWriter = None)
+                 gridWriter = gridWriter)
         self.outputType = outputType
         
     def getFileInfo(self):
