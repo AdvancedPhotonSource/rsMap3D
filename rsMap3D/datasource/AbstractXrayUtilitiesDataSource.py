@@ -6,6 +6,9 @@ import abc
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 import numpy as np
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
 
 class AbstractXrayutilitiesDataSource(AbstractDataSource):
     __metaclass__ = abc.ABCMeta
@@ -250,7 +253,7 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
         Method to load data into the source for use in analysis.  This should
         be defined by the subclass
         '''
-        print "Using Abstract Method"
+        logging.error("Using Abstract Method")
 
     def setTransform(self, transform):
         '''

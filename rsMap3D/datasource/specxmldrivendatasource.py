@@ -9,11 +9,14 @@ import rsMap3D.datasource.InstForXrayutilitiesReader \
     as InstReader
 import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
     as DetectorReader
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     InstConfigException, DetectorConfigException, RSMap3DException
+logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
 
 class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
     
@@ -171,7 +174,8 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             angles = self.getGeoAngles(self.sd.scans[str(scan)], 
                                        self.getReferenceNames())
         except ScanDataMissingException as e:
-            print ("Get Reference Values Scan data missing " + e.message)
+            logging.error ("Get Reference Values Scan data missing " + 
+                           str(e.message))
         return angles
 
     def getScanAngles(self, scan, angleNames):
@@ -229,10 +233,10 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         except DetectorConfigException as ex:
             raise ex
         except RSMap3DException as ex:
-            print ("---Error Reading detector config")
+            logging.error ("---Error Reading detector config")
             raise ex
         except Exception as ex:
-            print ("---Unhandled Exception in loading detector config")
+            logging.error ("---Unhandled Exception in loading detector config")
             raise ex
         
     def loadInstrumentXMLConfig(self):
@@ -261,10 +265,11 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         except InstConfigException as ex:
             raise ex
         except RSMap3DException as ex:
-            print ("---Error Reading instrument config")
+            logging.error ("---Error Reading instrument config")
             raise ex
         except Exception as ex:
-            print "Unhandle Exception loading instrument config" + str(ex)
+            logging.error( "Unhandle Exception loading instrument config" + 
+                           str(ex))
             raise ex
         
     

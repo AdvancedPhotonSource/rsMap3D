@@ -6,7 +6,9 @@ import abc
 import numpy as np
 from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
     NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
-    ZMIN_INDEX, ZMAX_INDEX
+    ZMIN_INDEX, ZMAX_INDEX, LOGGER_NAME
+import logging
+logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
 
 class AbstractDataSource(object):
     __metaclass__ = abc.ABCMeta
@@ -93,7 +95,7 @@ class AbstractDataSource(object):
         return a list of names that describe a set of 
         reference values to be used in display of scan extent
         '''
-        print("Using abstract method: getReferenceNames")
+        logging.error("Using abstract method: getReferenceNames")
         return []
     
     @abc.abstractmethod
@@ -101,7 +103,7 @@ class AbstractDataSource(object):
         '''
         return a list of values to be used in display of scan extent
         '''
-        print("Using abstract method: getReferenceValues")
+        logging.error("Using abstract method: getReferenceValues")
         return []
     
     def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):

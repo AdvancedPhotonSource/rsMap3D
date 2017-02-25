@@ -6,7 +6,7 @@ import os
 from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
         ScanDataMissingException
-from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
+from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOGGER_NAME
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
@@ -16,10 +16,12 @@ import xrayutilities as xu
 import time
 import sys,traceback
 from rsMap3D.datasource.InstForXrayutilitiesReader import SAMPLE_ANGLE_MAP_FUNCTION
+import logging
 try:
     from PIL import Image
 except ImportError:
     import Image
+logger = logging.getLogger(LOGGER_NAME + ".datasource.Sector33SpecDataSource")
 
 
 
@@ -115,20 +117,20 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         :param referenceAngles: list of reference angles to be used in angle 
         conversion
         '''
-        print "Running " + __name__
+        logging.info( "Running " + __name__)
         angles = []
-        print "referenceAngles " + str(referenceAngles)
+        logging.debug("referenceAngles " + str(referenceAngles))
         mappingAngles = self.instConfig.getSampleAngleMappingReferenceAngles()
         
-        print mappingAngles
+        logging.debug( "mappingAngles" + str(mappingAngles))
         for ii in range(len(referenceAngles)):
             replaceVal = \
                 float(self.instConfig.getSampleAngleMappingReferenceAngleAttrib( \
                                               number= str(mappingAngles[ii]), \
                                               attribName='replaceValue'))
-            print "primary Angles" + str(referenceAngles)
+            logging.debug( "primary Angles" + str(referenceAngles))
             angles.append(replaceVal* np.ones(len(referenceAngles[:,ii]),))
-            print "Angles" + str( angles)
+            logging.debug("Angles" + str( angles))
         return angles
         
     def fixGeoAngles(self, scan, angles):
@@ -137,7 +139,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         :param scan: scan to set the angles for
         :param angles: Array of angles to set for this scan  
         '''
-        print "starting " + __name__
+        logging.debug( "starting " + __name__)
         needToCorrect = False
         refAngleNames = self.instConfig.getSampleAngleMappingReferenceAngles()
         for refAngleName in refAngleNames:
@@ -146,7 +148,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 needToCorrect = True
                 
         if needToCorrect:
-            print __name__ + ": Fixing angles"
+            logging.debug( __name__ + ": Fixing angles")
             refAngles = self.getScanAngles(scan, refAngleNames)
             primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
             functionName = self.instConfig.getSampleAngleMappingFunctionName()
@@ -187,13 +189,13 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             g3 = scan.G["G3"].strip().split()
             g3 = np.array(map(float, g3))
             ub = g3.reshape(-1,3)
-            print ub
+            logging.debug("ub " +str(ub))
             return ub
         except:
-            print("Unable to read UB Matrix from G3")
-            print '-'*60
+            logging.error("Unable to read UB Matrix from G3")
+            logging.error( '-'*60)
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            logging.error('-'*60)
             
             
     def hotpixelkill(self, areaData):
@@ -290,11 +292,11 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                                  self.incidentEnergy[scan])
                             if self.progressUpdater <> None:
                                 self.progressUpdater(self.progress, self.progressMax)
-                            print (('Elapsed time for Finding qs for scan %d: ' +
+                            logging.info (('Elapsed time for Finding qs for scan %d: ' +
                                    '%.3f seconds') % \
                                    (scan, (time.time() - _start_time)))
                         except ScanDataMissingException:
-                            print "Scan " + str(scan) + " has no data"
+                            logging.error( "Scan " + str(scan) + " has no data")
                     #Make sure to show 100% completion
             if self.progressUpdater <> None:
                 self.progressUpdater(self.progressMax, self.progressMax)
