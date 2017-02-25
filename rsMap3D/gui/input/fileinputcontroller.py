@@ -2,12 +2,11 @@
 Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-#from rsMap3D.gui.input import s1highenergydiffractionform
 USE_XPCS = False
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
-from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_LOAD_SIGNAL, FILE_ERROR_SIGNAL,\
-    LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, INPUT_FORM_CHANGED
+from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_LOAD_SIGNAL, \
+    FILE_ERROR_SIGNAL, LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, INPUT_FORM_CHANGED
 from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     DetectorConfigException, InstConfigException, Transform3DException,\
