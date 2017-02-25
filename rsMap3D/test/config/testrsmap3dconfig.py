@@ -3,17 +3,22 @@ Created on May 22, 2014
 
 @author: hammonds
 '''
+import os
 import unittest
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 
-BAD_FILE_DIRECTORY = "../../resources/problemFilesForTesting/"
-GOOD_FILE_DIRECTORY = "../../resources/"
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+BAD_FILE_DIRECTORY = os.path.join(THIS_DIR,
+                                  "../../resources/problemFilesForTesting/")
+GOOD_FILE_DIRECTORY = os.path.join(THIS_DIR, "../../resources/")
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.config = RSMap3DConfig(fileName=GOOD_FILE_DIRECTORY + "/.rsMap3D")
+        print(THIS_DIR)
+        print(os.getcwd())
+        self.config = RSMap3DConfig(fileName=GOOD_FILE_DIRECTORY + ".rsMap3D")
 
 
     def tearDown(self):
