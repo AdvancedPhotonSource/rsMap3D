@@ -18,16 +18,26 @@ from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
+import logging.handlers
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
-from os.path import expanduser
-from logging import DEBUG
+import os
     
 #logging.basicConfig()
-logging.basicConfig(format=LOGGER_FORMAT)
+#logging.basicConfig(format=LOGGER_FORMAT)
 logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(DEBUG)
-userDir = expanduser("~")
-#logConfig = join(userDir,".rsMap3D.logConfig")
+userDir = os.path.expanduser("~")
+logFile = os.path.join(userDir, LOGGER_NAME + '.log')
+print ("LogfileName " + str(logFile))
+#fh = logging.FileHandler(logFile,maxBytes=10*1024*1024)
+fh = logging.FileHandler(logFile, delay=0)
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+formatter = logging.Formatter(LOGGER_FORMAT)
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 #    logging.config.dictConfig("rsMap.logConfig")
     
@@ -43,6 +53,8 @@ class MainDialog(qtGui.QMainWindow):
     def __init__(self,parent=None):
         '''
         '''
+        logging.error("error Message")
+        logging.debug("Debug Message")
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
         self.tabs = qtGui.QTabWidget()
