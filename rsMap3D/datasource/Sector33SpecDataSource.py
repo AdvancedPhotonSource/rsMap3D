@@ -343,7 +343,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         or read from the edf file header when no scan number is given (scannr=None)
         """
         
-        if mask == None:
+        if mask is None:
             mask_was_none = True
             #mask = [True] * len(self.getImageToBeUsed()[scans[0]])
         else:
