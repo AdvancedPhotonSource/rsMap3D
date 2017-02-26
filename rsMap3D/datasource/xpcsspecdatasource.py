@@ -273,7 +273,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 self.detectorROI = [header['row_beg'], header['row_end'],
                      header['col_beg'], header['col_end']]
             except IOError as ex:
-                logging.error("Problem opening IMM file to get the start indexes" +
+                logger.error("Problem opening IMM file to get the start indexes" +
                               str(ex))
             finally: 
                 fp.close()

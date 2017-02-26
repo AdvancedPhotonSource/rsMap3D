@@ -95,7 +95,7 @@ class AbstractDataSource(object):
         return a list of names that describe a set of 
         reference values to be used in display of scan extent
         '''
-        logging.error("Using abstract method: getReferenceNames")
+        logger.error("Using abstract method: getReferenceNames")
         return []
     
     @abc.abstractmethod
@@ -103,7 +103,7 @@ class AbstractDataSource(object):
         '''
         return a list of values to be used in display of scan extent
         '''
-        logging.error("Using abstract method: getReferenceValues")
+        logger.error("Using abstract method: getReferenceValues")
         return []
     
     def inBounds(self, xmin, xmax, ymin, ymax, zmin, zmax):

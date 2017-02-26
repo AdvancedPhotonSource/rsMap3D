@@ -18,7 +18,7 @@ from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
 import logging
-import logging.handlers
+#import logging.handlers
 from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
 import os
     
@@ -51,8 +51,7 @@ class MainDialog(qtGui.QMainWindow):
     def __init__(self,parent=None):
         '''
         '''
-        logging.error("error Message")
-        logging.debug("Debug Message")
+        logger.debug("Starting rsmEdit")
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
         self.tabs = qtGui.QTabWidget()

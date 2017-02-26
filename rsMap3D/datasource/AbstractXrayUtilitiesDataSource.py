@@ -253,7 +253,7 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
         Method to load data into the source for use in analysis.  This should
         be defined by the subclass
         '''
-        logging.error("Using Abstract Method")
+        logger.error("Using Abstract Method")
 
     def setTransform(self, transform):
         '''

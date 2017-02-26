@@ -174,7 +174,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             angles = self.getGeoAngles(self.sd.scans[str(scan)], 
                                        self.getReferenceNames())
         except ScanDataMissingException as e:
-            logging.error ("Get Reference Values Scan data missing " + 
+            logger.error ("Get Reference Values Scan data missing " + 
                            str(e.message))
         return angles
 
@@ -233,10 +233,10 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         except DetectorConfigException as ex:
             raise ex
         except RSMap3DException as ex:
-            logging.error ("---Error Reading detector config")
+            logger.error ("---Error Reading detector config")
             raise ex
         except Exception as ex:
-            logging.error ("---Unhandled Exception in loading detector config")
+            logger.error ("---Unhandled Exception in loading detector config")
             raise ex
         
     def loadInstrumentXMLConfig(self):
@@ -265,10 +265,10 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         except InstConfigException as ex:
             raise ex
         except RSMap3DException as ex:
-            logging.error ("---Error Reading instrument config")
+            logger.error ("---Error Reading instrument config")
             raise ex
         except Exception as ex:
-            logging.error( "Unhandle Exception loading instrument config" + 
+            logger.error( "Unhandle Exception loading instrument config" + 
                            str(ex))
             raise ex
         
