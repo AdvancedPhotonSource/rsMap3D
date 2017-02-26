@@ -62,7 +62,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
             self.xpcsDataFileTxt.editingFinished.emit()
     
     def checkOkToLoad(self):
-        print ("CheckOKToLoad in xpcs spec scan Fileform")
+        logger.debug ("CheckOKToLoad in xpcs spec scan Fileform")
         superOk = super(XPCSSpecScanFileForm, self).checkOkToLoad()
         xpcsFileOk = self.isXpcsFileNameOK()
          

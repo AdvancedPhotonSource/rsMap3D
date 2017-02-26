@@ -118,7 +118,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
 
 #    @qtCore.pyqtSlot(str)
     def _currentDetectorChanged(self, currentDetector):
-        print currentDetector
+        logger.info("Setting current detector to " + str(currentDetector))
         self.currentDetector = currentDetector
         self.updateROIandNumAvg()
         
@@ -136,7 +136,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
                     self.updateDetectorList()
                     #self.updateROIandNumAvg()
                 except DetectorConfigException as ex:
-                    print ex
+                    logger.error( ex)
                     message = qtGui.QMessageBox()
                     message.warning(self, \
                                      WARNING_STR,\
