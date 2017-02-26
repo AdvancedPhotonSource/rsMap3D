@@ -3,12 +3,17 @@
  See LICENSE file.
 '''
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException
-from rsMap3D.datasource.DetectorGeometry.detectorgeometrybase import DetectorGeometryBase
+import logging
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+from rsMap3D.datasource.DetectorGeometry.detectorgeometrybase \
+    import DetectorGeometryBase
 nameSpace = \
     '{https://subversion.xray.aps.anl.gov/RSM/detectorGeometryForXrayutils}'
 
 import xml.etree.ElementTree as ET
 import string
+logger = logging.getLogger(LOGGER_NAME + 
+                           'datasource.DetectorGeometryForXrayutilitiesReader')
 
 class DetectorGeometryForXrayutilitiesReader(DetectorGeometryBase):
     '''

@@ -2,9 +2,12 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
 import xml.etree.ElementTree as ET
 import string
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
+logger = logging.getLogger(LOGGER_NAME + 'datasource.xpcsdatasource')
 
 class DetectorGeometryBase(object):
     '''
