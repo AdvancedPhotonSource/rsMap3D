@@ -20,7 +20,15 @@ Installation and setup of Anaconda
 `Anaconda <https://www.continuum.io/downloads>`_ is a completly free bundling 
 of Python by Continuum Analytics.  Note that although Continuum Analytics does 
 provide Anaconda at no cost, it does provide `some additional levels of support 
-<https://www.continuum.io/support-plan>`_ for a fee
+<https://www.continuum.io/support-plan>`_ for a fee.  Anaconda supports 
+installation of both Python 2.7 and 3.x.  At the time of this writing, The 
+Python 3.x version does not support the integration of PyQt and VTK, which rsMap3D 
+uses.  Note that although the Anaconda download of for Python 2 & 3 are essentially 
+the same it is recommended, especially if you are installing for this application,
+that you install the Python 2 version of Anaconda for more convenient installation.
+Note also that the current distribution of Anaconda installs version 5.x of PyQt
+by default.  This version of PyQt does not support the integration with VTK so
+it will be necessary to downgrade the to version 4.11 of PyQt (see below).
 .
 To install Anaconda Python, go to the download site mentioned above you should 
 see a web page with a section that looks like
@@ -70,7 +78,8 @@ available and those not installed by default can be installed with the command
 Required packages
 
 * numpy  1.10.4 is already installed
-* pyqt 4.11.4 is already for installation 
+* pyqt 4.11.4 is already for installation (As noted above, it is necessary to
+install the 4.11 version of PyQt.  To do this use 'conda install pyqt=4.11')
 * vtk 6.3.0 is available for installation
 * pytables 3.2.2 is installed
 * h5py 2.5.0 is installed
