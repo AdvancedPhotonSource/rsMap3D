@@ -15,6 +15,26 @@ BAD_FILE_NO_DETECTOR_LIST = BAD_FILE_DIR + 'detectorGeometryNoDetectorList.xml'
 BAD_FILE_NO_DETECTOR = BAD_FILE_DIR + 'detectorGeometryNoDetector.xml'
 DETECTOR_NAME = 'Pilatus'
 GOOD_FILE_NAME = FILE_BASE_DIR + '33bmDetectorGeometry.xml'
+import logging
+import logging.handlers
+
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
+logger = logging.getLogger(LOGGER_NAME)
+userDir = os.path.expanduser("~")
+logger.setLevel(logging.INFO)
+logFile = os.path.join(userDir, LOGGER_NAME + '.log')
+fh = logging.handlers.RotatingFileHandler(logFile, delay=0, maxBytes=6000000, \
+                                          backupCount=5)
+fh.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter(LOGGER_FORMAT)
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
+
+
 class Test(unittest.TestCase):
     
 
