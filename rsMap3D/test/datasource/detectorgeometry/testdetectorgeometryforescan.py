@@ -8,6 +8,24 @@ from rsMap3D.datasource.DetectorGeometry.detectorgeometrybase import DetectorGeo
 from rsMap3D.datasource.DetectorGeometry.detectorgeometryforescan import DetectorGeometryForEScan
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException
 import os
+import logging
+import logging.handlers
+
+from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
+logger = logging.getLogger(LOGGER_NAME)
+userDir = os.path.expanduser("~")
+logger.setLevel(logging.DEBUG)
+logFile = os.path.join(userDir, LOGGER_NAME + '.log')
+fh = logging.handlers.RotatingFileHandler(logFile, delay=0, maxBytes=6000000, \
+                                          backupCount=5)
+fh.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter(LOGGER_FORMAT)
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_BASE_DIR = os.path.join(THIS_DIR, '../../../resources/34-id-escan/')
