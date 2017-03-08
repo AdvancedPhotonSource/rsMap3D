@@ -2,6 +2,9 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+logger = logging.getLogger(__name__)
+
 class RSMap3DException(Exception):
     '''
     General base class for all exceptions in rsMap3D package.
@@ -13,7 +16,8 @@ class RSMap3DException(Exception):
         raised.
         '''
         super(RSMap3DException, self).__init__(message)
-
+        logger.exception(message)
+        
 class DetectorConfigException(RSMap3DException):
     '''
     Exception class to be raised if there is a problem with a detector config
