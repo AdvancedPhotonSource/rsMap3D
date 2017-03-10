@@ -14,30 +14,25 @@ from rsMap3D.gui.datarange import DataRange
 from rsMap3D.gui.dataextentview import DataExtentView
 
 import sys
+import logging
+import logging.config
+
+import os
+from ConfigParser import NoSectionError
+from rsMap3D.config.rsmap3dlogging import LOGGER_NAME, LOGGER_DEFAULT,\
+    METHOD_EXIT_STR, METHOD_ENTER_STR
 from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
-import logging
-#import logging.handlers
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
-import os
     
-#logging.basicConfig()
-#logging.basicConfig(format=LOGGER_FORMAT)
-logger = logging.getLogger(LOGGER_NAME)
 userDir = os.path.expanduser("~")
-logFile = os.path.join(userDir, LOGGER_NAME + '.log')
-fh = logging.FileHandler(logFile, delay=0)
-fh.setLevel(logging.WARNING)
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-formatter = logging.Formatter(LOGGER_FORMAT)
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-logger.addHandler(fh)
-logger.addHandler(ch)
-
-#    logging.config.dictConfig("rsMap.logConfig")
+logConfigFile = os.path.join(userDir, LOGGER_NAME + 'Log.config')
+try:
+    logging.config.fileConfig(logConfigFile)
+except NoSectionError:
+    logging.config.dictConfig(LOGGER_DEFAULT)
+    
+logger = logging.getLogger(LOGGER_NAME)
     
 class MainDialog(qtGui.QMainWindow):
     '''
@@ -51,7 +46,7 @@ class MainDialog(qtGui.QMainWindow):
     def __init__(self,parent=None):
         '''
         '''
-        logger.debug("Starting rsmEdit")
+        logger.debug(METHOD_ENTER_STR)
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
         self.tabs = qtGui.QTabWidget()
@@ -105,6 +100,7 @@ class MainDialog(qtGui.QMainWindow):
         self.processScans.blockTabsForProcess.connect(self._blockTabsForProcess)
         self.processScans.unblockTabsForProcess.connect( \
             self._unblockTabsForProcess)
+        logger.debug(METHOD_EXIT_STR)
         
     def _blockTabsForLoad(self):
         '''
@@ -187,7 +183,7 @@ class MainDialog(qtGui.QMainWindow):
         message.warning(self, \
                             "Load Scan File Warning", \
                              str(error))
-        self.fileForm.setLoadOK()
+        self.fileForm.setScanLoadOK.emit()
               
 #     @Slot(str)
 #     def _showProcessError(self, error):
@@ -234,14 +230,16 @@ class MainDialog(qtGui.QMainWindow):
 def ctrlCHandler(signal, frame):
     qtGui.QApplication.closeAllWindows()
     
-#This line allows CTRL_C to work with PyQt.
-signal.signal(signal.SIGINT, ctrlCHandler)
-app = qtGui.QApplication(sys.argv)
-mainForm = MainDialog()
-mainForm.show()
-#timer allows Python interupts to work
-timer = qtCore.QTimer()
-timer.start(1000)
-timer.timeout.connect(lambda: None)
-app.exec_()
+if __name__ == "__main__":
+    #This line allows CTRL_C to work with PyQt.
+    logger.debug(METHOD_ENTER_STR)
+    signal.signal(signal.SIGINT, ctrlCHandler)
+    app = qtGui.QApplication(sys.argv)
+    mainForm = MainDialog()
+    mainForm.show()
+    #timer allows Python interupts to work
+    timer = qtCore.QTimer()
+    timer.start(1000)
+    timer.timeout.connect(lambda: None)
+    app.exec_()
 
