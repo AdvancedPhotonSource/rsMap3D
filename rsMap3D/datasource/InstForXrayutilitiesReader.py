@@ -293,7 +293,6 @@ class InstForXrayutilitiesReader():
         for angle in referenceAngles:
             angles[int(angle.attrib[AXIS_NUMBER])] = \
                 angle.attrib[SPEC_MOTOR_NAME]
-        #print angles
         for i in  angles.keys():
             angleList.append(angles[i])
         return angleList
