@@ -83,7 +83,6 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         Create widgets for collecting data
         '''
         super(S34HDFEScanFileForm, self)._createDataBox()
-        #print("create S34 dataBox")
         dataBox = super(S34HDFEScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
 
@@ -146,7 +145,6 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
                              "configuration is invalid")
         
     def getDataSource(self):
-        #print "S34 getDataSource"
         if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.getOutputType() == self.POLE_MAP_STR:
