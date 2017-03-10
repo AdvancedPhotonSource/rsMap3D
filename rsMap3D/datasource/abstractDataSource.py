@@ -6,9 +6,9 @@ import abc
 import numpy as np
 from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
     NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
-    ZMIN_INDEX, ZMAX_INDEX, LOGGER_NAME
+    ZMIN_INDEX, ZMAX_INDEX
 import logging
-logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
+logger = logging.getLogger(__name__)
 
 class AbstractDataSource(object):
     __metaclass__ = abc.ABCMeta
