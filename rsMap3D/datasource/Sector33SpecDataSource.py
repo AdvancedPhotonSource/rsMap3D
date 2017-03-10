@@ -6,7 +6,7 @@ import os
 from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
         ScanDataMissingException
-from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOGGER_NAME
+from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
@@ -21,7 +21,7 @@ try:
     from PIL import Image
 except ImportError:
     import Image
-logger = logging.getLogger(LOGGER_NAME + ".datasource.Sector33SpecDataSource")
+logger = logging.getLogger(__name__)
 
 
 
@@ -156,7 +156,6 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             method = getattr(self, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
                                    referenceAngles=refAngles)
-            #print "fixedAngles" + str(fixedAngles)
             for i in range(len(primaryAngles)):
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
         
