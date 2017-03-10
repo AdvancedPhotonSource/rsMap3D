@@ -2,6 +2,13 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+import math
+import numpy as np
+import glob
+import os
+import string
+
 from rsMap3D.exception.rsmap3dexception import DetectorConfigException,\
     RSMap3DException
 from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
@@ -11,11 +18,8 @@ from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.DetectorGeometry.detectorgeometryforescan \
     import DetectorGeometryForEScan
-import math
-import numpy as np
-import glob
-import os
-import string
+
+logger = logging.getLogger(__name__)
 
 H5_INCIDENT_ENERGY = '/entry1/sample/incident_energy'
 H5_ROI_START_X = '/entry1/detector/startx'
@@ -164,10 +168,10 @@ class Sector34NexusEscanSource(AbstractDataSource):
                               [Ry*s + Rx*Rz*c1,-Rx*s + Ry*Rz*c1, c + Rz*Rz*c1]])
                 
         except DetectorConfigException as ex:
-            print ("--Error Reading detectorConfig")
+            logger.warning ("--Error Reading detectorConfig")
             raise ex
         except Exception as ex:
-            print ("---Unhandled Exception in loading detector config")
+            logger.error ("---Unhandled Exception in loading detector config")
             raise ex
         
     def loadSource(self):
@@ -212,7 +216,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                              hdfFile[H5_ROI_END_Y].value[0]]
                         hdfFile.close()
                     except Exception:
-                        print "Trouble Opening File" + filename
+                        logger.warning( "Trouble Opening File" + filename)
                 if self.progressUpdater <> None:
                     self.progressUpdater(self.progress, self.progressMax)
                     self.progress += self.progressInc
