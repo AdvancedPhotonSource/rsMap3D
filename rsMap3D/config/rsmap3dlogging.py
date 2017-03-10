@@ -22,3 +22,6 @@ LOGGER_DEFAULT = {
                             }
                },
    }
+
+METHOD_ENTER_STR = "Enter"
+METHOD_EXIT_STR = "Exit"
