@@ -4,8 +4,7 @@
 '''
 import os
 import logging
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME + '.gui.input.xpcsspecscanfileform')
+logger = logging.getLogger(__name__)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
