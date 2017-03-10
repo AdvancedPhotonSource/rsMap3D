@@ -10,13 +10,12 @@ import rsMap3D.datasource.InstForXrayutilitiesReader \
 import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
     as DetectorReader
 import logging
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     InstConfigException, DetectorConfigException, RSMap3DException
-logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
+logger = logging.getLogger(__name__)
 
 class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
     
