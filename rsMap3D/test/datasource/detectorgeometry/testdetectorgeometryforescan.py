@@ -10,24 +10,19 @@ from rsMap3D.exception.rsmap3dexception import DetectorConfigException
 import os
 import logging
 import logging.handlers
+import logging.config
+from rsMap3D.config.rsmap3dlogging import LOGGER_NAME
 
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME, LOGGER_FORMAT
-logger = logging.getLogger(LOGGER_NAME)
-userDir = os.path.expanduser("~")
-logger.setLevel(logging.DEBUG)
-logFile = os.path.join(userDir, LOGGER_NAME + '.log')
-fh = logging.handlers.RotatingFileHandler(logFile, delay=0, maxBytes=6000000, \
-                                          backupCount=5)
-fh.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-formatter = logging.Formatter(LOGGER_FORMAT)
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-logger.addHandler(fh)
-logger.addHandler(ch)
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+configDir = os.path.join(THIS_DIR, '../../../resources/config')
+logConfigFile = os.path.join(configDir, LOGGER_NAME + 'Log.test.config')
+print logConfigFile
+logging.config.fileConfig(logConfigFile)
+logger = logging.getLogger(LOGGER_NAME)
+
+
 FILE_BASE_DIR = os.path.join(THIS_DIR, '../../../resources/34-id-escan/')
 DETECTOR_NAME1 ='PE1621 723-3335'
 DETECTOR_NAME2 ='PE0820 763-1807'
