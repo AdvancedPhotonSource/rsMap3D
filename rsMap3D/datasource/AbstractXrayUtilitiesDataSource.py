@@ -7,8 +7,7 @@ from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 import numpy as np
 import logging
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME + ".datasource.specxmldrivendatasource")
+logger = logging.getLogger(__name__)
 
 class AbstractXrayutilitiesDataSource(AbstractDataSource):
     __metaclass__ = abc.ABCMeta
