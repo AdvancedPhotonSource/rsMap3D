@@ -2,6 +2,9 @@
  Copyright (c) 2014,2017 UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+logger = logging.getLogger(__name__)
+
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -174,7 +177,7 @@ class ScanForm(qtGui.QDialog):
         '''
         scansSel = self.scanList.selectedItems()
         if len(scansSel) > 1:
-            print "Should not be able to select more than one scan."
+            logger.warning( "Should not be able to select more than one scan.")
         scan = scansSel[0]
         scanNo = int(scan.text().split(' ')[0])
         return scanNo
