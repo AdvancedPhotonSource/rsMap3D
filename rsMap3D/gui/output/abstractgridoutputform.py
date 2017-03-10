@@ -3,6 +3,8 @@
  See LICENSE file.
 '''
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 import PyQt4.QtCore as qtCore
 import PyQt4.QtGui as qtGui
@@ -98,7 +100,7 @@ class AbstractGridOutputForm(AbstractOutputView):
         in the application specific subclass.  A list of forms is provided in 
         dataSource classes.
         '''
-        print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE +
+        logger.debug ("Entering " + self.FORM_TITLE + " " + \
             str(self.gridWriter))
         self.dataSource = dataSource
         nx = int(self.xDimTxt.text())
@@ -122,7 +124,7 @@ class AbstractGridOutputForm(AbstractOutputView):
             self.processError.emit("The specified directory \n" + \
                                    str(os.path.dirname(self.outputFileName)) + \
                                    "\nis not writable")
-        print ("Entering Abstractgridoutput form runMapper " + self.FORM_TITLE)
+        logger.debug ("Exit " + self.FORM_TITLE)
 
     def stopMapper(self):
         '''
