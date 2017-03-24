@@ -178,6 +178,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                        str(ex) + \
                                        "\n" + \
                                        str(tb))
+        logger.debug("getGeoAngles:\n" + str(geoAngles))
         return geoAngles
     
     def getUBMatrix(self, scan):
@@ -384,7 +385,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 cch1=self.getDetectorCenterChannel()[0], \
                 cch2=self.getDetectorCenterChannel()[1], \
                 Nch1=self.getDetectorDimensions()[0], \
-                Nch2=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[1], \
                 pwidth1=self.getDetectorPixelWidth()[0], \
                 pwidth2=self.getDetectorPixelWidth()[1], \
                 distance=self.getDistanceToDetector(), \
@@ -396,7 +397,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 cch1=self.getDetectorCenterChannel()[0], \
                 cch2=self.getDetectorCenterChannel()[1], \
                 Nch1=self.getDetectorDimensions()[0], \
-                Nch2=self.getDetectorDimensions()[0], \
+                Nch2=self.getDetectorDimensions()[1], \
                 chpdeg1=self.getDetectorChannelsPerDegree()[0], \
                 chpdeg2=self.getDetectorChannelsPerDegree()[1], \
                 Nav=self.getNumPixelsToAverage(), 
@@ -483,6 +484,8 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                     # add data to intensity array
                     intensity[foundIndex+offset,:,:] = img2
                     for i in xrange(len(angleNames)):
+                        logger.debug("appending angles to angle2 " + 
+                                     str(scanAngle1[i][ind]))
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
             if len(scanAngle2[0]) > 0:
