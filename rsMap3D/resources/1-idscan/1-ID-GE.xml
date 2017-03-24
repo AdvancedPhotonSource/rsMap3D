@@ -6,7 +6,7 @@
     <Detectors>
 	   <Detector>
             <pixelDirection1>x-</pixelDirection1>
-            <pixelDirection2>z+</pixelDirection2>
+            <pixelDirection2>y+</pixelDirection2>
             <centerChannelPixel>1022 1025</centerChannelPixel>
             <Npixels>2048 2048</Npixels>
             <size unit="mm">409.6 409.6</size>

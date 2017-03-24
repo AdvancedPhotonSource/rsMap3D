@@ -17,7 +17,10 @@
 
     <!-- Define the detector circles as a series of axes. -->
     <detectorCircles numCircles="1">
-       <circleAxis number="1" specMotorName="delta" directionAxis="z-"/>
+       <!-- Modified this from the original from Andrew to match definition
+            in xrayutils that this is perp to primary beam and innermost detecotor
+            rotation axis -->
+       <circleAxis number="1" specMotorName="delta" directionAxis="y-"/>
     </detectorCircles>
 
     <!-- define reference directions -->
