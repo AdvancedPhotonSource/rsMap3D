@@ -22,8 +22,8 @@ class QGridMapper(AbstractGridMapper):
                  gridWriter = None):
         super(QGridMapper, self).__init__(dataSource, \
                  outputFileName, \
-                 nx=200, ny=201, nz=202, \
-                 transform = None, \
+                 nx=nx, ny=ny, nz=nz, \
+                 transform = transform, \
                  gridWriter = gridWriter)
         self.outputType = outputType
         
