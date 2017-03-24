@@ -4,6 +4,9 @@
 '''
 import os
 
+import logging
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -44,6 +47,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         '''
         Constructor - Layout Widgets on the page and link actions
         '''
+        logger.debug(METHOD_ENTER_STR)
         super(S33SpecScanFileForm, self).__init__(parent)
 
         #Initialize parameters
@@ -52,12 +56,14 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         #Initialize a couple of widgets to do setup.
         self.noFieldRadio.setChecked(True)
         self._fieldCorrectionTypeChanged(*(self.noFieldRadio,))
+        logger.debug(METHOD_EXIT_STR)
         
     @qtCore.pyqtSlot()
     def _badPixelFileChanged(self):
         '''
         Do some verification when the bad pixel file changes
         '''
+        logger.debug(METHOD_ENTER_STR)
         if os.path.isfile(self.badPixelFileTxt.text()) or \
            self.badPixelFileTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
@@ -67,6 +73,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                             WARNING_STR, \
                              "The filename entered for the bad pixel " + \
                              "file is invalid")
+        logger.debug(METHOD_EXIT_STR)
             
                 
     @qtCore.pyqtSlot()
@@ -74,6 +81,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         '''
         Launch file browser for bad pixel file
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.badPixelFileTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                                SELECT_BAD_PIXEL_TITLE, \
@@ -87,12 +95,14 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         if fileName != EMPTY_STR:
             self.badPixelFileTxt.setText(fileName)
             self.badPixelFileTxt.editingFinished.emit()
+        logger.debug(METHOD_EXIT_STR)
 
     @qtCore.pyqtSlot()
     def _browseFlatFieldFileName(self):
         '''
         Launch file browser for Flat field file
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.flatFieldFileTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                                SELECT_FLAT_FIELD_TITLE, \
@@ -106,6 +116,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         if fileName != EMPTY_STR:
             self.flatFieldFileTxt.setText(fileName)
             self.flatFieldFileTxt.editingFinished.emit()
+        logger.debug(METHOD_EXIT_STR)
     
     def checkOkToLoad(self):
         '''
@@ -113,6 +124,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         and the detector config.  If we do enable load button.  If not disable
         the load button
         '''
+        logger.debug(METHOD_ENTER_STR)
         retVal = False
         if os.path.isfile(self.projNameTxt.text()) and \
             os.path.isfile(self.instConfigTxt.text()) and \
@@ -130,19 +142,23 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
             retVal = False
             self.loadButton.setDisabled(not retVal)
         self.okToLoad.emit(retVal)
+        logger.debug(METHOD_EXIT_STR)
         return retVal
     
     def _createControlBox(self):
         '''
         Create Layout holding controls widgets
         '''
+        logger.debug(METHOD_ENTER_STR)
         controlBox = super(S33SpecScanFileForm, self)._createControlBox()
+        logger.debug(METHOD_EXIT_STR)
         return controlBox
     
     def _createDataBox(self):
         '''
         Create widgets for collecting data
         '''
+        logger.debug(METHOD_ENTER_STR)
         dataBox = super(S33SpecScanFileForm, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
@@ -211,6 +227,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self.pixAvgTxt.textChanged.connect(self._pixAvgTxtChanged)
         
         dataBox.setLayout(dataLayout)
+        logger.debug(METHOD_EXIT_STR)
         return dataBox
     
     @qtCore.pyqtSlot(QAbstractButton)
@@ -219,6 +236,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         React when the field type radio buttons change.  Disable/Enable other 
         widgets as appropriate
         '''
+        logger.debug(METHOD_ENTER_STR)
         if fieldCorrType[0].text() == self.NONE_RADIO_NAME:
             self.badPixelFileTxt.setDisabled(True)
             self.badPixelFileBrowseButton.setDisabled(True)
@@ -235,12 +253,14 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
             self.flatFieldFileTxt.setDisabled(False)
             self.flatFieldFileBrowseButton.setDisabled(False)
         self.checkOkToLoad()
+        logger.debug(METHOD_EXIT_STR)
             
     @qtCore.pyqtSlot()           
     def _flatFieldFileChanged(self):
         '''
         Do some verification when the flat field file changes
         '''
+        logger.debug(METHOD_ENTER_STR)
         if os.path.isfile(self.flatFieldFileTxt.text()) or \
            self.flatFieldFileTxt.text() == "":
             self.checkOkToLoad()
@@ -250,19 +270,25 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                             WARNING_STR, \
                              "The filename entered for the flat field " + \
                              "file is invalid")
+        logger.debug(METHOD_EXIT_STR)
                 
     def getBadPixelFileName(self):
         '''
         Return the badPixel file name.  If empty or if the bad pixel radio 
         button is not checked return None
         '''
+        logger.debug(METHOD_ENTER_STR)
+        retVal = None
         if (str(self.badPixelFileTxt.text()) == EMPTY_STR) or \
            (not self.badPixelRadio.isChecked()):
-            return None
+            retVal = None
         else:
-            return str(self.badPixelFileTxt.text())
+            retVal = str(self.badPixelFileTxt.text())
+        logger.debug("Exit " + str(retVal))
+        return retVal
         
     def getDataSource(self):
+        logger.debug(METHOD_ENTER_STR)
         if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
             self.transform = UnityTransform3D()
         elif self.getOutputType() == self.POLE_MAP_STR:
@@ -291,6 +317,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)
         self.dataSource.loadSource(mapHKL = self.getMapAsHKL())
+        logger.debug(METHOD_EXIT_STR)
         return self.dataSource
         
     def getFlatFieldFileName(self):
@@ -298,32 +325,42 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         Return the flat field file name.  If empty or if the bad pixel radio 
         button is not checked return None
         '''
+        logger.debug(METHOD_ENTER_STR)
+        retVal = None
         if (str(self.flatFieldFileTxt.text()) == EMPTY_STR) or \
            (not self.flatFieldRadio.isChecked()):
-            return None
+            retVal = None
         else:
-            return str(self.flatFieldFileTxt.text())
+            retVal = str(self.flatFieldFileTxt.text())
+        logger.debug(METHOD_EXIT_STR)
+        return retVal
         
     def getOutputForms(self):
+        logger.debug(METHOD_ENTER_STR)
         outputForms = []
         outputForms.append(ProcessVTIOutputForm)
         outputForms.append(ProcessImageStackForm)
+        logger.debug(METHOD_EXIT_STR)
         return outputForms
     
     def getPixelsToAverage(self):
         '''
         :return: the pixels to average as a list
         '''
+        logger.debug(METHOD_ENTER_STR)
         pixelStrings = str(self.pixAvgTxt.text()).split(COMMA_STR)
         pixels = []
         for value in pixelStrings:
             pixels.append(int(value))
+        logger.debug(METHOD_EXIT_STR)
         return pixels
     
     def getProjectionDirection(self):
         '''
         Return projection direction for stereographic projections
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR)
         return self.projectionDirection
           
             
@@ -333,22 +370,27 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         by a color change 
         :param text: new values as a text list 
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.pixAvgValid(text):
             self.pixAvgTxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % BLACK)
         else: 
             self.pixAvgTxt.setStyleSheet(QLINEEDIT_COLOR_STYLE % RED)
         self.checkOkToLoad()
+        logger.debug(METHOD_EXIT_STR)
             
     def pixAvgValid(self, text):
         '''
         Check to make sure that the pixAvgText is valid
         :param text: new values as a text list 
         '''
+        logger.debug(METHOD_ENTER_STR)
+        retVal = False
         rxPixAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_2)
         validator = qtGui.QRegExpValidator(rxPixAvg, None)
         pos = 0
         if validator.validate(text, pos)[0] == qtGui.QValidator.Acceptable:
-            return True
+            retVal = True
         else:
-            return False
-        
+            retVal = False
+        logger.debug("Exit " + str(retVal))
+        return retVal
