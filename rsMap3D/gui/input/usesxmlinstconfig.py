@@ -3,8 +3,8 @@
  See LICENSE file.
 '''
 import logging
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME + '.gui.input.usesxmlinstconfig')
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
 
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
@@ -23,14 +23,18 @@ class UsesXMLInstConfig(AbstractFileView):
         '''
         constructor
         '''
+        logger.debug(METHOD_ENTER_STR)
         super(UsesXMLInstConfig, self).__init__(parent)
         self.projectionDirection = None
+        self.instFileOk = False
+        logger.debug(METHOD_EXIT_STR)
         
 #    @pyqtSlot(bool)
     def _browseForInstFile(self, checked):
         '''
         Launch file selection dialog for instrument file.
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.instConfigTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, 
                                         SELECT_INSTRUMENT_CONFIG_TITLE, 
@@ -45,9 +49,11 @@ class UsesXMLInstConfig(AbstractFileView):
             self.instConfigTxt.setText(fileName)
             # use new style to emit edit finished signal
             self.instConfigTxt.editingFinished.emit()
+        logger.debug(METHOD_EXIT_STR)
 
     def _createInstConfig(self, layout, row):
         
+        logger.debug(METHOD_ENTER_STR)
         label = qtGui.QLabel("Instrument Config File:");
         self.instConfigTxt = qtGui.QLineEdit()
         self.instConfigFileButton = qtGui.QPushButton(BROWSE_STR)
@@ -57,11 +63,14 @@ class UsesXMLInstConfig(AbstractFileView):
         # switched to using new style signals
         self.instConfigFileButton.clicked.connect(self._browseForInstFile)
         self.instConfigTxt.editingFinished.connect(self._instConfigChanged)
+        logger.debug(METHOD_EXIT_STR)
 
     def getInstConfigName(self):
         '''
         Return the Instrument config file name
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR)
         return self.instConfigTxt.text()
 
     def _instConfigChanged(self):
@@ -70,6 +79,7 @@ class UsesXMLInstConfig(AbstractFileView):
         valid file (if not empty) and the check to see if it is OK to enable
         the Load button.  Also, grab the projection direction from the file.
         '''
+        logger.debug(METHOD_ENTER_STR)
         logger.debug("Entering _instConfigChanged")
         if self.instFileExists() or \
            self.instConfigTxt.text() == EMPTY_STR:
@@ -78,7 +88,7 @@ class UsesXMLInstConfig(AbstractFileView):
                 try:
                     # if you can get projection direction inst config is likely 
                     # a well formed instConfigFile
-                    self.updateProjectionDirection()
+                    self.instFileOk = self.isInstFileOK()
                 except InstConfigException :
                     message = qtGui.QMessageBox()
                     message.warning(self, \
@@ -91,25 +101,32 @@ class UsesXMLInstConfig(AbstractFileView):
                             WARNING_STR, \
                              "The filename entered for the instrument " + \
                              "configuration is invalid")
+        logger.debug(METHOD_EXIT_STR)
         
     def instFileExists(self):
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR)
         
         return os.path.isfile(self.instConfigTxt.text())
     
     def isInstFileOK(self):
+        logger.debug(METHOD_ENTER_STR)
         instFileExists = self.instFileExists()
         try:
             self.updateProjectionDirection()
         except InstConfigException:
             # If this fails the file is not likely a well formed inst config
             return False
-        return instFileExists()
+        logger.debug(METHOD_EXIT_STR)
+        return instFileExists
     
     def updateProjectionDirection(self):
         '''
         update the stored value for the projection direction
         '''
+        logger.debug(METHOD_ENTER_STR)
         instConfig = \
             InstForXrayutilitiesReader(self.instConfigTxt.text())
         self.projectionDirection = instConfig.getProjectionDirection()
+        logger.debug(METHOD_EXIT_STR)
         
