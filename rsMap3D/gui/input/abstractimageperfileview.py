@@ -2,6 +2,10 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+from rsMap3D.config.rsmap3dlogging import METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
+
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 
@@ -24,15 +28,17 @@ class AbstractImagePerFileView(AbstractFileView):
         Constructor
         '''
         super(AbstractImagePerFileView, self).__init__(parent)
+        logger.debug(METHOD_ENTER_STR)
         self.fileDialogTitle = "Dummy File Dialog"
         self.fileDialogFilter = ""
-        
+        logger.debug(METHOD_EXIT_STR)
 
     @Slot()
     def _browseForProjectDir(self):
         '''
         Launch file selection dialog for instrument file.
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.projNameTxt.text() == EMPTY_STR:
             fileName = qtGui.QFileDialog.getOpenFileName(None, \
                                                    self.fileDialogTitle, \
@@ -47,7 +53,8 @@ class AbstractImagePerFileView(AbstractFileView):
         if fileName != EMPTY_STR:
             self.projNameTxt.setText(fileName)
             self.projNameTxt.editingFinished.emit()
-
+        logger.debug(METHOD_EXIT_STR)
+        
     @Slot()
     def checkOkToLoad(self):
         '''
@@ -55,23 +62,28 @@ class AbstractImagePerFileView(AbstractFileView):
         and the detector config.  If we do enable load button.  If not disable
         the load button
         '''
-        print("AbstractImagePerFileViewCheckOKtoLoad")
-        if os.path.isfile(self.projNameTxt.text()):
+        logger.debug(METHOD_ENTER_STR)
+        if os.path.isfile(str(self.projNameTxt.text())):
             retVal = True
         else:
+            logger.warning("Project file name is invalid")
             retVal = False
+        logger.debug("Enter " + str(retVal))
         return retVal
     
     def _createControlBox(self):
         '''
         Create Layout holding controls widgets
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR)
         return super(AbstractImagePerFileView, self)._createControlBox()
-    
+        
     def _createDataBox(self):
         '''
         Create widgets for collecting data
         '''
+        logger.debug(METHOD_ENTER_STR)
         dataBox = super(AbstractImagePerFileView, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
@@ -85,7 +97,7 @@ class AbstractImagePerFileView(AbstractFileView):
         # Add Signals between widgets
         self.projectDirButton.clicked.connect(self._browseForProjectDir)
         self.projNameTxt.editingFinished.connect(self._projectDirChanged)
-
+        logger.debug(METHOD_EXIT_STR)
         return dataBox
     
     
@@ -95,25 +107,33 @@ class AbstractImagePerFileView(AbstractFileView):
         Return a list of appropriate output forms for use in the process 
         scan controller
         '''
+        logger.debug(METHOD_ENTER_STR)
         outputForms = []
+        logger.debug(METHOD_EXIT_STR % str(outputForms))
         return outputForms
     
     def getProjectDir(self):
         '''
         Return the project directory
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR )
         return os.path.dirname(str(self.projNameTxt.text()))
         
     def getProjectExtension(self):
         '''
         Return the project file extension
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR )
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[1]
 
     def getProjectName(self):
         '''
         Return the project name
         '''
+        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_EXIT_STR )
         return os.path.splitext(os.path.basename(str(self.projNameTxt.text())))[0]
     
     @Slot()
@@ -122,11 +142,14 @@ class AbstractImagePerFileView(AbstractFileView):
         When the project name changes, check to see if it is valid file and 
         then check to see if it is OK to enable the Load button.
         '''
+        logger.debug(METHOD_ENTER_STR)
         if os.path.isfile(self.projNameTxt.text()) or \
             self.projNameTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
         else:
+            logger.warning("The project directory entered is invalid")
             message = qtGui.QMessageBox()
             message.warning(self, \
                              WARNING_STR, \
                              "The project directory entered is invalid")
+        logger.debug(METHOD_EXIT_STR )
