@@ -2,6 +2,7 @@
  Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
 import PyQt4.QtGui as qtGui
 
 from  PyQt4.QtCore import pyqtSlot as Slot
@@ -13,6 +14,8 @@ import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
 from PyQt4.Qt import QComboBox
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
 
 class ProcessVTIOutputForm(AbstractOutputView):
     FORM_TITLE = "VTI Grid Output"
@@ -23,6 +26,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
     
     def __init__(self, parent=None):
         super(ProcessVTIOutputForm, self).__init__(parent)
+        logger.debug(METHOD_ENTER_STR)
         self.mapper = None
         layout = qtGui.QVBoxLayout()
         self.dataBox = self._createDataBox()
@@ -32,6 +36,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         layout.addWidget(controlBox)
         self.setLayout(layout)
         self.outputType = BINARY_OUTPUT
+        logger.debug(METHOD_EXIT_STR)
         
     @Slot()
     def _browseForOutputFile(self):
@@ -40,6 +45,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         sure the selected directory exists and that the selected file is 
         writable
         '''
+        logger.debug(METHOD_ENTER_STR)
         if self.outFileTxt.text() == "":
             fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
@@ -68,7 +74,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
-            
+        logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _cancelProcess(self):
 #         '''
@@ -81,6 +87,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         '''
         Create Widgets to collect output info
         '''
+        logger.debug(METHOD_ENTER_STR)
         dataBox = super(ProcessVTIOutputForm, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
@@ -140,7 +147,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         self.setFileName[str].connect( self.outFileTxt.setText)
         self.outputTypeSelect.currentIndexChanged[str]. \
             connect(self._selectedTypeChanged)
-        
+        logger.debug(METHOD_EXIT_STR)
         return dataBox
         
     @Slot()
@@ -149,6 +156,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         When editing is finished the a check is done to make sure that the 
         directory exists and the file is writable
         '''
+        logger.debug(METHOD_ENTER_STR)
         fileName = str(self.outFileTxt.text())
         if fileName != "":
             if os.path.exists(os.path.dirname(fileName)):
@@ -173,7 +181,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
-
+        logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _process(self):
 #         '''
@@ -185,10 +193,12 @@ class ProcessVTIOutputForm(AbstractOutputView):
         '''
         Run the selected mapper
         '''
+        logger.debug(METHOD_ENTER_STR)
         self.dataSource = dataSource
         nx = int(self.xDimTxt.text())
         ny = int(self.yDimTxt.text())
         nz = int(self.zDimTxt.text())
+        logger.debug( "nx,ny,nz %d,%d,%d" % (nx, ny, nz))
         outType = self.outputType
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
@@ -208,15 +218,20 @@ class ProcessVTIOutputForm(AbstractOutputView):
             self.processError.emit("The specified directory \n" + \
                                    str(os.path.dirname(self.outputFileName)) + \
                                    "\nis not writable")
-
+        logger.debug(METHOD_EXIT_STR)
+        
     @Slot(str)
     def _selectedTypeChanged(self, typeStr):
+        logger.debug(METHOD_ENTER_STR)
         self.outputType = str(typeStr)
+        logger.debug(METHOD_EXIT_STR)
         
     def _stopMapper(self):
         '''
         Halt the mapping _process
         '''
+        logger.debug(METHOD_ENTER_STR)
         self.mapper.stopMap()
+        logger.debug(METHOD_EXIT_STR)
         
         
