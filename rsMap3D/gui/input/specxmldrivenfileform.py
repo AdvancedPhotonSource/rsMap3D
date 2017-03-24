@@ -2,6 +2,9 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
 
 import PyQt4.QtCore as qtCore
 import PyQt4.QtGui as qtGui
@@ -21,6 +24,7 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
 
     def __init__(self, parent=None):
         super(SpecXMLDrivenFileForm, self).__init__(parent)
+        logger.debug(METHOD_ENTER_STR)
         
         self.fileDialogTitle = SELECT_SPEC_FILE_TITLE
         self.fileDialogFilter = SPEC_FILE_FILTER
@@ -31,15 +35,19 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
         self.layout.addWidget(self.dataBox)
         self.layout.addWidget(controlBox)
         self.setLayout(self.layout);
+        logger.debug(METHOD_EXIT_STR)
 
     def _createHKLOutput(self, layout, row):
+        logger.debug(METHOD_ENTER_STR)
         label = qtGui.QLabel("HKL output")
         layout.addWidget(label, row, 0)
         self.hklCheckbox = qtGui.QCheckBox()
         layout.addWidget(self.hklCheckbox, row, 1)
+        logger.debug(METHOD_EXIT_STR)
 
         
     def _createOutputType(self, layout, row):
+        logger.debug(METHOD_ENTER_STR)
         label = qtGui.QLabel("Output Type")
         self.outTypeChooser = qtGui.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
@@ -50,48 +58,62 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
 #         self.connect(self.outTypeChooser, \
 #                      qtCore.SIGNAL(CURRENT_INDEX_CHANGED_SIGNAL), \
 #                      self._outputTypeChanged)
+        logger.debug(METHOD_EXIT_STR)
         
         
     def _createScanNumberInput(self, layout, row):
+        logger.debug(METHOD_ENTER_STR)
         label = qtGui.QLabel("Scan Numbers")
         self.scanNumsTxt = qtGui.QLineEdit()
         rx = qtCore.QRegExp(self.SCAN_LIST_REGEXP)
         self.scanNumsTxt.setValidator(qtGui.QRegExpValidator(rx,self.scanNumsTxt))
         layout.addWidget(label, row, 0)
         layout.addWidget(self.scanNumsTxt, row, 1)
+        logger.debug(METHOD_EXIT_STR)
         
 
     def getMapAsHKL(self):
         '''
         '''
 #        Not sure if we need this JPH
-        return self.hklCheckbox.isChecked()
-#        return False
+        logger.debug(METHOD_ENTER_STR)
+        mapAsHkl = self.hklCheckbox.isChecked()
+        logger.debug(METHOD_EXIT_STR)
+        return mapAsHkl
     
     def getOutputType(self):
         '''
         Get the output type to be used.
         '''
-        return self.outTypeChooser.currentText()
+        logger.debug(METHOD_ENTER_STR)
+        outType = self.outTypeChooser.currentText()
+        logger.debug(METHOD_EXIT_STR)
+        return outType 
     
     def getScanList(self):
         '''
         return a list of scans to be used for loading data
         '''
+        logger.debug(METHOD_ENTER_STR)
+        scanList = None
         if str(self.scanNumsTxt.text()) == EMPTY_STR:
-            return None
+            scanList = None
         else:
             scans = srange(str(self.scanNumsTxt.text()))
-            return scans.list() 
-        
+            scanList = scans.list() 
+        logger.debug(METHOD_EXIT_STR)
+        return scanList
+    
     def _outputTypeChanged(self, typeStr):
         '''
         If the output is selected to be a simple grid map type then allow
         the user to select HKL as an output.
         :param typeStr: String holding the outpu type
         '''
+        logger.debug(METHOD_ENTER_STR)
         if typeStr == self.SIMPLE_GRID_MAP_STR:
             self.hklCheckbox.setEnabled(True)
         else:
             self.hklCheckbox.setDisabled(True)
             self.hklCheckbox.setCheckState(False)
+        logger.debug(METHOD_EXIT_STR)
