@@ -10,6 +10,9 @@ import rsMap3D.datasource.InstForXrayutilitiesReader \
 import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
     as DetectorReader
 import logging
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
+#from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
@@ -27,6 +30,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                  detConfigFile,
                  **kwargs):
         super(SpecXMLDrivenDataSource, self).__init__(**kwargs)
+        logger.debug(METHOD_ENTER_STR)
         self.projectDir = str(projectDir)
         self.projectName = str(projectName)
         self.projectExt = str(projectExtension)
@@ -49,7 +53,9 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             self.scans = kwargs['scanList']
         except KeyError:
             self.scans = None
+        logger.debug(METHOD_EXIT_STR)
 
+    #@profile
     def findImageQs(self, angles, ub, en):
         '''
         Find the minimum/maximum q boundaries associated with each scan given 
@@ -58,6 +64,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         :param ub: sample UB matrix
         :param en: Incident Energy
         '''
+        logger.debug(METHOD_ENTER_STR)
         qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
                                           self.getDetectorCircleDirections(), 
                                           self.getPrimaryBeamDirection())
@@ -82,7 +89,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        rsMap3DConfig = RSMap3DConfig()
+        rsMap3DConfig = RSMap3DConfigParser()
         maxImageMem = rsMap3DConfig.getMaxImageMemory()
         imageSize = self.getDetectorDimensions()[0] * \
                     self.getDetectorDimensions()[1]
@@ -94,6 +101,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc        
             angleList = []
+            logger.debug("angles " + str(angles) )
             for i in range(len(angles[0])):
                 angleList.append(angles[:,i])
             if ub == None:
@@ -132,8 +140,11 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                 firstImageInPass = thisPass*numImages/nPasses
                 lastImageInPass = (thisPass+1)*numImages/nPasses
                 angleList = []
+                logger.debug("angles " + str(angles) )
                 for i in range(len(angles[0])):
+                    logger.debug("angles in pass " + str(angles[firstImageInPass:lastImageInPass,i]) )
                     angleList.append(angles[firstImageInPass:lastImageInPass,i])
+                logger.debug("angleList " + str(angleList) )
                 if ub == None:
                     qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                              roi=roi, \
@@ -154,7 +165,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                 [zmin.append(np.min(qzTrans[i])) for i in idx] 
                 [zmax.append(np.max(qzTrans[i])) for i in idx] 
                 
-            
+        logger.debug(METHOD_EXIT_STR) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def getReferenceNames(self):
