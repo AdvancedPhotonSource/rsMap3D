@@ -3,7 +3,7 @@
  See LICENSE file.
 '''
 import logging
-from rsMap3D.config.rsmap3dlogging import METHOD_EXIT_STR
+from rsMap3D.config.rsmap3dlogging import METHOD_EXIT_STR, METHOD_ENTER_STR
 logger = logging.getLogger(__name__)
 
 import PyQt4.QtGui as qtGui
