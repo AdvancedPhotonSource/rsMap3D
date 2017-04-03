@@ -23,12 +23,12 @@ class AbstractImagePerFileView(AbstractFileView):
     '''
 
 
-    def __init__(self, parent=None):
+    def __init__(self, **kwargs):
         '''
         Constructor
         '''
-        super(AbstractImagePerFileView, self).__init__(parent)
-        logger.debug(METHOD_ENTER_STR)
+        logger.debug(METHOD_ENTER_STR  % str(kwargs))
+        super(AbstractImagePerFileView, self).__init__(**kwargs)
         self.fileDialogTitle = "Dummy File Dialog"
         self.fileDialogFilter = ""
         logger.debug(METHOD_EXIT_STR)

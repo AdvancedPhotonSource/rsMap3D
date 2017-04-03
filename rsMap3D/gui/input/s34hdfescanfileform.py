@@ -22,14 +22,14 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
     FORM_TITLE = "Sector 34 HDF/XML Setup"
     
     @staticmethod
-    def createInstance(parent=None):
-        return S34HDFEScanFileForm(parent)
+    def createInstance(parent=None, appConfig=None):
+        return S34HDFEScanFileForm(parent=parent, appConfig=appConfig)
         
-    def __init__(self, parent=None):
+    def __init__(self, **kwargs):
         '''
         Constructor
         '''
-        super(S34HDFEScanFileForm, self).__init__()
+        super(S34HDFEScanFileForm, self).__init__(**kwargs)
 
         self.fileDialogTitle = SELECT_HDF_FILE_TITLE
         self.fileDialogFilter = HDF_FILE_FILTER
@@ -158,7 +158,8 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
             Sector34NexusEscanSource(str(self.getProjectDir()), \
                                    str(self.getProjectName()), \
                                    str(self.getProjectExtension()), \
-                                   str(self.getDetConfigName()))
+                                   str(self.getDetConfigName()), \
+                                   appConfig = self.appConfig)
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.loadSource()
         return self.dataSource

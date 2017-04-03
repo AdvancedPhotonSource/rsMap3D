@@ -22,8 +22,8 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
 
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
 
-    def __init__(self, parent=None):
-        super(SpecXMLDrivenFileForm, self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(SpecXMLDrivenFileForm, self).__init__(**kwargs)
         logger.debug(METHOD_ENTER_STR)
         
         self.fileDialogTitle = SELECT_SPEC_FILE_TITLE

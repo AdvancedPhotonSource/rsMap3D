@@ -3,6 +3,8 @@ Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
 USE_XPCS = False
+import logging
+logger = logging.getLogger(__name__)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
 from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_LOAD_SIGNAL, \
@@ -17,13 +19,13 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 # Input forms Looking for a way to set these up.
 from rsMap3D.gui.input.s33specscanfileform import S33SpecScanFileForm
 from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
-#from rsMap3D.gui.input.s1highenergydiffractionform import S1HighEnergyDiffractionForm
+from rsMap3D.gui.input.s1highenergydiffractionform import S1HighEnergyDiffractionForm
 try:
     from rsMap3D.gui.input.xpcsspecscanfileform import XPCSSpecScanFileForm
     USE_XPCS = True
 
 except Exception as ex:
-    print ex
+    logger.debug( ex)
     traceback.print_exc()
     USE_XPCS = False
 
@@ -40,17 +42,23 @@ class FileInputController(qtGui.QDialog):
                 name = LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL)
     inputFormChanged = qtCore.pyqtSignal(name = INPUT_FORM_CHANGED)
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, appConfig=None):
         '''
         Constructor
         '''
         super(FileInputController, self).__init__(parent)
+        self.appConfig = None
+        if not (appConfig is None):
+            self.appConfig = appConfig
+        else:
+            raise RSMap3DException("FileInputController recieved no AppConfig" +\
+                                   "object.")
         self.layout = qtGui.QVBoxLayout()
         #Build a list of fileForms
         self.fileForms = []
         self.fileForms.append(S33SpecScanFileForm)
         self.fileForms.append(S34HDFEScanFileForm)
-#        self.fileForms.append(S1HighEnergyDiffractionForm)
+        self.fileForms.append(S1HighEnergyDiffractionForm)
         if USE_XPCS:
             self.fileForms.append(XPCSSpecScanFileForm)
             
@@ -67,7 +75,8 @@ class FileInputController(qtGui.QDialog):
         self.layout.addLayout(controlLayout)
         
         self.formLayout = qtGui.QHBoxLayout()
-        self.fileFormWidget = self.fileForms[0].createInstance()
+        self.fileFormWidget = self.fileForms[0].createInstance(appConfig=\
+                                                               self.appConfig)
         #print dir(self.fileFormWidget)
         self.formLayout.addWidget(self.fileFormWidget)
         self.layout.addLayout(self.formLayout)
@@ -160,7 +169,8 @@ class FileInputController(qtGui.QDialog):
 
         for form in self.fileForms:
             if typeStr == form.FORM_TITLE:
-                self.fileFormWidget = form.createInstance()
+                self.fileFormWidget = form.createInstance(appConfig= \
+                                                          self.appConfig)
 
         self.formLayout.addWidget(self.fileFormWidget)
         self._connectSignals()

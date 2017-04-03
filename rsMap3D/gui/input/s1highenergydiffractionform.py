@@ -44,15 +44,15 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
     resetParInfo = qtCore.pyqtSignal(name=RESET_PAR_INFO)
 
     @staticmethod
-    def createInstance(parent=None):
-        return S1HighEnergyDiffractionForm(parent)
+    def createInstance(parent=None, appConfig=None):
+        return S1HighEnergyDiffractionForm(parent=parent, appConfig=appConfig)
     
-    def __init__(self, parent=None):
+    def __init__(self, **kwargs):
         '''
          constructor
          '''
-        super(S1HighEnergyDiffractionForm, self).__init__(parent)
-        logger.debug("Entering")
+        super(S1HighEnergyDiffractionForm, self).__init__( **kwargs)
+        logger.debug(METHOD_ENTER_STR)
         self.fileDialogTitle = self.HED_IMAGE_FILE_TITLE
         self.fileDialogFilter = self.HED_IMAGE_FILE_FILTER
         
@@ -65,7 +65,7 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         
         self.parFile=None
         
-        logger.debug("Exiting")
+        logger.debug(METHOD_EXIT_STR)
         
     @qtCore.pyqtSlot()
     def _browseForImageDir(self):
@@ -305,7 +305,8 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
                                     self.getDetectorDistanceOverride(), \
                                  incidentEnergyOverride = 
                                     self.getIncidentEnergyOverride(), \
-                                offsetAngle = self.getOffsetAngle() \
+                                offsetAngle = self.getOffsetAngle(), \
+                                appConfig = self.appConfig
                                 )
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)

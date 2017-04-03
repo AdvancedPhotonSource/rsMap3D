@@ -36,11 +36,11 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     SCAN_LIST_REGEXP = "((\d)+(-(\d)+)?\,( )?)+"
 
     @staticmethod
-    def createInstance(parent=None):
-        return XPCSSpecScanFileForm(parent)
+    def createInstance(parent=None, appConfig=None):
+        return XPCSSpecScanFileForm(parent=parent, appConfig=appConfig)
     
-    def __init__(self, parent=None):
-        super(XPCSSpecScanFileForm, self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(XPCSSpecScanFileForm, self).__init__(**kwargs)
 
         self.imageFileDialogFilter = XPCS_FILE_FILTER
         
@@ -124,6 +124,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
 #                                    str(self.getImmFileName()), \
                                    scanList = self.getScanList(), \
                                    transform = self.transform, \
+                                   appConfig = self.appConfig
                                   )
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)

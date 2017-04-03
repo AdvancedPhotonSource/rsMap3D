@@ -40,15 +40,15 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
     FLAT_FIELD_RADIO_NAME = "Flat Field Correction"
     
     @staticmethod
-    def createInstance(parent=None):
-        return S33SpecScanFileForm(parent)
+    def createInstance(parent=None, appConfig=None):
+        return S33SpecScanFileForm(parent = parent, appConfig=appConfig)
         
-    def __init__(self,parent=None):
+    def __init__(self, **kwargs):
         '''
         Constructor - Layout Widgets on the page and link actions
         '''
         logger.debug(METHOD_ENTER_STR)
-        super(S33SpecScanFileForm, self).__init__(parent)
+        super(S33SpecScanFileForm, self).__init__(**kwargs)
 
         #Initialize parameters
         self.projectionDirection = [0,0,1]
@@ -312,7 +312,8 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
                                    badPixelFile = \
                                       self.getBadPixelFileName(), \
                                    flatFieldFile = \
-                                      self.getFlatFieldFileName() \
+                                      self.getFlatFieldFileName(), \
+                                   appConfig = self.appConfig
                                   )
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)

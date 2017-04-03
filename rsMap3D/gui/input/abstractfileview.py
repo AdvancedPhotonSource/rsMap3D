@@ -8,6 +8,10 @@ import PyQt4.QtCore as qtCore
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOAD_STR, OK_TO_LOAD
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
     UPDATE_PROGRESS_SIGNAL
+from rsMap3D.exception.rsmap3dexception import RSMap3DException
+import logging
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+logger = logging.getLogger(__name__)
 
 class AbstractFileView(qtGui.QDialog):
     '''
@@ -24,12 +28,20 @@ class AbstractFileView(qtGui.QDialog):
                                       name=UPDATE_PROGRESS_SIGNAL)
     
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, appConfig=None, *kwargs):
         '''
         Constructor
         '''
+        logger.debug(METHOD_ENTER_STR  % str(parent) + " " + str(appConfig))        
         super(AbstractFileView, self).__init__(parent)
         self.layout = qtGui.QVBoxLayout()
+        self.appConfig = appConfig
+        if not (appConfig is None):
+            self.appConfig = appConfig
+        else:
+            raise RSMap3DException("no AppConfig object received.")
+        logger.debug(METHOD_EXIT_STR)
+        
 
     @qtCore.pyqtSlot()
     def _cancelLoadFile(self):

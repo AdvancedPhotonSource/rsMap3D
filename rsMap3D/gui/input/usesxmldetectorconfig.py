@@ -38,11 +38,11 @@ class UsesXMLDetectorConfig(AbstractFileView):
     PIX_AVG_REGEXP_1 =  "^(\d*,*)+$"
     PIX_AVG_REGEXP_2 =  "^((\d)+,*){2}$"
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, **kwargs):
         '''
         constructor
         '''
-        super(UsesXMLDetectorConfig, self).__init__(parent)
+        super(UsesXMLDetectorConfig, self).__init__(parent, **kwargs)
         logger.debug(METHOD_ENTER_STR)
         self.roixmin = 1
         self.roixmax = 680

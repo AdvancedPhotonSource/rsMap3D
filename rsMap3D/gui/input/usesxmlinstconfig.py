@@ -19,12 +19,12 @@ from rsMap3D.exception.rsmap3dexception import InstConfigException
 from rsMap3D.datasource.InstForXrayutilitiesReader import InstForXrayutilitiesReader
 
 class UsesXMLInstConfig(AbstractFileView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, **kwargs):
         '''
         constructor
         '''
         logger.debug(METHOD_ENTER_STR)
-        super(UsesXMLInstConfig, self).__init__(parent)
+        super(UsesXMLInstConfig, self).__init__(parent, **kwargs)
         self.projectionDirection = None
         self.instFileOk = False
         logger.debug(METHOD_EXIT_STR)
