@@ -12,10 +12,8 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
 import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
-#from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
-from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
     InstConfigException, DetectorConfigException, RSMap3DException
 logger = logging.getLogger(__name__)
