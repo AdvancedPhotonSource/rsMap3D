@@ -7,8 +7,10 @@ import time
 import numpy as np
 import xrayutilities as xu
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
-from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
+#from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
+#from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
@@ -55,6 +57,9 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                  detConfigFile,
                  imageDirName,
                  detectorId="GE",
+                 detectorDistanceOverride=0.0,
+                 incidentEnergyOverride=0.0,
+                 offsetAngle=0.0,
                  **kwargs):
         super(S1HighEnergyDiffractionDS, self).__init__(**kwargs)
         logger.debug(METHOD_ENTER_STR)
@@ -65,6 +70,10 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         self.detConfigFile = str(detConfigFile)
         self.imageDirName = str(imageDirName)
         self.detectorId = detectorId
+        self.detectorDistanceOverride = detectorDistanceOverride
+        self.incidentEnergyOverride = incidentEnergyOverride
+        self.offsetAngle = offsetAngle
+        
         try:
             self.scans = kwargs['scanList']
         except KeyError:
@@ -115,7 +124,10 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                           self.getDetectorPixelDirection2())))
         logger.debug("distance to detector %f, pixel Size %s" % \
                      (self.distanceToDetector, str(self.detectorPixelWidth)))
-        
+        if self.detectorDistanceOverride == 0.0:
+            detectorDistance = self.distanceToDetector
+        else:
+            detectorDistance = self.detectorDistanceOverride
         hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(),
                              self.getDetectorPixelDirection2(),
                              cch1=cch[0],
@@ -124,10 +136,10 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                              Nch2=detDims[1],
                              pwidth1=self.detectorPixelWidth[0],
                              pwidth2=self.detectorPixelWidth[1],
-                             distance = self.distanceToDetector,
+                             distance = detectorDistance,
                              Nav=nav,
                              roi=roi)
-        rsMap3DConfig = RSMap3DConfig()
+        rsMap3DConfig = RSMap3DConfigParser()
         maxImageMem = rsMap3DConfig.getMaxImageMemory()
         imageSize = detDims[0] * detDims[1]
         numImages = len(angles)
@@ -386,9 +398,12 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             #TODO
             energyData = self.parFile.getEnergy([scan,])
             logger.debug("energyData " + str(energyData))
-            
+
+            #if self.incidentEnergyOverride == 0.0:            
             self.incidentEnergy[scan] = \
                 energyData[scan][INCIDENT_ENERGY] * KEV_TO_EV
+            #else:
+            logging.debug("energyData[scan]: " + str(self.incidentEnergy[scan]))     
             _start_time = time.time()
             self.imageBounds[scan] = \
                 self.findImageQs(angles, \
