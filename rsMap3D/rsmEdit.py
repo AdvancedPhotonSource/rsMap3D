@@ -24,6 +24,7 @@ from rsMap3D.config.rsmap3dlogging import LOGGER_NAME, LOGGER_DEFAULT,\
 from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
 from rsMap3D.gui.input.fileinputcontroller import FileInputController
 from rsMap3D.gui.output.processscanscontroller import ProcessScansController
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
     
 userDir = os.path.expanduser("~")
 logConfigFile = os.path.join(userDir, LOGGER_NAME + 'Log.config')
@@ -49,13 +50,13 @@ class MainDialog(qtGui.QMainWindow):
         logger.debug(METHOD_ENTER_STR)
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
+        self.appConfig = RSMap3DConfigParser()
         self.tabs = qtGui.QTabWidget()
-#        self.fileForm =FileForm()
-#        self.fileForm = S34HDFEScanFileForm()
-        self.fileForm = FileInputController()
+        self.fileForm = FileInputController(appConfig=self.appConfig)
         self.scanForm = ScanForm()
         self.dataRange = DataRange()
-        self.processScans = ProcessScansController(parent=self)
+        self.processScans = ProcessScansController(parent=self, \
+                                                   appConfig=self.appConfig)
         self.dataExtentView = DataExtentView()
         self.fileTabIndex = self.tabs.addTab(self.fileForm, "File")
         self.dataTabIndex = self.tabs.addTab(self.dataRange, "Data Range")
