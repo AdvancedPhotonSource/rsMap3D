@@ -3,8 +3,11 @@
  See LICENSE file.
 '''
 import unittest
+import logging
+import logging.config
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 import os
+from rsMap3D.config.rsmap3dlogging import LOGGER_NAME
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.join(THIS_DIR, "../../resources/spec")
@@ -14,6 +17,11 @@ INST_CONFIG_1 = os.path.join(THIS_DIR,
                              "../../resources/33BM-instForXrayutilities.xml")
 DET_CONFIG = os.path.join(THIS_DIR, "../../resources/33bmDetectorGeometry.xml")
 CURRENT_DETECTOR = "Pilatus"
+configDir = os.path.join(THIS_DIR, '../../resources/config')
+logConfigFile = os.path.join(configDir, LOGGER_NAME + 'Log.test.config')
+print logConfigFile
+logging.config.fileConfig(logConfigFile)
+logger = logging.getLogger(LOGGER_NAME)
 
 class Test(unittest.TestCase):
 
