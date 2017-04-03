@@ -69,22 +69,10 @@ class MainDialog(qtGui.QMainWindow):
         self.setCentralWidget(self.tabs)
 
         #Connect signals
-#         self.connect(self, \
-#                      qtCore.SIGNAL(BLOCK_TABS_FOR_LOAD_SIGNAL), \
-#                      self._blockTabsForLoad)
         self.unblockTabsForLoad.connect(self._unblockTabsForLoad)
-#         self.connect(self, \
-#                      qtCore.SIGNAL(FILE_ERROR_SIGNAL), \
-#                      self._showFileError)
         self.tabs.currentChanged[int].connect(self._tabChanged)
         self.fileForm.fileError[str].connect(self._showFileError)
         self.fileForm.blockTabsForLoad.connect(self._blockTabsForLoad)
-#         self.connect(self.fileForm, \
-#                      qtCore.SIGNAL(SET_SCAN_LOAD_OK_SIGNAL), \
-#                      self.fileForm.setLoadOK)
-#         self.connect(self, \
-#                      qtCore.SIGNAL(SET_SCAN_LOAD_CANCEL_SIGNAL), \
-#                      self.fileForm.setCancelOK)
         self.fileForm.loadDataSourceToScanForm.\
             connect(self._loadDataSourceToScanForm)
         self.fileForm.inputFormChanged.connect(self.updateOutputForms)
@@ -96,7 +84,6 @@ class MainDialog(qtGui.QMainWindow):
             self.dataExtentView.clearRenderWindow)
         self.scanForm.renderBoundsSignal[object].connect(
             self.dataExtentView.renderBounds)
-#         self.processScans.processError[str].connect(self._showProcessError)
         self.processScans.blockTabsForProcess.connect(self._blockTabsForProcess)
         self.processScans.unblockTabsForProcess.connect( \
             self._unblockTabsForProcess)
