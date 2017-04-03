@@ -7,7 +7,6 @@ from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
         ScanDataMissingException
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
-from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.datasource.pilatusbadpixelfile import PilatusBadPixelFile
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 from rsMap3D.datasource.specxmldrivendatasource import SpecXMLDrivenDataSource
@@ -89,7 +88,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             else:
                 self.kappa_inverted = False
         except Exception as ex:
-            raise RSMap3DConfig("Error trying to get parameter for " + \
+            raise RSMap3DException("Error trying to get parameter for " + \
                                 "sampleAngleMappingFunction " + \
                                 "_calc_eulerian_from_kappa in inst config " + \
                                 "file\n" + \
