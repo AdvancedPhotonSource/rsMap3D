@@ -16,6 +16,8 @@ from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
 import h5py
 from rsMap3D.datasource.abstractDataSource import AbstractDataSource
 from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
+#from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 from rsMap3D.datasource.DetectorGeometry.detectorgeometryforescan \
     import DetectorGeometryForEScan
 
@@ -61,7 +63,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         
 
     def findImageQs(self):
-        rsMap3DCongfig = RSMap3DConfig()
+        rsMap3DCongfig = RSMap3DConfigParser()
         maxImageMem = rsMap3DCongfig.getMaxImageMemory()
         imageSize = self.getDetectorDimensions()[0] * \
                 self.getDetectorDimensions()[1]
