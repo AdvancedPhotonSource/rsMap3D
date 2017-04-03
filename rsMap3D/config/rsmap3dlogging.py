@@ -23,5 +23,5 @@ LOGGER_DEFAULT = {
                },
    }
 
-METHOD_ENTER_STR = "Enter"
-METHOD_EXIT_STR = "Exit"
+METHOD_ENTER_STR = "Enter %s\n-------------------"
+METHOD_EXIT_STR = "Exit %s\n---------------------"
