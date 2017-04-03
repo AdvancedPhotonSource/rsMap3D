@@ -2,6 +2,7 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 try:
     from pyimm.immheader import readHeader, getNumberOfImages
     from pyimm.GetImmStartIndex import GetStartPositions
@@ -16,8 +17,7 @@ from spec2nexus.spec import SpecDataFile
 import xrayutilities as xu
 import numpy as np
 import logging
-from rsMap3D.gui.rsm3dcommonstrings import LOGGER_NAME
-logger = logging.getLogger(LOGGER_NAME + 'datasource.xpcsdatasource')
+logger = logging.getLogger(__name__)
 
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException
 from rsMap3D.datasource.Sector33SpecDataSource import IMAGE_DIR_MERGE_STR,\
@@ -45,7 +45,9 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                                  detConfigFile,
                                                  **kwargs)
 #         self.immDataFile = immDataFile
+        logger.debug(METHOD_ENTER_STR)
         self.cancelLoad = False
+        logger.debug(METHOD_EXIT_STR)
 
     
     def getGeoAngles(self, scan, angleNames):
@@ -73,6 +75,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         return numImages
         
     def loadSource(self, mapHKL=False):
+        logger.debug(METHOD_ENTER_STR)
         #Load up the instrument config XML file
         self.loadInstrumentXMLConfig()
         #Load up the detector configuration file
@@ -186,6 +189,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
 #                                         IMAGE_DIR_MERGE_STR % self.projectName))
         #Load config information from the imm file
         self.availableScanTypes = set(self.scanType.values())
+        logger.debug(METHOD_EXIT_STR)
         
     def rawmap(self, scans, mask=None):
     
