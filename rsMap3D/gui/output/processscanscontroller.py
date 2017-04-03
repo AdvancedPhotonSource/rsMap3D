@@ -29,13 +29,14 @@ class ProcessScansController(qtGui.QDialog):
     outputFormChanged = Signal(name=OUTPUT_FORM_CHANGED)
     processError = Signal(str, name=PROCESS_ERROR_SIGNAL)
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, appConfig=None):
         '''
         Constructor
         '''
         super(ProcessScansController, self).__init__(parent)
         
         self.parent = parent
+        self.appConfig = appConfig
         self.Mapper = None
         self.layout = qtGui.QVBoxLayout()
         self.outputForms = []
