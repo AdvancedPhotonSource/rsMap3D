@@ -8,6 +8,8 @@ from vtk.util import numpy_support
 import vtk
 from rsMap3D.gui.rsm3dcommonstrings import ASCII_OUTPUT
 VTI_WRITER_MERGE_STR = "%s_S%d.vti"
+import logging
+logger = logging.getLogger(__name__)
 
 class VTIGridWriter(AbstractGridWriter):
     
@@ -53,8 +55,11 @@ class VTIGridWriter(AbstractGridWriter):
         qz0 = self.qz.min()
         dqz = (self.qz.max()-qz0)/self.nz
         
+        logger.debug("self.gridData.shape: " + str(self.gridData.shape))
         da = np.transpose(self.gridData).reshape(self.gridData.size)
+        logger.debug("da.shape: " + str(da.shape)) 
         data_array = numpy_support.numpy_to_vtk(da)
+        logger.debug("self.gridData.shape: " + str(self.gridData.shape))
         
         image_data = vtk.vtkImageData()
         image_data.SetOrigin(qx0,qy0, qz0)
