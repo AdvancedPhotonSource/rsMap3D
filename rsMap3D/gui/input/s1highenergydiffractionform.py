@@ -266,6 +266,16 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
             self.detectorDistanceActive.setText(str(self.detectorDistance))
         logger.debug(METHOD_EXIT_STR)
         
+    def getOffsetAngle(self):
+        '''
+        returns an offset angle which will be added to the motor angle on the
+        spinning axis
+        '''
+        logger.debug(METHOD_ENTER_STR)
+        offsetAngle = float(self.offsetAngleTxt.text())
+        logger.debug(METHOD_EXIT_STR % str(offsetAngle))
+        return offsetAngle
+    
     def getDataSource(self):
         logger.debug(METHOD_ENTER_STR)
         if self.getOutputType() == self.SIMPLE_GRID_MAP_STR:
@@ -276,6 +286,7 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
                                    self.getProjectionDirection())
         else:
             self.transform = None
+        
         self.dataSource = \
             S1HighEnergyDiffractionDS(str(self.getProjectDir()), \
                                    str(self.getProjectName()), \
@@ -289,7 +300,12 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
                                    pixelsToAverage = \
                                     [1,1], \
                                  badPixelFile = None, \
-                                 flatFieldFile = None \
+                                 flatFieldFile = None, \
+                                 detectorDistanceOverride = \
+                                    self.getDetectorDistanceOverride(), \
+                                 incidentEnergyOverride = 
+                                    self.getIncidentEnergyOverride(), \
+                                offsetAngle = self.getOffsetAngle() \
                                 )
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)
@@ -298,9 +314,33 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         logger.debug(METHOD_EXIT_STR)
         return self.dataSource
     
+    def getDetectorDistanceOverride(self):
+        '''
+        return a value to override the detector distance in the detector
+        config file
+        '''
+        logger.debug(METHOD_ENTER_STR)
+        detectorDistanceOverride = \
+            float(self.detectorDistanceOverrideTxt.text())
+        logger.debug(METHOD_ENTER_STR % str(detectorDistanceOverride))
+        return detectorDistanceOverride
+    
+    
+    
+    
     def getImageDirName(self):
         return str(self.imageDirTxt.text())
         
+    def getIncidentEnergyOverride(self):
+        '''
+        get a value to override the energy read from the instrument par file 
+        used to load up the values associated with differrent scans.
+        '''
+        logger.debug(METHOD_ENTER_STR)
+        incidentEnergyOverride = float(self.incidentEnergyOverrideTxt.text())
+        logger.debug(METHOD_EXIT_STR % str(incidentEnergyOverride))
+        return incidentEnergyOverride
+ 
     def getScanList(self):
         logger.debug(METHOD_ENTER_STR)
         scan = int (self.parFileLineTxt.value())
