@@ -14,7 +14,6 @@ import numpy as np
 import xrayutilities as xu
 import time
 import sys,traceback
-from rsMap3D.datasource.InstForXrayutilitiesReader import SAMPLE_ANGLE_MAP_FUNCTION
 import logging
 try:
     from PIL import Image
@@ -483,8 +482,8 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                     # add data to intensity array
                     intensity[foundIndex+offset,:,:] = img2
                     for i in xrange(len(angleNames)):
-                        logger.debug("appending angles to angle2 " + 
-                                     str(scanAngle1[i][ind]))
+#                         logger.debug("appending angles to angle2 " + 
+#                                      str(scanAngle1[i][ind]))
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
             if len(scanAngle2[0]) > 0:
