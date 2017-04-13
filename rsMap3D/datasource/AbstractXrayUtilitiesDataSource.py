@@ -20,12 +20,12 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
                  roi=None, 
                  pixelsToAverage=[1,1],
                  badPixelFile=None,
-                 flatFieldFile=None):
+                 flatFieldFile=None, **kwargs):
         '''
         Constructor
         '''
-        super(AbstractXrayutilitiesDataSource, self).__init__()
-        self.sampleCirclesDirections = None
+        super(AbstractXrayutilitiesDataSource, self).__init__(**kwargs)
+        self.sampleCircleDirections = None
         self.detectorCircleDirections = None
         self.primaryBeamDirection = None
         self.incidentWavelength = float('nan')
@@ -232,7 +232,7 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
         '''
         Return a list of sample circle directions.  
         '''
-        return self.sampleCirclesDirections
+        return self.sampleCircleDirections
     
     def getSampleSurfaceNormalDirection(self):
         '''

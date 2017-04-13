@@ -8,6 +8,7 @@ from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
     NEGATIVE_INFINITY, XMIN_INDEX, XMAX_INDEX, YMIN_INDEX, YMAX_INDEX, \
     ZMIN_INDEX, ZMAX_INDEX
 import logging
+from rsMap3D.exception.rsmap3dexception import RSMap3DException
 logger = logging.getLogger(__name__)
 
 class AbstractDataSource(object):
@@ -18,10 +19,17 @@ class AbstractDataSource(object):
     '''
 
 
-    def __init__(self):
+    def __init__(self, appConfig=None):
         '''
         Constructor.  Initialize members needed for calls made by this class.
         '''
+        self.appConfig = None
+        if not (appConfig is None):
+            self.appConfig = appConfig
+        else:
+            raise RSMap3DException("no AppConfig object received.")
+        
+        
         self.availableScans = []
         self.imageBounds = {}
         self.imageToBeUsed = {}
