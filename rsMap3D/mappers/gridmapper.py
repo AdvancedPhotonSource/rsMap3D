@@ -6,9 +6,9 @@
 import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 import numpy as np
-from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from xrayutilities.exception import InputError
-
+import logging
+logger = logging.getLogger(__name__)
 
 class QGridMapper(AbstractGridMapper):
     '''
@@ -19,12 +19,13 @@ class QGridMapper(AbstractGridMapper):
                  outputType, \
                  nx=200, ny=201, nz=202, \
                  transform = None, \
-                 gridWriter = None):
+                 gridWriter = None, **kwargs):
         super(QGridMapper, self).__init__(dataSource, \
                  outputFileName, \
                  nx=nx, ny=ny, nz=nz, \
                  transform = transform, \
-                 gridWriter = gridWriter)
+                 gridWriter = gridWriter, \
+                 **kwargs)
         self.outputType = outputType
         
     def getFileInfo(self):
@@ -40,6 +41,7 @@ class QGridMapper(AbstractGridMapper):
     '''
     This map provides an x, y, z grid of the data.
     '''
+    #@profile
     def processMap(self, **kwargs):
         """
         read ad frames and grid them in reciprocal space
@@ -47,22 +49,21 @@ class QGridMapper(AbstractGridMapper):
     
         **kwargs are passed to the rawmap function
         """
-        rsMap3DConfig = RSMap3DConfig()
-        maxImageMem = rsMap3DConfig.getMaxImageMemory()
+        maxImageMem = self.appConfig.getMaxImageMemory()
         gridder = xu.Gridder3D(self.nx, self.ny, self.nz)
         gridder.KeepData(True)
         rangeBounds = self.dataSource.getRangeBounds()
         try:
-            # xrayutilities 1.0.6 and below
-            gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
-                              (rangeBounds[2], rangeBounds[3]), 
-                              (rangeBounds[4], rangeBounds[5]), 
-                              True)
-        except:
             # repository version or xrayutilities > 1.0.6
             gridder.dataRange(rangeBounds[0], rangeBounds[1], 
                               rangeBounds[2], rangeBounds[3], 
                               rangeBounds[4], rangeBounds[5], 
+                              True)
+        except:
+            # xrayutilities 1.0.6 and below
+            gridder.dataRange((rangeBounds[0], rangeBounds[1]), 
+                              (rangeBounds[2], rangeBounds[3]), 
+                              (rangeBounds[4], rangeBounds[5]), 
                               True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
@@ -103,8 +104,8 @@ class QGridMapper(AbstractGridMapper):
                         except InputError as ex:
                             print "Wrong Input to gridder"
                             print "qx Size: " + str( qx.shape)
-                            print "qy Size: " + str( qx.shape)
-                            print "qz Size: " + str( qx.shape)
+                            print "qy Size: " + str( qy.shape)
+                            print "qz Size: " + str( qz.shape)
                             print "intensity Size: " + str(intensity.shape)
                             raise InputError(ex)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder

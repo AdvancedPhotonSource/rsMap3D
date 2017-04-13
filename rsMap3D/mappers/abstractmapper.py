@@ -23,7 +23,8 @@ class AbstractGridMapper(object):
                  outputFileName, \
                  nx=200, ny=201, nz=202, \
                  transform = None, \
-                 gridWriter = None):
+                 gridWriter = None,
+                 appConfig = None):
         '''
         Constructor
         :param dataSource: source of scan data
@@ -33,6 +34,12 @@ class AbstractGridMapper(object):
         :param nz: number of points in z direction for griidder
         :param transform: Transform to be applied to the axes before gridding
         '''
+        self.appConfig = None
+        if not (appConfig is None):
+            self.appConfig = appConfig
+        else:
+            raise RSMap3DException("no AppConfig object received.")
+
         self.dataSource = dataSource
         self.outputFileName = outputFileName
         self.nx = nx
@@ -65,7 +72,6 @@ class AbstractGridMapper(object):
         print 'qx: ', qx.min(), ' .... ', qx.max()
         print 'qy: ', qy.min(), ' .... ', qy.max()
         print 'qz: ', qz.min(), ' .... ', qz.max()
-        
         self.gridWriter.setData(qx, qy, qz, gint)
         self.gridWriter.setFileInfo(self.getFileInfo())
         self.gridWriter.write()
