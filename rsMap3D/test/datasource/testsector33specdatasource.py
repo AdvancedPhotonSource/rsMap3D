@@ -8,6 +8,7 @@ import logging.config
 from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
 import os
 from rsMap3D.config.rsmap3dlogging import LOGGER_NAME
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.join(THIS_DIR, "../../resources/spec")
@@ -27,11 +28,13 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
+        appConfig = RSMap3DConfigParser()
         self.dataSource = Sector33SpecDataSource(PROJECT_DIR, \
                                                  PROJECT_NAME, \
                                                  PROJECT_EXT, \
                                                  INST_CONFIG_1, \
-                                                 DET_CONFIG) 
+                                                 DET_CONFIG, \
+                                                 appConfig=appConfig)
         self.dataSource.setCurrentDetector(CURRENT_DETECTOR)
         self.dataSource.loadSource()
 

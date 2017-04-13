@@ -6,6 +6,7 @@ Created on Sep 5, 2014
 import os
 import unittest
 from rsMap3D.datasource.sector34nexusescansource import Sector34NexusEscanSource
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,10 +43,12 @@ class Test(unittest.TestCase):
         self.projectExtension = ".h5"
         self.detConfigFile = os.path.join(THIS_DIR,
           "../../resources/34-id-escan-compare/geoN_2016-02-17_18-11-38.xml")
+        appConfig = RSMap3DConfigParser()
         self.datasource = Sector34NexusEscanSource(self.projectDir, \
                                               self.projectName, \
                                               self.projectExtension, \
-                                              self.detConfigFile)
+                                              self.detConfigFile, \
+                                              appConfig=appConfig)
         
         self.datasource.loadDetectorConfig()
         self.datasource.detectorROI= [1,2048, 1, 2048]

@@ -5,6 +5,7 @@
 import unittest
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource import \
     AbstractXrayutilitiesDataSource
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 SPEC_FILE = "../../resources/spec/CB_140303A_1.spec"
 INST_CONFIG_1 = "../../resources/33BM-instForXrayutilities.xml"
@@ -14,10 +15,9 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.dataSource = TestDataSource(SPEC_FILE, \
-                                         INST_CONFIG_1, \
-                                         DET_CONFIG) 
-                                                    
+        appConfig = RSMap3DConfigParser()
+        self.dataSource = TestDataSource(appConfig=appConfig) 
+                                                 
 
 
     def tearDown(self):
@@ -42,6 +42,10 @@ class Test(unittest.TestCase):
 
 
 class TestDataSource(AbstractXrayutilitiesDataSource):
+
+    def __init__(self, **kwargs):
+        super(TestDataSource, self).__init__(**kwargs)
+        
     def loadSource(self):
         return
         
