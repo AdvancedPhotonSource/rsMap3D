@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(name='rsMap3D',
-      version='1.0.19',
+      version='1.0.20',
       description='Python Program to map xray diffraction data into ' + \
                     'reciprocal space map',
       author = 'John Hammonds, Christian Schleputz',
