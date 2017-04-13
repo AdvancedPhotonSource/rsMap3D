@@ -11,6 +11,7 @@ import PyQt4.QtTest as qtTest
 from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm \
     as AGOutForm
 from rsMap3D.gui.output.abstractgridoutputform import INITIAL_DIM as INITIAL_DIM
+from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 app = qtGui.QApplication(sys.argv)
 
@@ -18,7 +19,8 @@ ZERO_INT = 0
 
 class TestAbstractGridOutputView(unittest.TestCase):
     def setUp(self):
-        self.form = TestGridFileForm(parent=None)
+        self.appConfig = RSMap3DConfigParser()
+        self.form = TestGridFileForm(parent=None, appConfig=self.appConfig)
         
     def test_defaults(self):
         self.assertEqual(self.form.runButton.isEnabled(), True)
@@ -53,8 +55,8 @@ class TestAbstractGridOutputView(unittest.TestCase):
         
         
 class TestGridFileForm(AGOutForm):
-    def __init__(self, parent=None):
-        super(TestGridFileForm,self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(TestGridFileForm,self).__init__(**kwargs)
         layout = qtGui.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
