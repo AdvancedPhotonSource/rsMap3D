@@ -5,12 +5,10 @@
 import logging
 import time
 import numpy as np
+
 import xrayutilities as xu
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
-#from rsMap3D.config.rsmap3dconfig import RSMap3DConfig
 from rsMap3D.mappers.abstractmapper import ProcessCanceledException
-from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
-#from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
@@ -73,7 +71,6 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         self.detectorDistanceOverride = detectorDistanceOverride
         self.incidentEnergyOverride = incidentEnergyOverride
         self.offsetAngle = offsetAngle
-        
         try:
             self.scans = kwargs['scanList']
         except KeyError:
@@ -92,36 +89,37 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         self.currentDetector = detectorId
         logger.debug(METHOD_EXIT_STR)
 
+    @profile
     def findImageQs(self, angles, ub, en):
         logger.debug(METHOD_ENTER_STR)
         logger.debug("sampleCircleDirections: " + \
-                     str(self.getSampleCircleDirections()))
+                     str(self.sampleCircleDirections))
         logger.debug("detectorCircleDirections: " + \
-                     str(self.getDetectorCircleDirections()))
+                     str(self.detectorCircleDirections))
         logger.debug("primaryBeamDirection: " + \
-                     str(self.getPrimaryBeamDirection()))
-        qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), 
-                                          self.getDetectorCircleDirections(), 
-                                          self.getPrimaryBeamDirection())
+                     str(self.primaryBeamDirection))
+        qconv = xu.experiment.QConversion(self.sampleCircleDirections, 
+                                          self.detectorCircleDirections, 
+                                          self.primaryBeamDirection)
         logger.debug("en: " + str(en))
         logger.debug("qconv: " + str(qconv))
         logger.debug("inplaneReferenceDirection: " + \
-                     str(self.getInplaneReferenceDirection()))
+                     str(self.sampleInplaneReferenceDirection))
         logger.debug("sampleSurfaceNormalDirection: " + \
-                     str(self.getSampleSurfaceNormalDirection()))
-        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), 
-                       self.getSampleSurfaceNormalDirection(), 
+                     str(self.sampleSurfaceNormalDirection))
+        hxrd = xu.HXRD(self.sampleInplaneReferenceDirection, 
+                       self.sampleSurfaceNormalDirection, 
                        en=en, 
                        qconv=qconv)
         
-        cch = self.getDetectorCenterChannel()
-        nav = self.getNumPixelsToAverage()
-        roi = self.getDetectorROI()
-        detDims = self.getDetectorDimensions()
+        cch = self.detectorCenterChannel
+        nav = self.numPixelsToAverage
+        roi = self.detectorROI
+        detDims = self.detectorDimensions
         
-        logger.debug("pixeelDirections: " + 
-                     str((self.getDetectorPixelDirection1(), 
-                          self.getDetectorPixelDirection2())))
+        logger.debug("pixelDirections: " + 
+                     str((self.detectorPixelDirection1, 
+                          self.detectorPixelDirection2)))
         logger.debug("distance to detector %f, pixel Size %s" % \
                      (self.distanceToDetector, str(self.detectorPixelWidth)))
         if self.detectorDistanceOverride == 0.0:
@@ -139,8 +137,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                              distance = detectorDistance,
                              Nav=nav,
                              roi=roi)
-        rsMap3DConfig = RSMap3DConfigParser()
-        maxImageMem = rsMap3DConfig.getMaxImageMemory()
+        maxImageMem = self.appConfig.getMaxImageMemory()
         imageSize = detDims[0] * detDims[1]
         numImages = len(angles)
         if imageSize*4*numImages <= maxImageMem:
@@ -192,11 +189,11 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 lastImageInPass = (thisPass+1)*numImages/nPasses
                 logger.debug("firstImageInPass %d, lastImageInPass %d" %
                              (firstImageInPass, lastImageInPass))
+                imageList = xrange(firstImageInPass, lastImageInPass)
                 angleList = []
                 #logger.debug("angles " + str(angles) )
                 for i in range(len(angles[0])):
-                    logger.debug("angles in pass " + str(angles[firstImageInPass:lastImageInPass,i]) )
-                    angleList.append(angles[firstImageInPass:lastImageInPass,i])
+                    angleList.append(angles[imageList,i])
                 logger.debug("angleList " + str(angleList) )
                 logger.debug("roi " + str(roi))
                 logger.debug("nav " + str(nav))
@@ -205,7 +202,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                                              roi=roi, \
                                              Nav=nav)
                 else:
-                    qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
+                    qx, qy, qz = hxrd.Ang2Q.area(*angleList , \
                                              roi=roi, \
                                              Nav=nav, \
                                              UB = ub)
@@ -215,16 +212,17 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                              str((qxTrans,qyTrans,qzTrans)))     
                 
                 idx = range(len(qxTrans))
-                [xmin.append(np.min(qxTrans[i])) for i in idx] 
-                [xmax.append(np.max(qxTrans[i])) for i in idx] 
-                [ymin.append(np.min(qyTrans[i])) for i in idx] 
-                [ymax.append(np.max(qyTrans[i])) for i in idx] 
-                [zmin.append(np.min(qzTrans[i])) for i in idx] 
-                [zmax.append(np.max(qzTrans[i])) for i in idx] 
-                
+                # Using Maps
+                xmin.extend(map(np.min, qxTrans))
+                xmax.extend(map(np.max, qxTrans))
+                ymin.extend(map(np.min, qyTrans))
+                ymax.extend(map(np.max, qyTrans))
+                zmin.extend(map(np.min, qzTrans))
+                zmax.extend(map(np.max, qzTrans))
+                ####
         logger.debug(METHOD_EXIT_STR + str((xmin, xmax, ymin, ymax, zmin, zmax)) ) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
-        
+    
     def getGeoAngles(self, scan): 
         angles = np.ones((self.angleParams[scan][NFRAMES], 3))
         logger.debug(METHOD_ENTER_STR)
@@ -323,7 +321,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         try:
             self.instConfig = \
                 InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-            self.sampleCirclesDirections = \
+            self.sampleCircleDirections = \
                 self.instConfig.getSampleCircleDirections()
             self.detectorCircleDirections = \
                 self.instConfig.getDetectorCircleDirections()
@@ -416,6 +414,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         logger.debug(METHOD_EXIT_STR)
         
         
+    #@profile
     def rawmap(self, scans, angledelta=[0,0,0,0],
                adframes=None, mask=None ):
         logger.debug(METHOD_ENTER_STR)
@@ -426,41 +425,41 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             
         intensity = np.array([])
         
-        qconv = xu.experiment.QConversion(self.getSampleCircleDirections(), \
-                                    self.getDetectorCircleDirections(), \
-                                    self.getPrimaryBeamDirection())
+        qconv = xu.experiment.QConversion(self.sampleCircleDirections, \
+                                    self.detectorCircleDirections, \
+                                    self.primaryBeamDirection)
     
-        en = self.getIncidentEnergy()
-        hxrd = xu.HXRD(self.getInplaneReferenceDirection(), \
-                       self.getSampleSurfaceNormalDirection(), \
-                       en=en[self.getAvailableScans()[0]], \
+        en = self.incidentEnergy
+        hxrd = xu.HXRD(self.sampleInplaneReferenceDirection, \
+                       self.sampleSurfaceNormalDirection, \
+                       en=en[self.availableScans[0]], \
                        qconv=qconv)
        
         # initialize area detector properties
-        if (self.getDetectorPixelWidth() != None ) and \
-            (self.getDistanceToDetector() != None):
-            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
-                self.getDetectorPixelDirection2(), \
-                cch1=self.getDetectorCenterChannel()[0], \
-                cch2=self.getDetectorCenterChannel()[1], \
-                Nch1=self.getDetectorDimensions()[0], \
-                Nch2=self.getDetectorDimensions()[1], \
-                pwidth1=self.getDetectorPixelWidth()[0], \
-                pwidth2=self.getDetectorPixelWidth()[1], \
-                distance=self.getDistanceToDetector(), \
-                Nav=self.getNumPixelsToAverage(), \
-                roi=self.getDetectorROI()) 
+        if (self.detectorPixelWidth != None ) and \
+            (self.distanceToDetector != None):
+            hxrd.Ang2Q.init_area(self.detectorPixelDirection1, \
+                self.detectorPixelDirection2, \
+                cch1=self.detectorCenterChannel[0], \
+                cch2=self.detectorCenterChannel[1], \
+                Nch1=self.detectorDimensions[0], \
+                Nch2=self.detectorDimensions[1], \
+                pwidth1=self.detectorPixelWidth[0], \
+                pwidth2=self.detectorPixelWidth[1], \
+                distance=self.distanceToDetector, \
+                Nav=self.numPixelsToAverage, \
+                roi=self.detectorROI) 
         else:
-            hxrd.Ang2Q.init_area(self.getDetectorPixelDirection1(), \
-                self.getDetectorPixelDirection2(), \
-                cch1=self.getDetectorCenterChannel()[0], \
-                cch2=self.getDetectorCenterChannel()[1], \
-                Nch1=self.getDetectorDimensions()[0], \
-                Nch2=self.getDetectorDimensions()[1], \
-                chpdeg1=self.getDetectorChannelsPerDegree()[0], \
-                chpdeg2=self.getDetectorChannelsPerDegree()[1], \
-                Nav=self.getNumPixelsToAverage(), 
-                roi=self.getDetectorROI()) 
+            hxrd.Ang2Q.init_area(self.detectorPixelDirection1, \
+                self.detectorPixelDirection2, \
+                cch1=self.detectorCenterChannel[0], \
+                cch2=self.detectorCenterChannel[1], \
+                Nch1=self.detectorDimensions[0], \
+                Nch2=self.getDetectorDimensions[1], \
+                chpdeg1=self.detectorChannelsPerDegree[0], \
+                chpdeg2=self.detectorChannelsPerDegree[1], \
+                Nav=self.numPixelsToAverage, 
+                roi=self.detectorROI) 
         
         angleNames = self.getAngles()
         scanAngle = {}
@@ -468,7 +467,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             scanAngle[i] = np.array([])
         
         offset = 0
-        imageToBeUsed = self.getImageToBeUsed()
+        imageToBeUsed = self.imageToBeUsed
         for scannr in scans:
             if self.haltMap:
                 raise ProcessCanceledException("ProcessCanceled")
@@ -488,18 +487,19 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                                       self.fileParams[scannr][IMAGE_NUMBER] +
                                       "." +
                                       self.fileParams[scannr][FILE_EXT])
-            
+            imageNameTemplate = str(imageFilePrefix) +'.frame%d.cor'
             if mask_was_none:
-                mask = [True] * len(self.getImageToBeUsed()[scannr])
+                mask = [True] * len(self.imageToBeUsed[scannr])
                 
             for ind in xrange(len(angles[:,0])):
                 if imageToBeUsed[scannr][ind] and mask[ind]:
-                    imageName = str(imageFilePrefix) +'.frame%d.cor' % (ind+1)
+                    imageName = imageNameTemplate % (ind+1)
                     logger.debug("processing image file " + imageName)
                     image = np.empty((self.detectorDimensions[0],
                                       self.detectorDimensions[1]),
                                      np.uint32)
-                    image.data[:] = open(imageName).read()
+                    with open(imageName) as f:
+                        image.data[:] = f.read()
                     img2 = xu.blockAverage2D(image,
                                              self.getNumPixelsToAverage()[0],
                                              self.getNumPixelsToAverage()[1],
@@ -508,11 +508,13 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                         imagesToProcess = [imageToBeUsed[scannr][i] and mask[i] \
                                 for i in range(len(imageToBeUsed[scannr]))]
                         if not intensity.shape[0]:
+                            # For first scan
                             intensity = np.zeros( \
                                 (np.count_nonzero(imagesToProcess),) + \
                                 img2.shape)
                             arrayInitializedForScan = True
-                        else:  
+                        else:
+                            # Need to expand for addditional scans  
                             offset = intensity.shape[0]
                             intenstity = np.concatenate( \
                                 (intensity, \
@@ -538,12 +540,12 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         logger.debug("Before hxrd.Ang2Q.area %s" %str(angleList))
         if self.ubMatrix[scans[0]] == None:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
-                            roi=self.getDetectorROI(), 
-                            Nav=self.getNumPixelsToAverage())
+                            roi=self.detectorROI, 
+                            Nav=self.numPixelsToAverage)
         else:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
-                            roi=self.getDetectorROI(), 
-                            Nav=self.getNumPixelsToAverage(), \
+                            roi=self.detectorROI, 
+                            Nav=self.numPixelsToAverage, \
                             UB = self.ubMatrix[scans[0]])
         logger.debug("After hxrd.Ang2Q.area")
                 
@@ -618,17 +620,6 @@ class S1ParameterFile():
         for lineNum in lineNums:
             logger.debug("Processing line: " + str(lineNum))
             angleData = {}
-#            angleData[S1_MOTOR] = []
-#            angleData[S1_START_POS] = []
-#            angleData[S1_END_POS] = []
-#            angleData[IMAGE_PREFIX] = []
-#            angleData[S2_MOTOR] = []
-#            angleData[S2_START_POS] = []
-#            angleData[S2_END_POS] = []
-#            angleData[D1_MOTOR] = []
-#            angleData[D1_START_POS] = []
-#            angleData[D1_END_POS] = []
-#            angleData[NFRAMES] = []
             
             angleData[S1_MOTOR] = self.lines[lineNum-1][S1_MOTOR]
             angleData[S1_START_POS] = float(self.lines[lineNum-1][S1_START_POS])
@@ -658,9 +649,6 @@ class S1ParameterFile():
     def getFileData(self, lineNums):
         scanFileData = {}
         fileData = {}
-#         fileData[IMAGE_PREFIX] = []
-#         fileData[IMAGE_NUMBER] = []
-#         fileData[FILE_EXT] = []
         for lineNum in lineNums:
             fileData[IMAGE_PREFIX] = (self.lines[lineNum-1][IMAGE_PREFIX])
             fileData[IMAGE_NUMBER] = (self.lines[lineNum-1][IMAGE_NUMBER])
