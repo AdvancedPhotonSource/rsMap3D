@@ -21,11 +21,11 @@ class ProcessVTIOutputForm(AbstractOutputView):
     FORM_TITLE = "VTI Grid Output"
     
     @staticmethod
-    def createInstance(parent=None):
-        return ProcessVTIOutputForm()
+    def createInstance(parent=None, appConfig=None):
+        return ProcessVTIOutputForm(parent=parent, appConfig=appConfig)
     
-    def __init__(self, parent=None):
-        super(ProcessVTIOutputForm, self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(ProcessVTIOutputForm, self).__init__(**kwargs)
         logger.debug(METHOD_ENTER_STR)
         self.mapper = None
         layout = qtGui.QVBoxLayout()
@@ -210,7 +210,8 @@ class ProcessVTIOutputForm(AbstractOutputView):
                                      outType, \
                                      nx=nx, ny=ny, nz=nz, \
                                      transform = transform, \
-                                     gridWriter = gridWriter)
+                                     gridWriter = gridWriter,
+                                     appConfig=self.appConfig)
             self.mapper.setGridWriter(VTIGridWriter())
             self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()

@@ -29,15 +29,15 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
     XPCS_GRID_LOCS_FILTER = "*.csv"
     
     @staticmethod
-    def createInstance(parent=None):
+    def createInstance(parent=None, appConfig=None):
         '''
         A static method to create an instance of this class.  The UI selects which processor method to use 
         from a menu so this method allows creating an instance without knowing what to create ahead of time. 
         '''
-        return ProcessXpcsGridLocationForm()
+        return ProcessXpcsGridLocationForm(parent=parent, appConfig=appConfig)
     
-    def __init__(self, parent=None):
-        super(ProcessXpcsGridLocationForm, self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(ProcessXpcsGridLocationForm, self).__init__(**kwargs)
         self.mapper = None
         layout = qtGui.QVBoxLayout()
         self.dataBox = self._createDataBox()

@@ -25,11 +25,12 @@ class AbstractOutputView (qtGui.QDialog):
     setFileName = Signal(str, name=SET_FILE_NAME_SIGNAL)
 #     processError = Signal(str, name = PROCESS_ERROR_SIGNAL)
         
-    def __init__(self, parent=None):
+    def __init__(self, appConfig = None, **kwargs):
         '''
         Constructor
         '''
-        super(AbstractOutputView,self).__init__(parent)
+        super(AbstractOutputView,self).__init__(**kwargs)
+        self.appConfig = appConfig
         self.dataBox = None
         
     @Slot()

@@ -20,18 +20,18 @@ class ProcessImageStackForm(AbstractGridOutputForm):
     FORM_TITLE = "Image Stack Output"
     
     @staticmethod
-    def createInstance(parent=None):
+    def createInstance(parent=None, appConfig=None):
         '''
         A static method to create an instance of this class.  The UI selects which processor method to use 
         from a menu so this method allows creating an instance without knowing what to create ahead of time. 
         '''
-        return ProcessImageStackForm(parent)
+        return ProcessImageStackForm(parent=parent, appConfig=appConfig)
 
-    def __init__(self,parent=None):
+    def __init__(self, **kwargs):
         '''
         Constructor.  Typically instances should be created by createInstance method.
         '''
-        super(ProcessImageStackForm, self).__init__(parent)
+        super(ProcessImageStackForm, self).__init__(**kwargs)
         self.gridWriter = ImageStackWriter()
         layout = qtGui.QVBoxLayout()
         self.dataBox = self._createDataBox()

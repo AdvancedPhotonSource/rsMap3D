@@ -28,11 +28,11 @@ class AbstractGridOutputForm(AbstractOutputView):
     '''
     FORM_TITLE = "AbstractOutputForm"
     
-    def __init__(self, parent=None):
+    def __init__(self, **kwargs):
         '''
         Constructor
         '''
-        super(AbstractGridOutputForm, self).__init__(parent)
+        super(AbstractGridOutputForm, self).__init__(**kwargs)
         self.gridWriter = VTIGridWriter()
         self.outputFileName = ""
         
@@ -117,7 +117,8 @@ class AbstractGridOutputForm(AbstractOutputView):
                                      self.outputType,\
                                      nx=nx, ny=ny, nz=nz,
                                      transform = transform,
-                                     gridWriter = self.gridWriter)
+                                     gridWriter = self.gridWriter,
+                                     appConfig=self.appConfig)
             self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()
         else:

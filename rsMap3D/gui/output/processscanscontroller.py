@@ -55,7 +55,8 @@ class ProcessScansController(qtGui.QDialog):
         self.layout.addLayout(controlLayout)
 
         self.formLayout = qtGui.QHBoxLayout()
-        self.outputFormWidget = self.outputForms[0].createInstance()
+        self.outputFormWidget = self.outputForms[0].createInstance(appConfig= \
+                                                            self.appConfig)
         self.formLayout.addWidget(self.outputFormWidget)
         self.layout.addLayout(self.formLayout)
         self.setLayout(self.layout)
@@ -130,7 +131,8 @@ class ProcessScansController(qtGui.QDialog):
         for form in self.outputForms:
             if typeStr == form.FORM_TITLE:
                 logger.debug("typeStr:" +str(typeStr) + " class " + str(form.__name__))
-                self.outputFormWidget = form.createInstance()
+                self.outputFormWidget = form.createInstance(appConfig = \
+                                                            self.appConfig)
                 
         self.formLayout.addWidget(self.outputFormWidget)
         self._connectSignals()
