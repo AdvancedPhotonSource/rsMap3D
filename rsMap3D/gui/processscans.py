@@ -224,7 +224,8 @@ class ProcessScans(qtGui.QDialog):
             self.mapper = QGridMapper(dataSource, \
                                      self.outputFileName, \
                                      nx=nx, ny=ny, nz=nz,
-                                     transform = transform)
+                                     transform = transform,
+                                     appConfig=self.appConfig)
             self.mapper.setProgressUpdater(self.updateProgress)
             self.mapper.doMap()
         else:
