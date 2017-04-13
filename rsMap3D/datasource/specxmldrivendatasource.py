@@ -11,7 +11,6 @@ import rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
     as DetectorReader
 import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
-from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 from rsMap3D.datasource.AbstractXrayUtilitiesDataSource \
     import AbstractXrayutilitiesDataSource
 from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
@@ -87,8 +86,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                              Nav=self.getNumPixelsToAverage(), 
                              roi=self.getDetectorROI())
 
-        rsMap3DConfig = RSMap3DConfigParser()
-        maxImageMem = rsMap3DConfig.getMaxImageMemory()
+        maxImageMem = self.appConfig.getMaxImageMemory()
         imageSize = self.getDetectorDimensions()[0] * \
                     self.getDetectorDimensions()[1]
         numImages = len(angles)
@@ -251,7 +249,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         try:
             self.instConfig = \
                 InstReader.InstForXrayutilitiesReader(self.instConfigFile)
-            self.sampleCirclesDirections = \
+            self.sampleCircleDirections = \
                 self.instConfig.getSampleCircleDirections()
             self.detectorCircleDirections = \
                 self.instConfig.getDetectorCircleDirections()
