@@ -66,10 +66,11 @@ class AbstractImagePerFileView(AbstractFileView):
         if os.path.isfile(str(self.projNameTxt.text())):
             retVal = True
         else:
-            logger.warning("Project file name is invalid")
+            if str(self.projNameTxt.text()) != "":
+                logger.warning("Project file name is invalid")
             retVal = False
         logger.debug("Enter " + str(retVal))
-        return retVal
+        return retVal 
     
     def _createControlBox(self):
         '''
