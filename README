@@ -60,3 +60,13 @@ Version 1.0.18	- 2016-11-8
        
 Version 1.0.19	- 2016-11-8 
        Readd missing string logger constants in common strings file.
+       
+Version 1.0.20  - 2017-03-03
+		Changed the Signal/Slot mechanism to use a newer version that will be 
+		used moving forward.  This will allow moving more easily to Python 3 and
+		PyQt 5.x.  Note that for now there are issues with VTK/PyQt integration
+		with PyQt 5.x so for now need to stick with PyQt 4.11 and Python 2.7.
+		Fixed a problem introduced when the output of data was split out into 
+		writers.  The calculation of y data (qy or k) was using x-data instead of 
+		Y.  This did not cause a problem when X&Y were using same range but
+		when they were different, qy/k was wrong.
