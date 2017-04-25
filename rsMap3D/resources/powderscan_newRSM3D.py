@@ -193,7 +193,7 @@ for scans in scan_list:
     gridder.dataRange(x_min, x_max)
     
     # Create the QGridMapper object
-    gm = QGridMapper(ds, 'dummy.vti')
+    #gm = QGridMapper(ds, 'dummy.vti')
 
     # Run through all scans of the scan-set to perform the gridding
     for scan in ds.getAvailableScans():
@@ -219,7 +219,7 @@ for scans in scan_list:
                 imageToBeUsedInPass = np.array(imageToBeUsed[scan])
                 imageToBeUsedInPass[:thisPass*numImages/nPasses] = False
                 imageToBeUsedInPass[(thisPass+1)*numImages/nPasses:] = False        
-                qx, qy, qz, intensity = gm.rawmap((scan,), mask=imageToBeUsedInPass)
+                qx, qy, qz, intensity = ds.rawmap((scan,), mask=imageToBeUsedInPass)
                 Q = np.sqrt(qx**2 + qy**2 + qz**2)
                 if data_coordinate is 'tth':
                     coords_x = np.rad2deg(np.arcsin((Q*wavelen) / 
