@@ -22,6 +22,11 @@ MEMORY_SECTION_NAME = "Memory"
 MAX_IMAGE_MEMORY = "maxImageMemory"
 INPUT_FORM_SECTION = "InputForms"
 OUTPUT_FORM_SECTION = "OutputForms"
+MPI_SECTION_NAME = "MPI"
+MPI_HOST_FILE = "hostfile"
+MPI_WORKER_COUNT = "workercount"
+MPI_DEFAULT_HOST = "worker_hosts"
+MPI_DEFAULT_WORKER_COUNT = 1
 
 class RSMap3DConfigParser(ConfigParser):
     '''
@@ -78,6 +83,9 @@ class RSMap3DConfigParser(ConfigParser):
             logging.debug("adding form %s as Form %d" %(form, formNum))
             self.set(INPUT_FORM_SECTION, "InputForm%i" % formNum, form)
             formNum += 1
+        self.add_section(MPI_SECTION_NAME)
+        self.set(MPI_SECTION_NAME, MPI_HOST_FILE, MPI_DEFAULT_HOST)
+        self.set(MPI_SECTION_NAME, MPI_WORKER_COUNT, MPI_DEFAULT_WORKER_COUNT)
         logging.debug(METHOD_EXIT_STR)
         
     def findFormClasses(self, module, superclass):
@@ -92,6 +100,52 @@ class RSMap3DConfigParser(ConfigParser):
     def getMaxImageMemory(self):
         logger.debug("Sections: " + str(self.sections()))
         logger.debug("Memory " + str(self.options(MEMORY_SECTION_NAME)))
-        logger.debug("MaxMemory Value ", str(self.get(MEMORY_SECTION_NAME, MAX_IMAGE_MEMORY)))
-        return self.getint(MEMORY_SECTION_NAME, MAX_IMAGE_MEMORY)
+        maxMemory = self.getint(MEMORY_SECTION_NAME, MAX_IMAGE_MEMORY)
+        logger.debug("MaxMemory Value %d" % maxMemory)
+        return maxMemory
+    
+    def getMPIWorkerHostFile(self, default="worker_hosts"):
+        hostFile = None
+        sections = self.sections()
+        logger.debug("Sections %s" % str((sections,)))
+        try:
+            if MPI_SECTION_NAME in sections:
+                hostFile = self.get(MPI_SECTION_NAME, MPI_HOST_FILE)
+                logger.debug("MPI HostFile %s" % str(hostFile))
+            else:
+                logger.warning("MPI Section not found in app config file\n" +
+                               "default section looks like\n" +
+                               "[MPI]\n"
+                               "HostFile = worker_hosts\n"
+                               "WorkerCount = 1\n"
+                               )
+                hostFile = MPI_DEFAULT_HOST 
+        except Exception as ex:
+            logger.error("No MPI_HOST_FILE found using defaut; %s" % \
+                str(MPI_DEFAULT_HOST))
+            logger.exception(ex.message)
+            hostFile = MPI_DEFAULT_HOST
+        return hostFile
+            
+    def getMPIWorkerCount(self, default=1):
+        workerCount = 1
+        try:
+            mpiSections = self.sections()
+            if MPI_SECTION_NAME in mpiSections:
+                #mpiSection = self.sections()[MPI_SECTION_NAME]
+                workerCount = self.getint(MPI_SECTION_NAME, \
+                                                MPI_WORKER_COUNT)
+                logger.debug("MPI Worker count %d" % workerCount)
+            else:
+                logger.warning("MPI Section not found in app config file\n" +
+                               "default section looks like\n" +
+                               "[MPI]\n"
+                               "HostFile = worker_hosts\n"
+                               "WorkerCount = 1\n"
+                               )
+                workerCount = MPI_DEFAULT_WORKER_COUNT
+        except Exception as ex:
+            workerCount = 1
+            logger.exception(ex.message)
+        return workerCount    
         
