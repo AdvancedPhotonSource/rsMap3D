@@ -161,7 +161,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                 [zmin.append(np.min(qzTrans[i])) for i in idx] 
                 [zmax.append(np.max(qzTrans[i])) for i in idx] 
                 
-        logger.debug(METHOD_EXIT_STR) 
+        logger.debug(METHOD_EXIT_STR % str((xmin, xmax, ymin, ymax, zmin, zmax))) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
 
     def getReferenceNames(self):
@@ -192,8 +192,14 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         :param scan: scan from which to retrieve the angles
         :params angleNames: a list of names for the angles to be returned
         """
-        
-        dataKeys = scan.data.keys()
+        try:
+            dataKeys = scan.data.keys()
+        except IndexError as ie:
+            logger.exception(str(ie) )
+            raise ie
+        except Exception as ex:
+            logger.exception(str(ex) + "at scan " + str(scan.scanNum))
+            raise ex
         if len(dataKeys) == 0:
             raise ScanDataMissingException("No Scan Data Found for scan " + 
                                            scan.scanNum)
