@@ -28,6 +28,7 @@ REFERENCE_AXIS = NAMESPACE + 'axis'
 SCALE_FACTOR = 'scaleFactor'
 SPEC_MOTOR_NAME = 'specMotorName'
 CALC_ON_SCANNED_REF = 'calcOnScannedRef'
+SAMPLE_ANGLE_MAP_MODULE = 'module'
 
 class InstForXrayutilitiesReader():
     '''
@@ -219,6 +220,25 @@ class InstForXrayutilitiesReader():
             return ""
         else:
             return function.attrib[NAME]
+
+    def getSampleAngleMappingFunctionModule(self):
+        '''
+        :return: The name of a function to be used in mapping 
+        '''
+        function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
+        if function == None:
+            raise InstConfigException("No Mapping function defined in " +\
+                                      "instrument config file")
+        try:
+            module = function.attrib[SAMPLE_ANGLE_MAP_MODULE]
+        except KeyError:
+            module = None
+        if module != None and module != "":
+            print ("Found Module %s" % module)
+            return module
+        else:
+            return None
+
 
     def getSampleAngleMappingParameter(self, name):
         '''
