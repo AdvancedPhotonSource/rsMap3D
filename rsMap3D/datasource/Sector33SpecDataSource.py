@@ -15,6 +15,7 @@ import xrayutilities as xu
 import time
 import sys,traceback
 import logging
+import importlib
 try:
     from PIL import Image
 except ImportError:
@@ -150,13 +151,22 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             refAngles = self.getScanAngles(scan, refAngleNames)
             primaryAngles = self.instConfig.getSampleAngleMappingPrimaryAngles()
             functionName = self.instConfig.getSampleAngleMappingFunctionName()
-            #Call a defined method to calculate angles from the reference angles.
-            method = getattr(self, functionName)
+            functionModuleName = self.instConfig.getSampleAngleMappingFunctionModule()
+            logger.debug("sampleMappingFunction moduleName %s" % functionModuleName) 
+           #Call a defined method to calculate angles from the reference angles.
+            moduleSource = self
+            if functionModuleName != None:
+                functionModule = importlib.import_module(functionModuleName)
+                logger.debug("dir(functionModule)" % dir(functionModule))
+                moduleSource = functionModule
+            method = getattr(moduleSource, functionName)
             fixedAngles = method(primaryAngles=primaryAngles, 
                                    referenceAngles=refAngles)
+            logger.debug ("fixed Angles: " + str(fixedAngles))
             for i in range(len(primaryAngles)):
+                logger.debug ("Fixing primaryAngles: %d " % primaryAngles[i])
                 angles[:,primaryAngles[i]-1] = fixedAngles[i]
-        
+         
     def getGeoAngles(self, scan, angleNames):
         """
         This function returns all of the geometry angles for the
