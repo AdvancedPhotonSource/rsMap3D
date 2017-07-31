@@ -160,7 +160,8 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                                               self.outputFileName,
                                               nx=nx, ny=ny, nz=nz,
                                               transform = transform,
-                                              gridWriter = self.gridWriter)
+                                              gridWriter = self.gridWriter,
+                                              appConfig = self.appConfig)
             self.mapper.setProgressUpdater(self._updateProgress)
             self.mapper.doMap()
 
