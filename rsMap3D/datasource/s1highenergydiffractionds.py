@@ -89,7 +89,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         self.currentDetector = detectorId
         logger.debug(METHOD_EXIT_STR)
 
-    @profile
+    #@profile
     def findImageQs(self, angles, ub, en):
         logger.debug(METHOD_ENTER_STR)
         logger.debug("sampleCircleDirections: " + \
@@ -220,6 +220,8 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 zmin.extend(map(np.min, qzTrans))
                 zmax.extend(map(np.max, qzTrans))
                 ####
+        if self.progressUpdater <> None:
+            self.progressUpdater(self.progress, self.progressMax)
         logger.debug(METHOD_EXIT_STR + str((xmin, xmax, ymin, ymax, zmin, zmax)) ) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
     
@@ -497,7 +499,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                     logger.debug("processing image file " + imageName)
                     image = np.empty((self.detectorDimensions[0],
                                       self.detectorDimensions[1]),
-                                     np.uint32)
+                                     np.float32)
                     with open(imageName) as f:
                         image.data[:] = f.read()
                     img2 = xu.blockAverage2D(image,
