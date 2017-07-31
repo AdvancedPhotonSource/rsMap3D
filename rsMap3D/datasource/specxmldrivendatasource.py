@@ -100,7 +100,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             logger.debug("angles " + str(angles) )
             for i in range(len(angles[0])):
                 angleList.append(angles[:,i])
-            if ub == None:
+            if ub is None:
                 qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                          roi=roi, \
                                          Nav=nav)

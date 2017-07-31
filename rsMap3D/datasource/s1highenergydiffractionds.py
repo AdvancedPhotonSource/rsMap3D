@@ -89,7 +89,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         self.currentDetector = detectorId
         logger.debug(METHOD_EXIT_STR)
 
-    #@profile
+    @profile
     def findImageQs(self, angles, ub, en):
         logger.debug(METHOD_ENTER_STR)
         logger.debug("sampleCircleDirections: " + \
