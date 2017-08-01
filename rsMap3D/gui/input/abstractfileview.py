@@ -104,6 +104,7 @@ class AbstractFileView(qtGui.QDialog):
         '''
         Set the value to be displayed in the progress bar.
         '''
+        logger.debug(METHOD_ENTER_STR % str((value,maxValue)))
         self.progressBar.setMinimum(1)
         self.progressBar.setMaximum(maxValue)
         self.progressBar.setValue(value)
