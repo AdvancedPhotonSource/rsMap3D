@@ -4,6 +4,7 @@
 '''
 import os
 import logging
+from spec2nexus.spec import SpecDataFile
 logger = logging.getLogger(__name__)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
@@ -39,26 +40,43 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     def createInstance(parent=None, appConfig=None):
         return XPCSSpecScanFileForm(parent=parent, appConfig=appConfig)
     
-    def __init__(self, **kwargs):
+    def __init__(self, pathToReplace=None, replacePathWith=None, **kwargs):
         super(XPCSSpecScanFileForm, self).__init__(**kwargs)
 
         self.imageFileDialogFilter = XPCS_FILE_FILTER
         
-    def _browseForXPCSFile(self):
-        if self.xpcsDataFileTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
-                                                   XPCS_FILE_DIALOG_TITLE, \
-                                                   filter=XPCS_FILE_FILTER)
+    def _browseForPathToReplace(self):
+        if os.path.exists(str(self.projNameTxt.text())) and \
+                          (str(self.scanNumsTxt.text()) != ""):
+            specFile = str(self.projNameTxt.text())
+            scans = self.getScanList()
+            sd = SpecDataFile(specFile)
+            scan = sd.scans[str(scans[0])]
+            scan.interpret()
+            if scan.CCD != None:
+                try:
+                    filePath = scan.CCD['image_dir'][0]
+                    self.pathToReplaceTxt.setText(filePath)
+                except:
+                    qtGui.QMessageBox.warning(self, "File patgh not Found", \
+                                              "File path not found for scan %s" \
+                                              % scan)
+            
+            self.pathToReplaceTxt.editingFinished.emit()
+    
+    def _browseForReplacePathWith(self):
+        if self.replacePathWithTxt.text() == EMPTY_STR:
+            fileName = qtGui.QFileDialog.getExistingDirectory(None, \
+                                                   XPCS_FILE_DIALOG_TITLE)
         else:
-            fileDirectory = os.path.dirname(str(self.xpcsDataFileTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None,\
+            fileDirectory = os.path.dirname(str(self.replacePathWithTxt.text()))
+            fileName = qtGui.QFileDialog.getExistingDirectory(None,\
                                                    XPCS_FILE_FILTER, \
-                                                   directory = fileDirectory,
-                                                   filter=XPCS_FILE_FILTER)
+                                                   dir = fileDirectory)
             
         if fileName != EMPTY_STR:
-            self.xpcsDataFileTxt.setText(fileName)
-            self.xpcsDataFileTxt.editingFinished.emit()
+            self.replacePathWithTxt.setText(fileName)
+            self.replacePathWithTxt.editingFinished.emit()
     
     def checkOkToLoad(self):
         logger.debug ("CheckOKToLoad in xpcs spec scan Fileform")
@@ -91,16 +109,37 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         row = dataLayout.rowCount() + 1
         self._createHKLOutput(dataLayout, row)
 
-        row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("XPCS Data:")
-        self.xpcsDataFileTxt = qtGui.QLineEdit()
-        self.xpcsBrowseButton = qtGui.QPushButton(BROWSE_STR)
-        dataLayout.addWidget(label, row, 0)
-        dataLayout.addWidget(self.xpcsDataFileTxt, row, 1)
-        dataLayout.addWidget(self.xpcsBrowseButton, row, 2)
+
+        row = dataLayout.rowCount() + 2
+        label1 = qtGui.QLabel("<b>The following correct the file path if it has" +
+                             " moved from the original location stored in the" +
+                             " file.  The first one requires that the spec " + 
+                             "file and scan number have been entered</b>")
+        label1.setWordWrap(True)
+        dataLayout.addWidget(label1, row, 0, 2, -1)
         
-        self.xpcsBrowseButton.clicked.connect(self._browseForXPCSFile)
-        self.xpcsDataFileTxt.editingFinished.connect(self._xpcsFileNameChanged)
+        
+        row = dataLayout.rowCount() + 1
+        label = qtGui.QLabel("file path to replace:")
+        self.pathToReplaceTxt = qtGui.QLineEdit()
+        self.pathToReplaceBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.pathToReplaceTxt, row, 1)
+        dataLayout.addWidget(self.pathToReplaceBrowseButton, row, 2)
+        
+        self.pathToReplaceBrowseButton.clicked.connect(self._browseForPathToReplace)
+        self.pathToReplaceTxt.editingFinished.connect(self._pathToReplaceChanged)
+
+        row = dataLayout.rowCount() + 1
+        label = qtGui.QLabel("replace file path with:")
+        self.replacePathWithTxt = qtGui.QLineEdit()
+        self.replacePathWithBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        dataLayout.addWidget(label, row, 0)
+        dataLayout.addWidget(self.replacePathWithTxt, row, 1)
+        dataLayout.addWidget(self.replacePathWithBrowseButton, row, 2)
+        
+        self.replacePathWithBrowseButton.clicked.connect(self._browseForReplacePathWith)
+        self.replacePathWithTxt.editingFinished.connect(self._replacePathWithChanged)
         
         dataBox.setLayout(dataLayout)
         return dataBox
@@ -114,7 +153,16 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
                                    self.fileForm.getProjectionDirection())
         else:
             self.transform = None
-            
+        pathToReplaceStr = str(self.pathToReplaceTxt.text())
+        replacePathWithStr = str(self.replacePathWithTxt.text())
+        if (pathToReplaceStr == ""):
+            pathToReplace = None
+        else:
+            pathToReplace = pathToReplaceStr
+        if (replacePathWithStr == ""):
+            replacePathWith = None
+        else:
+            replacePathWith = replacePathWithStr
         self.dataSource = \
             XPCSSpecDataSource(str(self.getProjectDir()), \
                                    str(self.getProjectName()), \
@@ -124,7 +172,9 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
 #                                    str(self.getImmFileName()), \
                                    scanList = self.getScanList(), \
                                    transform = self.transform, \
-                                   appConfig = self.appConfig
+                                   appConfig = self.appConfig,
+                                   pathToReplace = pathToReplace,
+                                   replacePathWith = replacePathWith
                                   )
         self.dataSource.setProgressUpdater(self.updateProgress)
         self.dataSource.setCurrentDetector(self.currentDetector)
@@ -140,16 +190,19 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     
     def getOutputForms(self):
         outputForms = []
-        outputForms.append(ProcessXpcsGridLocationForm)
         outputForms.append(ProcessVTIOutputForm)
+        outputForms.append(ProcessXpcsGridLocationForm)
         return outputForms
 
     def isXpcsFileNameOK(self):
-        return os.path.isfile(self.xpcsDataFileTxt.text()) or \
-            (self.xpcsDataFileTxt.text() == EMPTY_STR)
+        return self.pathToReplaceTxt.text() != EMPTY_STR
+            
+    def isReplacePathWithNameOK(self):
+        return os.path.isdir(self.replacePathWithTxt.text()) or \
+            (self.replacePathWithTxt.text() == EMPTY_STR)
             
     @qtCore.pyqtSlot()
-    def _xpcsFileNameChanged(self):
+    def _pathToReplaceChanged(self):
         if self.isXpcsFileNameOK():
             self.checkOkToLoad()
         else:
@@ -157,4 +210,15 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
             message.warning(self, \
                              WARNING_STR
                              , \
-                             "The IMM file entered is invalid")
+                             "The path To replace is invalid")
+
+    @qtCore.pyqtSlot()
+    def _replacePathWithChanged(self):
+        if self.isReplacePathWithNameOK():
+            self.checkOkToLoad()
+        else:
+            message = qtGui.QMessageBox()
+            message.warning(self, \
+                             WARNING_STR
+                             , \
+                             "The replace Path with is invalid")

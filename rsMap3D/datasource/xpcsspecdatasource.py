@@ -10,6 +10,7 @@ try:
 except ImportError as ex:
     raise ex
 
+import sys
 import time
 import os
 import glob
@@ -18,8 +19,10 @@ import xrayutilities as xu
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
+import traceback
 
-from rsMap3D.exception.rsmap3dexception import ScanDataMissingException
+from rsMap3D.exception.rsmap3dexception import ScanDataMissingException,\
+    RSMap3DException
 from rsMap3D.datasource.Sector33SpecDataSource import IMAGE_DIR_MERGE_STR,\
     Sector33SpecFileException,  LoadCanceledException
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR
@@ -28,6 +31,12 @@ from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 
 IMAGES_STR = "images"
 IMM_STR = "*.imm"
+XPCS_SCAN = 'xpcsscan'
+ASCAN = 'ascan'
+CCD_SCAN = 'ccdscan'
+DARK_STR = 'dark'
+PATH_TO_REPLACE = "pathToReplace"
+REPLACE_PATH_WITH = "replacePathWith"
 
 class XPCSSpecDataSource(SpecXMLDrivenDataSource):
     def __init__(self,
@@ -38,6 +47,18 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                  detConfigFile,
                  **kwargs):
         
+        self.pathToReplace = None
+        self.replacePathWith = None
+        if kwargs[PATH_TO_REPLACE] != None:
+            self.pathToReplace = kwargs[PATH_TO_REPLACE]
+            logger.debug("pathToReplace: %s" % self.pathToReplace)
+            
+        if kwargs[REPLACE_PATH_WITH] != None:
+            self.replacePathWith = kwargs[REPLACE_PATH_WITH]
+            logger.debug("replacePathWith: %s" % self.replacePathWith)
+        del kwargs[PATH_TO_REPLACE]
+        del kwargs[REPLACE_PATH_WITH]
+            
         super(XPCSSpecDataSource, self).__init__(projectDir,
                                                  projectName,
                                                  projectExtension,
@@ -48,7 +69,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         logger.debug(METHOD_ENTER_STR)
         self.cancelLoad = False
         logger.debug(METHOD_EXIT_STR)
-
+        
     
     def getGeoAngles(self, scan, angleNames):
         """
@@ -60,6 +81,22 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         geoAngles = self.getScanAngles(scan, angleNames)
         return geoAngles
         
+
+    def getUBMatrix(self, scan):
+        """
+        Read UB matrix from the #G3 line from the spec file. 
+        """
+        try:
+            g3 = scan.G["G3"].strip().split()
+            g3 = np.array(map(float, g3))
+            ub = g3.reshape(-1,3)
+            logger.debug("ub " +str(ub))
+            return ub
+        except:
+            logger.error("Unable to read UB Matrix from G3")
+            logger.error( '-'*60)
+            traceback.print_exc(file=sys.stdout)
+            logger.error('-'*60)
 
     def imagesBeforeScan(self, scanNo):
         numImages = 0
@@ -80,6 +117,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         self.loadInstrumentXMLConfig()
         #Load up the detector configuration file
         self.loadDetectorXMLConfig()
+#         lastScan = None
         
         self.specFile = os.path.join(self.projectDir, self.projectName + \
                                      self.projectExt)
@@ -87,7 +125,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             self.sd = SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
             maxScan = int(self.sd.getMaxScanNumber())
-            print str(maxScan) + " scans"
+            logger.debug("%s scans" % str(maxScan))
             if self.scans  == None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
@@ -103,6 +141,14 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             self.immDataFileName = {}
             self.progress = 0
             self.progressInc = 1
+            self.isCcdScan = {}
+            self.dataFilePrefix = {}
+            self.containsDark = {}
+            self.numberOfDarks = {}
+            self.containsRoi = {}
+            self.roi = {}
+            self.repeatsPoints = {}
+            self.numberOfRepeatPoints = {}
             # Zero the progress bar at the beginning.
             if self.progressUpdater <> None:
                 self.progressUpdater(self.progress, self.progressMax)
@@ -115,19 +161,26 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
 #                     if (os.path.exists(os.path.join(imagePath, \
 #                                             SCAN_NUMBER_MERGE_STR % scan))):
                     curScan = self.sd.scans[str(scan)]
+                    curScan.interpret()
+                    logger.debug( "scan: %s" % scan)
+#                     if int(scan) > 1:
+#                         lastScan = self.sd.scans[str(int(scan)-1)]
+#                         lastScan.interpret()
+#                         logger.debug("dir(lastScan) = %s" % dir(lastScan) )
+#                         logger.debug("lastScan.CCD %s" % lastScan.CCD)
                     try:
                         angles = self.getGeoAngles(curScan, self.angleNames)
                         self.availableScans.append(scan)
                         self.scanType[scan] = \
                             self.sd.scans[str(scan)].scanCmd.split()[0]
-                        print self.scanType[scan]
+                        logger.debug( "Scan %s scanType %s" % (scan, self.scanType[scan]))
                         if self.scanType[scan] == 'xpcsscan':
                             #print dir(self.sd)
                             d = curScan.data
                             h = curScan.header
                             dataFile = curScan.XPCS['batch_name'][0]
                             self.immDataFileName[scan] = dataFile
-                            print curScan.XPCS
+                            logger.debug("curScan.XPCS %s" % curScan.XPCS)
                             if not (dataFile in self.scanDataFile.keys()):
                                 self.scanDataFile[dataFile] = {}
                                 numImagesInScan = self.imagesInScan(scan)
@@ -135,9 +188,9 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                     range(0, numImagesInScan)
                                 self.scanDataFile[dataFile]['maxIndexImage'] = \
                                     numImagesInScan
-                                print "scanDataFile for " + \
+                                logger.debug( "scanDataFile for " + \
                                     str(dataFile) + " at scan " + str(scan) + \
-                                    " " + str(self.scanDataFile[dataFile][scan]) 
+                                    " " + str(self.scanDataFile[dataFile][scan])) 
                             else:
                                 startingImage = \
                                     self.scanDataFile[dataFile]['maxIndexImage']
@@ -147,14 +200,66 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                           startingImage + numImagesInScan)
                                 self.scanDataFile[dataFile]['maxIndexImage'] = \
                                     startingImage + numImagesInScan
-                                print "scanDataFile for " + str(dataFile) + \
+                                logger.debug( "scanDataFile for " + str(dataFile) + \
                                     " at scan " + str(scan) + " " + \
-                                    str(self.scanDataFile[dataFile][scan] )
+                                    str(self.scanDataFile[dataFile][scan] ))
                                 
-                            print dataFile
+                            logger.debug("dataFile %s" % dataFile)
+                        
+                        elif curScan.CCD != None and \
+                            'ccdscan' in curScan.CCD.keys():
+                            # this is a ccdscan where the defining #CCD lines 
+                            # were above the #S lines in spec file
+                            #TODO
+                            d = curScan.data
+                            h = curScan.header
+                            ccdPart = curScan.CCD
+                            COUNTER_ROI_STR = 'counter_roi'
+                            REPEAT_POINTS_STR = 'repeats_per_point'
+
+                            self.isCcdScan[scan] = True
+                            self.dataFilePrefix[scan] = ccdPart['image_dir'][0]
+                            #If the data has moved from the original location 
+                            # then we need to change the prefixPath
+                            if (self.pathToReplace != None) and \
+                                (self.replacePathWith !=None):
+                                self.dataFilePrefix[scan] = self.dataFilePrefix[scan].\
+                                    replace(self.pathToReplace, \
+                                            self.replacePathWith)
+                            self.containsDark[scan] = DARK_STR in ccdPart.keys()
+                            self.numberOfDarks[scan] = int(ccdPart[DARK_STR][0])
+                            self.containsRoi[scan] = COUNTER_ROI_STR in ccdPart.keys()
+                            self.roi[scan] = map(int, ccdPart[COUNTER_ROI_STR])
+                            self.repeatsPoints[scan] = REPEAT_POINTS_STR in ccdPart.keys()
+                            self.numberOfRepeatPoints[scan] = ccdPart[REPEAT_POINTS_STR]
+                            
+                            logger.debug("isCcdScan[%s] %s" % 
+                                         (scan,self.isCcdScan[scan]))
+                            logger.debug("dataFilePrefix[%s] %s" % 
+                                         (scan, self.dataFilePrefix[scan]))
+                            if self.containsDark[scan]:
+                                logger.debug("containsDark[%s] %s" % 
+                                             (scan, self.containsDark[scan]))
+                            logger.debug("numberOfDarks[%s] %s" % 
+                                         (scan, self.numberOfDarks[scan]))
+                            logger.debug("containsRoi[%s] %s" % 
+                                         (scan, self.containsRoi[scan]))
+                            if self.containsRoi[scan]:
+                                self.detectorROI = self.roi[scan]
+                                self.detectorROI[0] = self.roi[scan][0]
+                                self.detectorROI[1] = self.roi[scan][0] + self.roi[scan][1]
+                                self.detectorROI[2] = self.roi[scan][2]
+                                self.detectorROI[3] = self.roi[scan][2] + self.roi[scan][3]
+                                logger.debug("roi[%s] %s" % (scan, self.roi[scan]))
+                            logger.debug("repeatsPoints[%s] %s" % 
+                                         (scan, self.repeatsPoints[scan]))
+                            if self.repeatsPoints[scan]:
+                                logger.debug("numberOfRepeatPoints[%s] %s" % 
+                                             (scan,self.numberOfRepeatPoints[scan]))
+
                         if self.mapHKL==True:
                             self.ubMatrix[scan] = self.getUBMatrix(curScan)
-                            if self.ubMatrix[scan] == None:
+                            if self.ubMatrix[scan] is None:
                                 raise Sector33SpecFileException("UB matrix " + \
                                                                 "not found.")
                         else:
@@ -168,12 +273,12 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                              self.incidentEnergy[scan])
                         if self.progressUpdater <> None:
                             self.progressUpdater(self.progress, self.progressMax)
-                        print (('Elapsed time for Finding qs for scan %d: ' +
+                        logger.debug (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
                                (scan, (time.time() - _start_time)))
                         #Make sure to show 100% completion
                     except ScanDataMissingException:
-                        print scan
+                        logger.debug( "scan %s" % scan )
             if self.progressUpdater <> None:
                 self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
@@ -260,91 +365,195 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         #get startIndex and length for each image in the immFile
         imageDir = os.path.join(self.projectDir, IMAGES_STR) 
         for scannr in scans:
-            immDataFile = self.immDataFileName[scannr]
-            dataDir = os.path.join(imageDir, immDataFile)
-            fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0]).replace('\\','\\\\').replace('/','\\\\')
-            fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0])
-            imageStartIndex = []
-            dlen = []
-            try:
-                fp = open(fullFileName, "rb")
-                numImages = getNumberOfImages(fp)
-                fp.close()
-                imageStartIndex, dlen = GetStartPositions(fullFileName, \
-                                                          numImages)
-                fp = open(fullFileName, "rb")
-                header = readHeader(fp, imageStartIndex[self.scanDataFile[immDataFile][scannr][0]])
-                self.detectorROI = [header['row_beg'], header['row_end'],
-                     header['col_beg'], header['col_end']]
-            except IOError as ex:
-                logger.error("Problem opening IMM file to get the start indexes" +
-                              str(ex))
-            finally: 
-                fp.close()
-            if self.haltMap:
-                raise ProcessCanceledException("Process Canceled")
-            scan = self.sd.scans[str(scannr)]
-            angles = self.getGeoAngles(scan, angleNames)
-            scanAngle1 = {}
-            scanAngle2 = {}
-            for i in xrange(len(angleNames)):
-                scanAngle1[i] = angles[:,i]
-                scanAngle2[i] = []
-            arrayInitializedForScan = False
-            foundIndex = 0
-            if mask_was_none:
-                mask = True * len(self.getImageToBeUseds()[scannr])
-                
-            imagesToSkip = \
-                self.imagesBeforeScan(scannr)
-            imagesInScan = \
-                self.imagesInScan(scannr)
-            mask1 = np.array(mask)
-            indexesToProcess = (np.where(mask1 == True))[0]
-            startIndex = indexesToProcess[0]
-            numberToProcess = len(indexesToProcess)
-               
-            images = OpenMultiImm(fullFileName, \
-                                  imagesToSkip + startIndex - 1,
-                                  numberToProcess,
-                                  imageStartIndex,
-                                  dlen)
-            for ind in indexesToProcess:
-                if imageToBeUsed[scannr][ind] and mask[ind]:
-                    img = images[ind-startIndex,:,:]
-                    img2 = img
-
-                    #initialize data Array
-                    if not arrayInitializedForScan:
-                        imagesToProcess = [imageToBeUsed[scannr][i] and mask[i] \
-                                           for i in range(len(imageToBeUsed[scannr]))]
-                        if not intensity.shape[0]:
-                            offset = 0
-                            intensity = np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape)
-                            arrayInitializedForScan = True
-                        else:
-                            offset = intensity.shape[0]
-                            intensity = np.concatenate((intensity,
-                                                (np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape))), 
-                                                axis = 0)
-                    #add data to intensity array
-                    intensity[foundIndex + offset,:,:] = img2
-                    for i in xrange(len(angleNames)):
-                        scanAngle2[i].append(scanAngle1[i][ind])
+            curScan = self.sd.scans[str(scannr)]
+            curScan.interpret()
+            logger.debug( "scan: %s" % scannr)
+#             if int(scannr) > 1:
+#                 lastScan = self.sd.scans[str(int(scannr)-1)]
+#                 lastScan.interpret()
+#                 logger.debug("dir(lastScan) = %s" % dir(curS) )
+#                 logger.debug("lastScan.CCD %s" % lastScan.CCD)
+            if curScan.CCD != None and \
+                'ccdscan' in curScan.CCD.keys():
+                darkImage = None
+                darksToSkip = 1
+                if self.containsDark[scannr]:
+                    numDarks = self.numberOfDarks[scannr]
+                    namePrefix = self.dataFilePrefix[scannr]
+                    darkName = namePrefix + DARK_STR + \
+                            ("_00001-%.5d" % numDarks) + \
+                            IMM_STR[1:]
+                    try:
+                        fp = open(darkName, 'rb')
+                        numImagesInFile = getNumberOfImages(fp)
+                        fp.close()
+                        if numImagesInFile < numDarks:
+                            raise RSMap3DException("dark file %s contains " + \
+                                                   "only %d images.  Spec " + \
+                                                   "file says there should " + \
+                                                   "be %d" % \
+                                                   (darkName, \
+                                                    numImagesInFile, \
+                                                    numDarks))
+                        imageStartIndex, dlen = \
+                            GetStartPositions(darkName, numDarks)
+                        images = OpenMultiImm(darkName, darksToSkip -1, \
+                                              numDarks - darksToSkip,
+                                              imageStartIndex, dlen)
+                        darkImage = np.average(images, axis=0)                    
                         
-                    foundIndex += 1
-            
-            if len(scanAngle2[0]) > 0:
+                        
+                    except Exception as ex:
+                        logger.exception(ex)
+                    # End reading dark Images
+                    # start reading sample images
+                    numScanPoints = len(curScan.data_lines)
+                    angles = self.getGeoAngles(curScan, angleNames)
+                    scanAngle1 = {}
+                    scanAngle2 = {}
+                    for i in xrange(len(angleNames)):
+                        scanAngle1[i] = angles[:,i]
+                        scanAngle2[i] = []
+                    arrayInitializedForScan = False
+                    if mask_was_none:
+                        mask = True * len(self.getImageToBeUsed()[scannr])
+                    mask1 = np.array(mask)
+                    logger.debug("mask1.shape %s" % str(mask1.shape))
+                    indexesToProcess = (np.where(mask1 == True))[0]
+                    logger.debug("indexesToProcess.shape %s" % str(indexesToProcess.shape))
+                    logger.debug("indexesToProcess %s" % str(indexesToProcess))
+                    
+                    foundIndex = 0
+                    for scanno in indexesToProcess:
+                        fileName = namePrefix + \
+                                "%d_%.5d-%.5d" % (scanno, 1,1) + \
+                                IMM_STR[1:]
+                        logger.debug("Reading filename %s fileName" % fileName)
+                        imageStartIndex, dlen = GetStartPositions(fileName, \
+                                                                  1)
+                        # read single image from file with one image
+                        startImage = 0
+                        numImages = 1
+                        image = OpenMultiImm(fileName, startImage, \
+                                             numImages,
+                                             imageStartIndex, dlen)[0]
+                        if not arrayInitializedForScan:
+                            if not intensity.shape[0]:
+                                offset = 0
+                                intensity = np.zeros((indexesToProcess.shape[0],) + image.shape)
+                                arrayInitializedForScan = True
+                            else:
+                                offset = intensity.shape[0]
+                                intensity = np.concatenate((intensity, \
+                                                            (np.zeros((indexesToProcess.shape[0],) + image.shape))), \
+                                                           axis=0) 
+                        logger.debug("foundIndex %s" % foundIndex)
+                        logger.debug(" instensity.shape %s" % str(intensity.shape))
+                        logger.debug("image.shape %s" % str(image.shape))
+                        if self.containsDark[scannr]:
+                            intensity[foundIndex + offset,:, :] = image - darkImage
+                        else:
+                            intensity[foundIndex + offset,:, :] = image - darkImage
+                            
+                        for i in range(len(angleNames)):
+                            scanAngle2[i].append(scanAngle1[i][scanno])
+                        foundIndex += 1
+                    if len(scanAngle2[0]) > 0:
+                        for i in xrange(len(angleNames)):
+
+                            scanAngle[i] = np.concatenate((scanAngle[i], 
+                                                       np.array(scanAngle2[i])), 
+                                                       axis=0)  
+                    
+            else:
+                immDataFile = self.immDataFileName[scannr]
+                dataDir = os.path.join(imageDir, immDataFile)
+                fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0]).replace('\\','\\\\').replace('/','\\\\')
+                fullFileName = (glob.glob(os.path.join(dataDir, IMM_STR))[0])
+                imageStartIndex = []
+                dlen = []
+                try:
+                    fp = open(fullFileName, "rb")
+                    numImages = getNumberOfImages(fp)
+                    fp.close()
+                    imageStartIndex, dlen = GetStartPositions(fullFileName, \
+                                                              numImages)
+                    fp = open(fullFileName, "rb")
+                    header = readHeader(fp, imageStartIndex[self.scanDataFile[immDataFile][scannr][0]])
+                    self.detectorROI = [header['row_beg'], header['row_end'],
+                         header['col_beg'], header['col_end']]
+                except IOError as ex:
+                    logger.error("Problem opening IMM file to get the start indexes" +
+                                  str(ex))
+                finally: 
+                    fp.close()
+                if self.haltMap:
+                    raise ProcessCanceledException("Process Canceled")
+                scan = self.sd.scans[str(scannr)]
+                angles = self.getGeoAngles(scan, angleNames)
+                scanAngle1 = {}
+                scanAngle2 = {}
                 for i in xrange(len(angleNames)):
-                    scanAngle[i] = \
-                        np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
-                                    axis=0)
+                    scanAngle1[i] = angles[:,i]
+                    scanAngle2[i] = []
+                arrayInitializedForScan = False
+                foundIndex = 0
+                if mask_was_none:
+                    mask = True * len(self.getImageToBeUsed()[scannr])
+                    
+                imagesToSkip = \
+                    self.imagesBeforeScan(scannr)
+                imagesInScan = \
+                    self.imagesInScan(scannr)
+                mask1 = np.array(mask)
+                indexesToProcess = (np.where(mask1 == True))[0]
+                startIndex = indexesToProcess[0]
+                numberToProcess = len(indexesToProcess)
+                   
+                images = OpenMultiImm(fullFileName, \
+                                      imagesToSkip + startIndex - 1,
+                                      numberToProcess,
+                                      imageStartIndex,
+                                      dlen)
+                for ind in indexesToProcess:
+                    if imageToBeUsed[scannr][ind] and mask[ind]:
+                        img = images[ind-startIndex,:,:]
+                        img2 = img
+    
+                        #initialize data Array
+                        if not arrayInitializedForScan:
+                            imagesToProcess = [imageToBeUsed[scannr][i] and mask[i] \
+                                               for i in range(len(imageToBeUsed[scannr]))]
+                            if not intensity.shape[0]:
+                                offset = 0
+                                intensity = np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape)
+                                arrayInitializedForScan = True
+                            else:
+                                offset = intensity.shape[0]
+                                intensity = np.concatenate((intensity,
+                                                    (np.zeros((np.count_nonzero(imagesToProcess),) + img2.shape))), 
+                                                    axis = 0)
+                        #add data to intensity array
+                        intensity[foundIndex + offset,:,:] = img2
+                        for i in xrange(len(angleNames)):
+                            scanAngle2[i].append(scanAngle1[i][ind])
+                            
+                        foundIndex += 1
+                
+                if len(scanAngle2[0]) > 0:
+                    for i in xrange(len(angleNames)):
+                        scanAngle[i] = \
+                            np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
+                                        axis=0)
+                        
+                            
+                   
+                 
         # transform scan angles to reciprocal space coordinates for all detector
         # pixels
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-            
         if self.ubMatrix[scans[0]] == None:
             qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
                                            roi = self.getDetectorROI(),
@@ -353,13 +562,17 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             qx, qy, qz = hxrd.Ang2Q.area( *angleList, \
                                           roi=self.getDetectorROI(), \
                                           Nav=self.getNumPixelsToAverage(),
-                                          UB=self.ubMatrix[scan[0]])
+                                          UB=self.ubMatrix[scans[0]])
             
         # apply selected transform
         qxTrans, qyTrans, qzTrans = \
             self.transform.do3DTransform(qx, qy, qz)
             
-        
+        logger.debug("Shape of qxTrans %s, qyTrans %s, qzTrans %s, intensity %s" %
+                      (str(qxTrans.shape), 
+                       str(qyTrans.shape), 
+                       str(qzTrans.shape),
+                       str(intensity.shape)))
         return qxTrans, qyTrans, qzTrans, intensity
 
     def rawmapSingle(self, scan):
@@ -419,10 +632,10 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         scanAngle = {}
         for i in xrange(len(angleNames)):
             scanAngle[i] = np.array([])
-        print scan
+        logger.debug("scan %s" % scan)
         angles = self.getGeoAngles(self.sd.scans[str(scan)], angleNames)
         angles = np.array([angles[0],])
-        print angles
+        logger.debug("angles %s" % angles)
         
         for i in xrange(len(angleNames)):
             scanAngle[i] = np.concatenate((scanAngle[i], np.array(angles[:,i])), \
@@ -433,7 +646,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
 
-        if self.ubMatrix[scan] == None:
+        if self.ubMatrix[scan] is None:
             qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
                                            roi = self.getDetectorROI(),
                                            Nav=self.getNumPixelsToAverage())
