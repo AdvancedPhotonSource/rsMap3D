@@ -364,6 +364,9 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         imageToBeUsed = self.getImageToBeUsed()
         #get startIndex and length for each image in the immFile
         imageDir = os.path.join(self.projectDir, IMAGES_STR) 
+        self.progressMax = len( self.scans) * 100
+        self.progressInc = 1.0 * 100.0
+        self.progress = 0
         for scannr in scans:
             curScan = self.sd.scans[str(scannr)]
             curScan.interpret()
@@ -424,7 +427,12 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                     logger.debug("indexesToProcess %s" % str(indexesToProcess))
                     
                     foundIndex = 0
+                    minorProgressInc = self.progressInc/indexesToProcess.shape[0]
+                    minorProgress = self.progress
                     for scanno in indexesToProcess:
+                        if self.progressUpdater <> None:
+                            self.progressUpdater(minorProgress, self.progressMax)
+                        minorProgress += minorProgressInc        
                         fileName = namePrefix + \
                                 "%d_%.5d-%.5d" % (scanno, 1,1) + \
                                 IMM_STR[1:]
@@ -515,7 +523,12 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                       numberToProcess,
                                       imageStartIndex,
                                       dlen)
+                minorProgressInc = self.progressInc/indexesToProcess.shape[0]
+                minorProgress = self.progress
                 for ind in indexesToProcess:
+                    if self.progressUpdater <> None:
+                        self.progressUpdater(minorProgress, self.progressMax)
+                    minorProgress += minorProgressInc        
                     if imageToBeUsed[scannr][ind] and mask[ind]:
                         img = images[ind-startIndex,:,:]
                         img2 = img
@@ -545,9 +558,9 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                         scanAngle[i] = \
                             np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
                                         axis=0)
-                        
-                            
-                   
+            self.progress += self.progressInc
+            if self.progressUpdater <> None:
+                self.progressUpdater(self.progress, self.progressMax)
                  
         # transform scan angles to reciprocal space coordinates for all detector
         # pixels
