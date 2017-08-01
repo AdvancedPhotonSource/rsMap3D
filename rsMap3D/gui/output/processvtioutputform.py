@@ -9,7 +9,8 @@ from  PyQt4.QtCore import pyqtSlot as Slot
 
 from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
 from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
-    WARNING_STR, SAVE_FILE_STR, VTI_FILTER_STR, BINARY_OUTPUT, ASCII_OUTPUT
+    WARNING_STR, SAVE_FILE_STR, VTI_FILTER_STR, BINARY_OUTPUT, ASCII_OUTPUT,\
+    EMPTY_STR
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
@@ -46,7 +47,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         writable
         '''
         logger.debug(METHOD_ENTER_STR)
-        if self.outFileTxt.text() == "":
+        if self.outFileTxt.text() == EMPTY_STR:
             fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
                                                filter=VTI_FILTER_STR))
@@ -56,7 +57,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                                                SAVE_FILE_STR, 
                                                filter=VTI_FILTER_STR, \
                                                directory = inFileName))
-        if fileName != "":
+        if fileName != EMPTY_STR:
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
@@ -74,6 +75,9 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
+        else:
+            self.outputFileName = EMPTY_STR
+            self.setOutFileText.emit(EMPTY_STR)
         logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _cancelProcess(self):
@@ -144,7 +148,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
 #                      qtCore.SIGNAL(EDIT_FINISHED_SIGNAL), 
 #                      self._editFinishedOutputFile)
         self.outFileTxt.editingFinished.connect(self._editFinishedOutputFile)
-        self.setFileName[str].connect( self.outFileTxt.setText)
+        self.setFileName[str].connect( self.setOutFileText)
         self.outputTypeSelect.currentIndexChanged[str]. \
             connect(self._selectedTypeChanged)
         logger.debug(METHOD_EXIT_STR)
@@ -158,11 +162,11 @@ class ProcessVTIOutputForm(AbstractOutputView):
         '''
         logger.debug(METHOD_ENTER_STR)
         fileName = str(self.outFileTxt.text())
-        if fileName != "":
+        if fileName != EMPTY_STR:
             if os.path.exists(os.path.dirname(fileName)):
                 self.outputFileName = fileName
             else:
-                if os.path.dirname(fileName) == "":
+                if os.path.dirname(fileName) == EMPTY_STR:
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
                 else:
@@ -181,6 +185,9 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
+        else:
+            self.outputFileName = EMPTY_STR
+            self.setOutFileText.emit(EMPTY_STR)
         logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _process(self):
@@ -203,7 +210,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         if self.outputFileName == "":
             self.outputFileName = os.path.join(dataSource.projectDir,  \
                                                "%s.vti" %dataSource.projectName)
-            self.setFileName.emit(self.outputFileName)
+            self.setFileName[str].emit(self.outputFileName)
         if os.access(os.path.dirname(self.outputFileName), os.W_OK):
             self.mapper = QGridMapper(dataSource, \
                                      self.outputFileName, \
@@ -226,6 +233,12 @@ class ProcessVTIOutputForm(AbstractOutputView):
         logger.debug(METHOD_ENTER_STR)
         self.outputType = str(typeStr)
         logger.debug(METHOD_EXIT_STR)
+        
+    @Slot(str)
+    def setOutFileText(self, outFile):
+        logger.debug(METHOD_ENTER_STR)
+        self.outFileTxt.setText(outFile)
+        self.outFileTxt.editingFinished.emit()
         
     def _stopMapper(self):
         '''
