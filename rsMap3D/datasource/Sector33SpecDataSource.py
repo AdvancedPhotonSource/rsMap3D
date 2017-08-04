@@ -241,13 +241,13 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                 TIFF_FILE_MERGE_STR % 
                                 (self.projectName))
         # if needed load up the bad pixel file.
-        if not (self.badPixelFile == None):
+        if not (self.badPixelFile is None):
             
             badPixelFile = PilatusBadPixelFile(self.badPixelFile)
             self.badPixels = badPixelFile.getBadPixels()
              
         # id needed load the flat field file
-        if not (self.flatFieldFile == None):
+        if not (self.flatFieldFile is None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
         # Load scan information from the spec file
         try:
@@ -255,7 +255,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.mapHKL = mapHKL
             maxScan = int(self.sd.getMaxScanNumber())
             logger.debug("Number of Scans" +  str(maxScan))
-            if self.scans  == None:
+            if self.scans  is None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
                             IMAGE_DIR_MERGE_STR % self.projectName)
@@ -287,7 +287,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                             self.availableScans.append(scan)
                             if self.mapHKL==True:
                                 self.ubMatrix[scan] = self.getUBMatrix(curScan)
-                                if self.ubMatrix[scan] == None:
+                                if self.ubMatrix[scan] is None:
                                     raise Sector33SpecFileException("UB matrix " + \
                                                                     "not found.")
                             else:
@@ -434,7 +434,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 scanAngle2[i] = []
             if monitorName != None:
                 monitor_data = scan.data.get(monitorName)
-                if monitor_data == None:
+                if monitor_data is None:
                     raise IOError("Did not find Monitor source '" + \
                                   monitorName + \
                                   "' in the Spec file.  Make sure " + \
@@ -442,7 +442,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                   "instrument Config file")
             if filterName != None:
                 filter_data = scan.data.get(filterName)
-                if filter_data == None:
+                if filter_data is None:
                     raise IOError("Did not find filter source '" + \
                                   filterName + \
                                   "' in the Spec file.  Make sure " + \
@@ -462,7 +462,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                     img = np.array(im.getdata()).reshape(im.size[1],im.size[0]).T
                     img = self.hotpixelkill(img)
                     ff_data = self.getFlatFieldData()
-                    if not (ff_data == None):
+                    if not (ff_data is None):
                         img = img * ff_data
                     # reduce data siz
                     img2 = xu.blockAverage2D(img, 
@@ -505,7 +505,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-        if self.ubMatrix[scans[0]] == None:
+        if self.ubMatrix[scans[0]] is None:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
                             roi=self.getDetectorROI(), 
                             Nav=self.getNumPixelsToAverage())

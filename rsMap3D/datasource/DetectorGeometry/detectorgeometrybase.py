@@ -49,7 +49,7 @@ class DetectorGeometryBase(object):
         '''
         logger.debug("Enter")
         detectors = self.root.find(self.DETECTORS)
-        if detectors == None:
+        if detectors is None:
             raise DetectorConfigException("No detectors found in detector " + \
                                           "config file")
         logger.debug("Exit")

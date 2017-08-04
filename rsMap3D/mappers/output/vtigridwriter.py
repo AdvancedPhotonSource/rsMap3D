@@ -21,7 +21,7 @@ class VTIGridWriter(AbstractGridWriter):
         [projectName, availableScans, nx, ny, nz (number of points in the 3 dimensions) 
         and the output file name
         """
-        if ((fileInfo == None) or (len(fileInfo) == 0)):
+        if ((fileInfo is None) or (len(fileInfo) == 0)):
             raise ValueError(self.whatFunction() +
                             "passed no filename information " +
                             "requires a tuple with six members:\n"

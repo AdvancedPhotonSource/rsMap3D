@@ -48,7 +48,7 @@ class AbstractGridMapper(object):
         self.haltMap = False
         self.progressUpdater = None
         self.gridWriter = gridWriter
-        if transform == None:
+        if transform is None:
             self.transform = UnityTransform3D()
         else:
             self.transform = transform

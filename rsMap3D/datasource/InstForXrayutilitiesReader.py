@@ -71,7 +71,7 @@ class InstForXrayutilitiesReader():
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(DETECTOR_CIRCLES)
-        if circles == None:
+        if circles is None:
             raise InstConfigException("Instrument configuration has no " +\
                                       "Detector Circles")
         return self.root.find(DETECTOR_CIRCLES).getchildren()
@@ -88,10 +88,10 @@ class InstForXrayutilitiesReader():
         is not present. 
         '''
         name = self.root.find(FILTER_NAME)
-        if name == None:
+        if name is None:
             return None
         else:
-            if name.text == None or name.text.strip() == "":
+            if name.text is None or name.text.strip() == "":
                 return None
             else:
                 return str(name.text.strip())
@@ -102,7 +102,7 @@ class InstForXrayutilitiesReader():
         config file.  Returns 1 if it is not present. 
         '''
         name = self.root.find(FILTER_NAME)
-        if name == None:
+        if name is None:
             return 1
         else:
             try:
@@ -116,7 +116,7 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(INPLANE_REFERENCE_DIRECTION)
-        if direction == None:
+        if direction is None:
             raise InstConfigException("Missing in-plane reference direction " + \
                                       "in instrument config file")
         return self._makeReferenceDirection(direction )
@@ -127,10 +127,10 @@ class InstForXrayutilitiesReader():
         is not present or if the text string is empty
         '''
         name = self.root.find(MONITOR_NAME)
-        if name == None:
+        if name is None:
             return None
         else:
-            if name.text == None or name.text.strip() == "":
+            if name.text is None or name.text.strip() == "":
                 return None
             else:
                 return str(name.text.strip())
@@ -141,7 +141,7 @@ class InstForXrayutilitiesReader():
         config file.  Returns 1 if it is not present. 
         '''
         name = self.root.find(MONITOR_NAME)
-        if name == None:
+        if name is None:
             return 1
         else:
             try:
@@ -167,7 +167,7 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(PRIMARY_BEAM_DIRECTION)
-        if direction == None:
+        if direction is None:
             raise InstConfigException("Missing primary beam direction " + \
                                       "in instrument config file")
         return self._makeReferenceDirection(direction )
@@ -180,7 +180,7 @@ class InstForXrayutilitiesReader():
         
         direction = \
             self.root.find(PROJECTION_DIRECTION)
-        if direction == None:
+        if direction is None:
             message = PROJECTION_DIRECTION + \
                       " was not found in the instrument config file"
             raise InstConfigException(message)
@@ -192,10 +192,10 @@ class InstForXrayutilitiesReader():
         scanned 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " + \
                              "instrument config file")
-        if function.attrib[CALC_ON_SCANNED_REF] == None:
+        if function.attrib[CALC_ON_SCANNED_REF] is None:
             return False
         else:
             if function.attrib[CALC_ON_SCANNED_REF].lower() in \
@@ -216,7 +216,7 @@ class InstForXrayutilitiesReader():
         :return: The name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             return ""
         else:
             return function.attrib[NAME]
@@ -226,7 +226,7 @@ class InstForXrayutilitiesReader():
         :return: The name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " +\
                                       "instrument config file")
         try:
@@ -252,7 +252,7 @@ class InstForXrayutilitiesReader():
         
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " +\
                                       "instrument config file")
         param = function.find(NAMESPACE + name)
@@ -266,12 +266,12 @@ class InstForXrayutilitiesReader():
         :return: The name of a function to be used in mapping 
         '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " +\
                                       "instrument config file")
         angles = []
         primaryAngles = function.findall(PRIMARY_ANGLE)
-        if primaryAngles == None:
+        if primaryAngles is None:
             raise InstConfigException("No primaryAngle members in " + \
             "sampleAngleMapFunction in instrument config")
         for angle in primaryAngles:
@@ -284,14 +284,14 @@ class InstForXrayutilitiesReader():
                                                 attribName=None):
         attribValue = None
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " +\
                                       "instrument config file")
         refAngles = function.findall(REFERENCE_ANGLE)
         for angle in refAngles:
             if angle.attrib[SPEC_MOTOR_NAME] == str(number):
                 attribValue = angle.attrib[attribName]
-        if (attribValue == None):
+        if (attribValue is None):
             raise(AttributeError("Angle " + str(number) +
                                  " does not have a value for " +
                                  str(attribName)))
@@ -301,13 +301,13 @@ class InstForXrayutilitiesReader():
         '''
           '''
         function = self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " + \
                              "instrument config file")
         angles = {}
         angleList = []
         referenceAngles = function.findall(REFERENCE_ANGLE)
-        if referenceAngles == None:
+        if referenceAngles is None:
             raise InstConfigException("No referenceAngle members in " + \
             "sampleAngleMapFunction in instrument config")
         for angle in referenceAngles:
@@ -320,13 +320,13 @@ class InstForXrayutilitiesReader():
     def getSampleAngleMappingAlwaysFix(self):
         function =  self.root.find(SAMPLE_ANGLE_MAP_FUNCTION)
         
-        if function == None:
+        if function is None:
             raise InstConfigException("No Mapping function defined in " + \
                              "instrument config file")
         alwaysFix = None
         try:
             alwaysFix = function.attrib[ALWAYS_FIX]
-            if alwaysFix == None:
+            if alwaysFix is None:
                 return False
         except KeyError:
             alwaysFix = False
@@ -344,7 +344,7 @@ class InstForXrayutilitiesReader():
         is not included in the file raise an InstConfigException
         '''
         circles = self.root.find(SAMPLE_CIRCLES)
-        if circles == None:
+        if circles is None:
             raise InstConfigException("Instrument configuration has no Sample" +
                                       " Circles")
         return circles.getchildren()
@@ -361,7 +361,7 @@ class InstForXrayutilitiesReader():
         '''
         direction = \
             self.root.find(SAMPLE_SURFACE_NORMAL_DIRECTION)
-        if direction == None:
+        if direction is None:
             raise InstConfigException("Missing sample surface normal " + \
                                       "direction in instrument config file")
         return self._makeReferenceDirection(direction )

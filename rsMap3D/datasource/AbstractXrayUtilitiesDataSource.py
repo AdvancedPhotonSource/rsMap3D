@@ -55,7 +55,7 @@ class AbstractXrayutilitiesDataSource(AbstractDataSource):
         self.projectionDirection = None
         self.filterName = None
         self.filterScaleFactor = 1.0
-        if transform == None:
+        if transform is None:
             self.transform = UnityTransform3D()
         else:
             self.transform = transform

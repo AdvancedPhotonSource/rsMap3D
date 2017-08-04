@@ -149,7 +149,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             angleList = []
             for i in range(len(angles[0])):
                 angleList.append(angles[:,i])
-            if ub == None:
+            if ub is None:
                 qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                          roi=roi, \
                                          Nav=nav)
@@ -197,7 +197,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 logger.debug("angleList " + str(angleList) )
                 logger.debug("roi " + str(roi))
                 logger.debug("nav " + str(nav))
-                if ub == None:
+                if ub is None:
                     qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                              roi=roi, \
                                              Nav=nav)
@@ -300,9 +300,9 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 [detectorSize[0]/self.detectorDimensions[0],\
                  detectorSize[1]/self.detectorDimensions[1]]
             self.distanceToDetector = detConfig.getDistance(detector) 
-            if self.numPixelsToAverage == None:
+            if self.numPixelsToAverage is None:
                 self.numPixelsToAverage = [1,1]
-            if self.detectorROI == None:
+            if self.detectorROI is None:
                 self.detectorROI = [0, self.detectorDimensions[0],  
                                     0, self.detectorDimensions[1]]
             self.detectorPixelDirection1 = \
@@ -388,7 +388,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             #TODO
             if self.mapHKL==True:
                 self.ubMatrix[scan] = self.getUBMatrix(scan)
-                if self.ubMatrix[scan] == None:
+                if self.ubMatrix[scan] is None:
                     raise RSMap3DException("UB matrix " + \
                                                         "not found.")
                 else:
@@ -540,7 +540,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         for i in range(len(angleNames)):
             angleList.append(scanAngle[i])
         logger.debug("Before hxrd.Ang2Q.area %s" %str(angleList))
-        if self.ubMatrix[scans[0]] == None:
+        if self.ubMatrix[scans[0]] is None:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \
                             roi=self.detectorROI, 
                             Nav=self.numPixelsToAverage)

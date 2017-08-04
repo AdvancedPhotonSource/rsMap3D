@@ -141,7 +141,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                     logger.debug("angles in pass " + str(angles[firstImageInPass:lastImageInPass,i]) )
                     angleList.append(angles[firstImageInPass:lastImageInPass,i])
                 logger.debug("angleList " + str(angleList) )
-                if ub == None:
+                if ub is None:
                     qx, qy, qz = hxrd.Ang2Q.area(*angleList, \
                                              roi=roi, \
                                              Nav=nav)
@@ -233,9 +233,9 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                 [detectorSize[0]/self.detectorDimensions[0],\
                  detectorSize[1]/self.detectorDimensions[1]]
             self.distanceToDetector = detConfig.getDistance(detector) 
-            if self.numPixelsToAverage == None:
+            if self.numPixelsToAverage is None:
                 self.numPixelsToAverage = [1,1]
-            if self.detectorROI == None:
+            if self.detectorROI is None:
                 self.detectorROI = [0, self.detectorDimensions[0],  
                                     0, self.detectorDimensions[1]]
             self.detectorPixelDirection1 = \

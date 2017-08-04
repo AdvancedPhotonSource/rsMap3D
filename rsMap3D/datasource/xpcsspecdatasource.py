@@ -126,7 +126,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             self.mapHKL = mapHKL
             maxScan = int(self.sd.getMaxScanNumber())
             logger.debug("%s scans" % str(maxScan))
-            if self.scans  == None:
+            if self.scans  is None:
                 self.scans = range(1, maxScan+1)
             imagePath = os.path.join(self.projectDir, 
                             IMAGE_DIR_MERGE_STR % self.projectName)
@@ -298,7 +298,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         
     def rawmap(self, scans, mask=None):
     
-        if mask == None:
+        if mask is None:
             mask_was_none = True
             #mask = [True] * len(self.getImageToBeUsed()[scans[0]])
         else:
@@ -567,7 +567,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         angleList = []
         for i in xrange(len(angleNames)):
             angleList.append(scanAngle[i])
-        if self.ubMatrix[scans[0]] == None:
+        if self.ubMatrix[scans[0]] is None:
             qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
                                            roi = self.getDetectorROI(),
                                            Nav=self.getNumPixelsToAverage())

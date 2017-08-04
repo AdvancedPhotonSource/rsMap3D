@@ -64,7 +64,7 @@ class RSMap3DConfig():
         
     def getMaxImageMemory(self):
         maxIMem = self.root.find(MAX_IMAGE_MEMORY)
-        if maxIMem == None:
+        if maxIMem is None:
             raise RSMap3DException("Config file " + self.configFile + \
                                    " does not define maxImageMemory")
         try:

@@ -175,7 +175,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
     def loadSource(self):
         self.loadDetectorConfig()
         
-        if self.files == None:
+        if self.files is None:
             #Getting file list
             fileFilter = str(os.path.join(self.projectDir, string.rsplit(self.projectName, '_',1)[0])) + \
                          "_[0-9]*" + \
@@ -330,7 +330,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
     def rawmap(self,scans, angdelta=[0,0,0,0,0],
             adframes=None, mask = None):
 
-        if mask == None:
+        if mask is None:
             maskWasNone = True
         else:
             maskWasNone = False
