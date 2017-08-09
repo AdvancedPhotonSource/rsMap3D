@@ -27,16 +27,22 @@ class VTIGridWriter(AbstractGridWriter):
                             "requires a tuple with six members:\n"
                             "1. project filename so that a filename can be " +
                             "constructed if filename is blank\n 2. User " +
-                            "filename, and number of pixels for output in " + 
-                            "x/y/z directions and output file name")
+                            "filename\n" +
+                            "3,4,5 - number of pixels for output in " + 
+                            "x/y/z directions" +
+                            "6 - output file name" + 
+                            "7. outputFileType")
         elif (len( fileInfo) != 7):
             raise ValueError(self.whatFunction() +
                             "passed no filename information " +
                             "requires a tuple with six members:\n"
                             "1. project filename so that a filename can be " +
                             "constructed if filename is blank\n 2. User " +
-                            "filename, and number of pixels for output in " + 
-                            "x/y/z directions, outputFileName and out file type")
+                            "filename\n" +
+                            "3,4,5 - number of pixels for output in " + 
+                            "x/y/z directions" +
+                            "6 - output file name" + 
+                            "7. outputFileType")
         self.fileInfo.append(fileInfo[0])
         self.fileInfo.append(fileInfo[1])
         self.nx = fileInfo[2]
