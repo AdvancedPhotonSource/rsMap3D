@@ -9,7 +9,7 @@ import numpy as np
 from rsMap3D.gui.rsm3dcommonstrings import EMPTY_STR
 
 
-FILENAME_MERGE_STR = "%s_S%d.xye"
+FILENAME_MERGE_STR = "%s_S%03d.xye"
 
 class PowderScanWriter():
     
@@ -51,6 +51,8 @@ class PowderScanWriter():
         
     def write(self):
         
+        logger.debug("fileInfo[0] %s, fileInfo[1] %s" %
+                     (self.fileInfo[0], self.fileInfo[1]))
         if self.outputFileName == EMPTY_STR or self.outputFileName is None:
             outputFileName = FILENAME_MERGE_STR % \
                             (self.fileInfo[0], self.fileInfo[1])
