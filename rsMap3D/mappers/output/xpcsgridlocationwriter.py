@@ -11,7 +11,7 @@ class XPCSGridLocationWriter(AbstractGridWriter):
     FILE_EXTENSION = ""
     
     def setFileInfo(self, fileInfo):
-        if ((fileInfo == None) or (len(fileInfo) == 0)):
+        if ((fileInfo is None) or (len(fileInfo) == 0)):
             raise ValueError(self.whatFunction() +
                             "passed no filename information " +
                             "requires a tuple with six members:\n"
