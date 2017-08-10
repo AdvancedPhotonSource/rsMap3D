@@ -1,0 +1,2 @@
+include LICENSE
+include rsMap3D/resources/*.xml
