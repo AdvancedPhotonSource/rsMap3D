@@ -1,0 +1,8 @@
+Instructions for updating the package on pypi distribution site.
+
+- Edit README file in the root directory.  Add in new version information and 
+   date
+- Edit setup.py in root directory
+       - Change version number
+       - Add in any new package paths that need to be added to the distribution
+- upload to pypi
