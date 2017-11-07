@@ -491,7 +491,7 @@ if __name__ == "__main__":
         """
         Test function for the srange class.
         """
-        print '\n---------------------------------------------'
+        print ('\n---------------------------------------------')
         if type(test_str) is str:
             print "The test string: '%s'" % test_str
         else:
