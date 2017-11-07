@@ -70,7 +70,7 @@ class VTIGridWriter(AbstractGridWriter):
         image_data = vtk.vtkImageData()
         image_data.SetOrigin(qx0,qy0, qz0)
         image_data.SetSpacing(dqx, dqy, dqz)
-        print self.nx, self.ny,self.nx
+        logger.debug ("Gridsize %d, %d, %d" % (self.nx, self.ny,self.nz))
         image_data.SetExtent(0, self.nx-1,\
                              0, self.ny-1,\
                              0, self.nz-1)
