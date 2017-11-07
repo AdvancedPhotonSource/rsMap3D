@@ -113,6 +113,7 @@ class QGridMapper(AbstractGridMapper):
                             progress += 1.0/nPasses* 100.0
                             if self.progressUpdater <> None:
                                 self.progressUpdater(progress)
+            self.progressUpdater(100.0)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
     
     
