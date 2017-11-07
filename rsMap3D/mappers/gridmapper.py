@@ -91,23 +91,28 @@ class QGridMapper(AbstractGridMapper):
                         imageToBeUsedInPass[:thisPass*numImages/nPasses] = False
                         imageToBeUsedInPass[(thisPass+1)*numImages/nPasses:] = False
                         
-                        kwargs['mask'] = imageToBeUsedInPass
-                        qx, qy, qz, intensity = \
-                            self.dataSource.rawmap((scan,), **kwargs)
-                        # convert data to rectangular grid in reciprocal space
-                        try:
-                            gridder(qx, qy, qz, intensity)
-                    
+                        if True in imageToBeUsedInPass:
+                            kwargs['mask'] = imageToBeUsedInPass
+                            qx, qy, qz, intensity = \
+                                self.dataSource.rawmap((scan,), **kwargs)
+                            # convert data to rectangular grid in reciprocal space
+                            try:
+                                gridder(qx, qy, qz, intensity)
+                        
+                                progress += 1.0/nPasses* 100.0
+                                if self.progressUpdater <> None:
+                                    self.progressUpdater(progress)
+                            except InputError as ex:
+                                print "Wrong Input to gridder"
+                                print "qx Size: " + str( qx.shape)
+                                print "qy Size: " + str( qy.shape)
+                                print "qz Size: " + str( qz.shape)
+                                print "intensity Size: " + str(intensity.shape)
+                                raise InputError(ex)
+                        else:
                             progress += 1.0/nPasses* 100.0
                             if self.progressUpdater <> None:
                                 self.progressUpdater(progress)
-                        except InputError as ex:
-                            print "Wrong Input to gridder"
-                            print "qx Size: " + str( qx.shape)
-                            print "qy Size: " + str( qy.shape)
-                            print "qz Size: " + str( qz.shape)
-                            print "intensity Size: " + str(intensity.shape)
-                            raise InputError(ex)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
     
     
