@@ -221,7 +221,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 zmax.extend(map(np.max, qzTrans))
                 ####
         if self.progressUpdater <> None:
-            self.progressUpdater(self.progress, self.progressMax)
+            self.progressUpdater(self.progressMax, self.progressMax)
         logger.debug(METHOD_EXIT_STR + str((xmin, xmax, ymin, ymax, zmin, zmax)) ) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
     
