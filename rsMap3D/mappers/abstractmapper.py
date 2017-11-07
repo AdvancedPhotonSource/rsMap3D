@@ -89,7 +89,7 @@ class AbstractGridMapper(object):
         method doMap.  Typical access to this method is through the doMap
         method.
         """
-        print("Running abstract Method")
+        raise NotImplementedError("Subclasses should define this method")
         
     def setGridWriter(self, writer):
         self.gridWriter = writer
