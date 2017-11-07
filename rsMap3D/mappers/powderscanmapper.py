@@ -2,6 +2,7 @@
  Copyright (c) 2017 UChicago Argonne, LLC
  See LICENSE file.
 '''
+import os
 import numpy as np
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
@@ -15,7 +16,11 @@ Y_SCALING_OPTIONS  = ["Linear","log"]
 
 
 class PowderScanMapper():
-    
+    '''
+    This mapper takes data from a general diffraction scan and maps 
+    the data as Intensity vs q or intensity vs 2-theta.  This outputs
+    data into one three column text file per selected scan.
+    '''
     def __init__(self,
                  dataSource,
                  outputFileName,
@@ -53,6 +58,13 @@ class PowderScanMapper():
     
         
     def doMap(self):
+        '''
+        This method controls the processing of the mapping and subsequent 
+        writing of the map file.  This method should be launched by the 
+        runMapper of a "process" map output gui.
+        '''
+        for scan in self.dataSource.getAvailableScans():
+            self.currentMapScans = [scan,]
             x, y, e = self.processMap()
 
             self.gridWriter.setData(x, y, e)
@@ -62,18 +74,28 @@ class PowderScanMapper():
         
         
     def getFileInfo(self):
+        '''
+        Pack together information needed to write the data.
+        '''
         xMin = self.getXCoordMin()
         xMax = self.getXCoordMax()
         xStep = float(self.XCoordStep)
         numBins = np.round((xMax-xMin)/xStep)
-        return (self.dataSource.projectName,
-                self.dataSource.availableScans[0],
+        return (str(os.path.join(self.dataSource.projectDir, self.dataSource.projectName)),
+                self.currentMapScans[0],
                 numBins,
                 self.outputFileName)
+        
     def getXCoordMax(self):
+        '''
+        for this one dimensional mapping get the maximum value of the 
+        x coordinate.  If a value was specified on the input then that value
+        will be used.  If no value was specified, then one is calculated from 
+        the qx, qy, qz values.
+        '''
         logger.debug(METHOD_ENTER_STR)
         xMax = None
-        scans = self.dataSource.getAvailableScans()
+        scans = self.currentMapScans
         wavelen = 12398.41290/self.dataSource.getIncidentEnergy()[scans[0]]
         if not (self.xCoordMax is None) and not (self.xCoordMax == EMPTY_STR):
             xMax = float(self.xCoordMax)
@@ -93,9 +115,15 @@ class PowderScanMapper():
         return xMax
         
     def getXCoordMin(self):
+        '''
+        for this one dimensional mapping get the minimum value of the 
+        x coordinate.  If a value was specified on the input then that value
+        will be used.  If no value was specified, then one is calculated from 
+        the qx, qy, qz values.
+        '''
         logger.debug(METHOD_ENTER_STR)
         xMin = None
-        scans = self.dataSource.getAvailableScans()
+        scans = self.currentMapScans
         wavelen = 12398.41290/self.dataSource.getIncidentEnergy()[scans[0]]
         if not (self.xCoordMin is None) and not (self.xCoordMin == EMPTY_STR):
             xMin = float(self.xCoordMin)
@@ -143,7 +171,7 @@ class PowderScanMapper():
 
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         imageSize = np.prod(self.dataSource.getDetectorDimensions())
-        for scan in self.dataSource.getAvailableScans():
+        for scan in self.currentMapScans:
             wavelen = 12398.41290/self.dataSource.getIncidentEnergy()[scan]
             logger.info("Scan Number %s" % scan)
             numImages = len(imageToBeUsed[scan])
@@ -187,4 +215,9 @@ class PowderScanMapper():
         self.progressUpdater = updater
 
     def setGridWriter(self, gridWriter):
+        ''' 
+        set the GridWriter for this instance of the mapper.  Changing the writer
+        will change the output.  For now only the PowderScanWriter is 
+        appropriate though
+        '''
         self.gridWriter = gridWriter
