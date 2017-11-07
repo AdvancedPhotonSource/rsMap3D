@@ -6,6 +6,7 @@ import os
 
 import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
+from rsMap3D.gui.output.processpowderscanform import ProcessPowderScanForm
 logger = logging.getLogger(__name__)
 import PyQt4.QtGui as qtGui
 import PyQt4.QtCore as qtCore
@@ -341,6 +342,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         outputForms = []
         outputForms.append(ProcessVTIOutputForm)
         outputForms.append(ProcessImageStackForm)
+        outputForms.append(ProcessPowderScanForm)
         logger.debug(METHOD_EXIT_STR)
         return outputForms
     
