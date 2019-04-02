@@ -60,7 +60,7 @@ class DetectorGeometryForXrayutilitiesReader(DetectorGeometryBase):
             raise DetectorConfigException(self.CENTER_CHANNEL_PIXEL + 
                                           " not found in detector config " + \
                                           "file")
-        vals = string.split(centerPix)
+        vals = centerPix.split()
         logger.debug(METHOD_EXIT_STR + str([int(vals[0]), int(vals[1])]) )
         return [int(vals[0]), int(vals[1])]
     
