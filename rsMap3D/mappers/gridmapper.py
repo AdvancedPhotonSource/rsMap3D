@@ -81,15 +81,15 @@ class QGridMapper(AbstractGridMapper):
                     # convert data to rectangular grid in reciprocal space
                     gridder(qx, qy, qz, intensity)
                     progress += 100
-                    if self.progressUpdater <> None:
+                    if self.progressUpdater is not None:
                         self.progressUpdater(progress)
                 else:
-                    nPasses = imageSize*4*numImages/ maxImageMem + 1
+                    nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
                     
                     for thisPass in range(nPasses):
                         imageToBeUsedInPass = np.array(imageToBeUsed[scan])
-                        imageToBeUsedInPass[:thisPass*numImages/nPasses] = False
-                        imageToBeUsedInPass[(thisPass+1)*numImages/nPasses:] = False
+                        imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = False
+                        imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
                         
                         if True in imageToBeUsedInPass:
                             kwargs['mask'] = imageToBeUsedInPass
@@ -100,18 +100,18 @@ class QGridMapper(AbstractGridMapper):
                                 gridder(qx, qy, qz, intensity)
                         
                                 progress += 1.0/nPasses* 100.0
-                                if self.progressUpdater <> None:
+                                if self.progressUpdater is not None:
                                     self.progressUpdater(progress)
                             except InputError as ex:
-                                print "Wrong Input to gridder"
-                                print "qx Size: " + str( qx.shape)
-                                print "qy Size: " + str( qy.shape)
-                                print "qz Size: " + str( qz.shape)
-                                print "intensity Size: " + str(intensity.shape)
+                                print ("Wrong Input to gridder")
+                                print ("qx Size: " + str( qx.shape))
+                                print ("qy Size: " + str( qy.shape))
+                                print ("qz Size: " + str( qz.shape))
+                                print ("intensity Size: " + str(intensity.shape))
                                 raise InputError(ex)
                         else:
                             progress += 1.0/nPasses* 100.0
-                            if self.progressUpdater <> None:
+                            if self.progressUpdater is not None:
                                 self.progressUpdater(progress)
             self.progressUpdater(100.0)
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder

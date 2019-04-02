@@ -89,15 +89,16 @@ class PowderScanMapper():
     def getXCoordMax(self):
         '''
         for this one dimensional mapping get the maximum value of the 
-        x coordinate.  If a value was specified on the input then that value
-        will be used.  If no value was specified, then one is calculated from 
-        the qx, qy, qz values.
+        x coordinate.  If a value was specified on the input then that 
+        value will be used.  If no value was specified, then one is 
+        calculated from the qx, qy, qz values.
         '''
         logger.debug(METHOD_ENTER_STR)
         xMax = None
         scans = self.currentMapScans
         wavelen = 12398.41290/self.dataSource.getIncidentEnergy()[scans[0]]
-        if not (self.xCoordMax is None) and not (self.xCoordMax == EMPTY_STR):
+        if not (self.xCoordMax is None) and \
+            not (self.xCoordMax == EMPTY_STR):
             xMax = float(self.xCoordMax)
         else:
             qxMin, qxMax, qMin, qyMax, qzMin, qzMax = \
@@ -117,9 +118,9 @@ class PowderScanMapper():
     def getXCoordMin(self):
         '''
         for this one dimensional mapping get the minimum value of the 
-        x coordinate.  If a value was specified on the input then that value
-        will be used.  If no value was specified, then one is calculated from 
-        the qx, qy, qz values.
+        x coordinate.  If a value was specified on the input then that 
+        value will be used.  If no value was specified, then one is 
+        calculated from the qx, qy, qz values.
         '''
         logger.debug(METHOD_ENTER_STR)
         xMin = None
@@ -189,9 +190,11 @@ class PowderScanMapper():
             else:
                 nPasses = np.int(np.floor(imageSize*4*numImages/maxImageMem)+1)
                 for thisPass in range(nPasses):
-                    logger.info("Pass Number %d of %d" % (thisPass+1, nPasses))
+                    logger.info("Pass Number %d of %d" % \
+                                (thisPass+1, nPasses))
                     imageToBeUsedInPass = np.array(imageToBeUsed[scan])
-                    imageToBeUsedInPass[:thisPass*numImages/nPasses] = False
+                    imageToBeUsedInPass[:thisPass*numImages/nPasses] = \
+                        False
                     imageToBeUsedInPass[(thisPass+1)*numImages/nPasses] = False
                     qx, qy, qz, intensity = self.dataSource.rawMap((scan,), \
                                                        mask=imageToBeUsedInPass)
@@ -210,14 +213,15 @@ class PowderScanMapper():
     
     def setProgressUpdater(self, updater):
         '''
-        Set the updater that will be used to maintain the progress bar value 
+        Set the updater that will be used to maintain the progress bar 
+        value 
         '''
         self.progressUpdater = updater
 
     def setGridWriter(self, gridWriter):
         ''' 
-        set the GridWriter for this instance of the mapper.  Changing the writer
-        will change the output.  For now only the PowderScanWriter is 
-        appropriate though
+        set the GridWriter for this instance of the mapper.  Changing 
+        the writer will change the output.  For now only the 
+        PowderScanWriter is appropriate though
         '''
         self.gridWriter = gridWriter

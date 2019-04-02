@@ -65,13 +65,13 @@ class AbstractGridMapper(object):
         #rangeBounds = self.dataSource.getRangeBounds()
         qx, qy, qz, gint, gridder = \
             self.processMap()
-        print 'Elapsed time for gridding: %.3f seconds' % \
-               (time.time() - _start_time)
+        print ('Elapsed time for gridding: %.3f seconds' % \
+               (time.time() - _start_time))
         
         # print some information
-        print 'qx: ', qx.min(), ' .... ', qx.max()
-        print 'qy: ', qy.min(), ' .... ', qy.max()
-        print 'qz: ', qz.min(), ' .... ', qz.max()
+        print ('qx: ', qx.min(), ' .... ', qx.max())
+        print ('qy: ', qy.min(), ' .... ', qy.max())
+        print ('qz: ', qz.min(), ' .... ', qz.max())
         self.gridWriter.setData(qx, qy, qz, gint)
         self.gridWriter.setFileInfo(self.getFileInfo())
         self.gridWriter.write()
