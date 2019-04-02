@@ -2,7 +2,7 @@
  Copyright (c) 2017, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from os.path import expanduser, join, exists
 import inspect
 #import rsMap3D.gui.input as input

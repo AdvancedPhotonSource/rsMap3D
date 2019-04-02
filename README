@@ -109,9 +109,13 @@ Version 1.1.7
     Play around with new setup.py.  Added resources directory with example xml
     and also get the LICENSE file into the distro.
     
-Version 1.1.8
+Version 1.1.8   2017-11-7
     Fix problem selecting only a one or two images to process from a scan.  This 
     caused a problem if the size of the scan was such that processing was
     done in a number of passes based on user defined amount of memory to use 
     and the size and number of images to process.  
     Add Powder scan form into the S33 scan form.
+    
+Version 1.1.9   2017-11-7
+    Fix Gridmapper to show 100% when done.
+    Fix S1 to show 100% when done loading.
