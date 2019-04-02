@@ -136,7 +136,7 @@ class AbstractDataSource(object):
         self.imageToBeUsed = {}
         for scan in self.availableScans:
             inUse = []
-            for i in xrange(len(self.imageBounds[scan][0])):
+            for i in range(len(self.imageBounds[scan][0])):
                 bounds = self.imageBounds[scan]
                 if self.inBounds(bounds[XMIN_INDEX][i], \
                                  bounds[XMAX_INDEX][i], \
