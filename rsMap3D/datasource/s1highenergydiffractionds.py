@@ -143,7 +143,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         if imageSize*4*numImages <= maxImageMem:
             self.progressMax = len( self.scans) * 100
             self.progressInc = 1.0 * 100.0
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc        
             angleList = []
@@ -182,14 +182,14 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             for thisPass in range(nPasses):
                 self.progressMax = len( self.scans) * 100.0
                 self.progressInc = 1.0 / nPasses * 100.0
-                if self.progressUpdater <> None:
+                if self.progressUpdater is not None:
                     self.progressUpdater(self.progress, self.progressMax)
                 self.progress += self.progressInc        
                 firstImageInPass = thisPass*numImages/nPasses
                 lastImageInPass = (thisPass+1)*numImages/nPasses
                 logger.debug("firstImageInPass %d, lastImageInPass %d" %
                              (firstImageInPass, lastImageInPass))
-                imageList = xrange(firstImageInPass, lastImageInPass)
+                imageList = range(firstImageInPass, lastImageInPass)
                 angleList = []
                 #logger.debug("angles " + str(angles) )
                 for i in range(len(angles[0])):
@@ -220,7 +220,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                 zmin.extend(map(np.min, qzTrans))
                 zmax.extend(map(np.max, qzTrans))
                 ####
-        if self.progressUpdater <> None:
+        if self.progressUpdater is not None:
             self.progressUpdater(self.progressMax, self.progressMax)
         logger.debug(METHOD_EXIT_STR + str((xmin, xmax, ymin, ymax, zmin, zmax)) ) 
         return (xmin, xmax, ymin, ymax, zmin, zmax)
@@ -465,7 +465,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
         
         angleNames = self.getAngles()
         scanAngle = {}
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             scanAngle[i] = np.array([])
         
         offset = 0
@@ -476,7 +476,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             angles = self.getGeoAngles(scannr)
             scanAngle1 = {}
             scanAngle2 = {}
-            for i in xrange(len(angleNames)):
+            for i in range(len(angleNames)):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
             arrayInitializedForScan = False
@@ -493,7 +493,7 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
             if mask_was_none:
                 mask = [True] * len(self.imageToBeUsed[scannr])
                 
-            for ind in xrange(len(angles[:,0])):
+            for ind in range(len(angles[:,0])):
                 if imageToBeUsed[scannr][ind] and mask[ind]:
                     imageName = imageNameTemplate % (ind+1)
                     logger.debug("processing image file " + imageName)
@@ -524,13 +524,13 @@ class S1HighEnergyDiffractionDS(AbstractXrayutilitiesDataSource):
                                 axis=0)
                             arrayInitializedForScan = True
                     intensity[foundIndex+offset,:,:] = img2
-                    for i in xrange(len(angleNames)):
+                    for i in range(len(angleNames)):
                         logger.debug("appending angles to angle2 " + 
                                      str(scanAngle1[i][ind]))
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
             if len (scanAngle2[0]) > 0:
-                for i in xrange(len(angleNames)):
+                for i in range(len(angleNames)):
                     scanAngle[i] = \
                         np.concatenate((scanAngle[i], \
                                         np.array(scanAngle2[i])), \

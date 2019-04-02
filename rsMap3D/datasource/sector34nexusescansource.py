@@ -81,10 +81,10 @@ class Sector34NexusEscanSource(AbstractDataSource):
             ymax = []
             zmin = []
             zmax = []
-            nPasses = imageSize * 4 *numImages/maxImageMem
+            nPasses = int(imageSize * 4 *numImages/maxImageMem)
             for thisPass in range(nPasses):
-                firstImage = thisPass *numImages/nPasses
-                lastImage = (thisPass+1)* numImages/nPasses;
+                firstImage = int(thisPass *numImages/nPasses)
+                lastImage = int((thisPass+1)* numImages/nPasses);
                 (qx,qy,qz) = self.qsForDetector(startFile = firstImage, 
                                                 endFile = lastImage)
                 idx = range(len(qx))
@@ -147,7 +147,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
             theta = math.sqrt(Rx*Rx+Ry*Ry+Rz*Rz) 
             
             if theta == 0:
-                self.rho = np.array[[1,0,0],[0,1,0],[001]]
+                self.rho = np.array[[1,0,0],[0,1,0],[0,0,1]]
             else:
                 c = math.cos(theta)
                 s = math.sin(theta)
@@ -177,7 +177,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         
         if self.files is None:
             #Getting file list
-            fileFilter = str(os.path.join(self.projectDir, string.rsplit(self.projectName, '_',1)[0])) + \
+            fileFilter = str(os.path.join(self.projectDir, self.projectName.rsplit('_',1)[0])) + \
                          "_[0-9]*" + \
                          self.projectExtension
                          
@@ -187,7 +187,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                 raise RSMap3DException("No files Found matching " + fileFilter)
         self.files = range(1,len(fileList)+1)
 
-        if self.progressUpdater <> None:
+        if self.progressUpdater is not None:
             self.progressMax = len(self.files) *100.0
             self.progressUpdater(self.progress, self.progressMax)
 
@@ -197,7 +197,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                 raise LoadCanceledException(CANCEL_STR)
             else:
                 filename = os.path.join(self.projectDir, \
-                               string.rsplit(self.projectName, '_', 1)[0]) + \
+                               (self.projectName.rsplit( '_', 1))[0]) + \
                                '_' + \
                                str(afile) + \
                                self.projectExtension
@@ -215,7 +215,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                         hdfFile.close()
                     except Exception:
                         logger.warning( "Trouble Opening File" + filename)
-                if self.progressUpdater <> None:
+                if self.progressUpdater is not None:
                     self.progressUpdater(self.progress, self.progressMax)
                     self.progress += self.progressInc
             if afile == 1:
@@ -229,7 +229,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                 #Ending Energy independant Information
 
         #reset progress bar for second pass
-        if self.progressUpdater <> None:
+        if self.progressUpdater is not None:
             self.progress = 0.0
             self.progressUpdater(self.progress, self.progressMax)
 
@@ -317,7 +317,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
                              "endFile = " + str(endFile))
         twoPiOverLambda = []
         for afile in processFiles:
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc 
             twoPiOverLambda.append(2*np.pi * self.incidentEnergy[afile] / 1.23985)
@@ -341,8 +341,8 @@ class Sector34NexusEscanSource(AbstractDataSource):
         else:
             a = np.array(mask)
             trueLoc = np.argwhere(a)
-            firstScan = trueLoc[0]
-            lastScan = trueLoc[-1]
+            firstScan = int(trueLoc[0])
+            lastScan = int(trueLoc[-1])
         qx, qy, qz = self.qsForDetector(startFile=firstScan, endFile=lastScan)
         intensity = np.array([])
         arrayInitializedForScan = False
@@ -352,7 +352,7 @@ class Sector34NexusEscanSource(AbstractDataSource):
         for afile in self.availableFiles[firstScan:lastScan]:
             if mask[afile - 1]:
                 filename = os.path.join(self.projectDir, \
-                               string.rsplit(self.projectName, '_', 1)[0]) + \
+                               self.projectName.rsplit( '_', 1)[0]) + \
                                '_' + \
                                str(afile) + \
                                self.projectExtension

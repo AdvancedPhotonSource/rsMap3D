@@ -269,7 +269,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.progress = 0
             self.progressInc = 1
             # Zero the progress bar at the beginning.
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             for scan in self.scans:
                 if (self.cancelLoad):
@@ -298,7 +298,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                 self.findImageQs(angles, \
                                                  self.ubMatrix[scan], \
                                                  self.incidentEnergy[scan])
-                            if self.progressUpdater <> None:
+                            if self.progressUpdater is not None:
                                 self.progressUpdater(self.progress, self.progressMax)
                             logger.info (('Elapsed time for Finding qs for scan %d: ' +
                                    '%.3f seconds') % \
@@ -306,7 +306,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                         except ScanDataMissingException:
                             logger.error( "Scan " + str(scan) + " has no data")
                     #Make sure to show 100% completion
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
@@ -413,7 +413,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             
         angleNames = self.getAngles()
         scanAngle = {}
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             scanAngle[i] = np.array([])
     
         offset = 0
@@ -429,7 +429,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             angles = self.getGeoAngles(scan, angleNames)
             scanAngle1 = {}
             scanAngle2 = {}
-            for i in xrange(len(angleNames)):
+            for i in range(len(angleNames)):
                 scanAngle1[i] = angles[:,i]
                 scanAngle2[i] = []
             if monitorName != None:
@@ -455,7 +455,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             if mask_was_none:
                 mask = [True] * len(self.getImageToBeUsed()[scannr])            
             
-            for ind in xrange(len(scan.data[scan.data.keys()[0]])):
+            for ind in range(len(scan.data[list(scan.data.keys())[0]])):
                 if imageToBeUsed[scannr][ind] and mask[ind]:    
                     # read tif image
                     im = Image.open(self.imageFileTmp % (scannr, scannr, ind))
@@ -491,19 +491,19 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                             arrayInitializedForScan = True
                     # add data to intensity array
                     intensity[foundIndex+offset,:,:] = img2
-                    for i in xrange(len(angleNames)):
+                    for i in range(len(angleNames)):
 #                         logger.debug("appending angles to angle2 " + 
 #                                      str(scanAngle1[i][ind]))
                         scanAngle2[i].append(scanAngle1[i][ind])
                     foundIndex += 1
             if len(scanAngle2[0]) > 0:
-                for i in xrange(len(angleNames)):
+                for i in range(len(angleNames)):
                     scanAngle[i] = \
                         np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
                                           axis=0)
         # transform scan angles to reciprocal space coordinates for all detector pixels
         angleList = []
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             angleList.append(scanAngle[i])
         if self.ubMatrix[scans[0]] is None:
             qx, qy, qz = hxrd.Ang2Q.area(*angleList,  \

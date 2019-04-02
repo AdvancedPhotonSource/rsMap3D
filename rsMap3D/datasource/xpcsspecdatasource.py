@@ -150,7 +150,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
             self.repeatsPoints = {}
             self.numberOfRepeatPoints = {}
             # Zero the progress bar at the beginning.
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             for scan in self.scans:
                 if (self.cancelLoad):
@@ -271,7 +271,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                             self.findImageQs(angles, \
                                              self.ubMatrix[scan], \
                                              self.incidentEnergy[scan])
-                        if self.progressUpdater <> None:
+                        if self.progressUpdater is not None:
                             self.progressUpdater(self.progress, self.progressMax)
                         logger.debug (('Elapsed time for Finding qs for scan %d: ' +
                                '%.3f seconds') % \
@@ -279,7 +279,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                         #Make sure to show 100% completion
                     except ScanDataMissingException:
                         logger.debug( "scan %s" % scan )
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
@@ -358,7 +358,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
 
         angleNames = self.getAngles()
         scanAngle = {}
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             scanAngle[i] = np.array([])
     
         imageToBeUsed = self.getImageToBeUsed()
@@ -414,7 +414,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                     angles = self.getGeoAngles(curScan, angleNames)
                     scanAngle1 = {}
                     scanAngle2 = {}
-                    for i in xrange(len(angleNames)):
+                    for i in range(len(angleNames)):
                         scanAngle1[i] = angles[:,i]
                         scanAngle2[i] = []
                     arrayInitializedForScan = False
@@ -430,7 +430,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                     minorProgressInc = self.progressInc/indexesToProcess.shape[0]
                     minorProgress = self.progress
                     for scanno in indexesToProcess:
-                        if self.progressUpdater <> None:
+                        if self.progressUpdater is not None:
                             self.progressUpdater(minorProgress, self.progressMax)
                         minorProgress += minorProgressInc        
                         fileName = namePrefix + \
@@ -467,7 +467,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                             scanAngle2[i].append(scanAngle1[i][scanno])
                         foundIndex += 1
                     if len(scanAngle2[0]) > 0:
-                        for i in xrange(len(angleNames)):
+                        for i in range(len(angleNames)):
 
                             scanAngle[i] = np.concatenate((scanAngle[i], 
                                                        np.array(scanAngle2[i])), 
@@ -501,7 +501,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 angles = self.getGeoAngles(scan, angleNames)
                 scanAngle1 = {}
                 scanAngle2 = {}
-                for i in xrange(len(angleNames)):
+                for i in range(len(angleNames)):
                     scanAngle1[i] = angles[:,i]
                     scanAngle2[i] = []
                 arrayInitializedForScan = False
@@ -526,7 +526,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                 minorProgressInc = self.progressInc/indexesToProcess.shape[0]
                 minorProgress = self.progress
                 for ind in indexesToProcess:
-                    if self.progressUpdater <> None:
+                    if self.progressUpdater is not None:
                         self.progressUpdater(minorProgress, self.progressMax)
                     minorProgress += minorProgressInc        
                     if imageToBeUsed[scannr][ind] and mask[ind]:
@@ -548,24 +548,24 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
                                                     axis = 0)
                         #add data to intensity array
                         intensity[foundIndex + offset,:,:] = img2
-                        for i in xrange(len(angleNames)):
+                        for i in range(len(angleNames)):
                             scanAngle2[i].append(scanAngle1[i][ind])
                             
                         foundIndex += 1
                 
                 if len(scanAngle2[0]) > 0:
-                    for i in xrange(len(angleNames)):
+                    for i in range(len(angleNames)):
                         scanAngle[i] = \
                             np.concatenate((scanAngle[i], np.array(scanAngle2[i])), \
                                         axis=0)
             self.progress += self.progressInc
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
                  
         # transform scan angles to reciprocal space coordinates for all detector
         # pixels
         angleList = []
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             angleList.append(scanAngle[i])
         if self.ubMatrix[scans[0]] is None:
             qx, qy, qz  = hxrd.Ang2Q.area( *angleList, \
@@ -643,20 +643,20 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         # Setup list of angles to produce transform
         angleNames = self.getAngles()
         scanAngle = {}
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             scanAngle[i] = np.array([])
         logger.debug("scan %s" % scan)
         angles = self.getGeoAngles(self.sd.scans[str(scan)], angleNames)
         angles = np.array([angles[0],])
         logger.debug("angles %s" % angles)
         
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             scanAngle[i] = np.concatenate((scanAngle[i], np.array(angles[:,i])), \
                             axis=0)
         # transform scan angles to reciprocal space coordinates for all detector
         # pixels
         angleList = []
-        for i in xrange(len(angleNames)):
+        for i in range(len(angleNames)):
             angleList.append(scanAngle[i])
 
         if self.ubMatrix[scan] is None:

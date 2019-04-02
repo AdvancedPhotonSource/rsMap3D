@@ -93,7 +93,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         if imageSize*4*numImages <= maxImageMem:
             self.progressMax = len( self.scans) * 100
             self.progressInc = 1.0 * 100.0
-            if self.progressUpdater <> None:
+            if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc        
             angleList = []
@@ -120,7 +120,7 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             zmin = [np.min(qzTrans[i]) for i in idx] 
             zmax = [np.max(qzTrans[i]) for i in idx] 
         else:
-            nPasses = imageSize*4*numImages/ maxImageMem + 1
+            nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
             xmin = []
             xmax = []
             ymin = []
@@ -130,11 +130,11 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             for thisPass in range(nPasses):
                 self.progressMax = len( self.scans) * 100.0
                 self.progressInc = 1.0 / nPasses * 100.0
-                if self.progressUpdater <> None:
+                if self.progressUpdater is not None:
                     self.progressUpdater(self.progress, self.progressMax)
                 self.progress += self.progressInc        
-                firstImageInPass = thisPass*numImages/nPasses
-                lastImageInPass = (thisPass+1)*numImages/nPasses
+                firstImageInPass = int(thisPass*numImages/nPasses)
+                lastImageInPass = int((thisPass+1)*numImages/nPasses)
                 angleList = []
                 logger.debug("angles " + str(angles) )
                 for i in range(len(angles[0])):
@@ -203,16 +203,19 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
         if len(dataKeys) == 0:
             raise ScanDataMissingException("No Scan Data Found for scan " + 
                                            scan.scanNum)
-        geoAngles = np.zeros((len(scan.data[dataKeys[0]]), len(angleNames)))
+        logger.debug("dataKeys:  %s", dataKeys)
+        geoAngles = np.zeros((len(scan.data[list(dataKeys)[0]]), len(angleNames)))
         for i, name in enumerate(angleNames):
             v = scan.data.get(name)
             p = scan.positioner.get(name)
 
             if v != None:
                 if len(v) == 1:
-                    v = np.ones(len(scan.data[scan.data.keys()[0]])) * v
+                    v = np.ones(len(scan.data[list(scan.data.keys())[0]])) * v
             elif p != None:
-                v = np.ones(len(scan.data[scan.data.keys()[0]])) * p
+                logger.debug(scan.data.keys())
+                logger.debug(scan.data[list(scan.data.keys())[0]])
+                v = np.ones(len(scan.data[list(scan.data.keys())[0]])) * p
             else:
                 raise InstConfigException("Could not find angle " + name + \
                                           " in scan parameters")
@@ -291,5 +294,5 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
     def setScanTypeUsed(self, scanType, used):
         for scan in self.availableScans:
             if self.scanType[scan] == scanType:
-                for i in xrange(len(self.imageToBeUsed[scan])):
+                for i in range(len(self.imageToBeUsed[scan])):
                     self.imageToBeUsed[scan][i] = used
