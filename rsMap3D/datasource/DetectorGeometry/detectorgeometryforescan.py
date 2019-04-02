@@ -29,7 +29,7 @@ class DetectorGeometryForEScan(DetectorGeometryBase):
         :param detector: specifies the detector who's return value is requested
         :return: The size of the detector in millimeters
         '''
-        vals = string.split(detector.find(self.ROTATION).text)
+        vals = detector.find(self.ROTATION).text.split()
         return [float(vals[0]), float(vals[1]), float(vals[2])]
 
     def getTranslation(self, detector):
@@ -37,6 +37,6 @@ class DetectorGeometryForEScan(DetectorGeometryBase):
         :param detector: specifies the detector who's return value is requested
         :return: The size of the detector in millimeters
         '''
-        vals = string.split(detector.find(self.TRANSLATION).text)
+        vals = detector.find(self.TRANSLATION).text.split()
         return [float(vals[0]), float(vals[1]), float(vals[2])]
     

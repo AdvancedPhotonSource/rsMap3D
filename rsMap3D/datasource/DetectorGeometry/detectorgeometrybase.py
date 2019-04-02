@@ -97,7 +97,7 @@ class DetectorGeometryBase(object):
         in pixels
         ''' 
         logger.debug("Enter")
-        vals = string.split(detector.find(self.NUMBER_OF_PIXELS).text)
+        vals = detector.find(self.NUMBER_OF_PIXELS).text.split()
         retVal = [int(vals[0]), int(vals[1])]
         logger.debug("Exit" + str(retVal))
         return retVal
@@ -108,7 +108,7 @@ class DetectorGeometryBase(object):
         :return: The size of the detector in millimeters
         '''
         logger.debug("Enter")
-        vals = string.split(detector.find(self.DETECTOR_SIZE).text)
+        vals = detector.find(self.DETECTOR_SIZE).text.split()
         retVal = [float(vals[0]), float(vals[1])]
         logger.debug("Exit " + str(retVal))
         return retVal
