@@ -8,8 +8,9 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader \
@@ -60,15 +61,15 @@ class UsesXMLDetectorConfig(AbstractFileView):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.detConfigTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                             SELECT_DETECTOR_CONFIG_TITLE, \
-                                            filter=DETECTOR_CONFIG_FILE_FILTER)
+                                            filter=DETECTOR_CONFIG_FILE_FILTER)[0]
         else:
             fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                          SELECT_DETECTOR_CONFIG_TITLE, \
                                          filter=DETECTOR_CONFIG_FILE_FILTER, \
-                                         directory = fileDirectory)
+                                         directory = fileDirectory)[0]
         if fileName != EMPTY_STR:
             self.detConfigTxt.setText(fileName)
             self.detConfigTxt.editingFinished.emit()
@@ -80,16 +81,16 @@ class UsesXMLDetectorConfig(AbstractFileView):
         selecting from the list of detectors provided.
         '''
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Detector Config File:");
-        self.detConfigTxt = qtGui.QLineEdit()
-        self.detConfigFileButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("Detector Config File:");
+        self.detConfigTxt = qtWidgets.QLineEdit()
+        self.detConfigFileButton = qtWidgets.QPushButton(BROWSE_STR)
         layout.addWidget(label, row, 0)
         layout.addWidget(self.detConfigTxt, row, 1)
         layout.addWidget(self.detConfigFileButton, row, 2)
 
         row += 1
-        label = qtGui.QLabel("Select Detector")
-        self.detSelect = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Select Detector")
+        self.detSelect = qtWidgets.QComboBox()
         layout.addWidget(label, row, 0)
         layout.addWidget(self.detSelect, row, 1)
         
@@ -105,8 +106,8 @@ class UsesXMLDetectorConfig(AbstractFileView):
         Adds gui elements for entering the ROI
         '''
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Detector ROI:");
-        self.detROITxt = qtGui.QLineEdit()
+        label = qtWidgets.QLabel("Detector ROI:");
+        self.detROITxt = qtWidgets.QLineEdit()
         self.updateROITxt()
         rxROI = qtCore.QRegExp(self.DET_ROI_REGEXP_1)
         self.detROITxt.setValidator(qtGui.QRegExpValidator(rxROI,self.detROITxt))
@@ -121,8 +122,8 @@ class UsesXMLDetectorConfig(AbstractFileView):
     
     def _createNumberOfPixelsToAverage(self, layout, row, silent=False):
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Number of Pixels To Average:");
-        self.pixAvgTxt = qtGui.QLineEdit("1,1")
+        label = qtWidgets.QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = qtWidgets.QLineEdit("1,1")
         rxAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_1)
         self.pixAvgTxt.setValidator(qtGui.QRegExpValidator(rxAvg,self.pixAvgTxt))
         if (silent == False):
@@ -151,14 +152,14 @@ class UsesXMLDetectorConfig(AbstractFileView):
                     #self.updateROIandNumAvg()
                 except DetectorConfigException as ex:
                     logger.error( ex)
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self, \
                                      WARNING_STR,\
                                      "Trouble getting ROI or Num average " + \
                                      "from the detector config file")
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                              WARNING_STR,\
                              "The filename entered for the detector " + \
@@ -248,7 +249,7 @@ class UsesXMLDetectorConfig(AbstractFileView):
             roiStrings = rois.split(COMMA_STR)
             
         roi = []
-        if len(roiStrings) <> 4:
+        if len(roiStrings) != 4:
             logger.debug("Exiting via exception" +
                           "Detector ROI needs 4 values. " + \
                                    str(len(roiStrings)) + \

@@ -6,8 +6,9 @@ import os
 import logging
 from spec2nexus.spec import SpecDataFile
 logger = logging.getLogger(__name__)
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.output.processxpcsgridlocationform import ProcessXpcsGridLocationForm
@@ -58,7 +59,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
                     filePath = scan.CCD['image_dir'][0]
                     self.pathToReplaceTxt.setText(filePath)
                 except:
-                    qtGui.QMessageBox.warning(self, "File patgh not Found", \
+                    qtWidgets.QMessageBox.warning(self, "File patgh not Found", \
                                               "File path not found for scan %s" \
                                               % scan)
             
@@ -66,11 +67,11 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
     
     def _browseForReplacePathWith(self):
         if self.replacePathWithTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getExistingDirectory(None, \
+            fileName = qtWidgets.QFileDialog.getExistingDirectory(None, \
                                                    XPCS_FILE_DIALOG_TITLE)
         else:
             fileDirectory = os.path.dirname(str(self.replacePathWithTxt.text()))
-            fileName = qtGui.QFileDialog.getExistingDirectory(None,\
+            fileName = qtWidgets.QFileDialog.getExistingDirectory(None,\
                                                    XPCS_FILE_FILTER, \
                                                    dir = fileDirectory)
             
@@ -111,7 +112,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
 
 
         row = dataLayout.rowCount() + 2
-        label1 = qtGui.QLabel("<b>The following correct the file path if it has" +
+        label1 = qtWidgets.QLabel("<b>The following correct the file path if it has" +
                              " moved from the original location stored in the" +
                              " file.  The first one requires that the spec " + 
                              "file and scan number have been entered</b>")
@@ -120,9 +121,9 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         
         
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("file path to replace:")
-        self.pathToReplaceTxt = qtGui.QLineEdit()
-        self.pathToReplaceBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("file path to replace:")
+        self.pathToReplaceTxt = qtWidgets.QLineEdit()
+        self.pathToReplaceBrowseButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.pathToReplaceTxt, row, 1)
         dataLayout.addWidget(self.pathToReplaceBrowseButton, row, 2)
@@ -131,9 +132,9 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         self.pathToReplaceTxt.editingFinished.connect(self._pathToReplaceChanged)
 
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("replace file path with:")
-        self.replacePathWithTxt = qtGui.QLineEdit()
-        self.replacePathWithBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("replace file path with:")
+        self.replacePathWithTxt = qtWidgets.QLineEdit()
+        self.replacePathWithBrowseButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.replacePathWithTxt, row, 1)
         dataLayout.addWidget(self.replacePathWithBrowseButton, row, 2)
@@ -206,7 +207,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         if self.isXpcsFileNameOK():
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                              WARNING_STR
                              , \
@@ -217,7 +218,7 @@ class XPCSSpecScanFileForm(SpecXMLDrivenFileForm):
         if self.isReplacePathWithNameOK():
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                              WARNING_STR
                              , \

@@ -8,8 +8,9 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 from rsMap3D.gui.output.processpowderscanform import ProcessPowderScanForm
 logger = logging.getLogger(__name__)
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR,\
     COMMA_STR, QLINEEDIT_COLOR_STYLE, BLACK, RED, EMPTY_STR,\
@@ -21,7 +22,7 @@ from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 from rsMap3D.gui.input.specxmldrivenfileform import SpecXMLDrivenFileForm
 from rsMap3D.gui.output.processvtioutputform import ProcessVTIOutputForm
 from rsMap3D.gui.output.processimagestackform import ProcessImageStackForm
-from PyQt4.QtGui import QAbstractButton
+from PyQt5.QtWidgets import QAbstractButton
 
 class S33SpecScanFileForm(SpecXMLDrivenFileForm):
     '''
@@ -69,7 +70,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
            self.badPixelFileTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                             WARNING_STR, \
                              "The filename entered for the bad pixel " + \
@@ -84,12 +85,12 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.badPixelFileTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_BAD_PIXEL_TITLE, \
                                                filter=BAD_PIXEL_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_BAD_PIXEL_TITLE, \
                                                filter=BAD_PIXEL_FILE_FILTER, \
                                                directory = fileDirectory)
@@ -105,12 +106,12 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.flatFieldFileTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_FLAT_FIELD_TITLE, \
                                                filter=TIFF_FILE_FILTER)
         else:
             fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, 
                                                SELECT_FLAT_FIELD_TITLE, 
                                                filter=TIFF_FILE_FILTER, \
                                                directory = fileDirectory)
@@ -169,17 +170,17 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         self._createDetConfig(dataLayout, row)
 
         row = dataLayout.rowCount() + 1
-        self.fieldCorrectionGroup = qtGui.QButtonGroup(self)
-        self.noFieldRadio = qtGui.QRadioButton(self.NONE_RADIO_NAME)
-        self.badPixelRadio = qtGui.QRadioButton(self.BAD_PIXEL_RADIO_NAME)
-        self.flatFieldRadio = qtGui.QRadioButton(self.FLAT_FIELD_RADIO_NAME)
+        self.fieldCorrectionGroup = qtWidgets.QButtonGroup(self)
+        self.noFieldRadio = qtWidgets.QRadioButton(self.NONE_RADIO_NAME)
+        self.badPixelRadio = qtWidgets.QRadioButton(self.BAD_PIXEL_RADIO_NAME)
+        self.flatFieldRadio = qtWidgets.QRadioButton(self.FLAT_FIELD_RADIO_NAME)
         self.fieldCorrectionGroup.addButton(self.noFieldRadio, 1)
         self.fieldCorrectionGroup.addButton(self.badPixelRadio, 2)
         self.fieldCorrectionGroup.addButton(self.flatFieldRadio, 3)
-        self.badPixelFileTxt = qtGui.QLineEdit()
-        self.flatFieldFileTxt = qtGui.QLineEdit()
-        self.badPixelFileBrowseButton = qtGui.QPushButton(BROWSE_STR)
-        self.flatFieldFileBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        self.badPixelFileTxt = qtWidgets.QLineEdit()
+        self.flatFieldFileTxt = qtWidgets.QLineEdit()
+        self.badPixelFileBrowseButton = qtWidgets.QPushButton(BROWSE_STR)
+        self.flatFieldFileBrowseButton = qtWidgets.QPushButton(BROWSE_STR)
 
         
         dataLayout.addWidget(self.noFieldRadio, row, 0)
@@ -193,8 +194,8 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         dataLayout.addWidget(self.flatFieldFileBrowseButton, row, 2)
         
         row += 1
-        label = qtGui.QLabel("Number of Pixels To Average:");
-        self.pixAvgTxt = qtGui.QLineEdit("1,1")
+        label = qtWidgets.QLabel("Number of Pixels To Average:");
+        self.pixAvgTxt = qtWidgets.QLineEdit("1,1")
         rxAvg = qtCore.QRegExp(self.PIX_AVG_REGEXP_1)
         self.pixAvgTxt.setValidator(qtGui.QRegExpValidator(rxAvg,self.pixAvgTxt))
         dataLayout.addWidget(label, row, 0)
@@ -266,7 +267,7 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
            self.flatFieldFileTxt.text() == "":
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                             WARNING_STR, \
                              "The filename entered for the flat field " + \

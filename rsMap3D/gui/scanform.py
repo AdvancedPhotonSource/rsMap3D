@@ -5,8 +5,9 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.rsmap3dsignals import DONE_LOADING_SIGNAL, RENDER_BOUNDS_SIGNAL,\
     CLEAR_RENDER_WINDOW_SIGNAL, SHOW_RANGE_BOUNDS_SIGNAL
@@ -14,7 +15,7 @@ from rsMap3D.gui.rsm3dcommonstrings import POSITIVE_INFINITY, \
     NEGATIVE_INFINITY, X_STR, Y_STR, Z_STR, EMPTY_STR, RED, BLACK, MIN_STR,\
     MAX_STR
 
-class ScanForm(qtGui.QDialog):
+class ScanForm(qtWidgets.QDialog):
     '''
     This class presents a form to display available scans, lists the angles 
     and q values for a selected scan and allows selecting of individual images 
@@ -40,40 +41,40 @@ class ScanForm(qtGui.QDialog):
                             float(NEGATIVE_INFINITY), \
                             float(POSITIVE_INFINITY), \
                             float(NEGATIVE_INFINITY))
-        layout = qtGui.QGridLayout()
-        self.scanList = qtGui.QListWidget()
+        layout = qtWidgets.QGridLayout()
+        self.scanList = qtWidgets.QListWidget()
         layout.addWidget(self.scanList, 0, 0)
         layout.setColumnStretch(0, 10)
         
-        rightBox = qtGui.QVBoxLayout()
-        qrange = qtGui.QGridLayout()
-        xLabel = qtGui.QLabel(X_STR)
-        xminLabel = qtGui.QLabel(MIN_STR)
-        self.xminText = qtGui.QLabel(EMPTY_STR)
-        xmaxLabel = qtGui.QLabel(MAX_STR)
-        self.xmaxText = qtGui.QLabel(EMPTY_STR)
-        yLabel = qtGui.QLabel(Y_STR)
-        yminLabel = qtGui.QLabel(MIN_STR)
-        self.yminText = qtGui.QLabel(EMPTY_STR)
-        ymaxLabel = qtGui.QLabel(MAX_STR)
-        self.ymaxText = qtGui.QLabel(EMPTY_STR)
-        zLabel = qtGui.QLabel(Z_STR)
-        zminLabel = qtGui.QLabel(MIN_STR)
-        self.zminText = qtGui.QLabel(EMPTY_STR)
-        zmaxLabel = qtGui.QLabel(MAX_STR)
-        self.zmaxText = qtGui.QLabel(EMPTY_STR)
+        rightBox = qtWidgets.QVBoxLayout()
+        qrange = qtWidgets.QGridLayout()
+        xLabel = qtWidgets.QLabel(X_STR)
+        xminLabel = qtWidgets.QLabel(MIN_STR)
+        self.xminText = qtWidgets.QLabel(EMPTY_STR)
+        xmaxLabel = qtWidgets.QLabel(MAX_STR)
+        self.xmaxText = qtWidgets.QLabel(EMPTY_STR)
+        yLabel = qtWidgets.QLabel(Y_STR)
+        yminLabel = qtWidgets.QLabel(MIN_STR)
+        self.yminText = qtWidgets.QLabel(EMPTY_STR)
+        ymaxLabel = qtWidgets.QLabel(MAX_STR)
+        self.ymaxText = qtWidgets.QLabel(EMPTY_STR)
+        zLabel = qtWidgets.QLabel(Z_STR)
+        zminLabel = qtWidgets.QLabel(MIN_STR)
+        self.zminText = qtWidgets.QLabel(EMPTY_STR)
+        zmaxLabel = qtWidgets.QLabel(MAX_STR)
+        self.zmaxText = qtWidgets.QLabel(EMPTY_STR)
 
-        self.selectAll = qtGui.QPushButton()
+        self.selectAll = qtWidgets.QPushButton()
         self.selectAll.setText("Select All")
         self.selectAll.setDisabled(True)
-        self.deselectAll = qtGui.QPushButton()
+        self.deselectAll = qtWidgets.QPushButton()
         self.deselectAll.setText("Deselect All")
         self.deselectAll.setDisabled(True)
         self.selectAll.clicked.connect(self.selectAllAction)
         self.deselectAll.clicked.connect(self.deselectAllAction)
 
-        self.availableScanTypes = qtGui.QWidget()
-        self.availableScanTypes.setLayout(qtGui.QVBoxLayout())
+        self.availableScanTypes = qtWidgets.QWidget()
+        self.availableScanTypes.setLayout(qtWidgets.QVBoxLayout())
         
         row = 0
         qrange.addWidget(xLabel, row,0)
@@ -99,12 +100,12 @@ class ScanForm(qtGui.QDialog):
         qrange.addWidget(self.availableScanTypes, row, 2)
         
         rightBox.addLayout(qrange)
-        self.detail = qtGui.QTableWidget()
+        self.detail = qtWidgets.QTableWidget()
         rightBox.addWidget(self.detail)
         layout.addLayout(rightBox, 0,1)
         layout.setColumnStretch(1, 45)
                 
-        self.scanList.itemClicked[qtGui.QListWidgetItem]. \
+        self.scanList.itemClicked[qtWidgets.QListWidgetItem]. \
             connect(self._scanSelected)
         
         self.initialSelectionMade = False
@@ -113,7 +114,7 @@ class ScanForm(qtGui.QDialog):
     def addAvailableScanTypes(self):
         layout = self.availableScanTypes.layout()
         for scanType in self.dataSource.getAvailableScanTypes():
-            typeCheckBox = qtGui.QCheckBox(scanType)
+            typeCheckBox = qtWidgets.QCheckBox(scanType)
             typeCheckBox.setChecked(True)
             typeCheckBox.stateChanged[int].connect(
                          self.availableScanTypesChanged)
@@ -129,7 +130,7 @@ class ScanForm(qtGui.QDialog):
         :param column: Column to place the value
         :param coloredBrush:  A colored brush  to use to affect a color change
         '''
-        item = qtGui.QTableWidgetItem(str(value))
+        item = qtWidgets.QTableWidgetItem(str(value))
         item.setForeground(coloredBrush)
         item.setFlags(item.flags() & (~qtCore.Qt.ItemIsEditable))
         self.detail.setItem(row, column, item)
@@ -138,14 +139,14 @@ class ScanForm(qtGui.QDialog):
     def availableScanTypesChanged(self, state):
         scanTypes = self.availableScanTypes.children()
         for scanType in scanTypes:
-            if isinstance(scanType, qtGui.QWidget):
+            if isinstance(scanType, qtWidgets.QWidget):
                 self.dataSource.setScanTypeUsed(scanType.text(), 
                                                 scanType.isChecked())
         for scan in self.dataSource.getAvailableScans():
             self.showAngles(scan)
             self.showQs(scan)
     
-    @qtCore.pyqtSlot(qtGui.QTableWidgetItem)
+    @qtCore.pyqtSlot(qtWidgets.QTableWidgetItem)
     def checkItemChanged(self, item):
         '''
         Change whether a row is selected or not and register if the associated
@@ -167,7 +168,7 @@ class ScanForm(qtGui.QDialog):
         images are used in analysis
         '''
         scanNo = self.getSelectedScan()
-        for i in xrange(len(self.dataSource.imageToBeUsed[scanNo])):
+        for i in range(len(self.dataSource.imageToBeUsed[scanNo])):
             self.dataSource.imageToBeUsed[scanNo][i] = False
         self.showQs(scanNo)
 
@@ -191,7 +192,7 @@ class ScanForm(qtGui.QDialog):
         self.scanList.clear()
         self.removeAvailableScanTypes()
         for curScan in self.dataSource.getAvailableScans():
-            item = qtGui.QListWidgetItem()
+            item = qtWidgets.QListWidgetItem()
             item.setText(str(curScan))
             self.scanList.addItem(item)
         self.detail.setColumnCount(7 + \
@@ -210,7 +211,7 @@ class ScanForm(qtGui.QDialog):
         scanTypes = self.availableScanTypes.children()
         layout = self.availableScanTypes.layout()
         for scanType in scanTypes:
-            if isinstance(scanType, qtGui.QWidget):
+            if isinstance(scanType, qtWidgets.QWidget):
                 scanType.stateChanged[int].disconnect(
                                 self.availableScanTypesChanged)
                 layout.removeWidget(scanType)
@@ -233,14 +234,14 @@ class ScanForm(qtGui.QDialog):
             else:
                 step = 1
             #display scan 
-            for i in xrange(0, len(minx)-1,step ):
+            for i in range(0, len(minx)-1,int(step) ):
                 if imageToBeUsed[scan][i]:
                     self.renderBoundsSignal[object] \
                             .emit((minx[i], maxx[i], miny[i], \
                                maxy[i], minz[i], maxz[i]))
         self.showRangeBounds[object].emit( self.dataSource.getRangeBounds())
                                 
-    @qtCore.pyqtSlot(qtGui.QListWidgetItem)
+    @qtCore.pyqtSlot(qtWidgets.QListWidgetItem)
     def _scanSelected(self, item):
         '''
         When a scan is selected from the list, change the table to display 
@@ -260,7 +261,7 @@ class ScanForm(qtGui.QDialog):
         Mark all images in the currently selected scan for use in analysis
         '''
         scanNo = self.getSelectedScan()
-        for i in xrange(len(self.dataSource.imageToBeUsed[scanNo])):
+        for i in range(len(self.dataSource.imageToBeUsed[scanNo])):
             self.dataSource.imageToBeUsed[scanNo][i] = True
         self.showQs(scanNo)
                         
@@ -276,18 +277,18 @@ class ScanForm(qtGui.QDialog):
         blackBrush.setColor(qtGui.QColor(BLACK))
         row = 0
         if self.initialSelectionMade:
-            self.detail.itemChanged[qtGui.QTableWidgetItem].disconnect( \
+            self.detail.itemChanged[qtWidgets.QTableWidgetItem].disconnect( \
                         self.checkItemChanged)
 
         for angle in angles:
-            checkItem = qtGui.QTableWidgetItem(1)
+            checkItem = qtWidgets.QTableWidgetItem(1)
             checkItem.data(qtCore.Qt.CheckStateRole)
             checkItem.setCheckState(qtCore.Qt.Checked)
             self.detail.setItem(row, 0, checkItem)
-            for i in xrange(len(angle)):
+            for i in range(len(angle)):
                 self.addValueToTable(angle[i], row, i+1, blackBrush)
             row += 1
-        self.detail.itemChanged[qtGui.QTableWidgetItem].connect( \
+        self.detail.itemChanged[qtWidgets.QTableWidgetItem].connect( \
                     self.checkItemChanged)
         self.initialSelectionMade = True
 
@@ -306,7 +307,7 @@ class ScanForm(qtGui.QDialog):
             self.dataSource.getImageBounds(scan)
         row = 0
         if self.initialSelectionMade:
-            self.detail.itemChanged[qtGui.QTableWidgetItem].disconnect( \
+            self.detail.itemChanged[qtWidgets.QTableWidgetItem].disconnect( \
                         self.checkItemChanged)
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         numAngles = len(self.dataSource.getReferenceNames())
@@ -347,6 +348,6 @@ class ScanForm(qtGui.QDialog):
                                               scanYmax, scanZmin, scanZmax))
         self.showRangeBounds[object].emit( (scanXmin, scanXmax, scanYmin, \
                                               scanYmax, scanZmin, scanZmax))
-        self.detail.itemChanged[qtGui.QTableWidgetItem].connect( \
+        self.detail.itemChanged[qtWidgets.QTableWidgetItem].connect( \
                     self.checkItemChanged)
         self.initialSelectionMade = True

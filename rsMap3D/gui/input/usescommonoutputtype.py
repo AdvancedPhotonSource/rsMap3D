@@ -5,8 +5,9 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtCore as qtCore
-import PyQt4.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
 
@@ -23,9 +24,9 @@ class UsesCommonOutputTypes(AbstractFileView):
         
     def _createHKLOutput(self, layout, row):
         logger.debug("Enter")
-        label = qtGui.QLabel("HKL output")
+        label = qtWidgets.QLabel("HKL output")
         layout.addWidget(label, row, 0)
-        self.hklCheckbox = qtGui.QCheckBox()
+        self.hklCheckbox = qtWidgets.QCheckBox()
         layout.addWidget(self.hklCheckbox, row, 1)
         logger.debug("Exit")
 
@@ -35,8 +36,8 @@ class UsesCommonOutputTypes(AbstractFileView):
         '''
         logger.debug("Enter")
 
-        label = qtGui.QLabel("Output Type")
-        self.outTypeChooser = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Output Type")
+        self.outTypeChooser = qtWidgets.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
         layout.addWidget(label, row, 0)

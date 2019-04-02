@@ -6,10 +6,11 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_EXIT_STR, METHOD_ENTER_STR
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
+import PyQt5.QtCore as qtCore
 
-from  PyQt4.QtCore import pyqtSlot as Slot
+from  PyQt5.QtCore import pyqtSlot as Slot
 
 import os.path
 import abc
@@ -40,16 +41,17 @@ class AbstractImagePerFileView(AbstractFileView):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.projNameTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                    self.fileDialogTitle, \
-                                                   filter=self.fileDialogFilter)
+                                                   filter=self.fileDialogFilter)[0]
         else:
             fileDirectory = os.path.dirname(str(self.projNameTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None,\
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None,\
                                                    self.fileDialogTitle, \
                                                    directory = fileDirectory,
-                                                   filter=self.fileDialogFilter)
+                                                   filter=self.fileDialogFilter)[0]
             
+        logger.debug("Filename: %s" % ((fileName,)))
         if fileName != EMPTY_STR:
             self.projNameTxt.setText(fileName)
             self.projNameTxt.editingFinished.emit()
@@ -88,9 +90,9 @@ class AbstractImagePerFileView(AbstractFileView):
         dataBox = super(AbstractImagePerFileView, self)._createDataBox()
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Project File:");
-        self.projNameTxt = qtGui.QLineEdit()
-        self.projectDirButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("Project File:");
+        self.projNameTxt = qtWidgets.QLineEdit()
+        self.projectDirButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.projNameTxt, row, 1)
         dataLayout.addWidget(self.projectDirButton, row, 2)
@@ -149,7 +151,7 @@ class AbstractImagePerFileView(AbstractFileView):
             self.checkOkToLoad()
         else:
             logger.warning("The project directory entered is invalid")
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                              WARNING_STR, \
                              "The project directory entered is invalid")

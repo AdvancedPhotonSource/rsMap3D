@@ -11,7 +11,8 @@ from rsMap3D.mappers.powderscanmapper import PowderScanMapper, X_COORD_OPTIONS,\
 from rsMap3D.mappers.output.powderscanwriter import PowderScanWriter
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
 
@@ -36,7 +37,7 @@ class ProcessPowderScanForm(AbstractOutputView):
         logger.debug(METHOD_ENTER_STR)
         self.mapper = None
         self.outputFileName = None
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
@@ -54,12 +55,12 @@ class ProcessPowderScanForm(AbstractOutputView):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.outFileNameTxt == EMPTY_STR:
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                              SAVE_FILE_STR,
                                                              filter=XYE_FILTER_STR))
         else:
             inFileName = str(self.outFileNameTxt.text())
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None,
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None,
                                                              SAVE_FILE_STR,
                                                              filter=XYE_FILTER_STR,
                                                              directory=inFileName))
@@ -69,7 +70,7 @@ class ProcessPowderScanForm(AbstractOutputView):
                 self.outputFileName = fileName
                 self.outFileNameTxt.editingFinished.emit()
             else:
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, WARNING_STR, 
                                 "The specified directory does not exist")
                 
@@ -77,7 +78,7 @@ class ProcessPowderScanForm(AbstractOutputView):
                 self.outputFileName = fileName
                 self.outFileNameTxt.editingFinished.emit()
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, WARNING_STR,
                                 "The specified file is not writable")
         else:
@@ -93,58 +94,58 @@ class ProcessPowderScanForm(AbstractOutputView):
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
 
-        label = qtGui.QLabel("Output File Name:")
-        self.outFileNameTxt = qtGui.QLineEdit()
-        self.outFileNameButton = qtGui.QPushButton("Browse")
+        label = qtWidgets.QLabel("Output File Name:")
+        self.outFileNameTxt = qtWidgets.QLineEdit()
+        self.outFileNameButton = qtWidgets.QPushButton("Browse")
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outFileNameTxt, row, 1)
         dataLayout.addWidget(self.outFileNameButton, row, 2)
         
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Data Coordinate:")
-        self.dataCoordinate = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Data Coordinate:")
+        self.dataCoordinate = qtWidgets.QComboBox()
         self.dataCoordinate.addItems(X_COORD_OPTIONS) 
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.dataCoordinate, row, 1)
         
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("Output Data Range - leave max/min blank for automatic range")
+        label = qtWidgets.QLabel("Output Data Range - leave max/min blank for automatic range")
         dataLayout.addWidget(label, row, 0, 2, -1)
 
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Min:")
-        self.outMinTxt = qtGui.QLineEdit()
+        label = qtWidgets.QLabel("Min:")
+        self.outMinTxt = qtWidgets.QLineEdit()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outMinTxt, row, 1)
 
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Max:")
-        self.outMaxTxt = qtGui.QLineEdit()
+        label = qtWidgets.QLabel("Max:")
+        self.outMaxTxt = qtWidgets.QLineEdit()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outMaxTxt, row, 1)
         
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Step:")
-        self.outStepTxt = qtGui.QLineEdit("0.01")
+        label = qtWidgets.QLabel("Step:")
+        self.outStepTxt = qtWidgets.QLineEdit("0.01")
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.outStepTxt, row, 1)
         
         row = dataLayout.rowCount() +1
-        label = qtGui.QLabel("Plot Results:")
-        self.plotResults = qtGui.QCheckBox()
+        label = qtWidgets.QLabel("Plot Results:")
+        self.plotResults = qtWidgets.QCheckBox()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.plotResults, row, 1)
         
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Y Scaling:")
-        self.yScaling = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Y Scaling:")
+        self.yScaling = qtWidgets.QComboBox()
         self.yScaling.addItems(Y_SCALING_OPTIONS)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.yScaling, row, 1)
         
         row = dataLayout.rowCount() +1
-        label = qtGui.QLabel("Write xye file:")
-        self.writeFile = qtGui.QCheckBox()
+        label = qtWidgets.QLabel("Write xye file:")
+        self.writeFile = qtWidgets.QCheckBox()
         self.writeFile.setChecked(True)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.writeFile, row, 1)
@@ -172,7 +173,7 @@ class ProcessPowderScanForm(AbstractOutputView):
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
                 else:
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self,
                                     WARNING_STR,
                                     "The specified directory \n" + \

@@ -2,8 +2,9 @@
  Copyright (c) 2014, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.rsm3dcommonstrings import CANCEL_STR, LOAD_STR, OK_TO_LOAD
 from rsMap3D.gui.rsmap3dsignals import LOAD_FILE_SIGNAL, CANCEL_LOAD_FILE_SIGNAL,\
@@ -13,7 +14,7 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
-class AbstractFileView(qtGui.QDialog):
+class AbstractFileView(qtWidgets.QDialog):
     '''
     classdocs
     '''
@@ -34,7 +35,7 @@ class AbstractFileView(qtGui.QDialog):
         '''
         logger.debug(METHOD_ENTER_STR  % str(parent) + " " + str(appConfig))        
         super(AbstractFileView, self).__init__(parent)
-        self.layout = qtGui.QVBoxLayout()
+        self.layout = qtWidgets.QVBoxLayout()
         self.appConfig = appConfig
         if not (appConfig is None):
             self.appConfig = appConfig
@@ -52,18 +53,18 @@ class AbstractFileView(qtGui.QDialog):
         '''
         Create Layout holding controls widgets
         '''
-        controlBox = qtGui.QGroupBox()
-        self.controlLayout = qtGui.QGridLayout()       
+        controlBox = qtWidgets.QGroupBox()
+        self.controlLayout = qtWidgets.QGridLayout()       
         row =0
-        self.progressBar = qtGui.QProgressBar()
+        self.progressBar = qtWidgets.QProgressBar()
         self.progressBar.setTextVisible(True)
         self.controlLayout.addWidget(self.progressBar, row, 1)
         
         row += 1
-        self.loadButton = qtGui.QPushButton(LOAD_STR)        
+        self.loadButton = qtWidgets.QPushButton(LOAD_STR)        
         self.loadButton.setDisabled(True)
         self.controlLayout.addWidget(self.loadButton, row, 1)
-        self.cancelButton = qtGui.QPushButton(CANCEL_STR)        
+        self.cancelButton = qtWidgets.QPushButton(CANCEL_STR)        
         self.cancelButton.setDisabled(True)
         self.controlLayout.addWidget(self.cancelButton, row, 2)
 
@@ -79,8 +80,8 @@ class AbstractFileView(qtGui.QDialog):
         '''
         Create widgets for collecting data
         '''
-        dataBox = qtGui.QGroupBox()
-        dataLayout = qtGui.QGridLayout()
+        dataBox = qtWidgets.QGroupBox()
+        dataLayout = qtWidgets.QGridLayout()
 
         dataBox.setLayout(dataLayout)
         return dataBox

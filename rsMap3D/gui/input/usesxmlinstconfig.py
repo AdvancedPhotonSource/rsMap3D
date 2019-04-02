@@ -6,9 +6,10 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
-from PyQt4.QtCore import pyqtSlot
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
+from PyQt5.QtCore import pyqtSlot
 import os
 
 from rsMap3D.gui.input.abstractfileview import AbstractFileView
@@ -36,15 +37,15 @@ class UsesXMLInstConfig(AbstractFileView):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.instConfigTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, 
                                         SELECT_INSTRUMENT_CONFIG_TITLE, 
-                                        filter=INSTRUMENT_CONFIG_FILE_FILTER)
+                                        filter=INSTRUMENT_CONFIG_FILE_FILTER)[0]
         else:
             fileDirectory = os.path.dirname(str(self.instConfigTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, 
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, 
                                         SELECT_INSTRUMENT_CONFIG_TITLE, 
                                         filter=INSTRUMENT_CONFIG_FILE_FILTER, \
-                                        directory = fileDirectory)
+                                        directory = fileDirectory)[0]
         if fileName != EMPTY_STR:
             self.instConfigTxt.setText(fileName)
             # use new style to emit edit finished signal
@@ -54,9 +55,9 @@ class UsesXMLInstConfig(AbstractFileView):
     def _createInstConfig(self, layout, row):
         
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Instrument Config File:");
-        self.instConfigTxt = qtGui.QLineEdit()
-        self.instConfigFileButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("Instrument Config File:");
+        self.instConfigTxt = qtWidgets.QLineEdit()
+        self.instConfigFileButton = qtWidgets.QPushButton(BROWSE_STR)
         layout.addWidget(label, row, 0)
         layout.addWidget(self.instConfigTxt, row, 1)
         layout.addWidget(self.instConfigFileButton, row, 2)
@@ -90,13 +91,13 @@ class UsesXMLInstConfig(AbstractFileView):
                     # a well formed instConfigFile
                     self.instFileOk = self.isInstFileOK()
                 except InstConfigException :
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self, \
                                     WARNING_STR, \
                                      "Trouble getting the projection direction " + \
                                      "from the instrument config file.")
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                             WARNING_STR, \
                              "The filename entered for the instrument " + \

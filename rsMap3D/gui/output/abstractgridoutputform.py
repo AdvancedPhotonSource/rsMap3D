@@ -6,10 +6,11 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtCore as qtCore
-import PyQt4.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
 
-from  PyQt4.QtCore import pyqtSignal as Signal
+from  PyQt5.QtCore import pyqtSignal as Signal
 
 import abc
 
@@ -55,30 +56,30 @@ class AbstractGridOutputForm(AbstractOutputView):
         '''
         provide parameters for output grid size
         '''
-        label = qtGui.QLabel("Grid Dimensions")
+        label = qtWidgets.QLabel("Grid Dimensions")
         layout.addWidget(label, row,0)
         row += 1
-        label = qtGui.QLabel(X_STR)
+        label = qtWidgets.QLabel(X_STR)
         layout.addWidget(label, row,0)
-        self.xDimTxt = qtGui.QLineEdit()
+        self.xDimTxt = qtWidgets.QLineEdit()
         self.xDimTxt.setText(str(INITIAL_DIM))
         self.xDimValidator = qtGui.QIntValidator()
         self.xDimTxt.setValidator(self.xDimValidator)
         layout.addWidget(self.xDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Y_STR)
+        label = qtWidgets.QLabel(Y_STR)
         layout.addWidget(label, row,0)
-        self.yDimTxt = qtGui.QLineEdit()
+        self.yDimTxt = qtWidgets.QLineEdit()
         self.yDimTxt.setText(str(INITIAL_DIM))
         self.yDimValidator = qtGui.QIntValidator()
         self.yDimTxt.setValidator(self.yDimValidator)
         layout.addWidget(self.yDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Z_STR)
+        label = qtWidgets.QLabel(Z_STR)
         layout.addWidget(label, row,0)
-        self.zDimTxt = qtGui.QLineEdit()
+        self.zDimTxt = qtWidgets.QLineEdit()
         self.zDimTxt.setText(str(INITIAL_DIM))
         self.zDimValidator = qtGui.QIntValidator()
         self.zDimTxt.setValidator(self.zDimValidator)

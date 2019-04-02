@@ -3,11 +3,12 @@
  See LICENSE file.
 '''
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
-from  PyQt4.QtCore import pyqtSignal as Signal
-from  PyQt4.QtCore import pyqtSlot as Slot
+from  PyQt5.QtCore import pyqtSignal as Signal
+from  PyQt5.QtCore import pyqtSlot as Slot
 
 from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_PROCESS_SIGNAL, \
     SET_PROCESS_CANCEL_OK_SIGNAL,\
@@ -17,9 +18,10 @@ from rsMap3D.mappers.abstractmapper import ProcessCanceledException
 import traceback
 from rsMap3D.exception.rsmap3dexception import RSMap3DException
 import logging
+from PyQt5.uic.Compiler.qtproxies import QtWidgets
 logger = logging.getLogger(__name__)
 
-class ProcessScansController(qtGui.QDialog):
+class ProcessScansController(qtWidgets.QDialog):
     '''
     '''
     setProcessRunOK = Signal(name=SET_PROCESS_RUN_OK_SIGNAL)
@@ -38,15 +40,15 @@ class ProcessScansController(qtGui.QDialog):
         self.parent = parent
         self.appConfig = appConfig
         self.Mapper = None
-        self.layout = qtGui.QVBoxLayout()
+        self.layout = qtWidgets.QVBoxLayout()
         self.outputForms = []
         # Build a list of forms return Combo box for the selections and 
         # list of names
         self.outputFormSelection, self.outputForms = self.buildFormList()
-        controlLayout = qtGui.QHBoxLayout()
-        label = qtGui.QLabel('Output To:')
+        controlLayout = qtWidgets.QHBoxLayout()
+        label = qtWidgets.QLabel('Output To:')
         
-        self.outputFormSelection = qtGui.QComboBox()
+        self.outputFormSelection = qtWidgets.QComboBox()
         for form in self.outputForms:
             self.outputFormSelection.addItem(form.FORM_TITLE)
         
@@ -54,7 +56,7 @@ class ProcessScansController(qtGui.QDialog):
         controlLayout.addWidget(self.outputFormSelection)
         self.layout.addLayout(controlLayout)
 
-        self.formLayout = qtGui.QHBoxLayout()
+        self.formLayout = qtWidgets.QHBoxLayout()
         self.outputFormWidget = self.outputForms[0].createInstance(appConfig= \
                                                             self.appConfig)
         self.formLayout.addWidget(self.outputFormWidget)
@@ -66,7 +68,7 @@ class ProcessScansController(qtGui.QDialog):
     def buildFormList(self):
         del self.outputForms[:]
         self.outputForms = self.parent.getOutputForms()
-        outputFormSelection = qtGui.QComboBox()
+        outputFormSelection = qtWidgets.QComboBox()
         for form in self.outputForms:
             outputFormSelection.addItem(form.FORM_TITLE)
         return outputFormSelection, self.outputForms
@@ -92,7 +94,7 @@ class ProcessScansController(qtGui.QDialog):
         
     @Slot(str)
     def _processFormError(self, message):
-        messageBox = qtGui.QMessageBox()
+        messageBox = qtWidgets.QMessageBox()
         messageBox.warning(self, \
                             "Processing Scan File Warning", \
                              str(message))

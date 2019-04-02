@@ -5,8 +5,9 @@ Copyright (c) 2014, UChicago Argonne, LLC
 USE_XPCS = False
 import logging
 logger = logging.getLogger(__name__)
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 from rsMap3D.gui.rsmap3dsignals import BLOCK_TABS_FOR_LOAD_SIGNAL, \
     FILE_ERROR_SIGNAL, LOAD_DATASOURCE_TO_SCAN_FORM_SIGNAL, INPUT_FORM_CHANGED
 from rsMap3D.datasource.Sector33SpecDataSource import LoadCanceledException
@@ -29,7 +30,7 @@ except Exception as ex:
     traceback.print_exc()
     USE_XPCS = False
 
-class FileInputController(qtGui.QDialog):
+class FileInputController(qtWidgets.QDialog):
     '''
     classdocs
     '''
@@ -53,7 +54,7 @@ class FileInputController(qtGui.QDialog):
         else:
             raise RSMap3DException("FileInputController recieved no AppConfig" +\
                                    "object.")
-        self.layout = qtGui.QVBoxLayout()
+        self.layout = qtWidgets.QVBoxLayout()
         #Build a list of fileForms
         self.fileForms = []
         self.fileForms.append(S33SpecScanFileForm)
@@ -62,10 +63,10 @@ class FileInputController(qtGui.QDialog):
         if USE_XPCS:
             self.fileForms.append(XPCSSpecScanFileForm)
             
-        controlLayout = qtGui.QHBoxLayout()
-        label = qtGui.QLabel("Input from:")
+        controlLayout = qtWidgets.QHBoxLayout()
+        label = qtWidgets.QLabel("Input from:")
         #populate selection list with available forms.
-        self.formSelection = qtGui.QComboBox()
+        self.formSelection = qtWidgets.QComboBox()
         for form in self.fileForms:
             self.formSelection.addItem(form.FORM_TITLE)
         self.formSelection.setCurrentIndex(0)   
@@ -74,7 +75,7 @@ class FileInputController(qtGui.QDialog):
         
         self.layout.addLayout(controlLayout)
         
-        self.formLayout = qtGui.QHBoxLayout()
+        self.formLayout = qtWidgets.QHBoxLayout()
         self.fileFormWidget = self.fileForms[0].createInstance(appConfig=\
                                                                self.appConfig)
         #print dir(self.fileFormWidget)

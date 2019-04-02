@@ -14,8 +14,9 @@ from rsMap3D.gui.input.usescommonoutputtype import UsesCommonOutputTypes
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 
@@ -71,11 +72,11 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
     def _browseForImageDir(self):
         logger.debug("Entering")
         if self.imageDirTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getExistingDirectory(None, \
+            fileName = qtWidgets.QFileDialog.getExistingDirectory(None, \
                                                    IMAGE_DIR_DIALOG_TITLE)
         else:
             fileDirectory = os.path.dirname(str(self.imageDirTxt.text()))
-            fileName = qtGui.QFileDialog.getExistingDirectory(None,\
+            fileName = qtWidgets.QFileDialog.getExistingDirectory(None,\
                                                    IMAGE_DIR_DIALOG_TITLE, \
                                                    directory = fileDirectory)
             
@@ -102,7 +103,7 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
                 
             except RSMap3DException as ex:
                 logger.warning("Trouble with S1 par file")
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                                  WARNING_STR, \
                                  str(ex))
@@ -133,12 +134,12 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         dataLayout = dataBox.layout()
         
         row = dataLayout.rowCount()
-        label = qtGui.QLabel("Par File Line")
-        self.parFileLineTxt = qtGui.QSpinBox()
+        label = qtWidgets.QLabel("Par File Line")
+        self.parFileLineTxt = qtWidgets.QSpinBox()
         self.parFileLineTxt.setValue(1)
         self.parFileLineTxt.setSingleStep(1)
         self.parFileLineTxt.setRange(1,1)
-        self.parFileLineRange = qtGui.QLabel("1:1")
+        self.parFileLineRange = qtWidgets.QLabel("1:1")
         #disable until a good file is found
         self.parFileLineTxt.setEnabled(False)
         dataLayout.addWidget(label, row, 0)
@@ -148,13 +149,13 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         row = dataLayout.rowCount()
         
         # Setup a place to show setup parameters
-        label = qtGui.QLabel("Angle Info")
-        self.angleRange = qtGui.QLabel(self.WAITING_FOR_INPUT)
+        label = qtWidgets.QLabel("Angle Info")
+        self.angleRange = qtWidgets.QLabel(self.WAITING_FOR_INPUT)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.angleRange, row, 1)
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("File Info")
-        self.fileInfo = qtGui.QLabel(self.WAITING_FOR_INPUT)
+        label = qtWidgets.QLabel("File Info")
+        self.fileInfo = qtWidgets.QLabel(self.WAITING_FOR_INPUT)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.fileInfo, row, 1)
         
@@ -174,9 +175,9 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         
         
         row = dataLayout.rowCount()  + 1
-        label = qtGui.QLabel("Image Directory:")
-        self.imageDirTxt = qtGui.QLineEdit()
-        self.imageDirBrowseButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("Image Directory:")
+        self.imageDirTxt = qtWidgets.QLineEdit()
+        self.imageDirBrowseButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.imageDirTxt, row, 1)
         dataLayout.addWidget(self.imageDirBrowseButton, row, 2)
@@ -185,19 +186,19 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         row = dataLayout.rowCount() + 1
         posDoubleValidator = qtGui.QDoubleValidator()
         posDoubleValidator.setBottom(0.000000)
-        label = qtGui.QLabel("Override detector distance: ")
-        self.detectorDistanceOverrideTxt = qtGui.QLineEdit(str(0.0))
+        label = qtWidgets.QLabel("Override detector distance: ")
+        self.detectorDistanceOverrideTxt = qtWidgets.QLineEdit(str(0.0))
         self.detectorDistanceOverrideTxt.setValidator(posDoubleValidator)
-        self.detectorDistanceActive = qtGui.QLabel()
+        self.detectorDistanceActive = qtWidgets.QLabel()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detectorDistanceOverrideTxt, row, 1)
         dataLayout.addWidget(self.detectorDistanceActive,row, 2)
          
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("Override Incident Energy: ")
-        self.incidentEnergyOverrideTxt = qtGui.QLineEdit(str(0.0))
+        label = qtWidgets.QLabel("Override Incident Energy: ")
+        self.incidentEnergyOverrideTxt = qtWidgets.QLineEdit(str(0.0))
         self.incidentEnergyOverrideTxt.setValidator(posDoubleValidator)
-        self.incidentEnergyActive = qtGui.QLabel()
+        self.incidentEnergyActive = qtWidgets.QLabel()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.incidentEnergyOverrideTxt, row, 1)
         dataLayout.addWidget(self.incidentEnergyActive, row, 2)
@@ -207,10 +208,10 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
         self.angleLimitValidator.setBottom(-360.0)
         self.angleLimitValidator.setTop(360.0)
 #         angleLimitValidator.setNotation(qtGui.QDoubleValidator.StandardNotation)
-        label = qtGui.QLabel("Offset Angle: ")
-        self.offsetAngleTxt = qtGui.QLineEdit(str(0.0))
+        label = qtWidgets.QLabel("Offset Angle: ")
+        self.offsetAngleTxt = qtWidgets.QLineEdit(str(0.0))
         self.offsetAngleTxt.setValidator(self.angleLimitValidator)
-        self.offsetAngleActive = qtGui.QLabel()
+        self.offsetAngleActive = qtWidgets.QLabel()
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.offsetAngleTxt, row, 1)
         dataLayout.addWidget(self.offsetAngleActive, row, 2)
@@ -364,7 +365,7 @@ class S1HighEnergyDiffractionForm(AbstractImagePerFileView, \
             self.imageDirTxt.text() == EMPTY_STR:
             self.checkOkToLoad()
         else:
-            message = qtGui.QMessageBox() 
+            message = qtWidgets.QMessageBox() 
             message.warning(self, \
                              WARNING_STR
                              , \

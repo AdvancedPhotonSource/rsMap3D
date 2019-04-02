@@ -3,9 +3,10 @@
  See LICENSE file.
 '''
 import logging
-import PyQt4.QtGui as qtGui
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
 
-from  PyQt4.QtCore import pyqtSlot as Slot
+from  PyQt5.QtCore import pyqtSlot as Slot
 
 from rsMap3D.gui.output.abstractoutputview import AbstractOutputView
 from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
@@ -14,7 +15,7 @@ from rsMap3D.gui.rsm3dcommonstrings import X_STR, Y_STR, Z_STR, BROWSE_STR,\
 import os
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
-from PyQt4.Qt import QComboBox
+#from PyQt4.Qt import QComboBox
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
         super(ProcessVTIOutputForm, self).__init__(**kwargs)
         logger.debug(METHOD_ENTER_STR)
         self.mapper = None
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
@@ -48,12 +49,12 @@ class ProcessVTIOutputForm(AbstractOutputView):
         '''
         logger.debug(METHOD_ENTER_STR)
         if self.outFileTxt.text() == EMPTY_STR:
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
                                                filter=VTI_FILTER_STR))
         else:
             inFileName = str(self.outFileTxt.text())
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=VTI_FILTER_STR, \
                                                directory = inFileName))
@@ -62,22 +63,26 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
                 self.outFileTxt.editingFinished.emit()
+                self.setRunOK()
+                if not os.access(os.path.dirname(fileName), os.W_OK):
+                    message = qtWidgets.QMessageBox()
+                    message.warning(self, \
+                                 WARNING_STR, \
+                                 "The specified file is not writable")
+                    self.setRunInfoCorrupt()
             else:
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified directory does not exist")
-                self.outFileTxt.setText(fileName)
+                #self.outFileTxt.setText(fileName)
                 self.outputFileName = fileName
-                self.outFileTxt.editingFinished.emit()
-            if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
-                message.warning(self, \
-                             WARNING_STR, \
-                             "The specified file is not writable")
+                #self.outFileTxt.editingFinished.emit()
+                self.setRunInfoCorrupt()
         else:
             self.outputFileName = EMPTY_STR
-            self.setOutFileText.emit(EMPTY_STR)
+            self.setOutFileText(EMPTY_STR)
+            self.setRunOK()
         logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _cancelProcess(self):
@@ -96,49 +101,49 @@ class ProcessVTIOutputForm(AbstractOutputView):
         dataLayout = dataBox.layout()
         row = dataLayout.rowCount()
         
-        label = qtGui.QLabel("Grid Dimensions")
+        label = qtWidgets.QLabel("Grid Dimensions")
         dataLayout.addWidget(label, row,0)
         row += 1
-        label = qtGui.QLabel(X_STR)
+        label = qtWidgets.QLabel(X_STR)
         dataLayout.addWidget(label, row,0)
-        self.xDimTxt = qtGui.QLineEdit()
+        self.xDimTxt = qtWidgets.QLineEdit()
         self.xDimTxt.setText("200")
         self.xDimValidator = qtGui.QIntValidator()
         self.xDimTxt.setValidator(self.xDimValidator)
         dataLayout.addWidget(self.xDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Y_STR)
+        label = qtWidgets.QLabel(Y_STR)
         dataLayout.addWidget(label, row,0)
-        self.yDimTxt = qtGui.QLineEdit()
+        self.yDimTxt = qtWidgets.QLineEdit()
         self.yDimTxt.setText("200")
         self.yDimValidator = qtGui.QIntValidator()
         self.yDimTxt.setValidator(self.yDimValidator)
         dataLayout.addWidget(self.yDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Z_STR)
+        label = qtWidgets.QLabel(Z_STR)
         dataLayout.addWidget(label, row,0)
-        self.zDimTxt = qtGui.QLineEdit()
+        self.zDimTxt = qtWidgets.QLineEdit()
         self.zDimTxt.setText("200")
         self.zDimValidator = qtGui.QIntValidator()
         self.zDimTxt.setValidator(self.zDimValidator)
         dataLayout.addWidget(self.zDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel("Output File")
+        label = qtWidgets.QLabel("Output File")
         dataLayout.addWidget(label, row,0)
         self.outputFileName = ""
-        self.outFileTxt = qtGui.QLineEdit()
+        self.outFileTxt = qtWidgets.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
         dataLayout.addWidget(self.outFileTxt, row,1)
-        self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
+        self.outputFileButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(self.outputFileButton, row, 2)
 
         row += 1
-        label = qtGui.QLabel("Output Type")
+        label = qtWidgets.QLabel("Output Type")
         dataLayout.addWidget(label, row, 0)
-        self.outputTypeSelect = QComboBox()
+        self.outputTypeSelect = qtWidgets.QComboBox()
         self.outputTypeSelect.addItem(BINARY_OUTPUT)
         self.outputTypeSelect.addItem(ASCII_OUTPUT)
         dataLayout.addWidget(self.outputTypeSelect, row, 2)
@@ -169,25 +174,31 @@ class ProcessVTIOutputForm(AbstractOutputView):
                 if os.path.dirname(fileName) == EMPTY_STR:
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
+                    self.setFileName.emit(fileName)
+                    self.setRunOK()
                 else:
-                    message = qtGui.QMessageBox()
+                    self.setRunInfoCorrupt()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self, \
                                  WARNING_STR, \
                                  "The specified directory \n" + \
                                  str(os.path.dirname(fileName)) + \
                                  "\ndoes not exist")
-                
+                    logger.debug.warning("The specified directory \n" + \
+                                 str(os.path.dirname(fileName)) + \
+                                 "\ndoes not exist")
+                    return
 #               self.outputFileName = fileName
-                self.setFileName.emit(fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
         else:
             self.outputFileName = EMPTY_STR
-            self.setOutFileText.emit(EMPTY_STR)
+            self.setOutFileText(EMPTY_STR)
+            self.setRunOK()
         logger.debug(METHOD_EXIT_STR)
 #     @Slot()
 #     def _process(self):

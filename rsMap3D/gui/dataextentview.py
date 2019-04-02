@@ -3,17 +3,18 @@
  See LICENSE file.
 '''
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 import sys
 
 
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import vtk
 from rsMap3D.gui.rsm3dcommonstrings import XMIN_INDEX, XMAX_INDEX, YMAX_INDEX,\
     YMIN_INDEX, ZMIN_INDEX, ZMAX_INDEX
 
-class DataExtentView(qtGui.QFrame):
+class DataExtentView(qtWidgets.QFrame):
     '''
     This class will hold a vtk widget to show the extent of data.  This extent
     will be shown as a series of boxes, one for each image.  Each box will 
@@ -27,7 +28,7 @@ class DataExtentView(qtGui.QFrame):
         Constructor
         '''
         super(DataExtentView,self).__init__(parent)
-        self.layout = qtGui.QVBoxLayout()
+        self.layout = qtWidgets.QVBoxLayout()
          
         self.vtkMain = QVTKRenderWindowInteractor()
         #self.layout.addWidget(self.vtkMain)
@@ -119,7 +120,7 @@ class DataExtentView(qtGui.QFrame):
  
 
     
-class mainClass(qtGui.QMainWindow):
+class mainClass(qtWidgets.QMainWindow):
     '''
     A small class for testing via the main method
     '''
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     Main method for small scale testing.
     '''
  
-    app = qtGui.QApplication(sys.argv)
+    app = qtWidgets.QApplication(sys.argv)
  
     window = mainClass()
  

@@ -6,8 +6,9 @@ import logging
 from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR, METHOD_EXIT_STR
 logger = logging.getLogger(__name__)
 
-import PyQt4.QtCore as qtCore
-import PyQt4.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.gui.input.usesxmlinstconfig import UsesXMLInstConfig
@@ -39,17 +40,17 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
 
     def _createHKLOutput(self, layout, row):
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("HKL output")
+        label = qtWidgets.QLabel("HKL output")
         layout.addWidget(label, row, 0)
-        self.hklCheckbox = qtGui.QCheckBox()
+        self.hklCheckbox = qtWidgets.QCheckBox()
         layout.addWidget(self.hklCheckbox, row, 1)
         logger.debug(METHOD_EXIT_STR)
 
         
     def _createOutputType(self, layout, row):
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Output Type")
-        self.outTypeChooser = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Output Type")
+        self.outTypeChooser = qtWidgets.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         self.outTypeChooser.addItem(self.POLE_MAP_STR)
         layout.addWidget(label, row, 0)
@@ -63,8 +64,8 @@ class SpecXMLDrivenFileForm(AbstractImagePerFileView, UsesXMLInstConfig, UsesXML
         
     def _createScanNumberInput(self, layout, row):
         logger.debug(METHOD_ENTER_STR)
-        label = qtGui.QLabel("Scan Numbers")
-        self.scanNumsTxt = qtGui.QLineEdit()
+        label = qtWidgets.QLabel("Scan Numbers")
+        self.scanNumsTxt = qtWidgets.QLineEdit()
         rx = qtCore.QRegExp(self.SCAN_LIST_REGEXP)
         self.scanNumsTxt.setValidator(qtGui.QRegExpValidator(rx,self.scanNumsTxt))
         layout.addWidget(label, row, 0)

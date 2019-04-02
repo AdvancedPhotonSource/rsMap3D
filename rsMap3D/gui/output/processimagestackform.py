@@ -2,10 +2,11 @@
  Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
-from  PyQt4.QtCore import pyqtSlot as Slot
+from  PyQt5.QtCore import pyqtSlot as Slot
 
 from rsMap3D.gui.output.abstractgridoutputform import AbstractGridOutputForm
 from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, SAVE_DIR_STR, WARNING_STR,\
@@ -33,7 +34,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         '''
         super(ProcessImageStackForm, self).__init__(**kwargs)
         self.gridWriter = ImageStackWriter()
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
@@ -48,11 +49,11 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         Launch file browser to find location to write image files.
         '''
         if self.outputDirTxt.text() == "":
-            dirName = str(qtGui.QFileDialog.getExistingDirectory(None, 
+            dirName = str(qtWidgets.QFileDialog.getExistingDirectory(None, 
                                                               SAVE_DIR_STR))
         else:
             curName = str(self.outputDirTxt.text())
-            dirName = str(qtGui.QFileDialog.getExistingDirectory(None, 
+            dirName = str(qtWidgets.QFileDialog.getExistingDirectory(None, 
                                                               SAVE_DIR_STR,
                                                               directory = curName))
             
@@ -62,7 +63,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                 self.outputDirName = dirName
                 self.outputDirTxt.editingFinished.emit()
             else:
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, 
                                 WARNING_STR, 
                                 "The specified directory does not exist")
@@ -70,7 +71,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                 self.outputDirName = dirName
                 self.outputDirTxt.editingFinished.emit()
             if not os.access(dirName, os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self,
                                 WARNING_STR,
                                 "The specified directory is not writable")
@@ -82,28 +83,28 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         row = layout.rowCount()
         row += 1
 
-        label = qtGui.QLabel("Output Directory")
+        label = qtWidgets.QLabel("Output Directory")
         layout.addWidget(label, row,0)
         self.outputDirName = ""
-        self.outputDirTxt = qtGui.QLineEdit()
+        self.outputDirTxt = qtWidgets.QLineEdit()
         self.outputDirTxt.setText(self.outputDirName)
         layout.addWidget(self.outputDirTxt, row,1)
-        self.outputDirButton = qtGui.QPushButton(BROWSE_STR)
+        self.outputDirButton = qtWidgets.QPushButton(BROWSE_STR)
         layout.addWidget(self.outputDirButton, row, 2)
 
         row += 1
-        label = qtGui.QLabel("Image File Prefix")
+        label = qtWidgets.QLabel("Image File Prefix")
         layout.addWidget(label, row, 0)
         self.imageFilePrefix = ""
-        self.imageFilePrefixTxt = qtGui.QLineEdit()
+        self.imageFilePrefixTxt = qtWidgets.QLineEdit()
         self.imageFilePrefixTxt.setText(self.imageFilePrefix)
         layout.addWidget(self.imageFilePrefixTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel("Slice Axis")
+        label = qtWidgets.QLabel("Slice Axis")
         layout.addWidget(label, row, 0)
         self.axisChoices = ["0", "1", "2"]
-        self.axisSelector = qtGui.QComboBox()
+        self.axisSelector = qtWidgets.QComboBox()
         self.axisSelector.addItems(self.axisChoices)
         self.axisSelector.setCurrentIndex(self.gridWriter.getSliceIndex())
         layout.addWidget(self.axisSelector)
@@ -138,7 +139,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
                 if dirName == "":
                     dirName = os.path.realpath(os.path.curdir)
                 else:
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self,
                                     WARNING_STR,
                                     "The specified directory \n" +
@@ -149,7 +150,7 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         if imageFilePrefix != "":
             for badChar in ['\\', '/', ':', '*', '?', '<', '>', '|']:
                 if badChar in imageFilePrefix:
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self,
                                     WARNING_STR,
                                     "The specified imagePrefix conatins one " +

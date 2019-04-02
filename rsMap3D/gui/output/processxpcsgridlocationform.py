@@ -2,11 +2,12 @@
  Copyright (c) 2016, UChicago Argonne, LLC
  See LICENSE file.
 '''
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
-from  PyQt4.QtCore import pyqtSignal as Signal
-from  PyQt4.QtCore import pyqtSlot as Slot
+from  PyQt5.QtCore import pyqtSignal as Signal
+from  PyQt5.QtCore import pyqtSlot as Slot
 
 from rsMap3D.gui.rsm3dcommonstrings import SAVE_FILE_STR, WARNING_STR,\
     BROWSE_STR
@@ -39,7 +40,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
     def __init__(self, **kwargs):
         super(ProcessXpcsGridLocationForm, self).__init__(**kwargs)
         self.mapper = None
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         
@@ -57,12 +58,12 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         writable
         '''
         if self.outFileTxt.text() == "":
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
                                                filter=self.outFilter))
         else:
             inFileName = str(self.outFileTxt.text())
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=self.outFilter, \
                                                directory = inFileName))
@@ -72,7 +73,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                 self.outputFileName = fileName
                 self.outFileTxt.editingFinished.emit()
             else:
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified directory does not exist")
@@ -80,7 +81,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                 self.outputFileName = fileName
                 self.outFileTxt.editingFinished.emit()
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
@@ -91,13 +92,13 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         
         row = layout.rowCount()
         row += 1
-        label = qtGui.QLabel("Output File")
+        label = qtWidgets.QLabel("Output File")
         layout.addWidget(label, row,0)
         self.outputFileName = ""
-        self.outFileTxt = qtGui.QLineEdit()
+        self.outFileTxt = qtWidgets.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
         layout.addWidget(self.outFileTxt, row,1)
-        self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
+        self.outputFileButton = qtWidgets.QPushButton(BROWSE_STR)
         layout.addWidget(self.outputFileButton, row, 2)
 
         self.outputFileButton.clicked.connect(self._browseForOutputFile)
@@ -124,7 +125,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
                 else:
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self, \
                                  WARNING_STR, \
                                  "The specified directory \n" + \
@@ -135,7 +136,7 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
                 self.setFileName.emit(fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")

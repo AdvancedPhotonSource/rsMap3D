@@ -3,8 +3,9 @@
  See LICENSE file.
 '''
 import os.path
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.gui.input.abstractimageperfileview import AbstractImagePerFileView
 from rsMap3D.gui.rsm3dcommonstrings import BROWSE_STR, EMPTY_STR,\
@@ -47,15 +48,15 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         Launch file selection dialog for Detector file.
         '''
         if self.detConfigTxt.text() == EMPTY_STR:
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                             SELECT_DETECTOR_CONFIG_TITLE, \
-                                            filter=DETECTOR_CONFIG_FILE_FILTER)
+                                            filter=DETECTOR_CONFIG_FILE_FILTER)[0]
         else:
             fileDirectory = os.path.dirname(str(self.detConfigTxt.text()))
-            fileName = qtGui.QFileDialog.getOpenFileName(None, \
+            fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                          SELECT_DETECTOR_CONFIG_TITLE, \
                                          filter=DETECTOR_CONFIG_FILE_FILTER, \
-                                         directory = fileDirectory)
+                                         directory = fileDirectory)[0]
         if fileName != EMPTY_STR:
             self.detConfigTxt.setText(fileName)
             self.detConfigTxt.editingFinished.emit()
@@ -87,9 +88,9 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
         dataLayout = dataBox.layout()
 
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("Detector Config File:");
-        self.detConfigTxt = qtGui.QLineEdit()
-        self.detConfigFileButton = qtGui.QPushButton(BROWSE_STR)
+        label = qtWidgets.QLabel("Detector Config File:");
+        self.detConfigTxt = qtWidgets.QLineEdit()
+        self.detConfigFileButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(label, row, 0)
         dataLayout.addWidget(self.detConfigTxt, row, 1)
         dataLayout.addWidget(self.detConfigFileButton, row, 2)
@@ -101,8 +102,8 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
 #         self._createNumberOfPixelsToAverage(dataLayout, row, silent=True)
 
         row = dataLayout.rowCount() + 1
-        label = qtGui.QLabel("Output Type")
-        self.outTypeChooser = qtGui.QComboBox()
+        label = qtWidgets.QLabel("Output Type")
+        self.outTypeChooser = qtWidgets.QComboBox()
         self.outTypeChooser.addItem(self.SIMPLE_GRID_MAP_STR)
         #self.outTypeChooser.addItem(self.POLE_MAP_STR)
         dataLayout.addWidget(label, row, 0)
@@ -138,7 +139,7 @@ class S34HDFEScanFileForm(AbstractImagePerFileView):
 #                                  "Trouble getting ROI or Num average " + \
 #                                  "from the detector config file")
         else:
-            message = qtGui.QMessageBox()
+            message = qtWidgets.QMessageBox()
             message.warning(self, \
                              WARNING_STR,\
                              "The filename entered for the detector " + \
