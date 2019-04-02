@@ -419,7 +419,7 @@ class InstForXrayutilitiesReader():
         '''
         axes = direction.findall(REFERENCE_AXIS)
         
-        if len(axes) <> 3:
+        if len(axes) != 3:
             raise InstConfigException("Axes not defined properly in \n" + \
                                       ET.tostring(direction) + \
                                       "\nin instrument config file")
