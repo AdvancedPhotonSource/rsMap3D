@@ -57,7 +57,7 @@ class RSMap3DConfig():
         tree = ET.ElementTree(configElement)
         tree.write(self.configFile,  encoding = "utf-8", xml_declaration=True, method ="xml")
         redo = minidom.parseString(ET.tostring(configElement, 'utf8'))
-        print redo.toprettyxml(indent="    ")
+        print (redo.toprettyxml(indent="    "))
         fileHandle = open(self.configFile, "wb")
         redo.writexml(fileHandle, indent='   ', newl='\r\n')
         fileHandle.close()
