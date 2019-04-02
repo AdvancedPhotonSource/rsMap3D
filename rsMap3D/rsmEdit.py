@@ -3,12 +3,12 @@
  See LICENSE file.
 '''
 import signal
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
  
-from  PyQt4.QtCore import pyqtSignal as Signal
-from  PyQt4.QtCore import pyqtSlot as Slot
-
+from  PyQt5.QtCore import pyqtSignal as Signal
+from  PyQt5.QtCore import pyqtSlot as Slot
 from rsMap3D.gui.scanform import ScanForm
 from rsMap3D.gui.datarange import DataRange
 from rsMap3D.gui.dataextentview import DataExtentView
@@ -18,7 +18,7 @@ import logging
 import logging.config
 
 import os
-from ConfigParser import NoSectionError
+from configparser import NoSectionError
 from rsMap3D.config.rsmap3dlogging import LOGGER_NAME, LOGGER_DEFAULT,\
     METHOD_EXIT_STR, METHOD_ENTER_STR
 from rsMap3D.gui.rsmap3dsignals import UNBLOCK_TABS_FOR_LOAD_SIGNAL
@@ -28,14 +28,23 @@ from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
     
 userDir = os.path.expanduser("~")
 logConfigFile = os.path.join(userDir, LOGGER_NAME + 'Log.config')
-try:
-    logging.config.fileConfig(logConfigFile)
-except NoSectionError:
+if os.path.exists(logConfigFile):
+    print ("logConfigFile " + logConfigFile )
+    try:
+        logging.config.fileConfig(logConfigFile, disable_existing_loggers=False)
+        print("Success Openning logfile")
+    except (NoSectionError,TypeError) as ex:
+        print ("In Exception to load dictConfig package %s\n %s" % (LOGGER_NAME, ex))
+        logging.config.dictConfig(LOGGER_DEFAULT)
+    except KeyError as ex:
+        print ("logfile %s was missing or had errant sections %s" %(logConfigFile, ex.args))
+
+else:
     logging.config.dictConfig(LOGGER_DEFAULT)
     
 logger = logging.getLogger(LOGGER_NAME)
     
-class MainDialog(qtGui.QMainWindow):
+class MainDialog(qtWidgets.QMainWindow):
     '''
     Main dialog for rsMap3D.  This class also serves as the over action 
     controller for the application
@@ -51,7 +60,7 @@ class MainDialog(qtGui.QMainWindow):
         super(MainDialog, self).__init__(parent)
         #Create and layout the widgets
         self.appConfig = RSMap3DConfigParser()
-        self.tabs = qtGui.QTabWidget()
+        self.tabs = qtWidgets.QTabWidget()
         self.fileForm = FileInputController(appConfig=self.appConfig)
         self.scanForm = ScanForm()
         self.dataRange = DataRange()
@@ -167,7 +176,7 @@ class MainDialog(qtGui.QMainWindow):
         toggle Load and Cancel buttons in file tab to Load Active/Cancel 
         inactive
         '''
-        message = qtGui.QMessageBox()
+        message = qtWidgets.QMessageBox()
         message.warning(self, \
                             "Load Scan File Warning", \
                              str(error))
@@ -216,13 +225,13 @@ class MainDialog(qtGui.QMainWindow):
         self.processScans.updateOutputForms(newOutputForms)
         
 def ctrlCHandler(signal, frame):
-    qtGui.QApplication.closeAllWindows()
+    qtWidgets.QApplication.closeAllWindows()
     
 if __name__ == "__main__":
     #This line allows CTRL_C to work with PyQt.
     logger.debug(METHOD_ENTER_STR)
     signal.signal(signal.SIGINT, ctrlCHandler)
-    app = qtGui.QApplication(sys.argv)
+    app = qtWidgets.QApplication(sys.argv)
     mainForm = MainDialog()
     mainForm.show()
     #timer allows Python interupts to work
