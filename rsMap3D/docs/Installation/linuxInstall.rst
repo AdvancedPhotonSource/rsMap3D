@@ -2,10 +2,9 @@
 Installation of rsMap3D on Linux Host
 =====================================
 These installation instructions assume the use of the Anaconda Python 
-distribution from Continuum Analytics.  We use Canopy for these instructions as 
-it is the default Python environment used by the Advanced Photon Source at this 
-time.  For these instructions, Anaconda 2.5.0 and the packages provided by 
-Anaconda were used as much as possible.  The description written here was put 
+distribution from Continuum Analytics.  For these instructions, Anaconda 5.x and the packages provided by 
+Anaconda were used as much as possible.  At this time, the current version 
+available from anaconda.org is 2018.12. The description written here was put 
 together using a fresh Anaconda install in order to provide as much information 
 as possible for the beginning user.
 
@@ -14,7 +13,7 @@ install/check the install of a number of other python packages and then install:
 
 *	`xrayutilities <http://sourceforge.net/projects/xrayutilities>`_
 *	`spec2nexus <http://spec2nexus.readthedocs.org/en/latest/>`_
-*	And then download the source for `rsMap3D <https://subversion.xray.aps.anl.gov/RSM/rsMap3D/trunk/>`_
+*	`rsMap3D <https://github.com/AdvancedPhotonSource/rsMap3D/wiki>`_
 
 Installation and setup of Anaconda
 ----------------------------------
@@ -22,14 +21,9 @@ Installation and setup of Anaconda
 of Python by Continuum Analytics.  Note that although Continuum Analytics does 
 provide Anaconda at no cost, it does provide `some additional levels of support 
 <https://www.continuum.io/support-plan>`_ for a fee.  Anaconda supports 
-installation of both Python 2.7 and 3.x.  At the time of this writing, The 
-Python 3.x version does not support the integration of PyQt and VTK, which rsMap3D 
-uses.  Note that although the Anaconda download of for Python 2 & 3 are essentially 
+installation of both Python 2.7 and 3.x.  Note that although the Anaconda download of for Python 2 & 3 are essentially 
 the same it is recommended, especially if you are installing for this application,
-that you install the Python 2 version of Anaconda for more convenient installation.
-Note also that the current distribution of Anaconda installs version 5.x of PyQt
-by default.  This version of PyQt does not support the integration with VTK so
-it will be necessary to downgrade the to version 4.11 of PyQt (see below).
+that you install the Python 3 version of Anaconda for more convenient installation.
 .
 To install Anaconda Python, go to the download site mentioned above you should 
 see a web page with a section that looks like
@@ -47,7 +41,7 @@ common packages by default.
 
 
 For rsMap3D we need to make sure that the following packages are installed: 
-numpy, vtk, pytables and PyQt4.  Installation can be verified by launching an 
+numpy, vtk,scypy pillow and pyqt.  Installation can be verified by launching an 
 Anaconda prompt from Start->All Programs->Anaconda2 (64-bit).  We can verify 
 package installation with 
 
@@ -55,7 +49,7 @@ package installation with
 
    conda search <packagename> at the prompt.
 
-At this time, Anaconda 2.5.0 is being used and the following packages are 
+At this time, Anaconda 5.x is being used and the following packages are 
 available and those not installed by default can be installed with the command
 
 .. code-block:: none
@@ -64,13 +58,12 @@ available and those not installed by default can be installed with the command
 
 Required packages
 
-* numpy  1.10.4 is already installed
-* pyqt 4.11.4 is already for installation (As noted above, it is necessary to
-install the 4.11 version of PyQt.  To do this use 'conda install pyqt=4.11')
-* vtk 6.3.0 is available for installation
-* pytables 3.2.2 is installed
-* h5py 2.5.0 is installed
-* pillow 3.1.0 is installed (or pil)
+* numpy  1.16.2 
+* pyqt 5.9.2 
+* vtk 8.2.0 
+* h5py 2.5.0 
+* pillow 5.4.1
+* scipy  1.2.1
 
 Make sure to install these packages now.  Note that we will also need 
 xrayutilities and spec2nexus (described below). 
@@ -96,23 +89,20 @@ This package includes a setup.py file to help with the install.   To install xra
  ~/Enthought/Canopy_64bit/User/bin/python setup.py install
 
 
-Installing pySpec 
---------------------
+Installing spec2nexus 
+---------------------
+spec2nexus is a python package written by Pete Jemian at the APS.  This package
+provides a subpackage that enables parsing spec files in python.  This package
+has been used in places to read spec files  as input for the rsMap3D.  Note 
+that rsMap3D requires at least version 2016.216.0.  Although the installation
+instructions suggest this can be installed with the conda installer, this 
+method currently installs an older version.  To install the correct version 
+use:
 
-pySpec is a python package written by Stuart Wilkins.  We have been downloading the latest version of pyspec from the repository on github.  To download into /local/pyspec:
+.. code-block:: none
 
-.. code-block:: sh
-
- cd /local
- git clone https://github.com/stuwilkins/pyspec
-
-Like xrayutilities, pyspec comes with a setup.py file to help with the installation.  To install pyspec run:
-
-.. code-block:: sh
-
- cd /local/pyspec
- ~/Enthought/Canopy_64bit/User/bin/python setup.py install
- 
+   pip install spec2nexus
+   
 Installing rsMap3D
 --------------------
 

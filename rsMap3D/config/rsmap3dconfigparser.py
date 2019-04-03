@@ -26,7 +26,7 @@ MPI_SECTION_NAME = "MPI"
 MPI_HOST_FILE = "hostfile"
 MPI_WORKER_COUNT = "workercount"
 MPI_DEFAULT_HOST = "worker_hosts"
-MPI_DEFAULT_WORKER_COUNT = 1
+MPI_DEFAULT_WORKER_COUNT = '1'
 
 class RSMap3DConfigParser(ConfigParser):
     '''
@@ -59,7 +59,7 @@ class RSMap3DConfigParser(ConfigParser):
                              str(self.MaxMemory))
                 except Exception as ex:
                     logger.debug("Trouble loading from XML file")
-                with open(self.configFile, 'wb') as configFile:
+                with open(self.configFile, 'w') as configFile:
                     self.write(configFile)
                 with open(self.configFile, 'r') as configFile:
                     self.read(configFile)
@@ -143,7 +143,7 @@ class RSMap3DConfigParser(ConfigParser):
                                "HostFile = worker_hosts\n"
                                "WorkerCount = 1\n"
                                )
-                workerCount = MPI_DEFAULT_WORKER_COUNT
+                workerCount = int(MPI_DEFAULT_WORKER_COUNT)
         except Exception as ex:
             workerCount = 1
             logger.exception(ex.message)
