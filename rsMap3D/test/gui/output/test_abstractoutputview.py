@@ -4,20 +4,21 @@
 '''
 import sys
 import unittest
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
-import PyQt4.QtTest as qtTest
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
+import PyQt5.QtTest as qtTest
 
 from rsMap3D.gui.output.abstractoutputview import AbstractOutputView as AOutView
 
-app = qtGui.QApplication(sys.argv)
+app = qtWidgets.QApplication(sys.argv)
 
 class TestAbstractOutputView(unittest.TestCase):
     def setUp(self):
         self.form = TestFileView(parent=None)
 
     def test_defaults(self):
-        print dir(self.form)
+        print (dir(self.form))
         self.assertEqual(self.form.runButton.isEnabled(), True)
         self.assertEqual(self.form.cancelButton.isEnabled(), False)
         self.assertEqual(self.form.progressBar.value(), 0)
@@ -114,7 +115,7 @@ class TestAbstractOutputView(unittest.TestCase):
 class TestFileView(AOutView):
     def __init__(self, parent=None):
         super(TestFileView,self).__init__(parent)
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
         

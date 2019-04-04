@@ -4,9 +4,10 @@
 '''
 import sys
 import unittest
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
-import PyQt4.QtTest as qtTest
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
+import PyQt5.QtTest as qtTest
 from rsMap3D.gui.input.s33specscanfileform import S33SpecScanFileForm
 from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
 
