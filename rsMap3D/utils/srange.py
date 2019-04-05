@@ -53,8 +53,8 @@ class srange:
         
         if type(r) is str:
             self.r = r
-        elif type(r) is unicode:
-            self.r = r.encode()
+#         elif type(r) is unicode:
+#             self.r = r.encode()
         elif type(r) is int:
             self.r = str(r)
         elif type(r) is list:
@@ -191,7 +191,7 @@ class srange:
         
         if not self.l:
             return False
-        if not (type(item) is int or type(item) is long):
+        if not (type(item) is int or type(item) is int):
             raise TypeError("Element must be integer number")
             
         for (lo, hi) in self.l:
@@ -206,7 +206,7 @@ class srange:
         
         if not self.l:
             raise ValueError("String range is empty.")
-        if not (type(n) is int or type(n) is long):
+        if not (type(n) is int or type(n) is int):
             raise TypeError("Element must be integer number")
         if (n < 0):
             raise ValueError("Index must be non-negative.")
@@ -234,7 +234,7 @@ class srange:
         
         if not self.l:
             raise ValueError("String range is empty.")
-        if not (type(val) is int or type(val) is long):
+        if not (type(val) is int or type(val) is int):
             raise TypeError("Value must be an integer.")
             
         index = 0
@@ -263,10 +263,10 @@ class srange:
 
         if not self.l:
             raise ValueError("String range is empty.")
-        if not (type(start) is int or type(start) is long):
+        if not (type(start) is int or type(start) is int):
             raise TypeError("Start value (start) must be an integer.")
 
-        if not (type(n) is int or type(n) is long):
+        if not (type(n) is int or type(n) is int):
             raise TypeError("Number of elements (n) must be an integer.")
         if n < 0:
             raise ValueError("Number of elements must be greater zero.")
@@ -343,7 +343,7 @@ class srange:
     def reset_last(self):
         """ Reset last_item to the lowest possible value."""
         
-        self.last_item = -sys.maxint-1
+        self.last_item = -sys.maxsize-1
 
     def _compact(self):
         """
@@ -401,9 +401,9 @@ class srange:
             lo,mid,hi = s.partition('@')
             lo = lo.strip()
             if lo.lower().find('-inf') >= 0:
-                lo = -sys.maxint
+                lo = -sys.maxsize
             elif lo.lower().find('inf') >= 0:
-                lo = sys.maxint
+                lo = sys.maxsize
             try:
                 lo = int(lo)
             except:
@@ -412,9 +412,9 @@ class srange:
             if(hi):
                 hi = hi.strip()
                 if hi.lower().find('-inf') >= 0:
-                    hi = -sys.maxint
+                    hi = -sys.maxsize
                 elif hi.lower().find('inf') >= 0:
-                    hi = sys.maxint
+                    hi = sys.maxsize
                 try:    
                     hi = int(hi)
                 except:
@@ -493,36 +493,36 @@ if __name__ == "__main__":
         """
         print ('\n---------------------------------------------')
         if type(test_str) is str:
-            print "The test string: '%s'" % test_str
+            print ("The test string: '%s'" % test_str)
         else:
-            print "The test string: ", test_str
+            print ("The test string: %s" % test_str)
             
         try:
             sr = srange(test_str)
             mystr = ''
             for val in sr:
                 mystr += str(val) + ', '
-            print 'Elements in str1: ', mystr
-            print 'Python list of elements in str1:', sr.list()
-            print 'Number of elements in string range:', sr.len()
-            print 'First element:',    sr.first()
-            print 'Last element:',    sr.last()
-            print 'Next element after 5:',    sr.after(5)
-            print 'Next element after 16:',    sr.after(16)
-            print 'Test if 5 is in range:',    sr.is_in_range(6)
-            print 'Test if 6 is in range:',    sr.is_in_range(10)
-            print 'Subrange from -1 with 100 elements: ', sr.sub_range(-1,100)
-            print 'Subrange from 3 with 5 elements: ', sr.sub_range(3,5)
-            print 'Index of 5 in string range:', sr.val2index(5)
-            print 'Value at index 3 in string range:', sr.index(3)
-            print 'String representation:', repr(sr)
-            print 'String value:', str(sr)
+            print ('Elements in str1: ', mystr)
+            print ('Python list of elements in str1:', sr.list())
+            print ('Number of elements in string range:', sr.len())
+            print ('First element:',    sr.first())
+            print ('Last element:',    sr.last())
+            print ('Next element after 5:',    sr.after(5))
+            print ('Next element after 16:',    sr.after(16))
+            print ('Test if 5 is in range:',    sr.is_in_range(6))
+            print ('Test if 6 is in range:',    sr.is_in_range(10))
+            print ('Subrange from -1 with 100 elements: ', sr.sub_range(-1,100))
+            print ('Subrange from 3 with 5 elements: ', sr.sub_range(3,5))
+            print ('Index of 5 in string range:', sr.val2index(5))
+            print ('Value at index 3 in string range:', sr.index(3))
+            print ('String representation:', repr(sr))
+            print ('String value:', str(sr))
             
             return sr
             
         except Exception as err:
-            print 'This test returned an ERROR!'
-            print err
+            print ('This test returned an ERROR!')
+            print (err)
             
     
     str1 = '1,3,4-5,8-11,12-13,20'         # a standard string range
