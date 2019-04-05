@@ -119,3 +119,17 @@ Version 1.1.8   2017-11-7
 Version 1.1.9   2017-11-7
     Fix Gridmapper to show 100% when done.
     Fix S1 to show 100% when done loading.
+    
+Version 1.2.0rc1 2019-04-02
+    The major change is to switch to Python 3 and PyQt5, and VTK 8.2, with 
+    as little change to the overall code as psosible.  So far, this has
+    been tested on Mac with Anaconda Python (custom version has been updated),
+    with conda 4.6.7(conda-build version: 3.4.1), python 3.6.8.final.0.
+    
+Version 1.2.0rc2 2019-04-02
+    Fix a bug creating an new configuration file when one does not exist.  
+
+Version 1.2.0rc2 2019-04-02
+    Mostly fix issues in Py2 to 3 conversion.  File dialogs now return a 
+    list even for single file operations.  Needed to pick list element as 0th
+    element in using single file selection. 
