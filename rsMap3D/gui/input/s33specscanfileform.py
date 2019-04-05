@@ -87,13 +87,13 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         if self.badPixelFileTxt.text() == EMPTY_STR:
             fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_BAD_PIXEL_TITLE, \
-                                               filter=BAD_PIXEL_FILE_FILTER)
+                                               filter=BAD_PIXEL_FILE_FILTER)[0]
         else:
             fileDirectory = os.path.dirname(str(self.badPixelFileTxt.text()))
             fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_BAD_PIXEL_TITLE, \
                                                filter=BAD_PIXEL_FILE_FILTER, \
-                                               directory = fileDirectory)
+                                               directory = fileDirectory)[0]
         if fileName != EMPTY_STR:
             self.badPixelFileTxt.setText(fileName)
             self.badPixelFileTxt.editingFinished.emit()
@@ -108,13 +108,13 @@ class S33SpecScanFileForm(SpecXMLDrivenFileForm):
         if self.flatFieldFileTxt.text() == EMPTY_STR:
             fileName = qtWidgets.QFileDialog.getOpenFileName(None, \
                                                SELECT_FLAT_FIELD_TITLE, \
-                                               filter=TIFF_FILE_FILTER)
+                                               filter=TIFF_FILE_FILTER)[0]
         else:
             fileDirectory = os.path.dirname(str(self.flatFieldFileTxt.text()))
             fileName = qtWidgets.QFileDialog.getOpenFileName(None, 
                                                SELECT_FLAT_FIELD_TITLE, 
                                                filter=TIFF_FILE_FILTER, \
-                                               directory = fileDirectory)
+                                               directory = fileDirectory)[0]
         if fileName != EMPTY_STR:
             self.flatFieldFileTxt.setText(fileName)
             self.flatFieldFileTxt.editingFinished.emit()

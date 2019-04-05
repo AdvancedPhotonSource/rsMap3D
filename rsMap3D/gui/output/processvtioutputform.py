@@ -51,13 +51,13 @@ class ProcessVTIOutputForm(AbstractOutputView):
         if self.outFileTxt.text() == EMPTY_STR:
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
-                                               filter=VTI_FILTER_STR))
+                                               filter=VTI_FILTER_STR)[0])
         else:
             inFileName = str(self.outFileTxt.text())
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=VTI_FILTER_STR, \
-                                               directory = inFileName))
+                                               directory = inFileName)[0])
         if fileName != EMPTY_STR:
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)
@@ -197,7 +197,7 @@ class ProcessVTIOutputForm(AbstractOutputView):
                              "The specified file is not writable")
         else:
             self.outputFileName = EMPTY_STR
-            self.setOutFileText(EMPTY_STR)
+            self.outFileTxt.setText(EMPTY_STR)
             self.setRunOK()
         logger.debug(METHOD_EXIT_STR)
 #     @Slot()

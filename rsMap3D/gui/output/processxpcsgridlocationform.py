@@ -60,13 +60,13 @@ class ProcessXpcsGridLocationForm(AbstractGridOutputForm):
         if self.outFileTxt.text() == "":
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
-                                               filter=self.outFilter))
+                                               filter=self.outFilter)[0])
         else:
             inFileName = str(self.outFileTxt.text())
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=self.outFilter, \
-                                               directory = inFileName))
+                                               directory = inFileName)[0])
         if fileName != "":
             if os.path.exists(os.path.dirname(str(fileName))):
                 self.outFileTxt.setText(fileName)

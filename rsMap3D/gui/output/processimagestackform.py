@@ -50,12 +50,12 @@ class ProcessImageStackForm(AbstractGridOutputForm):
         '''
         if self.outputDirTxt.text() == "":
             dirName = str(qtWidgets.QFileDialog.getExistingDirectory(None, 
-                                                              SAVE_DIR_STR))
+                                                              SAVE_DIR_STR)[0])
         else:
             curName = str(self.outputDirTxt.text())
             dirName = str(qtWidgets.QFileDialog.getExistingDirectory(None, 
                                                               SAVE_DIR_STR,
-                                                              directory = curName))
+                                                              directory = curName)[0])
             
         if dirName != "":
             if os.path.exists(str(dirName)):

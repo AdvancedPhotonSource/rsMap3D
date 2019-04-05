@@ -57,16 +57,16 @@ class ProcessPowderScanForm(AbstractOutputView):
         if self.outFileNameTxt == EMPTY_STR:
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                              SAVE_FILE_STR,
-                                                             filter=XYE_FILTER_STR))
+                                                             filter=XYE_FILTER_STR)[0])
         else:
             inFileName = str(self.outFileNameTxt.text())
             fileName = str(qtWidgets.QFileDialog.getSaveFileName(None,
                                                              SAVE_FILE_STR,
                                                              filter=XYE_FILTER_STR,
-                                                             directory=inFileName))
+                                                             directory=inFileName)[0])
         if fileName != EMPTY_STR:
             if os.path.exists(os.path.dirname(str(fileName))):
-                self.outFileTxt.setText(fileName)
+                self.outFileNameTxt.setText(fileName)
                 self.outputFileName = fileName
                 self.outFileNameTxt.editingFinished.emit()
             else:
@@ -83,7 +83,7 @@ class ProcessPowderScanForm(AbstractOutputView):
                                 "The specified file is not writable")
         else:
             self.outputFileName = EMPTY_STR
-            self.setOutFileText.emit(EMPTY_STR)
+            self.setFileName.emit(EMPTY_STR)
                 
     def _createDataBox(self):
         '''
@@ -182,7 +182,7 @@ class ProcessPowderScanForm(AbstractOutputView):
                 self.setFileName.emit(fileName)
         if not os.access(os.path.dirname(fileName), os.W_OK):
             self.outputFileName = EMPTY_STR
-            self.setOutFileText.emit(EMPTY_STR)
+            #self.setFileName.emit(EMPTY_STR)
         
         logger.debug(METHOD_EXIT_STR)
 
