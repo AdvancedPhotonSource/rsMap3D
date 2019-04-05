@@ -3,7 +3,6 @@
  See LICENSE file.
 '''
 import signal
-import PyQt5.QtGui as qtGui
 import PyQt5.QtCore as qtCore
 import PyQt5.QtWidgets as qtWidgets
  
