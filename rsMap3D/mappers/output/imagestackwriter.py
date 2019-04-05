@@ -13,11 +13,11 @@ except ImportError:
 STACK_OUTFILE_MERGE_STR = "%s_S%d"
 
 def exportTiffStack(qx, qy, qz, intensity, dim=2, filebase="slice"):
-    print qx.shape
-    print qy.shape
-    print qz.shape
-    print intensity.shape
-    print filebase
+    print (qx.shape)
+    print (qy.shape)
+    print (qz.shape)
+    print (intensity.shape)
+    print (filebase)
     if dim==0:
         for ind, val in enumerate(qx):
             im = Image.fromarray(np.squeeze(intensity[ind,:,:]))
@@ -59,9 +59,9 @@ class ImageStackWriter(AbstractGridWriter):
         
     def write(self):
         print ("Entering ImageStackWriter.write ")
-        print self.qx.shape
-        print self.qy.shape
-        print self.qz.shape
+        print (self.qx.shape)
+        print (self.qy.shape)
+        print (self.qz.shape)
         dimX = (self.qx[-1] - self.qx[0])/self.nx
         qxOut = np.linspace(self.qx[0], self.qx[0]+dimX*self.nx, dimX )
         dimY = (self.qy[-1] - self.qy[0])/self.ny
