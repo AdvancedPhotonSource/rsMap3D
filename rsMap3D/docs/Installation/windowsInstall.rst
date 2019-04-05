@@ -1,11 +1,9 @@
 Installation of rsMap3D on Windows Host
 =======================================
 These installation instructions assume the use of the Anaconda Python 
-distribution from Continuum Analytics.  For these instructions, Anaconda 2.5.0 and the packages provided by 
-Anaconda were used as much as possible.  At this time, the current version 
-available from anaconda.org is 2018.12.  The description written here was put 
-together using a fresh Anaconda install in order to provide as much information 
-as possible for the beginning user.
+distribution.  For these instructions, Anaconda 5.x (Images May be from 2.5) 
+and the packages provided by Anaconda were used as much as possible.  At 
+this time, the current version available from anaconda.org is 2018.12.
 
 In order to install run rsmMap3D the user will need to install Anaconda, and 
 install/check the install of a number of other python packages and then install:
@@ -16,20 +14,19 @@ install/check the install of a number of other python packages and then install:
 
 Installation and setup of Anaconda
 ----------------------------------
-`Anaconda <https://www.continuum.io/downloads>`_ is a completly free bundling 
-of Python by Continuum Analytics.  Note that although Continuum Analytics does 
-provide Anaconda at no cost, it does provide `some additional levels of support 
-<https://www.continuum.io/support-plan>`_ for a fee.  Anaconda supports 
-installation of both Python 2.7 and 3.x.  Note that although the Anaconda 
-download of for Python 2 & 3 are essentially the same it is recommended, 
-especially if you are installing for this application, that you install 
-the Python 3 version of Anaconda for more convenient installation.
-.
-To install Anaconda Python, go to the download site mentioned above you should 
-see a web page with a section that looks like
-
-.. image:: Images/anaconda_download_win.png
-     :scale: 30 %
+`Anaconda <https://www.anaconda.com/distribution/>`_ is a free bundling 
+of Python and over 1500 open source Python packages.  Support is available 
+through open community or, for more advanced solutions, through paid support
+from Anaconda, Inc.  Anaconda provides installers for both Python 2.7 
+and 3.x.  Each has a different version of Python as a default.  Note 
+that although these installations are essentially the same, it is 
+recommended that **if this your first install of Anaconda that you install the Python 3** 
+version of Anaconda for more convenience since rsMap now requires Python 3.  
+If you have already installed Python 2 version of Anaconda you can still 
+use Python 3, but will need to create a 
+`Python 3 environment,<https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`.  
+Working in a python environment is suggested in either case since this will
+allow separation of the requirements of different Python applications.
 
 These instructions assume that you will install the Python 2.7, 64-bit 
 graphical installer.  Launching this installer should present a window like:
@@ -55,20 +52,34 @@ the installation since Anaconda provides many common packages by default.
 
 
 For rsMap3D we need to make sure that the following packages are installed: 
-numpy, vtk, scipy, pillow and pyqt.  Installation can be verified by launching an 
-Anaconda prompt from Start->All Programs->Anaconda2 (64-bit).  We can verify 
+numpy, vtk, scipy, pillow and pyqt.  We can verify 
 package installation with 
 
 .. code-block:: none
 
    conda search <packagename> at the prompt.
 
-At this time, Anaconda 2.5.0 is being used and the following packages are 
-available and those not installed by default can be installed with the command
+If you previously installed Anaconda (you see older versions of packages 
+than listed here) you may need to update your distribution.
+At this time, Anaconda 5.x is being used and the following packages are 
+available and those not installed by default can be installed with the command.  
 
 .. code-block:: none
 
    conda install <packagename>
+
+As mentioned earlier, it is suggested to run rsMap3D using a *Python 
+environment*.  *Python environments* allow creating a separate space for 
+an application to run, separating it's package requirements from other 
+applications.  An example of this is the ability to run one application
+using Python 2 and another in Python 3.  Anaconda and it's conda package 
+manager allow creation of a *Python environment*.  More information on 
+managing environments in python can be found here:  
+https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+
+After installing Python 3 and optionally creating a *Python environment* 
+ensure that the following packages are installed.  If not, use the conda 
+install command listed above.
 
 Required packages
 
@@ -85,20 +96,13 @@ xrayutilities and spec2nexus (described below).
 Installing xrayutilities
 ------------------------
 Xrayutilities is a package written by Dominik Kriegner and Eugen Wintersberger. 
-We are presently using version 1.2.1 of xrayutilities.  Although the source 
-code for this package can be downloaded and built as a `tar.gz
-<http://sourceforge.net/projects/xrayutilities/>`_ although a precompiled 
-distribution for windows is provided as a `wheel file
-<https://confluence.aps.anl.gov/display/RSM/Binary+Distributions+of+Python+Packages>`_.
-This wheel is recommended since this file was compile using the Microsoft 
-Visual Studio 2008 compiler (the same used for compiling Anaconda Python).  
-
-
-This wheel file can be installed with 
+We are presently using version 1.2.1 of xrayutilities.  This package is 
+available for install from the pypi distribution site and can be installed
+using the pip command
 
 .. code-block:: none
 
-   pip install xrayutilities-<long version info>.whl
+   pip install xrayutilities
 
 
 
