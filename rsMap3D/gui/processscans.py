@@ -4,8 +4,9 @@
 '''
 import os
 
-import PyQt4.QtGui as qtGui
-import PyQt4.QtCore as qtCore
+import PyQt5.QtGui as qtGui
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
 
 from rsMap3D.mappers.gridmapper import QGridMapper
 from rsMap3D.gui.qtsignalstrings import CLICKED_SIGNAL, EDIT_FINISHED_SIGNAL
@@ -16,7 +17,7 @@ from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, X_STR, Y_STR
     CANCEL_STR, RUN_STR, Z_STR, VTI_FILTER_STR, SAVE_FILE_STR
 
 
-class ProcessScans(qtGui.QDialog):
+class ProcessScans(qtWidgets.QDialog):
     '''
     This class presents a form to select to start analysis.  This display
     allows switching between Grid map and pole figure.
@@ -27,7 +28,7 @@ class ProcessScans(qtGui.QDialog):
         '''
         super(ProcessScans, self).__init__(parent)
         self.Mapper = None
-        layout = qtGui.QVBoxLayout()
+        layout = qtWidgets.QVBoxLayout()
 
         self.dataBox = self._createDataBox()
         controlBox = self._createControlBox()
@@ -46,12 +47,12 @@ class ProcessScans(qtGui.QDialog):
         writable
         '''
         if self.outFileTxt.text() == "":
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, \
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, \
                                                SAVE_FILE_STR, \
                                                filter=VTI_FILTER_STR))
         else:
             inFileName = str(self.outFileTxt.text())
-            fileName = str(qtGui.QFileDialog.getSaveFileName(None, 
+            fileName = str(qtWidgets.QFileDialog.getSaveFileName(None, 
                                                SAVE_FILE_STR, 
                                                filter=VTI_FILTER_STR, \
                                                directory = inFileName))
@@ -61,7 +62,7 @@ class ProcessScans(qtGui.QDialog):
                 self.outputFileName = fileName
                 self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
             else:
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified directory does not exist")
@@ -69,7 +70,7 @@ class ProcessScans(qtGui.QDialog):
                 self.outputFileName = fileName
                 self.outFileTxt.emit(qtCore.SIGNAL(EDIT_FINISHED_SIGNAL))
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
@@ -84,16 +85,16 @@ class ProcessScans(qtGui.QDialog):
         '''
         Create box wih the GUI controls Run & Cancel
         '''
-        controlBox = qtGui.QGroupBox()
-        controlLayout = qtGui.QGridLayout()
+        controlBox = qtWidgets.QGroupBox()
+        controlLayout = qtWidgets.QGridLayout()
         row = 0
-        self.progressBar = qtGui.QProgressBar()
+        self.progressBar = qtWidgets.QProgressBar()
         controlLayout.addWidget(self.progressBar,row, 1)
 
-        self.runButton = qtGui.QPushButton(RUN_STR)
+        self.runButton = qtWidgets.QPushButton(RUN_STR)
         controlLayout.addWidget(self.runButton, row, 3)
 
-        self.cancelButton = qtGui.QPushButton(CANCEL_STR)
+        self.cancelButton = qtWidgets.QPushButton(CANCEL_STR)
         self.cancelButton.setDisabled(True)
 
         controlLayout.addWidget(self.cancelButton, row, 4)
@@ -114,47 +115,47 @@ class ProcessScans(qtGui.QDialog):
         '''
         Create Sub Layout for data gathering widgets
         '''
-        dataBox = qtGui.QGroupBox()
-        dataLayout = qtGui.QGridLayout()
+        dataBox = qtWidgets.QGroupBox()
+        dataLayout = qtWidgets.QGridLayout()
         row = 0       
 
-        label = qtGui.QLabel("Grid Dimensions")
+        label = qtWidgets.QLabel("Grid Dimensions")
         dataLayout.addWidget(label, row,0)
         row += 1
-        label = qtGui.QLabel(X_STR)
+        label = qtWidgets.QLabel(X_STR)
         dataLayout.addWidget(label, row,0)
-        self.xDimTxt = qtGui.QLineEdit()
+        self.xDimTxt = qtWidgets.QLineEdit()
         self.xDimTxt.setText("200")
         self.xDimValidator = qtGui.QIntValidator()
         self.xDimTxt.setValidator(self.xDimValidator)
         dataLayout.addWidget(self.xDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Y_STR)
+        label = qtWidgets.QLabel(Y_STR)
         dataLayout.addWidget(label, row,0)
-        self.yDimTxt = qtGui.QLineEdit()
+        self.yDimTxt = qtWidgets.QLineEdit()
         self.yDimTxt.setText("200")
         self.yDimValidator = qtGui.QIntValidator()
         self.yDimTxt.setValidator(self.yDimValidator)
         dataLayout.addWidget(self.yDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel(Z_STR)
+        label = qtWidgets.QLabel(Z_STR)
         dataLayout.addWidget(label, row,0)
-        self.zDimTxt = qtGui.QLineEdit()
+        self.zDimTxt = qtWidgets.QLineEdit()
         self.zDimTxt.setText("200")
         self.zDimValidator = qtGui.QIntValidator()
         self.zDimTxt.setValidator(self.zDimValidator)
         dataLayout.addWidget(self.zDimTxt, row,1)
         
         row += 1
-        label = qtGui.QLabel("Output File")
+        label = qtWidgets.QLabel("Output File")
         dataLayout.addWidget(label, row,0)
         self.outputFileName = ""
-        self.outFileTxt = qtGui.QLineEdit()
+        self.outFileTxt = qtWidgets.QLineEdit()
         self.outFileTxt.setText(self.outputFileName)
         dataLayout.addWidget(self.outFileTxt, row,1)
-        self.outputFileButton = qtGui.QPushButton(BROWSE_STR)
+        self.outputFileButton = qtWidgets.QPushButton(BROWSE_STR)
         dataLayout.addWidget(self.outputFileButton, row, 2)
 
         self.connect(self.outputFileButton, \
@@ -186,7 +187,7 @@ class ProcessScans(qtGui.QDialog):
                     curDir = os.path.realpath(os.path.curdir)
                     fileName = str(os.path.join(curDir, fileName))
                 else:
-                    message = qtGui.QMessageBox()
+                    message = qtWidgets.QMessageBox()
                     message.warning(self, \
                                  WARNING_STR, \
                                  "The specified directory \n" + \
@@ -197,7 +198,7 @@ class ProcessScans(qtGui.QDialog):
                 self.emit(qtCore.SIGNAL(SET_FILE_NAME_SIGNAL), fileName)
                 
             if not os.access(os.path.dirname(fileName), os.W_OK):
-                message = qtGui.QMessageBox()
+                message = qtWidgets.QMessageBox()
                 message.warning(self, \
                              WARNING_STR, \
                              "The specified file is not writable")
