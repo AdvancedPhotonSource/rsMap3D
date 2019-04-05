@@ -143,7 +143,7 @@ class RSMap3DConfigParser(ConfigParser):
                                "HostFile = worker_hosts\n"
                                "WorkerCount = 1\n"
                                )
-                workerCount = int(MPI_DEFAULT_WORKER_COUNT)
+                workerCount = MPI_DEFAULT_WORKER_COUNT
         except Exception as ex:
             workerCount = 1
             logger.exception(ex.message)
