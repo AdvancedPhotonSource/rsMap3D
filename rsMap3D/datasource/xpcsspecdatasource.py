@@ -88,7 +88,7 @@ class XPCSSpecDataSource(SpecXMLDrivenDataSource):
         """
         try:
             g3 = scan.G["G3"].strip().split()
-            g3 = np.array(map(float, g3))
+            g3 = np.array(list(map(float, g3)))
             ub = g3.reshape(-1,3)
             logger.debug("ub " +str(ub))
             return ub
