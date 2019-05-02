@@ -133,3 +133,8 @@ Version 1.2.0rc2 2019-04-02
     Mostly fix issues in Py2 to 3 conversion.  File dialogs now return a 
     list even for single file operations.  Needed to pick list element as 0th
     element in using single file selection. 
+    
+Version 1.2.0rc4 2019-04-02
+    Fix a problem with extracting the UB matrix from the scan file.  This 
+    was due to a change in Pythons built-in 'map' function.  This caused 
+    a problem using the output to create a numpy array.
