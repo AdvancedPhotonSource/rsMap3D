@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Sample instrument definition file for RSM program for sector 13-BMC -->
+<instForXrayutils xmlns="https://subversion.xray.aps.anl.gov/RSM/instForXrayutils">
+    <dateWritten>Thu, May 29, 2014</dateWritten>
+    <timeWritten>12:30:00.0 (-6)</timeWritten>
+
+    <!-- Define the sample circles as a series of axes.
+         number - is an index to define which circle.  1 is the outermost
+             circle working towards the innermost
+         specAngleName - is the name of the motor in spec file
+         the value (z-, y+, etc.) are the rotation axis/direction 
+             for the circle -->
+    <sampleCircles numCircles="4">
+       <circleAxis number="1" specMotorName="Mu" directionAxis="x+"/>
+       <circleAxis number="2" specMotorName="Theta" directionAxis="z-"/>
+       <circleAxis number="3" specMotorName="Chi" directionAxis="y+"/>
+       <circleAxis number="4" specMotorName="Phi" directionAxis="z-"/>
+    </sampleCircles>
+
+    <!-- Define the detector circles as a series of axes. -->
+    <detectorCircles numCircles="3">
+       <circleAxis number="1" specMotorName="Mu" directionAxis="x+"/>
+       <circleAxis number="2" specMotorName="Delta" directionAxis="z-"/>
+       <circleAxis number="3" specMotorName="Gamma" directionAxis="x+"/>
+    </detectorCircles>
+
+    <!-- define reference directions -->
+    <primaryBeamDirection>
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </primaryBeamDirection>
+    <inplaneReferenceDirection>
+        <axis number="1">0</axis>
+        <axis number="2">1</axis>
+        <axis number="3">0</axis>
+    </inplaneReferenceDirection>
+    <sampleSurfaceNormalDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">1</axis>
+    </sampleSurfaceNormalDirection>
+    <projectionDirection>
+        <axis number="1">0</axis>
+        <axis number="2">0</axis>
+        <axis number="3">1</axis>
+    </projectionDirection>
+    
+    <!-- monitor and filter transmission corrections -->
+    <monitorName scaleFactor="1000000">I0</monitorName>
+    <filterName scaleFactor="1">trans</filterName>
+</instForXrayutils>

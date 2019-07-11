@@ -138,3 +138,9 @@ Version 1.2.0rc4 2019-04-02
     Fix a problem with extracting the UB matrix from the scan file.  This 
     was due to a change in Pythons built-in 'map' function.  This caused 
     a problem using the output to create a numpy array.
+    
+Version 1.2.1  2019-07-11
+    Finalize 1.2 release & add a function to copy one motor columns data to another
+    column.  This is useful when both sample and detector have the same motor.  
+    Cannot include the same motor twice.  This allows setting up a dummy motor 
+    to copy another array into it.
