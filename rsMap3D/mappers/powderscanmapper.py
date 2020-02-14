@@ -193,9 +193,9 @@ class PowderScanMapper():
                     logger.info("Pass Number %d of %d" % \
                                 (thisPass+1, nPasses))
                     imageToBeUsedInPass = np.array(imageToBeUsed[scan])
-                    imageToBeUsedInPass[:thisPass*numImages/nPasses] = \
+                    imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = \
                         False
-                    imageToBeUsedInPass[(thisPass+1)*numImages/nPasses] = False
+                    imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
                     qx, qy, qz, intensity = self.dataSource.rawMap((scan,), \
                                                        mask=imageToBeUsedInPass)
                     Q = np.sqrt(qx**2 + qy**2 + qz**2)
