@@ -268,6 +268,9 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.scanType = {}
             self.progress = 0
             self.progressInc = 1
+            #======= ZZ, 2020/02/19, add initialization 
+            self.progressMax = 100
+            #=======
             # Zero the progress bar at the beginning.
             if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
