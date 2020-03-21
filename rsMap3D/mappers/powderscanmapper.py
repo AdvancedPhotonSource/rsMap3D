@@ -65,7 +65,7 @@ class PowderScanMapper():
         '''
         """ 
         #===== ZZ 2020/02/19
-        # Now do not one map per scan here, instead, 
+        # Now do not just do one map per scan here, instead, 
         #  at this level, one map per group of scans
         for scan in self.dataSource.getAvailableScans():
             self.currentMapScans = [scan,]
@@ -82,7 +82,10 @@ class PowderScanMapper():
             self.gridWriter.setData(x, y, e)
             self.gridWriter.setFileInfo(self.getFileInfo())
             self.gridWriter.write()
-            
+        if self.plotResults:
+            self.gridWriter.setData(x, y, e)
+            self.gridWriter.setFileInfo(self.getFileInfo())
+            self.gridWriter.plot()
         
         
     def getFileInfo(self):
@@ -96,7 +99,9 @@ class PowderScanMapper():
         return (str(os.path.join(self.dataSource.projectDir, self.dataSource.projectName)),
                 self.currentMapScans[0],
                 numBins,
-                self.outputFileName)
+                self.outputFileName,
+                self.dataCoord,
+                self.yScaling) #===== carry over the xlabel and y scanling, ZZ 
         
     def getXCoordMax(self):
         '''

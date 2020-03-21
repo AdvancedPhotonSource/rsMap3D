@@ -36,24 +36,24 @@ class PowderScanWriter():
         if ((fileInfo is None) or (len(fileInfo) ==0) ):
             raise ValueError(self.whatFunction() +
                              "passed no filename information." +
-                             "requires a tuple with four members:\n" +
+                             "requires a tuple with six members:\n" +
                              "1. project filename so that a filename can be" +
                              "constructed if filename is blank\n" +
                              "2. User filename\n" + 
-                             "3 number of datapints" +
-                             "4. outputFileName" +
-                             "5. x-axis label" +
+                             "3. number of datapints\n" +
+                             "4. outputFileName\n" +
+                             "5. x-axis label\n" +
                              "6. y-axis lin/log") #===== ZZ
         elif len(fileInfo) != 6:
             raise ValueError(self.whatFunction() +
                              "passed no filename information." +
-                             "requires a tuple with four members:\n" +
+                             "requires a tuple with six members:\n" +
                              "1. project filename so that a filename can be" +
                              "constructed if filename is blank\n" +
                              "2. User filename\n" + 
-                             "3 number of datapints" +
-                             "4. outputFileName" +
-                             "5. x-axis label" +
+                             "3. number of datapints\n" +
+                             "4. outputFileName\n" +
+                             "5. x-axis label\n" +
                              "6. y-axis lin/log") #===== ZZ
         self.fileInfo.append(fileInfo[0])
         self.fileInfo.append(fileInfo[1])
