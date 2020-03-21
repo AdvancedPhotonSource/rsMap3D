@@ -25,6 +25,19 @@ Example:
                    ['113-114,116',],
                ]
 
+  slicesNotUsedLists = [
+                [ # per spec file
+                    [ # per powder curve
+                        ['73', '0-10'],  # per scan, with the format of ['scan_num', 'point_to_be_removed']
+                    ],
+                    [ # curve with scan 74 & 76 together:
+                        [ '74', ''], ['76', '0-5'] # scan 74 no clice removed; scan 76, slice 0-5 removed
+                    ],
+                    [ # curve with scan 113, 114, and 116 together
+                        ['113-114, 116', '10-20'] # all scans in this set with slices 10-20 removed
+                    ],
+                ],
+            ]            
   It will read in 3 specfiles, 
    for the file "specfile_1.spec", processes scan 73; and generates 1 file:
        ..._S073.xye : scan #73
