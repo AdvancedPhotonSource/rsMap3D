@@ -223,7 +223,7 @@ class PowderScanMapper():
                     imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = \
                         False
                     imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
-                    qx, qy, qz, intensity = self.dataSource.rawMap((scan,), \
+                    qx, qy, qz, intensity = self.dataSource.rawmap((scan,), \
                                                        mask=imageToBeUsedInPass)
                     Q = np.sqrt(qx**2 + qy**2 + qz**2)
                     coordsX
