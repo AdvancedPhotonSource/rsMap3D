@@ -226,7 +226,7 @@ class PowderScanMapper():
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), \
                                                        mask=imageToBeUsedInPass)
                     Q = np.sqrt(qx**2 + qy**2 + qz**2)
-                    coordsX
+                    coordsX = None
                     if self.dataCoord == X_COORD_OPTIONS[0]:
                         coordsX = np.rad2deg(np.arcsin((Q*wavelen)/
                                                      (4.0*np.pi))*2.0)
