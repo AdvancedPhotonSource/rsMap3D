@@ -88,7 +88,7 @@ scanLists = [
 slicesNotUsedLists = [
                 [ # per spec file
                     [ # per powder curve
-                        ['290', '0-50'],  # per scan, with the format of ['scan_num', 'point_to_be_removed']
+                        ['290', '0-20, 190-200'],  # per scan, with the format of ['scan_num', 'point_to_be_removed']
                         #['76-78', '1'],
                     ],
                 ],
@@ -280,9 +280,12 @@ for (specfile, scan_list, slicesNotUsed_list) in zip(specFileList, scanLists, sl
             slice_nums = slice_range.list()
             for onescan in scan_nums:
                 if onescan in scans:
-                    logger.info('      Points #%s in scans #%s ignored.  ' % (str(slice_nums), str(scan_nums)) )
+                    logger.info('      Points #%s in scans #%s ignored.  ' % \
+                        (str(slicesNotUsedinScan[1]), str(slicesNotUsedinScan[0])) )
                     for slice in slice_nums:
-                        ds.imageToBeUsed[onescan][slice] = False
+                        my_len = len(ds.imageToBeUsed[onescan])
+                        if slice in range(-my_len, my_len):
+                            ds.imageToBeUsed[onescan][slice] = False
                         #logger.info('       slice # %d ignored' % slice)
                     
         logger.info('  --------------------------------')
