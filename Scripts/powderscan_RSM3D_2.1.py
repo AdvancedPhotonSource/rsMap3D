@@ -14,6 +14,10 @@ List of scans or scan-ranges that should be processed. Each list item is
   within list elements are combined in a single data file. List items can be
   integers, strings, string ranges, or lists.
 
+Slices_not_used lists the slices (points) in any scan that will not be used.
+  Each File should have a separate list, where the item itself a lists of 2 string items:
+  the scan number(s) and the slices to be removed.
+
 Example:  
 
   specFileList = [ "specfile_1.spec", 
@@ -28,21 +32,14 @@ Example:
                ]
 
   slicesNotUsedLists = [
-                [ # per spec file
-                    [ # per powder curve
-                        ['73', '0-10'],  # per scan, with the format of ['scan_num', 'point_to_be_removed']
-                    ],
-                    [ # curve with scan 74 & 76 together:
-                        [ '74', ''], ['76', '0-5'] # scan 74 no clice removed; scan 76, slice 0-5 removed
-                    ],
-                    [ # curve with scan 113, 114, and 116 together
-                        ['113-114, 116', '10-20'] # all scans in this set with slices 10-20 removed
-                    ],
-                    [ # curve for scan #113
-                    ],
+                [ # per spec file, list of the slices to be removed from any scans.
+                    ['73', '0-10'], # per scan, with the format of ['scan_num', 'point_to_be_removed']
+                    ['74', ''],     # scan 74 no slice removed; -- this one is not needed other than a place holder.
+                    ['76', '0-5']   # scan 76, slices [0:6] removed
+                    ['113-114, 116', '-10-20'] # scans 113, 114, & 116, all with slices [-10 : -1], and [0:21] removed
                 ],
             ]            
-  It will read in 3 specfiles, 
+  It will read in 4 specfiles, 
    for the file "specfile_1.spec", processes scan 73; and generates 1 file:
        ..._S073.xye : scan #73
    for the file "specfile_2.spec", generates 2 files:
@@ -97,16 +94,16 @@ specFileList = [
                ]    
 scanLists = [
               #['290', '291'],  # per spec file
-              range(290, 293), # or use range() in place of a list
+              range(290, 293), # or use range() in place of a list, this one will get one curve per scan;
+              #[range(290, 293)], # this one, will get one curve with 3 scans together.  
             ]
-slicesNotUsedLists = [[]]
-'''                [ # per spec file
-                    [ # per powder curve
-                        #['290', '-10-20'],  # per scan, with the format of ['scan_num', 'point_to_be_removed']
-                    ],
+slicesNotUsedLists = [
+                [ # per spec file, list of scans with slices to be removed down here.  
+                    #['290', '-10-20'],  # with the format of ['scan_num', 'point_to_be_removed']
+                    #['291', '-20-20'], 
                 ],
             ]     
-'''             
+             
 #^^^^^^^^^^^^^^^^^^^^^^
 
 #detectorSettings
@@ -240,14 +237,36 @@ for (specfile, scan_list, slicesNotUsed_list) in zip_longest(specFileList, scanL
     logger.info('  Starting SPEC file : %s' % (specfile) )
     logger.info('    Scans            : %s' % (scan_list) )
 
+    # generate the scan_list from a number/string/range
+    if not isinstance(scan_list, list):
+        if isinstance(scan_list, (int, float)):
+            scan_list = [int(scan_list)]
+        elif isinstance(scan_list, str):
+            scan_range = srange(scan_list)
+            scan_list = scan_range.list()
+        elif isinstance(scan_list, range):
+            scan_list = list(scan_list)
+
+    # generate the slicesNotUsed_list from the given list/strings
+    slicesNotUsed_scanN = []
+    slicesNotUsed_sliceN = []
+    for slicesNotUsed_oneset in slicesNotUsed_list:
+        scan_range = srange(slicesNotUsed_oneset[0])
+        scan_num = scan_range.list()
+        slice_range = srange(slicesNotUsed_oneset[1])
+        slice_nums = slice_range.list()
+        if slice_nums:
+            slicesNotUsed_scanN.extend( scan_num )
+            slicesNotUsed_sliceN.append( slice_nums * len(scan_num) )
+
     num_curves = len(scan_list)
     progress = 0
     # Inner loop here, iterate over set of scans, one curve/file per set
-    
-    for (scans, slicesNotUsed) in zip_longest(scan_list, slicesNotUsed_list):
+    #for (scans, slicesNotUsed) in zip_longest(scan_list, slicesNotUsed_list):
+    for scans in scan_list:
         logger.info('  --------------------------------')
         logger.info('      Reading scans # %s' % (str(scans)) )
-        logger.info('        Skipped slices : %s' % (str(slicesNotUsed)) )
+        #logger.info('        Skipped slices : %s' % (str(slicesNotUsed)) )
         
         # generate the scanlist for current curve/file
         #  Note this part is because I want to use the range() function for the input
@@ -290,26 +309,20 @@ for (specfile, scan_list, slicesNotUsed_list) in zip_longest(specFileList, scanL
         
         # Adding here the section to handle the slices that are not going to be used
         #  in each scan -- in working progress, ZZ 2020/03/20
-        if slicesNotUsed is not None:
-            for slicesNotUsedinScan in slicesNotUsed:
-                scan_range = srange(slicesNotUsedinScan[0])
-                scan_nums = scan_range.list()
-                slice_range = srange(slicesNotUsedinScan[1])
-                slice_nums = slice_range.list()
-                for onescan in scan_nums:
-                    if onescan in scans:
-                        logger.info('      Points #%s in scans #%s ignored.  ' % \
-                            (str(slicesNotUsedinScan[1]), str(slicesNotUsedinScan[0])) )
-                        for slice in slice_nums:
-                            my_len = len(ds.imageToBeUsed[onescan])
-                            if slice in range(-my_len, my_len):
-                                ds.imageToBeUsed[onescan][slice] = False
-                            #logger.info('       slice # %d ignored' % slice)
-        else:
-            logger.info('       No slice removed. ')
-                        
+        for onescan in scans:
+            if onescan in slicesNotUsed_scanN:
+                myindex = slicesNotUsed_scanN.index(onescan)
+                slice_list = slicesNotUsed_sliceN[myindex]
+                logger.info('      Points #%s in scan #%s ignored.  ' % \
+                        (str(slice_list), str(onescan)) )
+                my_len = len(ds.imageToBeUsed[onescan])
+                for slice in slice_list:
+                    if slice in range(-my_len, my_len):
+                        ds.imageToBeUsed[onescan][slice] = False
+            else:
+                logger.info('       No slice removed. ')
         logger.info('  --------------------------------')
-        
+                        
         # calling powder scan Mapper here.
         #  Note here the plot part does not do anything yet.
         powderMapper = PowderScanMapper(ds,
