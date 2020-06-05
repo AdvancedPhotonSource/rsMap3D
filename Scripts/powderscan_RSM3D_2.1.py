@@ -85,16 +85,16 @@ from itertools import zip_longest
 #projectDir = os.path.join("/home/33id/", "data/tung/20200131/SHK/")
 # for Windows system:
 #projectDir = os.path.join("Z:\\", "data\\tung\\20200131\\SHK\\")      
-projectDir = os.path.join("C:\\", "work\\testground\\rsm3d_test\\CuCrCo\\")      
+projectDir = os.path.join("C:\\work\synrun\\", "20180701_33IDD_MaBeihai\\Cu_C\\")      
 #^^^^^^^^^^^^^^^^^^^^^^
 
 #vvvvvvvvvvvvvvvvvvvvvv
 specFileList = [
-                "100-6-CuCrCo_1.spec",
+                "802-25-5_1.spec",
                ]    
 scanLists = [
               #['290', '291'],  # per spec file
-              range(290, 293), # or use range() in place of a list, this one will get one curve per scan;
+              ['1'], # or use range() in place of a list, this one will get one curve per scan;
               #[range(290, 293)], # this one, will get one curve with 3 scans together.  
             ]
 slicesNotUsedLists = [
@@ -115,7 +115,7 @@ bin = [1,1]
 # set explicitly since the images are cropped by ROI
 # COMMENT OUT roi or set to none to simply grab size from the calib file
 #vvvvvvvvvvvvvvvvvvvvvv
-roi = [5, 480, 5, 185]
+roi = [5, 480, 5, 190]
 #^^^^^^^^^^^^^^^^^^^^^^
 
 # Set the x-axis properties
@@ -123,13 +123,13 @@ roi = [5, 480, 5, 185]
 data_coordinate = 'tth'
 # Use x_min = None or x_max = None to automatically find data set bounds
 #vvvvvvvvvvvvvvvvvvvvvv
-x_min_0 = 8
-x_max_0 = 52
+x_min_0 = 15
+x_max_0 = 75
 #^^^^^^^^^^^^^^^^^^^^^^
 
 # Histogram step size in units of the x-axis (q or tth)
 #vvvvvvvvvvvvvvvvvvvvvv
-x_step = 0.02
+x_step = 0.05
 #^^^^^^^^^^^^^^^^^^^^^^
 
 #------------------
@@ -190,10 +190,10 @@ from rsMap3D.mappers.powderscanmapper import PowderScanMapper
 from rsMap3D.mappers.output.powderscanwriter import PowderScanWriter
 
 def updateDataSourceProgress(value1, value2):
-    logger.info("\t\tDataSource Progress %s%%/%s%%" % (value1, value2))
+    logger.info("\t\tDataLoading Progress %.3f%%/%s%%" % (value1, value2))
 
 def updateMapperProgress(value1):
-    logger.info("\t\tMapper Progress -- Current Curve %s%%" % (value1))
+    logger.info("\t\tMapper Progress -- Current Curve %.3f%%" % (value1))
 
 #=====================================
 # Set ROI or get info from the config
@@ -206,8 +206,8 @@ logger.info('  ROI: %s ' % roi)
 #=====================================
 # assign the configuration files
 configDir = projectDir
-instConfigName = os.path.join(configDir, "33IDD_kappa.xml")
-detectorConfigName = os.path.join(configDir, "33IDD_Pilatus_kappa.xml")
+instConfigName = os.path.join(configDir, "33IDD_xrim.xml")
+detectorConfigName = os.path.join(configDir, "33IDD_Pilatus_xrim.xml")
 badPixelFile = os.path.join(configDir, "badpixels_dp3.txt")
 #flatfieldFile = os.path.join(configDir, "flatfield_allone.tif")
 flatfieldFile = None

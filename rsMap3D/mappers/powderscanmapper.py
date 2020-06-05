@@ -78,13 +78,13 @@ class PowderScanMapper():
         self.currentMapScans =  self.dataSource.getAvailableScans()
         x, y, e = self.processMap()
 
-        if self.writeXyeFile:
+        if self.writeXyeFile or self.plotResults:
             self.gridWriter.setData(x, y, e)
             self.gridWriter.setFileInfo(self.getFileInfo())
+          
+        if self.writeXyeFile:
             self.gridWriter.write()
         if self.plotResults:
-            self.gridWriter.setData(x, y, e)
-            self.gridWriter.setFileInfo(self.getFileInfo())
             self.gridWriter.plot()
         
         
