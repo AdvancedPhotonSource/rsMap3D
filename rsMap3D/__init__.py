@@ -1,3 +1,3 @@
 # import gui
 # import datasource
-__version__ = '1.2.2z'
+__version__ = '1.2.3z'
