@@ -74,7 +74,7 @@ class InstForXrayutilitiesReader():
         if circles is None:
             raise InstConfigException("Instrument configuration has no " +\
                                       "Detector Circles")
-        return self.root.find(DETECTOR_CIRCLES).getchildren()
+        return list(self.root.find(DETECTOR_CIRCLES))
         
     def getDetectorCircleNames(self):
         '''
@@ -347,7 +347,7 @@ class InstForXrayutilitiesReader():
         if circles is None:
             raise InstConfigException("Instrument configuration has no Sample" +
                                       " Circles")
-        return circles.getchildren()
+        return list(circles)
 
     def getSampleCircleNames(self):
         '''
