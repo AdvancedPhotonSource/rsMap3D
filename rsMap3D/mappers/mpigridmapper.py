@@ -3,12 +3,24 @@
  See LICENSE file.
 '''
 
+import time
+from xml.dom.expatbuilder import InternalSubsetExtractor
 import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 import numpy as np
 from xrayutilities.exception import InputError
 import logging
+from mpi4py.futures import MPICommExecutor
 logger = logging.getLogger(__name__)
+import datetime
+
+
+def doPassExt(thisPass):
+    global _currMapper
+    print(f'Started_map {_currMapper.mpi_comm.Get_rank()} {datetime.datetime.now()}')
+    result = _currMapper.doPass(thisPass)
+    print(f'Ended map{_currMapper.mpi_comm.Get_rank()} {datetime.datetime.now()}')
+    return result
 
 class MPIQGridMapper(AbstractGridMapper):
     '''
@@ -17,7 +29,7 @@ class MPIQGridMapper(AbstractGridMapper):
     def __init__(self, dataSource, \
                  outputFileName, \
                  outputType, \
-                 mpi_rank, \
+                 mpi_comm, \
                  nx=200, ny=201, nz=202, \
                  transform = None, \
                  gridWriter = None, 
@@ -29,7 +41,7 @@ class MPIQGridMapper(AbstractGridMapper):
                  gridWriter = gridWriter, \
                  **kwargs)
         self.outputType = outputType
-        self.mpi_rank = mpi_rank
+        self.mpi_comm = mpi_comm 
         
     def getFileInfo(self):
         '''
@@ -46,6 +58,7 @@ class MPIQGridMapper(AbstractGridMapper):
     '''
     #@profile
     def processMap(self, **kwargs):
+        global _currMapper
         """
         read ad frames and grid them in reciprocal space
         angular coordinates are taken from the spec file
@@ -88,36 +101,53 @@ class MPIQGridMapper(AbstractGridMapper):
                         self.progressUpdater(progress)
                 else:
                     nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
-                    
-                    for thisPass in range(nPasses):
-                        imageToBeUsedInPass = np.array(imageToBeUsed[scan])
-                        imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = False
-                        imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
-                        
-                        if True in imageToBeUsedInPass:
-                            kwargs['mask'] = imageToBeUsedInPass
-                            qx, qy, qz, intensity = \
-                                self.dataSource.rawmap((scan,), **kwargs)
-                            # convert data to rectangular grid in reciprocal space
-                            try:
-                                gridder(qx, qy, qz, intensity)
-                        
+
+                    passesList = list(range(nPasses))
+
+                    self.pass_info = (kwargs, imageToBeUsed, scan, numImages, nPasses)
+
+                    _currMapper = self
+                    with MPICommExecutor(self.mpi_comm, root=0) as executor:
+                        if executor is not None:
+                            for grid_data in executor.map(doPassExt, passesList):
+                                if grid_data == -1:
+                                    continue
+
+                                qx, qy, qz, intensity = grid_data
+                                try:
+                                    print(f'Starting Gridding {datetime.datetime.now()}')
+                                    gridder(qx, qy, qz, intensity)
+                            
+                                    progress += 1.0/nPasses* 100.0
+                                    if self.progressUpdater is not None:
+                                        self.progressUpdater(progress)
+                                except InputError as ex:
+                                    print ("Wrong Input to gridder")
+                                    print ("qx Size: " + str( qx.shape))
+                                    print ("qy Size: " + str( qy.shape))
+                                    print ("qz Size: " + str( qz.shape))
+                                    print ("intensity Size: " + str(intensity.shape))
+                                    raise InputError(ex)
+                            else:
                                 progress += 1.0/nPasses* 100.0
                                 if self.progressUpdater is not None:
                                     self.progressUpdater(progress)
-                            except InputError as ex:
-                                print ("Wrong Input to gridder")
-                                print ("qx Size: " + str( qx.shape))
-                                print ("qy Size: " + str( qy.shape))
-                                print ("qz Size: " + str( qz.shape))
-                                print ("intensity Size: " + str(intensity.shape))
-                                raise InputError(ex)
-                        else:
-                            progress += 1.0/nPasses* 100.0
-                            if self.progressUpdater is not None:
-                                self.progressUpdater(progress)
-            self.progressUpdater(100.0)
+                                        
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
+    
+
+    def doPass(self, thisPass):
+        (kwargs, imageToBeUsed, scan, numImages, nPasses) = self.pass_info
+
+        imageToBeUsedInPass = np.array(imageToBeUsed[scan])
+        imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = False
+        imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
+        
+        if True in imageToBeUsedInPass:
+            kwargs['mask'] = imageToBeUsedInPass
+            return self.dataSource.rawmap((scan,), **kwargs)
+        
+        return -1
     
     def doMap(self):
         '''

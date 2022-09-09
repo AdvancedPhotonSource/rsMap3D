@@ -37,8 +37,9 @@ def updateMapperProgress(value1):
 with open('config.json', 'r') as config_f:
     config = json.load(config_f)
 
-with open('time.log', 'a') as time_log:
-    time_log.write(f'Start: {datetime.datetime.now()}\n')
+if mpi_rank == 0:
+    with open('time.log', 'a') as time_log:
+        time_log.write(f'Start: {datetime.datetime.now()}\n')
 
 
 #
@@ -111,8 +112,9 @@ print("imageToBeUsed %s" % imageToBeUsed)
 imageSize = np.prod(ds.getDetectorDimensions())
 
 gridMapper = MPIQGridMapper(ds,
-                            outputFileName, 
-                            outputType=BINARY_OUTPUT,
+                            outputFileName,
+                            BINARY_OUTPUT,
+                            mpi_comm, 
                             transform=UnityTransform3D(),
                             gridWriter=VTIGridWriter(),
                             appConfig=appConfig)
@@ -120,5 +122,6 @@ gridMapper = MPIQGridMapper(ds,
 gridMapper.setProgressUpdater(updateMapperProgress)
 gridMapper.doMap()
 
-with open('time.log', 'a') as time_log:
-    time_log.write(f'End: {datetime.datetime.now()}\n')
+if mpi_rank == 0:
+    with open('time.log', 'a') as time_log:
+        time_log.write(f'End: {datetime.datetime.now()}\n')
