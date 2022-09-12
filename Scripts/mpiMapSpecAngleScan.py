@@ -107,7 +107,7 @@ ds.setProgressUpdater(updateDataSourceProgress)
 ds.loadSource(mapHKL=mapHKL)
 ds.setRangeBounds(ds.getOverallRanges())
 imageToBeUsed = ds.getImageToBeUsed()
-print("imageToBeUsed %s" % imageToBeUsed)
+#print("imageToBeUsed %s" % imageToBeUsed)
 #    wavelen = ENERGY_WAVELENGTH_CONVERT_FACTOR/ds.getIncidentEnergy()[scans[0]]
 imageSize = np.prod(ds.getDetectorDimensions())
 
