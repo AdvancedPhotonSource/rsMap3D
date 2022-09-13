@@ -105,7 +105,21 @@ ds = Sector33SpecDataSource(projectDir, specName, specExt,
                             appConfig=appConfig)
 ds.setCurrentDetector(detectorName)
 ds.setProgressUpdater(updateDataSourceProgress)
-ds.loadSource(mapHKL=mapHKL)
+
+loadScans = mpi_rank == 0
+
+ds.loadSource(mapHKL=mapHKL, loadScans=loadScans)
+
+if mpi_rank == 0:
+    scanData = ds.exportScans()
+else:
+    scanData = None
+
+scanData = mpi_comm.bcast(scanData, root=0)
+
+if mpi_rank != 0:
+    ds.importScans(scanData)
+
 ds.setRangeBounds(ds.getOverallRanges())
 imageToBeUsed = ds.getImageToBeUsed()
 #print("imageToBeUsed %s" % imageToBeUsed)

@@ -221,7 +221,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         
         return areaData
 
-    def loadSource(self, mapHKL=False):
+    def loadSource(self, mapHKL=False, loadScans=True):
         '''
         This method does the work of loading data from the files.  This has been
         split off from the constructor to allow this to be threaded and later 
@@ -250,9 +250,14 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         if not (self.flatFieldFile is None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
         # Load scan information from the spec file
+
+        self.sd = SpecDataFile(self.specFile)
+        self.mapHKL = mapHKL
+
+        if not loadScans:
+            return
+
         try:
-            self.sd = SpecDataFile(self.specFile)
-            self.mapHKL = mapHKL
             maxScan = int(self.sd.getMaxScanNumber())
             logger.debug("Number of Scans" +  str(maxScan))
             if self.scans  is None:
@@ -323,6 +328,31 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         self.availableScanTypes = set(self.scanType.values())
 
         
+    def exportScans(self):
+        """
+        Returns loaded data as an MPI-safe object 
+        """
+        return {
+            'scans': self.scans,
+            'imageBounds': self.imageBounds,
+            'imageToBeUsed': self.imageToBeUsed,
+            'availableScans':self.availableScans,
+            'incidentEnergy': self.incidentEnergy,
+            'ubMatrix':self.ubMatrix,
+            'availableScanTypes': self.availableScanTypes 
+        }
+    
+    def importScans(self, scanData):
+        """
+        Imports exported scan data from another data source via an MPI-safe object.
+        """
+        self.scans = scanData['scans']
+        self.imageBounds = scanData['imageBounds']
+        self.imageToBeUsed = scanData['imageToBeUsed']
+        self.availableScans = scanData['availableScans']
+        self.incidentEnergy = scanData['incidentEnergy']
+        self.ubMatrix = scanData['ubMatrix']
+        self.availableScanTypes = scanData['availableScanTypes']
     
     def to_bool(self, value):
         """
