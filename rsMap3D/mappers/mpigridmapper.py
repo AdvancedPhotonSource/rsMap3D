@@ -16,6 +16,8 @@ from datetime import datetime
 import sys
 import pickle
 
+SCAN_WIN_SIZE = 4
+
 
 class MPIQGridMapper(AbstractGridMapper):
     '''
@@ -84,28 +86,41 @@ class MPIQGridMapper(AbstractGridMapper):
         # Init gridder buffer on proc 0
         if self.mpi_rank == 0:
             gridder_pickle = pickle.dumps(gridder)
-            win_size = len(gridder_pickle) * 2
+            win_size = round(len(gridder_pickle) * 1.5)
         else:
             win_size = 0
 
-        win = MPI.Win.Allocate(win_size, comm=self.mpi_comm)
+        gridderWin = MPI.Win.Allocate(win_size, comm=self.mpi_comm)
 
         if self.mpi_rank == 0:
-            win.Lock(rank=0)
-            win.Put([gridder_pickle, MPI.BYTE], target_rank=0)
-            win.Unlock(rank=0)
+            gridderWin.Lock(rank=0)
+            gridderWin.Put([gridder_pickle, MPI.BYTE], target_rank=0)
+            gridderWin.Unlock(rank=0)
 
         # Sync forced here
         gridder_buff_size = self.mpi_comm.bcast(win_size, root=0)
 
 
         scans = self.dataSource.getAvailableScans()
-        scans_split = np.array_split(scans, self.mpi_comm.size)
-        ind_scans= self.mpi_comm.scatter(scans_split, root=0) 
-        print(ind_scans)
 
-        # TODO: SET TO SCANS
-        for scan in ind_scans: 
+        if self.mpi_rank == 0:
+            scanWinSize = SCAN_WIN_SIZE
+        else:
+            scanWinSize = 0
+        
+        scanWin = MPI.Win.Allocate(scanWinSize, comm=self.mpi_comm)
+
+        scanIdx = self.mpi_rank
+        if self.mpi_rank == 0:
+            scanWin.Lock(rank=0)
+            scanWin.Put([self.mpi_comm.size.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
+            scanWin.Unlock(rank=0)
+        
+        self.mpi_comm.Barrier()
+
+        while scanIdx < len(scans):
+            print(f'Starting Scan {scanIdx} of {len(scans)}')
+            scan = scans[scanIdx]
 
             if True in imageToBeUsed[scan]:
                 imageSize = self.dataSource.getDetectorDimensions()[0] * \
@@ -113,23 +128,39 @@ class MPIQGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
+                    print(f'R: {self.mpi_rank} Mapping {datetime.now():%M:%S}')
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
 
+                    try:
+                        
+                        gridder_buff = bytearray(gridder_buff_size)
+                        gridderWin.Lock(rank=0)
+                        print(f'R: {self.mpi_rank} Acquired Gridder {datetime.now():%M:%S}')
+                        gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
+                        print(f'Gridder Loaded {datetime.now():%M:%S}')
+                        gridder = pickle.loads(gridder_buff)
+                        gridder(qx, qy, qz, intensity)
+                        print(f'R: {self.mpi_rank} Gridding Complete {datetime.now():%M:%S}')
+                        gridder_buff = pickle.dumps(gridder)
+                        gridderWin.Put([gridder_buff, MPI.BYTE], target_rank=0)
+                        print(f'Gridder Sent {datetime.now():%M:%S}')
+                        print(f'R: {self.mpi_rank} Released Complete {datetime.now():%M:%S}\n\n')
+                        gridderWin.Unlock(rank=0)
+                
+                    except InputError as ex:
+                        print ("Wrong Input to gridder")
+                        print ("qx Size: " + str( qx.shape))
+                        print ("qy Size: " + str( qy.shape))
+                        print ("qz Size: " + str( qz.shape))
+                        print ("intensity Size: " + str(intensity.shape))
+                        raise InputError(ex)
 
-                    raise ValueError("TODO: REMOVE FOR TESTING")
-                    gridder(qx, qy, qz, intensity)
                     
                     progress += 100
                     if self.progressUpdater is not None:
                         self.progressUpdater(progress)
                 else:
                     nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
-
-
-                    passes = np.array_split(list(range(nPasses)), self.mpi_comm.size)
-                    ind_passes = self.mpi_comm.scatter(passes, root=0) 
-                    
-                    # CURRENTLY SET TO SCANS
                     for thisPass in range(nPasses):
                         imageToBeUsedInPass = np.array(imageToBeUsed[scan])
                         imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = False
@@ -143,18 +174,18 @@ class MPIQGridMapper(AbstractGridMapper):
                             try:
                                 
                                 gridder_buff = bytearray(gridder_buff_size)
-                                win.Lock(rank=0)
+                                gridderWin.Lock(rank=0)
                                 print(f'R: {self.mpi_rank} Acquired Gridder {datetime.now():%M:%S}')
-                                win.Get([gridder_buff, MPI.BYTE], target_rank=0)
+                                gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
                                 print(f'Gridder Loaded {datetime.now():%M:%S}')
                                 gridder = pickle.loads(gridder_buff)
                                 gridder(qx, qy, qz, intensity)
                                 print(f'R: {self.mpi_rank} Gridding Complete {datetime.now():%M:%S}')
                                 gridder_buff = pickle.dumps(gridder)
-                                win.Put([gridder_buff, MPI.BYTE], target_rank=0)
+                                gridderWin.Put([gridder_buff, MPI.BYTE], target_rank=0)
                                 print(f'Gridder Sent {datetime.now():%M:%S}')
                                 print(f'R: {self.mpi_rank} Released Complete {datetime.now():%M:%S}\n\n')
-                                win.Unlock(rank=0)
+                                gridderWin.Unlock(rank=0)
                         
                                 progress += 1.0/nPasses* 100.0
                                 if self.progressUpdater is not None:
@@ -170,16 +201,27 @@ class MPIQGridMapper(AbstractGridMapper):
                             progress += 1.0/nPasses* 100.0
                             if self.progressUpdater is not None:
                                 self.progressUpdater(progress)
+                        
+            scanBuff = bytearray(SCAN_WIN_SIZE)
+            scanWin.Lock(rank=0)
+            scanWin.Get([scanBuff, MPI.BYTE], target_rank=0)
+            scanIdx = int.from_bytes(scanBuff, 'little')
+            print(f'Recieved Scan {scanIdx}')
+            scanNext = scanIdx + 1
+            scanWin.Put([scanNext.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
+            scanWin.Unlock(rank=0)
+
+
             self.progressUpdater(100.0)
 
         self.mpi_comm.Barrier()
 
         if self.mpi_rank == 0:
             gridder_buff = bytearray(gridder_buff_size)
-            win.Lock(rank=0)
-            win.Get([gridder_buff, MPI.BYTE], target_rank=0)
+            gridderWin.Lock(rank=0)
+            gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
             gridder = pickle.loads(gridder_buff)
-            win.Unlock(rank=0)
+            gridderWin.Unlock(rank=0)
         
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
     
