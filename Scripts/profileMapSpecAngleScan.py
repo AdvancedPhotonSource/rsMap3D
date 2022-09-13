@@ -30,8 +30,9 @@ def updateMapperProgress(value1):
 with open('config.json', 'r') as config_f:
     config = json.load(config_f)
 
+start_time = datetime.datetime.now()
 with open('time.log', 'a') as time_log:
-    time_log.write(f'Start: {datetime.datetime.now()}\n')
+    time_log.write(f'Start: {start_time}\n')
 
 
 #
@@ -114,4 +115,6 @@ gridMapper.setProgressUpdater(updateMapperProgress)
 gridMapper.doMap()
 
 with open('time.log', 'a') as time_log:
-    time_log.write(f'End: {datetime.datetime.now()}\n')
+    end_time = datetime.datetime.now()
+    time_log.write(f'End: {end}\n')
+    time_log.write(f'Diff: {end_time - start_time}\n')

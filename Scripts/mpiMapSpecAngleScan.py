@@ -38,8 +38,9 @@ with open('config.json', 'r') as config_f:
     config = json.load(config_f)
 
 if mpi_rank == 0:
+    start_time = datetime.datetime.now()
     with open('time.log', 'a') as time_log:
-        time_log.write(f'Start: {datetime.datetime.now()}\n')
+        time_log.write(f'Start: {start_time}\n')
 
 
 #
@@ -124,4 +125,6 @@ gridMapper.doMap()
 
 if mpi_rank == 0:
     with open('time.log', 'a') as time_log:
-        time_log.write(f'End: {datetime.datetime.now()}\n')
+        end_time = datetime.datetime.now()
+        time_log.write(f'End: {end_time}\n')
+        time_log.write(f'Diff: {end_time - start_time}\n')
