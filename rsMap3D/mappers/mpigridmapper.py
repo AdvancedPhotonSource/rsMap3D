@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 from datetime import datetime
 import sys
 import pickle
+import math
 
 SCAN_WIN_SIZE = 4
 
@@ -26,7 +27,7 @@ class MPIQGridMapper(AbstractGridMapper):
     def __init__(self, dataSource, \
                  outputFileName, \
                  outputType, \
-                 mpi_comm, \
+                 mpiComm, \
                  nx=200, ny=201, nz=202, \
                  transform = None, \
                  gridWriter = None, 
@@ -38,8 +39,8 @@ class MPIQGridMapper(AbstractGridMapper):
                  gridWriter = gridWriter, \
                  **kwargs)
         self.outputType = outputType
-        self.mpi_comm = mpi_comm
-        self.mpi_rank = mpi_comm.Get_rank()
+        self.mpiComm = mpiComm
+        self.mpiRank = mpiComm.Get_rank()
         
     def getFileInfo(self):
         '''
@@ -83,40 +84,22 @@ class MPIQGridMapper(AbstractGridMapper):
         progress = 0
         
 
-        # Init gridder buffer on proc 0
-        if self.mpi_rank == 0:
-            gridder_pickle = pickle.dumps(gridder)
-            win_size = round(len(gridder_pickle) * 1.5)
-        else:
-            win_size = 0
-
-        gridderWin = MPI.Win.Allocate(win_size, comm=self.mpi_comm)
-
-        if self.mpi_rank == 0:
-            gridderWin.Lock(rank=0)
-            gridderWin.Put([gridder_pickle, MPI.BYTE], target_rank=0)
-            gridderWin.Unlock(rank=0)
-
-        # Sync forced here
-        gridder_buff_size = self.mpi_comm.bcast(win_size, root=0)
-
-
         scans = self.dataSource.getAvailableScans()
 
-        if self.mpi_rank == 0:
+        if self.mpiRank == 0:
             scanWinSize = SCAN_WIN_SIZE
         else:
             scanWinSize = 0
         
-        scanWin = MPI.Win.Allocate(scanWinSize, comm=self.mpi_comm)
+        scanWin = MPI.Win.Allocate(scanWinSize, comm=self.mpiComm)
 
-        scanIdx = self.mpi_rank
-        if self.mpi_rank == 0:
+        scanIdx = self.mpiRank
+        if self.mpiRank == 0:
             scanWin.Lock(rank=0)
-            scanWin.Put([self.mpi_comm.size.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
+            scanWin.Put([self.mpiComm.size.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
             scanWin.Unlock(rank=0)
         
-        self.mpi_comm.Barrier()
+        self.mpiComm.Barrier()
 
         while scanIdx < len(scans):
             print(f'Starting Scan {scanIdx} of {len(scans)}')
@@ -128,24 +111,15 @@ class MPIQGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
-                    print(f'R: {self.mpi_rank} Mapping {datetime.now():%M:%S}')
+                    print(f'R: {self.mpiRank} Mapping {datetime.now():%M:%S}')
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
 
                     try:
                         
-                        gridder_buff = bytearray(gridder_buff_size)
-                        gridderWin.Lock(rank=0)
-                        print(f'R: {self.mpi_rank} Acquired Gridder {datetime.now():%M:%S}')
-                        gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
-                        print(f'Gridder Loaded {datetime.now():%M:%S}')
-                        gridder = pickle.loads(gridder_buff)
                         gridder(qx, qy, qz, intensity)
-                        print(f'R: {self.mpi_rank} Gridding Complete {datetime.now():%M:%S}')
-                        gridder_buff = pickle.dumps(gridder)
-                        gridderWin.Put([gridder_buff, MPI.BYTE], target_rank=0)
-                        print(f'Gridder Sent {datetime.now():%M:%S}')
-                        print(f'R: {self.mpi_rank} Released Complete {datetime.now():%M:%S}\n\n')
-                        gridderWin.Unlock(rank=0)
+                        progress += 100
+                        if self.progressUpdater is not None:
+                            self.progressUpdater(progress)
                 
                     except InputError as ex:
                         print ("Wrong Input to gridder")
@@ -173,19 +147,7 @@ class MPIQGridMapper(AbstractGridMapper):
                             # convert data to rectangular grid in reciprocal space
                             try:
                                 
-                                gridder_buff = bytearray(gridder_buff_size)
-                                gridderWin.Lock(rank=0)
-                                print(f'R: {self.mpi_rank} Acquired Gridder {datetime.now():%M:%S}')
-                                gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
-                                print(f'Gridder Loaded {datetime.now():%M:%S}')
-                                gridder = pickle.loads(gridder_buff)
                                 gridder(qx, qy, qz, intensity)
-                                print(f'R: {self.mpi_rank} Gridding Complete {datetime.now():%M:%S}')
-                                gridder_buff = pickle.dumps(gridder)
-                                gridderWin.Put([gridder_buff, MPI.BYTE], target_rank=0)
-                                print(f'Gridder Sent {datetime.now():%M:%S}')
-                                print(f'R: {self.mpi_rank} Released Complete {datetime.now():%M:%S}\n\n')
-                                gridderWin.Unlock(rank=0)
                         
                                 progress += 1.0/nPasses* 100.0
                                 if self.progressUpdater is not None:
@@ -214,17 +176,47 @@ class MPIQGridMapper(AbstractGridMapper):
 
             self.progressUpdater(100.0)
 
-        self.mpi_comm.Barrier()
 
-        if self.mpi_rank == 0:
-            gridder_buff = bytearray(gridder_buff_size)
-            gridderWin.Lock(rank=0)
-            gridderWin.Get([gridder_buff, MPI.BYTE], target_rank=0)
-            gridder = pickle.loads(gridder_buff)
-            gridderWin.Unlock(rank=0)
+        gridder = self.mergeGridders(gridder)
+        self.mpiComm.Barrier()
         
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
     
+
+    def mergeGridders(self, gridder):
+        """
+        Merges gridders, combining their grids till all data is collated at proc 0. 
+        Similar to the upward execution of a distributed merge-sort. 
+        """
+        worldSize = self.mpiComm.Get_size()
+
+        depth = math.floor(np.log2(worldSize)) + 1
+        for curr_depth in range(depth):
+
+            # Exclude procs that have merged
+            if self.mpiRank % (2**curr_depth) != 0:
+                break
+
+            # Determine if sending or receiving
+            if (self.mpiRank / (2**curr_depth)) % 2 == 0:
+                source = self.mpiRank + (2**curr_depth)
+
+                # Odd # world size
+                if source >= worldSize:
+                    continue
+
+                incomingGrid = self.mpiComm.recv(source=source)
+                # Normalization must be OFF and range must be FIXED for this to work
+                # These are the defaults as of the current version of xu (1.7.3)
+                gridder._gdata += incomingGrid._gdata
+                gridder._gnorm += incomingGrid._gnorm
+            
+            else:
+                dest = self.mpiRank - (2 ** curr_depth)
+                self.mpiComm.send(gridder, dest=dest)
+        return gridder
+
+
     def doMap(self):
         '''
         Produce a q map of the data.  This is the method typically called to 
@@ -240,7 +232,7 @@ class MPIQGridMapper(AbstractGridMapper):
         print ('Elapsed time for gridding: %.3f seconds' % \
                (time.time() - _start_time))
         
-        if self.mpi_rank == 0:
+        if self.mpiRank == 0:
             # print some information
             print ('qx: ', qx.min(), ' .... ', qx.max())
             print ('qy: ', qy.min(), ' .... ', qy.max())
