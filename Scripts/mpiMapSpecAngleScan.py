@@ -111,6 +111,8 @@ loadScans = mpi_rank == 0
 ds.loadSource(mapHKL=mapHKL, loadScans=loadScans)
 
 if mpi_rank == 0:
+    with open('time.log', 'a') as time_log:
+        time_log.write(f'Source Load Time: {datetime.datetime.now()}\n')
     scanData = ds.exportScans()
 else:
     scanData = None

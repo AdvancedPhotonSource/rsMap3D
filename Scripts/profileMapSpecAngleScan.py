@@ -104,6 +104,9 @@ imageToBeUsed = ds.getImageToBeUsed()
 #    wavelen = ENERGY_WAVELENGTH_CONVERT_FACTOR/ds.getIncidentEnergy()[scans[0]]
 imageSize = np.prod(ds.getDetectorDimensions())
 
+with open('time.log', 'a') as time_log:
+    time_log.write(f'Source Load Time: {datetime.datetime.now()}\n')
+
 gridMapper = QGridMapper(ds,
                             outputFileName, 
                             outputType=BINARY_OUTPUT,
@@ -116,5 +119,5 @@ gridMapper.doMap()
 
 with open('time.log', 'a') as time_log:
     end_time = datetime.datetime.now()
-    time_log.write(f'End: {end}\n')
+    time_log.write(f'End: {end_time}\n')
     time_log.write(f'Diff: {end_time - start_time}\n')
