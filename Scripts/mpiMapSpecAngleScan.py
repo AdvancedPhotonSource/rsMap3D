@@ -20,13 +20,6 @@ from rsMap3D.mappers.mpigridmapper import MPIQGridMapper
 from rsMap3D.gui.rsm3dcommonstrings import BINARY_OUTPUT
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
-import logging
-
-logging.basicConfig(format='%(asctime)s %(message)s', 
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    filename='mpiMap.log',
-                    level=logging.INFO)
-
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
@@ -46,7 +39,8 @@ with open('config.json', 'r') as config_f:
 
 if mpiRank == 0:
     startTime = datetime.datetime.now()
-    logging.info('Starting Mapping')
+    with open('time.log', 'a') as time_log:
+        time_log.write(f'Start: {startTime}\n')
 
 
 #
@@ -114,6 +108,9 @@ ds.setProgressUpdater(updateDataSourceProgress)
 
 ds.loadSource(mapHKL=mapHKL)
 
+if mpiRank == 0:
+    with open('time.log', 'a') as time_log:
+        time_log.write(f'Source Load Time: {datetime.datetime.now()}\n')
 
 ds.setRangeBounds(ds.getOverallRanges())
 imageToBeUsed = ds.getImageToBeUsed()
@@ -133,6 +130,7 @@ gridMapper.setProgressUpdater(updateMapperProgress)
 gridMapper.doMap()
 
 if mpiRank == 0:
-    logging.info('Ended map')
-    endTime = datetime.datetime.now()
-    logging.info(f'Diff: {endTime - startTime}\n')
+    with open('time.log', 'a') as time_log:
+        endTime = datetime.datetime.now()
+        time_log.write(f'End: {endTime}\n')
+        time_log.write(f'Diff: {endTime - startTime}\n')
