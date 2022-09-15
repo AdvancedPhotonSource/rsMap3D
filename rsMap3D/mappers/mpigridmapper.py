@@ -111,7 +111,6 @@ class MPIQGridMapper(AbstractGridMapper):
                 numImages = len(imageToBeUsed[scan])
                 if imageSize*4*numImages <= maxImageMem:
                     kwargs['mask'] = imageToBeUsed[scan]
-                    print(f'R: {self.mpiRank} Mapping {datetime.now():%M:%S}')
                     qx, qy, qz, intensity = self.dataSource.rawmap((scan,), **kwargs)
 
                     try:
@@ -191,15 +190,15 @@ class MPIQGridMapper(AbstractGridMapper):
         worldSize = self.mpiComm.Get_size()
 
         depth = math.floor(np.log2(worldSize)) + 1
-        for curr_depth in range(depth):
+        for currDepth in range(depth):
 
             # Exclude procs that have merged
-            if self.mpiRank % (2**curr_depth) != 0:
+            if self.mpiRank % (2**currDepth) != 0:
                 break
 
             # Determine if sending or receiving
-            if (self.mpiRank / (2**curr_depth)) % 2 == 0:
-                source = self.mpiRank + (2**curr_depth)
+            if (self.mpiRank / (2**currDepth)) % 2 == 0:
+                source = self.mpiRank + (2**currDepth)
 
                 # Odd # world size
                 if source >= worldSize:
@@ -212,7 +211,7 @@ class MPIQGridMapper(AbstractGridMapper):
                 gridder._gnorm += incomingGrid._gnorm
             
             else:
-                dest = self.mpiRank - (2 ** curr_depth)
+                dest = self.mpiRank - (2 ** currDepth)
                 self.mpiComm.send(gridder, dest=dest)
         return gridder
 

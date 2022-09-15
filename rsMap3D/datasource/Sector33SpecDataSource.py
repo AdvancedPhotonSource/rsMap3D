@@ -251,13 +251,13 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
         # Load scan information from the spec file
 
-        self.sd = SpecDataFile(self.specFile)
-        self.mapHKL = mapHKL
-
-        if not loadScans:
-            return
-
         try:
+            self.sd = SpecDataFile(self.specFile)
+            self.mapHKL = mapHKL
+
+            if not loadScans:
+                return
+
             maxScan = int(self.sd.getMaxScanNumber())
             logger.debug("Number of Scans" +  str(maxScan))
             if self.scans  is None:

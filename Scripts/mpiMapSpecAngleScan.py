@@ -20,13 +20,19 @@ from rsMap3D.mappers.mpigridmapper import MPIQGridMapper
 from rsMap3D.gui.rsm3dcommonstrings import BINARY_OUTPUT
 from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.mappers.output.vtigridwriter import VTIGridWriter
+import logging
+
+logging.basicConfig(format='%(asctime)s %(message)s', 
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    filename='mpiMap.log',
+                    level=logging.INFO)
+
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
-mpi_comm = MPI.COMM_WORLD
-mpi_size = mpi_comm.Get_size()
-mpi_rank = mpi_comm.Get_rank()
+mpiComm = MPI.COMM_WORLD
+mpiRank = mpiComm.Get_rank()
 
 def updateDataSourceProgress(value1, value2):
     print("DataSource Progress %s/%s" % (value1, value2))
@@ -37,10 +43,10 @@ def updateMapperProgress(value1):
 with open('config.json', 'r') as config_f:
     config = json.load(config_f)
 
-if mpi_rank == 0:
-    start_time = datetime.datetime.now()
-    with open('time.log', 'a') as time_log:
-        time_log.write(f'Start: {start_time}\n')
+
+if mpiRank == 0:
+    startTime = datetime.datetime.now()
+    logging.info('Starting Mapping')
 
 
 #
@@ -106,20 +112,19 @@ ds = Sector33SpecDataSource(projectDir, specName, specExt,
 ds.setCurrentDetector(detectorName)
 ds.setProgressUpdater(updateDataSourceProgress)
 
-loadScans = mpi_rank == 0
+loadScans = mpiRank == 0
 
 ds.loadSource(mapHKL=mapHKL, loadScans=loadScans)
 
-if mpi_rank == 0:
-    with open('time.log', 'a') as time_log:
-        time_log.write(f'Source Load Time: {datetime.datetime.now()}\n')
+if mpiRank == 0:
+    logging.info("Finished loading source")
     scanData = ds.exportScans()
 else:
     scanData = None
 
-scanData = mpi_comm.bcast(scanData, root=0)
+scanData = mpiComm.bcast(scanData, root=0)
 
-if mpi_rank != 0:
+if mpiRank != 0:
     ds.importScans(scanData)
 
 ds.setRangeBounds(ds.getOverallRanges())
@@ -131,7 +136,7 @@ imageSize = np.prod(ds.getDetectorDimensions())
 gridMapper = MPIQGridMapper(ds,
                             outputFileName,
                             BINARY_OUTPUT,
-                            mpi_comm, 
+                            mpiComm, 
                             transform=UnityTransform3D(),
                             gridWriter=VTIGridWriter(),
                             appConfig=appConfig)
@@ -139,8 +144,7 @@ gridMapper = MPIQGridMapper(ds,
 gridMapper.setProgressUpdater(updateMapperProgress)
 gridMapper.doMap()
 
-if mpi_rank == 0:
-    with open('time.log', 'a') as time_log:
-        end_time = datetime.datetime.now()
-        time_log.write(f'End: {end_time}\n')
-        time_log.write(f'Diff: {end_time - start_time}\n')
+if mpiRank == 0:
+    logging.info('Ended map')
+    endTime = datetime.datetime.now()
+    logging.info(f'Diff: {endTime - startTime}\n')
