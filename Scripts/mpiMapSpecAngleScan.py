@@ -11,7 +11,7 @@ import numpy as np
 import xrayutilities as xu
 import json
 import datetime
-from rsMap3D.datasource.Sector33SpecDataSource import Sector33SpecDataSource
+from rsMap3D.datasource.MpiSector33SpecDataSource import MPISector33SpecDataSource
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader import DetectorGeometryForXrayutilitiesReader as detReader
 from rsMap3D.utils.srange import srange
 from rsMap3D.config.rsmap3dconfigparser import RSMap3DConfigParser
@@ -105,27 +105,15 @@ appConfig = RSMap3DConfigParser()
 maxImageMemory = appConfig.getMaxImageMemory()
 print ("scanRange %s" % scanRange)
 print("specName, specExt: %s, %s" % (specName, specExt))
-ds = Sector33SpecDataSource(projectDir, specName, specExt,
-                            instConfigName, detectorConfigName, roi=roi, 
+ds = MPISector33SpecDataSource(projectDir, specName, specExt,
+                            instConfigName, detectorConfigName, mpiComm, roi=roi, 
                             pixelsToAverage=bin, scanList= scanRange, 
                             appConfig=appConfig)
 ds.setCurrentDetector(detectorName)
 ds.setProgressUpdater(updateDataSourceProgress)
 
-loadScans = mpiRank == 0
+ds.loadSource(mapHKL=mapHKL)
 
-ds.loadSource(mapHKL=mapHKL, loadScans=loadScans)
-
-if mpiRank == 0:
-    logging.info("Finished loading source")
-    scanData = ds.exportScans()
-else:
-    scanData = None
-
-scanData = mpiComm.bcast(scanData, root=0)
-
-if mpiRank != 0:
-    ds.importScans(scanData)
 
 ds.setRangeBounds(ds.getOverallRanges())
 imageToBeUsed = ds.getImageToBeUsed()
