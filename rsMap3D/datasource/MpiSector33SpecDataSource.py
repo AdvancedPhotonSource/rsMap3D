@@ -276,9 +276,6 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
             self.scanType = {}
             self.progress = 0
             self.progressInc = 1
-            # Zero the progress bar at the beginning.
-            if self.progressUpdater is not None:
-                self.progressUpdater(self.progress, self.progressMax)
 
 
             if self.mpiRank == 0:
@@ -325,8 +322,6 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
                                 self.findImageQs(angles, \
                                                  self.ubMatrix[scan], \
                                                  self.incidentEnergy[scan])
-                            if self.progressUpdater is not None:
-                                self.progressUpdater(self.progress, self.progressMax)
                             logger.info (('Elapsed time for Finding qs for scan %d: ' +
                                    '%.3f seconds') % \
                                    (scan, (time.time() - _start_time)))
@@ -338,13 +333,14 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
                 scanWin.Lock(rank=0)
                 scanWin.Get([scanBuff, MPI.BYTE], target_rank=0)
                 scanIdx = int.from_bytes(scanBuff, 'little')
-                print(f'Recieved Scan {scanIdx}')
+                if scanIdx < len(self.scans):
+                    print(f'Proc {self.mpiRank} Loading Scan {scanIdx+1}/{len(self.scans)}')
+                else:
+                    print(f'Proc {self.mpiRank} finished load. Beginning merge.')
                 scanNext = scanIdx + 1
                 scanWin.Put([scanNext.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
                 scanWin.Unlock(rank=0)
 
-            if self.progressUpdater is not None:
-                self.progressUpdater(self.progressMax, self.progressMax)
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         if len(self.getAvailableScans()) == 0:

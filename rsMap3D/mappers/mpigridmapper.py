@@ -81,7 +81,6 @@ class MPIQGridMapper(AbstractGridMapper):
                               True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
-        progress = 0
         
 
         scans = self.dataSource.getAvailableScans()
@@ -102,7 +101,6 @@ class MPIQGridMapper(AbstractGridMapper):
         self.mpiComm.Barrier()
 
         while scanIdx < len(scans):
-            print(f'Starting Scan {scanIdx} of {len(scans)}')
             scan = scans[scanIdx]
 
             if True in imageToBeUsed[scan]:
@@ -116,9 +114,6 @@ class MPIQGridMapper(AbstractGridMapper):
                     try:
                         
                         gridder(qx, qy, qz, intensity)
-                        progress += 100
-                        if self.progressUpdater is not None:
-                            self.progressUpdater(progress)
                 
                     except InputError as ex:
                         print ("Wrong Input to gridder")
@@ -129,9 +124,6 @@ class MPIQGridMapper(AbstractGridMapper):
                         raise InputError(ex)
 
                     
-                    progress += 100
-                    if self.progressUpdater is not None:
-                        self.progressUpdater(progress)
                 else:
                     nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
                     for thisPass in range(nPasses):
@@ -148,9 +140,6 @@ class MPIQGridMapper(AbstractGridMapper):
                                 
                                 gridder(qx, qy, qz, intensity)
                         
-                                progress += 1.0/nPasses* 100.0
-                                if self.progressUpdater is not None:
-                                    self.progressUpdater(progress)
                             except InputError as ex:
                                 print ("Wrong Input to gridder")
                                 print ("qx Size: " + str( qx.shape))
@@ -158,22 +147,21 @@ class MPIQGridMapper(AbstractGridMapper):
                                 print ("qz Size: " + str( qz.shape))
                                 print ("intensity Size: " + str(intensity.shape))
                                 raise InputError(ex)
-                        else:
-                            progress += 1.0/nPasses* 100.0
-                            if self.progressUpdater is not None:
-                                self.progressUpdater(progress)
                         
             scanBuff = bytearray(SCAN_WIN_SIZE)
             scanWin.Lock(rank=0)
             scanWin.Get([scanBuff, MPI.BYTE], target_rank=0)
             scanIdx = int.from_bytes(scanBuff, 'little')
-            print(f'Recieved Scan {scanIdx}')
+            if scanIdx < len(scans):
+                print(f'Proc {self.mpiRank} Gridding {scanIdx+1}/{len(scans)}')
+            else:
+                print(f'Proc {self.mpiRank} finished grid. Beginning merge.')
+
             scanNext = scanIdx + 1
             scanWin.Put([scanNext.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
             scanWin.Unlock(rank=0)
 
 
-            self.progressUpdater(100.0)
 
 
         gridder = self.mergeGridders(gridder)

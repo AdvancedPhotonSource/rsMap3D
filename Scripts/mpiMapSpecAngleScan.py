@@ -104,7 +104,7 @@ ds = MPISector33SpecDataSource(projectDir, specName, specExt,
                             pixelsToAverage=bin, scanList= scanRange, 
                             appConfig=appConfig)
 ds.setCurrentDetector(detectorName)
-ds.setProgressUpdater(updateDataSourceProgress)
+#ds.setProgressUpdater(updateDataSourceProgress)
 
 ds.loadSource(mapHKL=mapHKL)
 
