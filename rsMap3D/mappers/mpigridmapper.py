@@ -99,7 +99,7 @@ class MPIQGridMapper(AbstractGridMapper):
             scanWin.Unlock(rank=0)
         
         self.mpiComm.Barrier()
-
+        print(f'Proc {self.mpiRank} Beginning Gridding {scanIdx+1}/{len(scans)}')
         while scanIdx < len(scans):
             scan = scans[scanIdx]
 
