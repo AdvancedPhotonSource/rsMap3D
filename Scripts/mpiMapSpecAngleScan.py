@@ -8,9 +8,10 @@ Script to process a dataset using the Sector33SpecDataSource
 
 import os
 import numpy as np
-import xrayutilities as xu
 import json
 import datetime
+import argparse
+
 from rsMap3D.datasource.MpiSector33SpecDataSource import MPISector33SpecDataSource
 from rsMap3D.datasource.DetectorGeometryForXrayutilitiesReader import DetectorGeometryForXrayutilitiesReader as detReader
 from rsMap3D.utils.srange import srange
@@ -27,13 +28,23 @@ from mpi4py.futures import MPICommExecutor
 mpiComm = MPI.COMM_WORLD
 mpiRank = mpiComm.Get_rank()
 
+def parseArgs():
+    parser = argparse.ArgumentParser(description='Default MPI run script. Expects a json config file pointed at the data.')
+    parser.add_argument('configPath', 
+                        nargs='?', 
+                        default=os.path.join(os.getcwd(), 'config.json'),
+                        help='Path to config file. If none supplied, directs to a config.json located in CWD')
+    return parser.parse_args()
+
+args = parseArgs()
+
 def updateDataSourceProgress(value1, value2):
     print("DataSource Progress %s/%s" % (value1, value2))
 
 def updateMapperProgress(value1):
     print("Mapper Progress %s" % (value1))
 
-with open('config.json', 'r') as config_f:
+with open(args.configPath, 'r') as config_f:
     config = json.load(config_f)
 
 
@@ -50,6 +61,9 @@ roi = None    # defined later
 projectDir = config["project_dir"]
 specFile = config["spec_file"]
 scanRange = srange(config["scan_range"]).list()
+
+if len(scanRange) < mpiComm.Get_size():
+    raise ValueError("Too many processes! Reduce proc count to <= number of scans.")
 
 
 
