@@ -20,13 +20,13 @@ MPI is implemented through a similar interface to the standard RSMap library fil
 
 ## Running the Program
 
-The program can be run via the local mpi run command. In the default installation this is `mpirun -n [num procs] python [script].py`. 
+The program can be run via the local mpi run command. In the default installation this is `mpirun -n [num_procs] python [script].py`
 
-On ALCF systems, this would be run with `aprun -n [num procs] -N [num procs per node] python [script].py`
+On ALCF systems, this would be run with `aprun -n [num_procs] -N [num_procs per node] python [script].py`
 
 ## Script Usage
 
-A script `Scripts/mpiMapSpecAngleScan.py` has been provided as a starting point. The script takes in a .json config file pointing to data files. The path can be provided as a command line argument: `mpiMapSpecAngleScan.py path/to/config.json`. If no path is provided, the script searches for `config.json` in the CWD. 
+A script `Scripts/mpiMapSpecAngleScan.py` has been provided as a starting point. The script takes in a .json config file pointing to data files. The path can be provided as a command line argument: `mpiMapSpecAngleScan.py path/to/config.json` If no path is provided, the script searches for `config.json` in the CWD. 
 
 The config format is as follows:
 ```json
@@ -43,7 +43,7 @@ The config format is as follows:
 
 ## Class API Changes
 
-New MPI classes based on original classes have been implemented. There are a few sharp edges due to synchronization. They are located in files with the `mpi` prefix. The constructors of MPI classes will require an additional argument: the `mpiComm`. When creating your own scripts, this can be created via the following block of code. It is also highly recommended to use the process rank to prevent the program from repeating script work. 
+MPI is implemented in new classes based on the original classes.Due to sharp edges, they are located in source files with the `mpi` prefix. The constructors of MPI classes will require an additional argument: the `mpiComm`. When creating your own scripts, this can be created via the following block of code. It is also highly recommended to use the process rank to prevent the program from repeating script work. 
 
 ```python
 from mpi4py import MPI
@@ -55,7 +55,7 @@ if mpiRank == 0: # 0th process only
     # Do singleton logging, work, etc. 
 ```
 
-Operations like `datasource.loadSource` and `gridMapper.doMap()` are now **SYNCHRONOUS**. This means ALL scripts have to enter the same branch for them to complete. The program will _hang_ (not exit) at synchronization points. As an example:
+Operations like `dataSource.loadSource()` and `gridMapper.doMap()` are now **SYNCHRONOUS**. This means ALL scripts have to enter the same branch for them to complete. The program will _hang_ (not exit) at synchronization points. As an example:
 
 ```python
 if mpiRank == 2:
@@ -78,14 +78,12 @@ Parallelization also introduces sharp edges related to the gridder and loading o
 
 ## Gridder
 
-Some sharp edges appear around the gridder object. 
-
 Two gridder settings are required for this form of parallelization to work:
 
-1. Normalization must be off. This is the default in xrayutilities==1.7.3
-2. The gridder must be a static size. This is hard-coded to false in the mpigridmapper.py file. 
+1. Normalization must be off. This is the default in xrayutilities==1.7.3.
+2. The gridder must be a static size. This is hard-coded in the mpigridmapper.py file. 
 
-The gridder is passed through MPI channels `nlog(n)` times (where n = num procs) during the program. An extremely large gridder size may increase runtimes. 
+The gridder is passed through MPI channels `nlog(n)` times (where n = num_procs) during the program. An extremely large gridder size may increase runtimes. 
 
 ## Loading
 
@@ -99,7 +97,7 @@ scanData = self.mpiComm.bcast(scanData, root=0)
 self.importScans(scanData)
 ```
 
-If your implementation requires additional data to be loaded, `exportScans` and `importScans` will need to be modified. If the data is not list or dict based, `mpiMergeSources` will likely need modification. Custom merge operations can be added to the type conditional in the merge method. Any new data being passed through MPI must be able to be pickled. 
+If your implementation requires additional data to be loaded, `exportScans` and `importScans` will need to be modified. If the data is not list or dict based, `mpiMergeSources` will need modification. Custom merge operations can be added to the conditional in the merge method. Any new data being passed through MPI must be able to be pickled. 
 
 # Performance Characteristics
 
@@ -107,10 +105,10 @@ This section will cover expected program performance and recommendations for opt
 
 ## Performance Factors
 
-The program adds a `nlog(n)` operation where `n = num procs` to both loading and gridding. The length of a single operation depends primarily on the size of data being passed through a MPI pipe. This means single-node runs will perform this operation faster than multi-node runs. 
+The program adds a `nlog(n)` operation where `n = num_procs` to both loading and gridding. The length of a single operation depends primarily on the size of data being passed through a MPI pipe. This means single-node runs will perform this operation faster than multi-node runs. 
 
-Otherwise, gridding is expected to scale with a factor of `1/(2^n)`. Loading is expected to scale roughly the same, but may be limited by disk access speeds. 
+Otherwise, gridding is expected to scale with a factor of `1/(2^n)`. Loading is expected to scale the same, but may be limited by disk access speeds. 
 
 ## Recommended Settings
 
-The gridding operation is additionally multi-threaded via xrayutilities so it is recommended that num procs < num cores. Through testing we recommend `num_procs = num_cores / [5-10]` as a reasonable starting point. Experiment with your system to find what works best. 
+The gridding operation is additionally multi-threaded via xrayutilities so it is recommended that num_procs < num cores. Through testing we recommend `num_procs = num_cores / [5-10]` as a reasonable starting point. Experiment with your system to find what works best. 
