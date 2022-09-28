@@ -72,7 +72,7 @@ if mpiRank != 2: # This will cause the program to hang indefinitely
 
 # Sharp Edges
 
-A major sharp edge is `num scans <= num cores`. If a run only uses 10 scan, no more than 10 cores may be applied. Therefore this parallelization only improves larger runs. The `Scripts/mpiMapSpecAngleScan.py` script checks for this and raises an error if otherwise. It's highly recommended that your scripts do the same. 
+A major sharp edge is `num scans >= num cores`. If a run only uses 10 scans, no more than 10 cores may be applied. Therefore this parallelization only improves larger runs. The `Scripts/mpiMapSpecAngleScan.py` script checks for this and raises an error if otherwise. It's highly recommended that your scripts do the same. 
 
 Parallelization also introduces sharp edges related to the gridder and loading of data. 
 
@@ -81,7 +81,7 @@ Parallelization also introduces sharp edges related to the gridder and loading o
 Two gridder settings are required for this form of parallelization to work:
 
 1. Normalization must be off. This is the default in xrayutilities==1.7.3.
-2. The gridder must be a static size. This is hard-coded in the mpigridmapper.py file. 
+2. The gridder must be a static size. This is hard-coded false in the mpigridmapper.py file. 
 
 The gridder is passed through MPI channels `nlog(n)` times (where n = num_procs) during the program. An extremely large gridder size may increase runtimes. 
 
