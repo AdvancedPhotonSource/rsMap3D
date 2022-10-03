@@ -111,4 +111,4 @@ Otherwise, gridding is expected to scale with a factor of `1/(2^n)`. Loading is 
 
 ## Recommended Settings
 
-The gridding operation is additionally multi-threaded via xrayutilities so it is recommended that num_procs < num cores. Through testing we recommend `num_procs = num_cores / [5-10]` as a reasonable starting point. Experiment with your system to find what works best. 
+While multi-threading is applied by xrayutilities, it only affects about <5% of execution time. As such, the main parameter to vary is the number of processes. Through testing we recommend `num_procs = num MPI slots` as a reasonable starting point. Experiment with your system to find what works best. 
