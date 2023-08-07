@@ -107,15 +107,15 @@ class AbstractFileView(qtWidgets.QDialog):
         '''
         logger.debug(METHOD_ENTER_STR % str((value,maxValue)))
         self.progressBar.setMinimum(1)
-        self.progressBar.setMaximum(maxValue)
-        self.progressBar.setValue(value)
+        self.progressBar.setMaximum(int(maxValue))
+        self.progressBar.setValue(int(value))
         
     def setProgressLimits(self, minVal, maxVal):
         '''
         Set the limits on the progress bar
         '''
-        self.progressBar.setMinimum(minVal)
-        self.progressBar.setMaximum(maxVal)
+        self.progressBar.setMinimum(int(minVal))
+        self.progressBar.setMaximum(int(maxVal))
         
     def updateProgress(self, value, maxValue):
         '''
