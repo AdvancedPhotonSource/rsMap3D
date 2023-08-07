@@ -116,7 +116,7 @@ class AbstractOutputView (qtWidgets.QDialog):
         Set the value in the progress bar
         :param value: value to write to the progress bar
         '''
-        self.progressBar.setValue(value)
+        self.progressBar.setValue(int(value))
         
     def setCancelOK(self):
         '''
