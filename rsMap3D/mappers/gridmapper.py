@@ -67,7 +67,10 @@ class QGridMapper(AbstractGridMapper):
                               True)
                               
         imageToBeUsed = self.dataSource.getImageToBeUsed()
+        #===== Add progress indicator, ZZ 2020/02/19
         progress = 0
+        data_segment = len(self.dataSource.getAvailableScans())
+        #=====
         for scan in self.dataSource.getAvailableScans():
 
             if True in imageToBeUsed[scan]:
@@ -80,7 +83,9 @@ class QGridMapper(AbstractGridMapper):
                     
                     # convert data to rectangular grid in reciprocal space
                     gridder(qx, qy, qz, intensity)
-                    progress += 100
+                    #===== ZZ
+                    progress += 100.0/data_segment
+                    #=====
                     if self.progressUpdater is not None:
                         self.progressUpdater(progress)
                 else:
@@ -98,8 +103,9 @@ class QGridMapper(AbstractGridMapper):
                             # convert data to rectangular grid in reciprocal space
                             try:
                                 gridder(qx, qy, qz, intensity)
-                        
-                                progress += 1.0/nPasses* 100.0
+                                #===== ZZ
+                                progress += 1.0/nPasses* 100.0/data_segment
+                                #===== 
                                 if self.progressUpdater is not None:
                                     self.progressUpdater(progress)
                             except InputError as ex:
@@ -110,10 +116,14 @@ class QGridMapper(AbstractGridMapper):
                                 print ("intensity Size: " + str(intensity.shape))
                                 raise InputError(ex)
                         else:
-                            progress += 1.0/nPasses* 100.0
+                            #===== ZZ
+                            progress += 1.0/nPasses* 100.0/data_segment
+                            #===== 
                             if self.progressUpdater is not None:
                                 self.progressUpdater(progress)
-            self.progressUpdater(100.0)
+            #===== ZZ
+            #self.progressUpdater(100.0)
+            #===== 
         return gridder.xaxis,gridder.yaxis,gridder.zaxis,gridder.data,gridder
     
     
