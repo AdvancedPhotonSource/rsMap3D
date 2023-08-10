@@ -63,6 +63,10 @@ class PowderScanMapper():
         writing of the map file.  This method should be launched by the 
         runMapper of a "process" map output gui.
         '''
+        """ 
+        #===== ZZ 2020/02/19
+        # Now do not just do one map per scan here, instead, 
+        #  at this level, one map per group of scans
         for scan in self.dataSource.getAvailableScans():
             self.currentMapScans = [scan,]
             x, y, e = self.processMap()
@@ -70,7 +74,18 @@ class PowderScanMapper():
             self.gridWriter.setData(x, y, e)
             self.gridWriter.setFileInfo(self.getFileInfo())
             self.gridWriter.write()
-            
+        """
+        self.currentMapScans =  self.dataSource.getAvailableScans()
+        x, y, e = self.processMap()
+
+        if self.writeXyeFile or self.plotResults:
+            self.gridWriter.setData(x, y, e)
+            self.gridWriter.setFileInfo(self.getFileInfo())
+          
+        if self.writeXyeFile:
+            self.gridWriter.write()
+        if self.plotResults:
+            self.gridWriter.plot()
         
         
     def getFileInfo(self):
@@ -84,7 +99,9 @@ class PowderScanMapper():
         return (str(os.path.join(self.dataSource.projectDir, self.dataSource.projectName)),
                 self.currentMapScans[0],
                 numBins,
-                self.outputFileName)
+                self.outputFileName,
+                self.dataCoord,
+                self.yScaling) #===== carry over the xlabel and y scanling, ZZ 
         
     def getXCoordMax(self):
         '''
@@ -172,6 +189,11 @@ class PowderScanMapper():
 
         imageToBeUsed = self.dataSource.getImageToBeUsed()
         imageSize = np.prod(self.dataSource.getDetectorDimensions())
+        #===== Add progress indicator, ZZ 2020/02/14
+        progress = 0
+        data_segment = len(self.currentMapScans)
+        #logger.info('Total number of scans : %s (%s)' % (data_segment, self.currentMapScans) )
+        #=====
         for scan in self.currentMapScans:
             wavelen = 12398.41290/self.dataSource.getIncidentEnergy()[scan]
             logger.info("Scan Number %s" % scan)
@@ -187,6 +209,11 @@ class PowderScanMapper():
                 else:
                     coordsX = Q
                 gridder(np.ravel(coordsX), np.ravel(intensity))
+                #===== ZZ
+                progress += 100.0/data_segment
+                if self.progressUpdater is not None:
+                    self.progressUpdater(progress)
+                #=====
             else:
                 nPasses = np.int(np.floor(imageSize*4*numImages/maxImageMem)+1)
                 for thisPass in range(nPasses):
@@ -196,16 +223,21 @@ class PowderScanMapper():
                     imageToBeUsedInPass[:int(thisPass*numImages/nPasses)] = \
                         False
                     imageToBeUsedInPass[int((thisPass+1)*numImages/nPasses):] = False
-                    qx, qy, qz, intensity = self.dataSource.rawMap((scan,), \
+                    qx, qy, qz, intensity = self.dataSource.rawmap((scan,), \
                                                        mask=imageToBeUsedInPass)
                     Q = np.sqrt(qx**2 + qy**2 + qz**2)
-                    coordsX
+                    coordsX = None
                     if self.dataCoord == X_COORD_OPTIONS[0]:
                         coordsX = np.rad2deg(np.arcsin((Q*wavelen)/
                                                      (4.0*np.pi))*2.0)
                     else:
                         coordsX = Q
                     gridder(np.ravel(coordsX), np.ravel(intensity))
+                    #===== ZZ
+                    progress += 100.0/nPasses / data_segment
+                    if self.progressUpdater is not None:
+                        self.progressUpdater(progress)
+                    #=====
         err = np.where(gridder._gnorm > 0.0, 
                        np.sqrt(gridder._gdata)/gridder._gnorm, 0.0)
 

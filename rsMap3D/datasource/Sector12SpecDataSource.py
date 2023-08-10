@@ -25,13 +25,14 @@ logger = logging.getLogger(__name__)
 
 
 IMAGE_DIR_MERGE_STR = "images/%s"
-SCAN_NUMBER_MERGE_STR = "S%03d"
-TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
+SCAN_NUMBER_MERGE_STR = "%s_%04d"
+#TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
+TIFF_FILE_MERGE_STR = "%s_%%04d/pil_%%05d.tif"
 
-class Sector33SpecDataSource(SpecXMLDrivenDataSource):
+class Sector12SpecDataSource(SpecXMLDrivenDataSource):
     '''
     Class to load data from spec file and configuration xml files from 
-    for the way that data is collected at sector 33.
+    for the way that data is collected at sector 12.
     :members
     '''
 
@@ -52,9 +53,9 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         :param detConfigFile: Full path to the detector configuration file
         :param kwargs: Assorted keyword arguments
 
-        :rtype: Sector33SpecDataSource
+        :rtype: Sector12SpecDataSource
         '''
-        super(Sector33SpecDataSource, self).__init__(projectDir, 
+        super(Sector12SpecDataSource, self).__init__(projectDir, 
                                                      projectName, 
                                                      projectExtension,
                                                      instConfigFile, 
@@ -281,7 +282,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                 
                 else:
                     if (os.path.exists(os.path.join(imagePath, \
-                                            SCAN_NUMBER_MERGE_STR % scan))):
+                                            SCAN_NUMBER_MERGE_STR % (self.projectName, scan) ))):
                         try:
                             curScan = self.sd.scans[str(scan)]
                             self.scanType[scan] = \
@@ -291,7 +292,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                             if self.mapHKL==True:
                                 self.ubMatrix[scan] = self.getUBMatrix(curScan)
                                 if self.ubMatrix[scan] is None:
-                                    raise Sector33SpecFileException("UB matrix " + \
+                                    raise Sector12SpecFileException("UB matrix " + \
                                                                     "not found.")
                             else:
                                 self.ubMatrix[scan] = None
@@ -461,7 +462,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             for ind in range(len(scan.data[list(scan.data.keys())[0]])):
                 if imageToBeUsed[scannr][ind] and mask[ind]:    
                     # read tif image
-                    im = Image.open(self.imageFileTmp % (scannr, scannr, ind))
+                    im = Image.open(self.imageFileTmp % (scannr, ind))
                     img = np.array(im.getdata()).reshape(im.size[1],im.size[0]).T
                     img = self.hotpixelkill(img)
                     ff_data = self.getFlatFieldData()
@@ -533,14 +534,14 @@ class LoadCanceledException(RSMap3DException):
     def __init__(self, message):
         super(LoadCanceledException, self).__init__(message)
         
-class Sector33SpecFileException(RSMap3DException):
+class Sector12SpecFileException(RSMap3DException):
     '''
     Exception class to be raised if there is a problem loading information
     from a spec file
     file
     '''
     def __init__(self, message):
-        super(Sector33SpecFileException, self).__init__(message)
+        super(Sector12SpecFileException, self).__init__(message)
 
 
 

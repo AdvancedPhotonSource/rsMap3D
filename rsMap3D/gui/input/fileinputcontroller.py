@@ -19,6 +19,7 @@ from rsMap3D.transforms.unitytransform3d import UnityTransform3D
 from rsMap3D.transforms.polemaptransform3d import PoleMapTransform3D
 # Input forms Looking for a way to set these up.
 from rsMap3D.gui.input.s33specscanfileform import S33SpecScanFileForm
+from rsMap3D.gui.input.s12specscanfileform import S12SpecScanFileForm
 from rsMap3D.gui.input.s34hdfescanfileform import S34HDFEScanFileForm
 from rsMap3D.gui.input.s1highenergydiffractionform import S1HighEnergyDiffractionForm
 try:
@@ -58,6 +59,7 @@ class FileInputController(qtWidgets.QDialog):
         #Build a list of fileForms
         self.fileForms = []
         self.fileForms.append(S33SpecScanFileForm)
+        self.fileForms.append(S12SpecScanFileForm)
         self.fileForms.append(S34HDFEScanFileForm)
         self.fileForms.append(S1HighEnergyDiffractionForm)
         if USE_XPCS:
