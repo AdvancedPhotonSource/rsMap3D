@@ -3,6 +3,7 @@
  See LICENSE file.
 '''
 
+import logging
 import PyQt5.QtGui as qtGui
 import PyQt5.QtWidgets as qtWidgets
 
@@ -12,6 +13,7 @@ from  PyQt5.QtCore import pyqtSlot as Slot
 from rsMap3D.gui.rsm3dcommonstrings import RUN_STR, CANCEL_STR
 from rsMap3D.gui.rsmap3dsignals import UPDATE_PROGRESS_SIGNAL, PROCESS_SIGNAL,\
     CANCEL_PROCESS_SIGNAL, PROCESS_ERROR_SIGNAL, SET_FILE_NAME_SIGNAL
+logger = logging.getLogger(__name__)
 
 
 class AbstractOutputView (qtWidgets.QDialog):
@@ -22,7 +24,7 @@ class AbstractOutputView (qtWidgets.QDialog):
     #define signals to be sent from this class
     process = Signal(name=PROCESS_SIGNAL)
     cancel = Signal(name=CANCEL_PROCESS_SIGNAL)
-    updateProgress = Signal(float, name=UPDATE_PROGRESS_SIGNAL)
+    updateProgress = Signal(int, name=UPDATE_PROGRESS_SIGNAL)
     setFileName = Signal(str, name=SET_FILE_NAME_SIGNAL)
 #     processError = Signal(str, name = PROCESS_ERROR_SIGNAL)
         
@@ -110,12 +112,13 @@ class AbstractOutputView (qtWidgets.QDialog):
                              str(error))
         self.processScans.setProcessRunOK.emit()
               
-    @Slot(float)    
+    @Slot(int)    
     def setProgress(self, value):
         '''
         Set the value in the progress bar
         :param value: value to write to the progress bar
         '''
+        logger.debug("Progress {value}")
         self.progressBar.setValue(int(value))
         
     def setCancelOK(self):
@@ -162,4 +165,4 @@ class AbstractOutputView (qtWidgets.QDialog):
         Send signal to update the progress bar.
         :param value: value to be put on the progress bar.
         '''
-        self.updateProgress[float].emit( value)
+        self.updateProgress[int].emit( value)

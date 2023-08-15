@@ -25,7 +25,7 @@ class AbstractFileView(qtWidgets.QDialog):
     cancelLoadFile = qtCore.pyqtSignal(name=CANCEL_LOAD_FILE_SIGNAL)
     loadFile = qtCore.pyqtSignal(name=LOAD_FILE_SIGNAL)
     okToLoad = qtCore.pyqtSignal(bool, name=OK_TO_LOAD)
-    updateProgressSignal = qtCore.pyqtSignal(float, float, \
+    updateProgressSignal = qtCore.pyqtSignal(int, int, \
                                       name=UPDATE_PROGRESS_SIGNAL)
     
 
@@ -100,12 +100,12 @@ class AbstractFileView(qtWidgets.QDialog):
         else:
             self.loadButton.setDisabled(True)
             
-    @qtCore.pyqtSlot(float, float)
+    @qtCore.pyqtSlot(int, int)
     def setProgress(self, value, maxValue):
         '''
         Set the value to be displayed in the progress bar.
         '''
-        logger.debug(METHOD_ENTER_STR % str((value,maxValue)))
+        logger.debug(METHOD_ENTER_STR % str((int(value),int(maxValue))))
         self.progressBar.setMinimum(1)
         self.progressBar.setMaximum(int(maxValue))
         self.progressBar.setValue(int(value))
@@ -121,7 +121,7 @@ class AbstractFileView(qtWidgets.QDialog):
         '''
         Emit a signal to update the progress bar
         '''
-        self.updateProgressSignal.emit(value, maxValue)
+        self.updateProgressSignal.emit(int(value), int(maxValue))
         
     @qtCore.pyqtSlot()
     def setCancelOK(self):

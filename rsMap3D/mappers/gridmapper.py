@@ -87,7 +87,7 @@ class QGridMapper(AbstractGridMapper):
                     progress += 100.0/data_segment
                     #=====
                     if self.progressUpdater is not None:
-                        self.progressUpdater(progress)
+                        self.progressUpdater(int(progress))
                 else:
                     nPasses = int(imageSize*4*numImages/ maxImageMem + 1)
                     
@@ -107,7 +107,7 @@ class QGridMapper(AbstractGridMapper):
                                 progress += 1.0/nPasses* 100.0/data_segment
                                 #===== 
                                 if self.progressUpdater is not None:
-                                    self.progressUpdater(progress)
+                                    self.progressUpdater(int(progress))
                             except InputError as ex:
                                 print ("Wrong Input to gridder")
                                 print ("qx Size: " + str( qx.shape))
@@ -120,7 +120,7 @@ class QGridMapper(AbstractGridMapper):
                             progress += 1.0/nPasses* 100.0/data_segment
                             #===== 
                             if self.progressUpdater is not None:
-                                self.progressUpdater(progress)
+                                self.progressUpdater(int(progress))
             #===== ZZ
             #self.progressUpdater(100.0)
             #===== 

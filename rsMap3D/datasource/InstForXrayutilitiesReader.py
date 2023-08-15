@@ -347,7 +347,7 @@ class InstForXrayutilitiesReader():
         if circles is None:
             raise InstConfigException("Instrument configuration has no Sample" +
                                       " Circles")
-        return circles.getchildren()
+        return list(circles)
 
     def getSampleCircleNames(self):
         '''

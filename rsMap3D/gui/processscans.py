@@ -2,6 +2,7 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+import logging
 import os
 
 import PyQt5.QtGui as qtGui
@@ -15,6 +16,8 @@ from rsMap3D.gui.rsmap3dsignals import CANCEL_PROCESS_SIGNAL,\
     PROCESS_ERROR_SIGNAL
 from rsMap3D.gui.rsm3dcommonstrings import WARNING_STR, BROWSE_STR, X_STR, Y_STR,\
     CANCEL_STR, RUN_STR, Z_STR, VTI_FILTER_STR, SAVE_FILE_STR
+from rsMap3D.config.rsmap3dlogging import METHOD_ENTER_STR
+logger = logging.getLogger(__name__)
 
 
 class ProcessScans(qtWidgets.QDialog):
@@ -257,7 +260,8 @@ class ProcessScans(qtWidgets.QDialog):
         Set the value in the progress bar
         :param value: value to write to the progress bar
         '''
-        self.progressBar.setValue(value)
+        logger.debug("{METHOD_ENTER_STR} Progress {value}")
+        self.progressBar.setValue(int(value))
         
     def setProgressLimits(self, progressMin, progressMax):
         '''
@@ -288,5 +292,6 @@ class ProcessScans(qtWidgets.QDialog):
         Send signal to update the progress bar.
         :param value: value to be put on the progress bar.
         '''
-        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), value)
+        
+        self.emit(qtCore.SIGNAL(UPDATE_PROGRESS_SIGNAL), int(value))
         

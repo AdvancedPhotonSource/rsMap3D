@@ -212,7 +212,7 @@ class PowderScanMapper():
                 #===== ZZ
                 progress += 100.0/data_segment
                 if self.progressUpdater is not None:
-                    self.progressUpdater(progress)
+                    self.progressUpdater(int(progress))
                 #=====
             else:
                 nPasses = np.int(np.floor(imageSize*4*numImages/maxImageMem)+1)
@@ -236,7 +236,7 @@ class PowderScanMapper():
                     #===== ZZ
                     progress += 100.0/nPasses / data_segment
                     if self.progressUpdater is not None:
-                        self.progressUpdater(progress)
+                        self.progressUpdater(int(progress))
                     #=====
         err = np.where(gridder._gnorm > 0.0, 
                        np.sqrt(gridder._gdata)/gridder._gnorm, 0.0)
