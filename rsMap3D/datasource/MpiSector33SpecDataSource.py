@@ -2,6 +2,7 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
+from multiprocessing.sharedctypes import Value
 import os
 from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
@@ -16,19 +17,21 @@ import time
 import sys,traceback
 import logging
 import importlib
+import math
+from mpi4py import MPI
 try:
     from PIL import Image
 except ImportError:
     import Image
 logger = logging.getLogger(__name__)
 
-
+SCAN_WIN_SIZE = 4
 
 IMAGE_DIR_MERGE_STR = "images/%s"
 SCAN_NUMBER_MERGE_STR = "S%03d"
 TIFF_FILE_MERGE_STR = "S%%03d/%s_S%%03d_%%05d.tif"
 
-class Sector33SpecDataSource(SpecXMLDrivenDataSource):
+class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
     '''
     Class to load data from spec file and configuration xml files from 
     for the way that data is collected at sector 33.
@@ -42,6 +45,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                  projectExtension,
                  instConfigFile, 
                  detConfigFile, 
+                 mpiComm,
                  **kwargs):
         '''
         Constructor
@@ -54,12 +58,14 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
 
         :rtype: Sector33SpecDataSource
         '''
-        super(Sector33SpecDataSource, self).__init__(projectDir, 
+        super(MPISector33SpecDataSource, self).__init__(projectDir, 
                                                      projectName, 
                                                      projectExtension,
                                                      instConfigFile, 
                                                      detConfigFile, 
                                                      **kwargs)
+        self.mpiComm = mpiComm
+        self.mpiRank = mpiComm.Get_rank()
         
     def _calc_eulerian_from_kappa(self, primaryAngles=None, 
                                   referenceAngles = None):
@@ -221,7 +227,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         
         return areaData
 
-    def loadSource(self, mapHKL=False, loadScans=True):
+    def loadSource(self, mapHKL=False):
         '''
         This method does the work of loading data from the files.  This has been
         split off from the constructor to allow this to be threaded and later 
@@ -255,9 +261,6 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.sd = SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
 
-            if not loadScans:
-                return
-
             maxScan = int(self.sd.getMaxScanNumber())
             logger.debug("Number of Scans" +  str(maxScan))
             if self.scans  is None:
@@ -273,13 +276,26 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
             self.scanType = {}
             self.progress = 0
             self.progressInc = 1
-            #======= ZZ, 2020/02/19, add initialization 
-            self.progressMax = 100
-            #=======
-            # Zero the progress bar at the beginning.
-            if self.progressUpdater is not None:
-                self.progressUpdater(self.progress, self.progressMax)
-            for scan in self.scans:
+
+
+            if self.mpiRank == 0:
+                scanWinSize = SCAN_WIN_SIZE
+            else:
+                scanWinSize = 0
+            
+            scanWin = MPI.Win.Allocate(scanWinSize, comm=self.mpiComm)
+
+            scanIdx = self.mpiRank
+            if self.mpiRank == 0:
+                scanWin.Lock(rank=0)
+                scanWin.Put([self.mpiComm.size.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
+                scanWin.Unlock(rank=0)
+            
+            self.mpiComm.Barrier()
+
+
+            while scanIdx < len(self.scans):
+                scan = self.scans[scanIdx]
                 if (self.cancelLoad):
                     self.cancelLoad = False
                     raise LoadCanceledException(CANCEL_STR)
@@ -306,16 +322,25 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                 self.findImageQs(angles, \
                                                  self.ubMatrix[scan], \
                                                  self.incidentEnergy[scan])
-                            if self.progressUpdater is not None:
-                                self.progressUpdater(self.progress, self.progressMax)
                             logger.info (('Elapsed time for Finding qs for scan %d: ' +
                                    '%.3f seconds') % \
                                    (scan, (time.time() - _start_time)))
                         except ScanDataMissingException:
                             logger.error( "Scan " + str(scan) + " has no data")
                     #Make sure to show 100% completion
-            if self.progressUpdater is not None:
-                self.progressUpdater(self.progressMax, self.progressMax)
+
+                scanBuff = bytearray(SCAN_WIN_SIZE)
+                scanWin.Lock(rank=0)
+                scanWin.Get([scanBuff, MPI.BYTE], target_rank=0)
+                scanIdx = int.from_bytes(scanBuff, 'little')
+                if scanIdx < len(self.scans):
+                    print(f'Proc {self.mpiRank} Loading Scan {scanIdx+1}/{len(self.scans)}')
+                else:
+                    print(f'Proc {self.mpiRank} finished load. Beginning merge.')
+                scanNext = scanIdx + 1
+                scanWin.Put([scanNext.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
+                scanWin.Unlock(rank=0)
+
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
         if len(self.getAvailableScans()) == 0:
@@ -327,8 +352,55 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
                                            "to be in " + \
                                            os.path.join(self.projectDir, 
                                         IMAGE_DIR_MERGE_STR % self.projectName))
+        
+        scanData = self.exportScans()
+        scanData = self.mpiMergeSources(scanData)
+
+        scanData = self.mpiComm.bcast(scanData, root=0)
+        self.importScans(scanData)
 
         self.availableScanTypes = set(self.scanType.values())
+
+
+    def mpiMergeSources(self, scanData):
+        """
+        Merges data sources, combining their information till all data is collated at proc 0. 
+        Similar to the upward execution of a distributed merge-sort. 
+        Data can be shared back via the export commands. 
+        """
+        worldSize = self.mpiComm.Get_size()
+
+        depth = math.floor(np.log2(worldSize)) + 1
+        for currDepth in range(depth):
+
+            # Exclude procs that have merged
+            if self.mpiRank % (2**currDepth) != 0:
+                break
+
+            # Determine if sending or receiving
+            if (self.mpiRank / (2**currDepth)) % 2 == 0:
+                source = self.mpiRank + (2**currDepth)
+
+                # Odd # world size
+                if source >= worldSize:
+                    continue
+
+                incomingScanData = self.mpiComm.recv(source=source)
+                for key in incomingScanData.keys():
+                    if type(incomingScanData[key]) is list:
+                        scanData[key] += incomingScanData[key]
+                    elif type(incomingScanData[key]) is dict:
+                        if len(set(scanData[key].keys()).intersection(set(incomingScanData[key].keys()))) > 0:
+                            raise ValueError(f"Unable to merge {key} dict due to overlapping keys")
+                        scanData[key].update(incomingScanData[key])
+                    else:
+                        raise NotImplementedError(f"Unable to merge {key}. Please implement merge here.")
+            
+            else:
+                dest = self.mpiRank - (2 ** currDepth)
+                self.mpiComm.send(scanData, dest=dest)
+
+        return scanData
 
         
     def exportScans(self):
@@ -336,7 +408,6 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         Returns loaded data as an MPI-safe object 
         """
         return {
-            'scans': self.scans,
             'imageBounds': self.imageBounds,
             'imageToBeUsed': self.imageToBeUsed,
             'availableScans':self.availableScans,
@@ -349,7 +420,6 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
         """
         Imports exported scan data from another data source via an MPI-safe object.
         """
-        self.scans = scanData['scans']
         self.imageBounds = scanData['imageBounds']
         self.imageToBeUsed = scanData['imageToBeUsed']
         self.availableScans = scanData['availableScans']
@@ -555,6 +625,7 @@ class Sector33SpecDataSource(SpecXMLDrivenDataSource):
 
     
         return qxTrans, qyTrans, qzTrans, intensity
+
         
 class LoadCanceledException(RSMap3DException):
     '''
