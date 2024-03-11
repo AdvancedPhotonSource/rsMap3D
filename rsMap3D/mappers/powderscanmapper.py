@@ -215,7 +215,8 @@ class PowderScanMapper():
                     self.progressUpdater(int(progress))
                 #=====
             else:
-                nPasses = np.int(np.floor(imageSize*4*numImages/maxImageMem)+1)
+                # np.int() deprecated; use int() instead. ZZ
+                nPasses = int(np.floor(imageSize*4*numImages/maxImageMem)+1)
                 for thisPass in range(nPasses):
                     logger.info("Pass Number %d of %d" % \
                                 (thisPass+1, nPasses))
