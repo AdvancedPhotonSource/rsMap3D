@@ -135,7 +135,9 @@ class UsesXMLDetectorConfig(AbstractFileView):
     def _currentDetectorChanged(self, currentDetector):
         logger.debug(METHOD_ENTER_STR % str(currentDetector))
         self.currentDetector = str(currentDetector)
-        self.updateROIandNumAvg()
+        # if the detector list is empty, let's not update ROI etc.
+        if currentDetector != "":
+           self.updateROIandNumAvg()
         logger.debug(METHOD_EXIT_STR  % self.currentDetector)
         
 #    @qtCore.pyqtSlot()
