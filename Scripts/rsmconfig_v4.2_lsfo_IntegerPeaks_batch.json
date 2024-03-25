@@ -1,0 +1,62 @@
+{
+    "project_dir":"C:\\work\\Users\\YCao\\LSFO\\",
+    "config_dir":null,
+    "detector_config":"NSLS_4ID_Eiger500k.xml",
+    "instrument_config":"NSLS_4ID_fourc.xml",
+    "badpixel_file":"badpixels_ISREiger500k.txt",
+    "flat_field":null,
+    "use_HKL":true,
+    "real_time":false,
+    "detector_name":"Eiger500k",
+    "binning":[1, 1],
+    "roi_setting":[10, 1020, 10, 504],
+    "nx":200,
+    "ny":200,
+    "nz":200,
+	"grid_range":null,
+    "maxTime_1Scan":150,
+	"datasets":[
+		{
+		"spec_file":"LSFO_001_Cryo.spec",
+        "scan_list":null,
+		"scan_range":
+			{
+			"cycles":1,
+			"scans_per_cycle":12,
+			"rsm_sets":[
+				{"start":101, "end":103},
+				{"start":104, "end":106},
+				{"start":107, "end":109}
+				]
+			}
+		},
+		{
+		"spec_file":"LSFO_001_Cryo.spec",
+        "scan_list":null,
+		"scan_range":
+			{
+			"cycles":16,
+			"scans_per_cycle":12,
+			"rsm_sets":[
+				{"start":114, "end":116},
+				{"start":117, "end":119},
+				{"start":120, "end":122}
+				]
+			}
+		},
+		{
+		"spec_file":"LSFO_001_Cryo.spec",
+        "scan_list":null,
+		"scan_range":
+			{
+			"cycles":3,
+			"scans_per_cycle":12,
+			"rsm_sets":[
+				{"start":304, "end":306},
+				{"start":307, "end":309},
+				{"start":310, "end":312}
+				]
+			}
+		}
+	]
+}
