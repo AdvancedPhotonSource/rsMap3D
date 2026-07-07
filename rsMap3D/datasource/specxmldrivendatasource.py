@@ -91,8 +91,12 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
                     self.getDetectorDimensions()[1]
         numImages = len(angles)
         if imageSize*4*numImages <= maxImageMem:
-            self.progressMax = len( self.scans) * 100
-            self.progressInc = 1.0 * 100.0
+            #======= Change the progress scaling to max @ 100 -- ZZ, 20202/02/19
+            #self.progressMax = len( self.scans) * 100
+            #self.progressInc = 1.0 * 100.0
+            self.progressMax = 100
+            self.progressInc = 1.0 * 100.0/len( self.scans)
+            #=======
             if self.progressUpdater is not None:
                 self.progressUpdater(self.progress, self.progressMax)
             self.progress += self.progressInc        
@@ -128,8 +132,12 @@ class SpecXMLDrivenDataSource(AbstractXrayutilitiesDataSource):
             zmin = []
             zmax = []
             for thisPass in range(nPasses):
-                self.progressMax = len( self.scans) * 100.0
-                self.progressInc = 1.0 / nPasses * 100.0
+                #======= Change the progress scaling to max @ 100 -- ZZ, 20202/02/19
+                #self.progressMax = len( self.scans) * 100.0
+                #self.progressInc = 1.0 / nPasses * 100.0
+                self.progressMax = 100.0
+                self.progressInc = 1.0 / nPasses * 100.0 / len( self.scans)
+                #=======
                 if self.progressUpdater is not None:
                     self.progressUpdater(self.progress, self.progressMax)
                 self.progress += self.progressInc        

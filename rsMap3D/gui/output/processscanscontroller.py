@@ -168,8 +168,10 @@ class ProcessScansController(qtWidgets.QDialog):
         Spawn a new thread to load the scan so that scan may be canceled later 
         and so that this does not interfere with the GUI operation.
         '''
-        self.outputFormWidget.setProgressLimits(0, 
-                                len(self.parent.getDataSource().getAvailableScans())*100)
+        #self.outputFormWidget.setProgressLimits(0, 
+        #                        len(self.parent.getDataSource().getAvailableScans())*100)
+        # try change here to simply make the range 0 - 100 percent : ZZ 2020/06/04
+        self.outputFormWidget.setProgressLimits(0, 100)
         self.outputFormWidget.setProgress(0)
         self.setCancelOK()
         self.processThread = ProcessScanThread(self, 
