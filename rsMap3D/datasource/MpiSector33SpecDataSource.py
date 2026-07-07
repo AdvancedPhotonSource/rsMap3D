@@ -2,7 +2,6 @@
  Copyright (c) 2012, UChicago Argonne, LLC
  See LICENSE file.
 '''
-from multiprocessing.sharedctypes import Value
 import os
 from spec2nexus.spec import SpecDataFile
 from rsMap3D.exception.rsmap3dexception import RSMap3DException,\
@@ -256,7 +255,36 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
         if not (self.flatFieldFile is None):
             self.flatFieldData = np.array(Image.open(self.flatFieldFile)).T
         # Load scan information from the spec file
+        # Abort the communicator on any rank error so others do not deadlock
+        self._abortOnException(lambda: self._loadSourceParallel(mapHKL))
 
+        # scanType has been merged across ranks by this point
+        self.availableScanTypes = set(self.scanType.values())
+
+
+    def _abortOnException(self, body):
+        '''
+        Run body, aborting the communicator if it raises.  Without this a single
+        rank failing would leave the others hung at the next collective call.
+        :param body: no-arg callable holding the parallel work
+        '''
+        try:
+            return body()
+        except Exception:
+            logger.error("Rank " + str(self.mpiRank) + " failed in parallel " + \
+                         "region, aborting.\n" + traceback.format_exc())
+            # A single process run should just raise as usual
+            if self.mpiComm.Get_size() > 1:
+                self.mpiComm.Abort(1)
+            raise
+
+    def _loadSourceParallel(self, mapHKL):
+        '''
+        Parallel body of loadSource.  Split out so it can be wrapped by
+        _abortOnException.
+        :param mapHKL: boolean to mark if the data should be mapped to HKL
+        '''
+        scanWin = None
         try:
             self.sd = SpecDataFile(self.specFile)
             self.mapHKL = mapHKL
@@ -343,6 +371,10 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
 
         except IOError:
             raise IOError( "Cannot open file " + str(self.specFile))
+        finally:
+            if scanWin is not None:
+                scanWin.Free()
+
         if len(self.getAvailableScans()) == 0:
             raise ScanDataMissingException("Could not find scan data for " + \
                                            "input file \n" + self.specFile + \
@@ -358,8 +390,6 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
 
         scanData = self.mpiComm.bcast(scanData, root=0)
         self.importScans(scanData)
-
-        self.availableScanTypes = set(self.scanType.values())
 
 
     def mpiMergeSources(self, scanData):
@@ -405,7 +435,8 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
         
     def exportScans(self):
         """
-        Returns loaded data as an MPI-safe object 
+        Returns loaded data as an MPI-safe object.  scanType is passed as a dict
+        so it can be merged; availableScanTypes is rebuilt from it after merge.
         """
         return {
             'imageBounds': self.imageBounds,
@@ -413,7 +444,7 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
             'availableScans':self.availableScans,
             'incidentEnergy': self.incidentEnergy,
             'ubMatrix':self.ubMatrix,
-            'availableScanTypes': self.availableScanTypes 
+            'scanType': self.scanType
         }
     
     def importScans(self, scanData):
@@ -422,10 +453,11 @@ class MPISector33SpecDataSource(SpecXMLDrivenDataSource):
         """
         self.imageBounds = scanData['imageBounds']
         self.imageToBeUsed = scanData['imageToBeUsed']
-        self.availableScans = scanData['availableScans']
+        # sort so ordering is the same regardless of proc count
+        self.availableScans = sorted(scanData['availableScans'])
         self.incidentEnergy = scanData['incidentEnergy']
         self.ubMatrix = scanData['ubMatrix']
-        self.availableScanTypes = scanData['availableScanTypes']
+        self.scanType = scanData['scanType']
     
     def to_bool(self, value):
         """

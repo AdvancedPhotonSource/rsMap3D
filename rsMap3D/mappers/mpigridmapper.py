@@ -4,17 +4,14 @@
 '''
 
 import time
-from xml.dom.expatbuilder import InternalSubsetExtractor
 import xrayutilities as xu
 from rsMap3D.mappers.abstractmapper import AbstractGridMapper
 import numpy as np
 from xrayutilities.exception import InputError
 import logging
+import traceback
 from mpi4py import MPI
 logger = logging.getLogger(__name__)
-from datetime import datetime
-import sys
-import pickle
 import math
 
 SCAN_WIN_SIZE = 4
@@ -52,6 +49,22 @@ class MPIQGridMapper(AbstractGridMapper):
                 self.outputFileName,
                 self.outputType)
     
+    def _abortOnException(self, body):
+        '''
+        Run body, aborting the communicator if it raises.  Without this a single
+        rank failing would leave the others hung at the next collective call.
+        :param body: no-arg callable holding the parallel work
+        '''
+        try:
+            return body()
+        except Exception:
+            logger.error("Rank " + str(self.mpiRank) + " failed in gridding " + \
+                         "region, aborting.\n" + traceback.format_exc())
+            # A single process run should just raise as usual
+            if self.mpiComm.Get_size() > 1:
+                self.mpiComm.Abort(1)
+            raise
+
     '''
     This map provides an x, y, z grid of the data.
     '''
@@ -62,6 +75,13 @@ class MPIQGridMapper(AbstractGridMapper):
         angular coordinates are taken from the spec file
     
         **kwargs are passed to the rawmap function
+        """
+        return self._abortOnException(lambda: self._processMapParallel(**kwargs))
+
+    def _processMapParallel(self, **kwargs):
+        """
+        Parallel body of processMap.  Split out so it can be wrapped by
+        _abortOnException.
         """
         maxImageMem = self.appConfig.getMaxImageMemory()
         gridder = xu.Gridder3D(self.nx, self.ny, self.nz)
@@ -161,8 +181,7 @@ class MPIQGridMapper(AbstractGridMapper):
             scanWin.Put([scanNext.to_bytes(SCAN_WIN_SIZE, 'little'), MPI.BYTE], target_rank=0)
             scanWin.Unlock(rank=0)
 
-
-
+        scanWin.Free()
 
         gridder = self.mergeGridders(gridder)
         self.mpiComm.Barrier()
